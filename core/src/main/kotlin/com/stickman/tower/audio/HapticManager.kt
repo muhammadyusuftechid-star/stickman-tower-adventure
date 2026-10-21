@@ -9,7 +9,33 @@ import com.badlogic.gdx.Gdx
  * pada perangkat Android yang mendukung motor vibrasi, dengan penanganan defensif zero-overhead.
  */
 object HapticManager {
+    private const val PREF_SETTINGS = "StickmanSettings"
+    private const val KEY_HAPTIC = "haptic_enabled"
+
     var isEnabled: Boolean = true
+        private set
+
+    fun init() {
+        try {
+            val prefs = Gdx.app?.getPreferences(PREF_SETTINGS)
+            if (prefs != null && prefs.contains(KEY_HAPTIC)) {
+                isEnabled = prefs.getBoolean(KEY_HAPTIC, true)
+            }
+        } catch (_: Exception) {}
+    }
+
+    fun toggle() {
+        isEnabled = !isEnabled
+        try {
+            val prefs = Gdx.app?.getPreferences(PREF_SETTINGS)
+            prefs?.putBoolean(KEY_HAPTIC, isEnabled)
+            prefs?.flush()
+        } catch (_: Exception) {}
+
+        if (isEnabled) {
+            vibrateMedium()
+        }
+    }
 
     /**
      * Getaran mikro sangat halus (18ms) untuk manuver cepat seperti Dodge Roll dan pendaratan.

@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.stickman.tower.StickmanGame
 import com.stickman.tower.audio.AudioManager
+import com.stickman.tower.audio.HapticManager
 import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.character.Player
 import com.stickman.tower.combat.ComboStep
@@ -65,7 +66,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     // Sistem Pause Menu
     var isPaused: Boolean = false
     private var pauseSelectedIndex: Int = 0
-    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "AUDIO: ON", "MAIN MENU")
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -99,6 +100,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
+        HapticManager.init()
         FontManager.init()
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
             uiViewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
@@ -961,8 +963,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             val w = 1280f
             val h = 720f
             val menuW = 280f
-            val startY = h / 2f + 35f
-            val itemH = 46f
+            val startY = h / 2f + 55f
+            val itemH = 44f
             val menuX = w / 2f - menuW / 2f
 
             for (i in pauseMenuItems.indices) {
@@ -991,7 +993,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            3 -> { // Main Menu
+            3 -> { // Toggle Haptic
+                HapticManager.toggle()
+                AudioManager.playSlashLight()
+            }
+            4 -> { // Main Menu
                 isPaused = false
                 AudioManager.playDodge()
                 if (game != null) {
@@ -1013,7 +1019,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         // Pause Menu Card (Dark Obsidian with Gold Accent)
         val cardW = 340f
-        val cardH = 280f
+        val cardH = 330f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
         shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
@@ -1022,11 +1028,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
-        val startY = h / 2f + 35f
-        val itemH = 46f
+        val startY = h / 2f + 55f
+        val itemH = 44f
         val btnY = startY - (pauseSelectedIndex * itemH)
         shapeRenderer.color = Color(0.15f, 0.35f, 0.65f, 0.75f)
-        shapeRenderer.rect(cardX + 25f, btnY - 5f, cardW - 50f, 38f)
+        shapeRenderer.rect(cardX + 25f, btnY - 5f, cardW - 50f, 36f)
 
         shapeRenderer.end()
 
@@ -1039,10 +1045,10 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         headF.draw(batch, "=== GAME PAUSED ===", w / 2f - 110f, cardY + cardH - 22f)
 
         for (i in pauseMenuItems.indices) {
-            val itemText = if (i == 2) {
-                if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-            } else {
-                pauseMenuItems[i]
+            val itemText = when (i) {
+                2 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                3 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                else -> pauseMenuItems[i]
             }
             val curY = startY - (i * itemH) + 20f
             if (i == pauseSelectedIndex) {
