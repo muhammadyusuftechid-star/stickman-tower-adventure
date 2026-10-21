@@ -1057,7 +1057,160 @@ Apa yang terbentang di luar The Obsidian Spire?
 
 ---
 
-*Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Loremaster, Quest Designer, Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+## 🎬 BAGIAN 22: NASKAH LAKON SINEMATIK LENGKAP & PETUNJUK SUARA (THE COMPLETE SCREENPLAY)
+
+*Format naskah drama standar industri video game dengan petunjuk emosi, arah vokal, jeda ketukan dramatik, dan aksi panggung.*
+
+```
+SCENE 01: INT. GERBANG BAWAH MENARA - SENJA ABADI
+Karakter: KAELEN (Garis hitam padat, rune emas berdenyut), ARIA (Gema siluet cyan melayang).
+Atmosfer: Desir angin membawa butiran debu tinta kering. Langit kelabu mati tanpa matahari.
+```
+
+> **ARIA**  
+> *(berbisik lirih, suaranya bergetar dengan kepedihan yang ditahan ratusan tahun)*  
+> "Kaelen... Buka matamu. Dengarkan aku sebelum pasir hitam ini menelan kakimu."
+>
+> *(Kaelen perlahan mengangkat kepalanya. Matanya yang putih tajam mengerjap, menatap kedua tangannya yang kini berupa garis hitam pekat tanpa ruas jari biologis)*
+>
+> **KAELEN**  
+> *(parau, suaranya seperti bilah pedang yang bergesekan dengan batu asah)*  
+> "Tanganku... Mengapa tubuhku... di mana warna kulitku? Di mana darahku?"
+>
+> **ARIA**  
+> *(mendekat, cahaya cyannya menerangi bilah baja tua yang tertancap di depan gerbang)*  
+> "Darah biologis kita telah dicuri oleh mereka yang bertahta di puncak langit, saudaraku. Mereka merampas merahnya mawar, birunya samudra, dan hangatnya mentari pagi... Tapi mereka gagal menghancurkan satu hal: tekad jiwamu yang menyala di balik rune emas itu. Cabut pedang itu, Kaelen! Jangan biarkan lilin jiwamu padam menjadi tinta mati di dasar bumi!"
+>
+> *(Kaelen melangkah maju. Jemari siluetnya mencengkeram hulu pedang. Begitu pedang tercabut, kilatan kilau emas meledak sesaat. Pintu gerbang obsidian berderit terbuka)*
+
+```
+SCENE 02: INT. BALAIRUNG GERBANG BENTENG BAWAH (LANTAI 3) - ARENA DUEL
+Karakter: KAELEN, JENDERAL OAKHAVEN (Setinggi 2.8m, helm tanduk emas, pedang besar).
+Atmosfer: Gema langkah kaki berat di atas lantai batu obsidian. Lampu obor api hitam menyala di dinding.
+```
+
+> **JENDERAL OAKHAVEN**  
+> *(suara bariton berat bergaung layaknya genderang perang kuno, menatap Kaelen dari singgasana)*  
+> "Ratusan tahun aku berdiri di ambang gerbang ini. Ribuan pejuang datang dengan kesombongan yang sama... dan kini seluruh tulang mereka menjadi debu tinta di bawah telapak kakiku."
+>
+> **KAELEN**  
+> *(mengambil kuda-kuda pedang rendah, bilah baja sejajar dengan dada)*  
+> "Aku tidak datang untuk mencari kemuliaan gelar ksatria, Jenderal. Aku datang untuk merebut kembali warna dunia kita."
+>
+> **JENDERAL OAKHAVEN**  
+> *(tersenyum pahit, menghunuskan pedang besarnya dengan satu tangan raksasa)*  
+> "Kata-kata yang berani, bocah... Tapi apakah bilah bajamu sanggup menanggung kebenaran di lantai atas? Tunjukkan padaku bahwa tekadmu bukan sekadar percikan jerami yang mudah padam!"
+>
+> *(Oakhaven melompat menerjang; bilah pedangnya membelah angin dengan kecepatan kilat)*  
+> *(MID-FIGHT — HP OAKHAVEN < 50%)*  
+>
+> **JENDERAL OAKHAVEN**  
+> *(menghentakkan kaki ke lantai, aura angin emas menyelimuti tubuhnya)*  
+> "Bagus! TEBASANMU MEMILIKI JIWA! Tapi rasakan ini: BADAI ANGIN LEGIUN PERTAMA!"
+>
+> *(DEATH SCENE — OAKHAVEN KALAH)*  
+> *(Oakhaven berlutut dengan satu kaki, menancapkan pedang besarnya ke lantai batu. Tubuhnya mulai retak memancarkan debu emas)*  
+>
+> **JENDERAL OAKHAVEN**  
+> *(nafasnya berat namun penuh kebanggaan prajurit sejati)*  
+> "Cukup... Gerbang ini... kini menjadi milikmu. Dengarkan aku, Kaelen: di atas sana, para sarjana Amethyst telah gila oleh racun mereka sendiri. Jangan percaya pada bayangan... dan jangan pernah... membiarkan pedangmu tumpul."  
+> *(Oakhaven menutup mata; tubuhnya luruh menjadi tumpukan debu emas berkilau)*
+
+```
+SCENE 03: INT. KAWAH ALKIMIA KRISTAL (LANTAI 5) - KABUT MIASMA
+Karakter: KAELEN, THE AMETHYST MATRON (Siluet anggun berselubung uap ungu, busur kaca).
+```
+
+> **THE AMETHYST MATRON**  
+> *(tertawa melengking dingin seraya melayang di atas platform kaca)*  
+> "Lihatlah ksatria kecil kita yang malang... Datang dengan pedang tumpul dan baju zirah yang berat! Tidakkah kau mencium aroma uap Miasma ini, anak muda?"
+>
+> **KAELEN**  
+> *(batuk kecil, siluetnya berkedip ungu sesaat akibat efek racun)*  
+> "Racunmu tidak akan menghentikan langkahku, Penyihir!"
+>
+> **THE AMETHYST MATRON**  
+> *(merentangkan busur kaca kristal, 5 panah racun menyala ungu di tali busur)*  
+> "Penyihir? Kami adalah para pencari kebebasan! Kami menolak mati sebagai garis hitam polos para dewa! Tinta ungu ini telah menyatu dengan darah kami. Menyerahlah... hirup uap ini, dan lupakan kepedihan dunia fana!"
+>
+> *(DEATH SCENE — SANG RATU TERSUNGKUR)*  
+> *(Matron tersungkur di atas kristal kaca yang pecah, busur kristalnya terbelah)*  
+>
+> **THE AMETHYST MATRON**  
+> *(suaranya melembut, uap ungu di sekelilingnya mulai memudar)*  
+> "Panahku... patah. Betapa hangatnya darah yang mengalir ini... Akhirnya... kepalaku terasa hening. Maafkan kami... yang tersesat dalam keabadian kaca..."
+
+```
+SCENE 04: INT. SUAKA TEMPA LOGAM (LANTAI 6) - BENGKEL VULCANUS
+Karakter: KAELEN, VULCANUS (Siluet berotot kekar berselubungkan bara api emas).
+```
+
+> **VULCANUS**  
+> *(menurunkan palu godam raksasa dengan dentingan keras ke paron)*  
+> **KLAAANG!**  
+> "Kau masih hidup setelah melewati kawah wanita gila itu? Luar biasa. Taruh senjatamu di atas paron ini, bocah."
+>
+> **KAELEN**  
+> *(meletakkan pedangnya yang bernoda racun ungu di atas paron panas)*  
+> "Mengapa kau tetap berada di sini, Vulcanus? Mengapa kau tidak ikut mendaki ke puncak?"
+>
+> **VULCANUS**  
+> *(menyeka keningnya, menatap kobaran api tungku meteorit)*  
+> "Karena seseorang harus tetap memegang palu saat semesta memilih berlutut, Kaelen! Para dewa mengira mereka bisa menghapus eksistensi kita hanya dengan mengubah wujud kita menjadi garis hitam. Tapi mereka lupa satu hal: baja yang ditempa di tengah kobaran api paling panas adalah baja yang kelak sanggup mematahkan pena penciptanya sendiri! Pegang kembali pedangmu. Sekarang, ia telah bernyawa!"
+
+```
+SCENE 05: INT. SINGGASANA KANVAS PRIMORDIAL (LANTAI 10) - KONFRONTASI AKHIR
+Karakter: KAELEN (Bilah berselimut api keemasan murni), THE GRAND CALLIGRAPHER (Raksasa 3.4m memegang The Primordial Stylus).
+Atmosfer: Keheningan mutlak. Lantai putih tanpa batas di atas samudra tinta hitam kosmis.
+```
+
+> **THE GRAND CALLIGRAPHER**  
+> *(suaranya menggema tanpa organ mulut biologis, bergaung langsung di dalam rongga jiwa Kaelen)*  
+> "Luar biasa. Seekor semut tinta berhasil merangkak hingga ke meja kerja tuannya. Apa yang kau cari di puncak takdir ini, wahai makhluk buatan?"
+>
+> **KAELEN**  
+> *(menghunuskan pedangnya, rune emas di dadanya meledak memancarkan cahaya menyilaukan)*  
+> "Kembalikan warna dunia kami! Kembalikan langit biru, hangatnya mentari, dan hak kami untuk bernafas sebagai manusia seutuhnya!"
+>
+> **THE GRAND CALLIGRAPHER**  
+> *(menggelengkan kepala dengan dingin, memutar The Primordial Stylus)*  
+> "Betapa piciknya pikiran fana. Warna adalah racun yang melahirkan ego, keserakahan, dan kehancuran perang. Dalam kesunyian hitam dan putih ini, tidak ada lagi perbedaan kasta, tidak ada lagi rasa lapar, dan tidak ada lagi kematian biologis. Aku telah menganugerahkan keabadian yang damai kepadamu!"
+>
+> **KAELEN**  
+> *(berteriak lantang dengan seluruh kehendak jiwanya)*  
+> "Keabadian tanpa rasa bukanlah kedamaian... ITU ADALAH KUBURAN MASSAL! Jika takdir kami harus ditulis dengan tinta kehampaanmu, maka dengan pedang ini, AKU AKAN MEROBEK KANVASMU!"
+>
+> *(Kaelen melompat menerjang badai kosmis; layarnya membeku dalam Perfect Parry 80ms saat bilahnya membelah The Primordial Stylus menjadi dua kepingan hancur!)*
+
+---
+
+## 🌬️ BAGIAN 23: BISIKAN MENARA & SISTEM SUARA LINGKUNGAN (TOWER WHISPERS)
+
+Ketika pemain berdiri diam tanpa melakukan aksi input (*Idle State* $> 4.0\text{ detik}$), sistem suara lingkungan akan memutar bisikan tipis (*ambient text whisper*) di atas kepala karakter:
+
+### 23.1 Bisikan Babak I (Benteng Bawah — Lantai 1 s/d 3)
+* *"Jangan berdiam... debu di bawah kakimu dahulunya adalah manusia."*
+* *"Duri obsidian ini haus akan kinetika... melompatlah!"*
+* *"Gema pedang Oakhaven... masih meratapi rajanya yang hilang."*
+
+### 23.2 Bisikan Babak II (Arsip Tenggelam — Lantai 4 s/d 6)
+* *"Uap kaca mendesis pelan... 'Siapa namamu sebelum dunia menjadi hitam?'"*
+* *"Di dalam buku-buku ini, seluruh air mata masa lalu telah membeku."*
+* *"Denting paron Vulcanus... denyut jantung terakhir Aethelgard."*
+
+### 23.3 Bisikan Babak III (Tebing Astral & Gerhana — Lantai 7 s/d 9)
+* *"Di luar lubang dinding ini... tidak ada surga, hanya bintang-bintang yang telah mati."*
+* *"Jangan tatap cermin terlalu lama... bayanganmu tahu ketakutan terbesarmu."*
+* *"Bulan darah menyala... Pangeran menangis di balik belati merahnya."*
+
+### 23.4 Bisikan Babak IV & Endless Spire (Lantai 10+)
+* *"Kanvas ini terlalu putih... terlalu hening... robeklah keheningannya!"*
+* *"Waktu telah patah... setiap langkah ke atas adalah tarian tanpa akhir."*
+
+---
+
+*Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Dialogue & Script Writer, Loremaster, Quest Designer, Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+
 
 
 

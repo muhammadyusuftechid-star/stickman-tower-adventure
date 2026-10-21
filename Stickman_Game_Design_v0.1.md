@@ -489,7 +489,74 @@ Diimplementasikan pada [StoryCodexScreen.kt](file:///home/yusuf/projekan/game/ga
 
 ---
 
+## 💬 18. Arsitektur Engine Dialog & Protokol Audio Vokal (Dialogue Engine Architecture)
+
+Diimplementasikan pada [StoryDialogue.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/world/StoryDialogue.kt) dan dirender di atas lapisan gameplay [PlayScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/PlayScreen.kt):
+
+```
+                   [PROXIMITY TRIGGER: JARAK PEMAIN < 3.0m]
+                                      │
+                                      ▼
+                      [POPUP BUBBLE & TIKIK KOMA TYPEWRITER]
+                       Kecepatan: 35 Karakter/Detik
+                       Voice Blip: Sintesis Gelombang Audio Prosedural
+                                      │
+     ┌────────────────────────────────┴────────────────────────────────┐
+     ▼                                                                 ▼
+[TOUCH / TOMBOL ACTION TAP]                                    [AKHIR PERCAKAPAN]
+Lanjut ke Baris Berikutnya (advance)                           isTriggered = true
+Animasi Fade-in Teks Lembut                                    Kamera Reset ke Posisi Pemain
+```
+
+### 18.1 Spesifikasi Kotak Dialog & Palet Warna Pembicara
+* **Dimensi Kotak Dialog:** Kotak marmer hitam transparan ($85\%$ opacity) dengan lebar $900$ dp dan tinggi $130$ dp, berjarak $40$ dp dari tepi bawah layar, dihiasi bingkai garis runik setebal $1.5$ dp.
+* **Palet Warna Nama Pembicara (Speaker Name Color Palette):**
+  * `Aria` $\rightarrow$ **Color.CYAN** (`#00FFFF`) — Pendar gema cahaya penuntun.
+  * `Jenderal Oakhaven` $\rightarrow$ **Color.GOLD** (`#FFD700`) — Kehormatan militer ksatria Solaria.
+  * `The Amethyst Matron` $\rightarrow$ **Purple Amethyst** (`#D973FF`) — Kaca kristal racun ungu.
+  * `Vulcanus` $\rightarrow$ **Bright Amber Flame** (`#FF9933`) — Kobaran api tungku meteorit abadi.
+  * `The Shadow Doppelgänger` $\rightarrow$ **Spectral Lavender** (`#9999E6`) — Ilusi cermin jiwa gelap.
+  * `The Crimson Sovereign` $\rightarrow$ **Deep Blood Crimson** (`#FF3333`) — Tinta darah gerhana vampirik.
+  * `The Grand Calligrapher` $\rightarrow$ **Pristine Celestial White** (`#F2F5FF`) — Kanvas purba para dewa.
+
+### 18.2 Protokol Suara Vokal Siluet (Procedural Voice Chirp Synthesis)
+Karena tubuh siluet tidak lagi memiliki paru-paru dan pita suara biologis berdaging, komunikasi vokal disintesis secara prosedural di [AudioManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/audio/AudioManager.kt) menggunakan getaran osilator gelombang murni saat setiap karakter huruf muncul di layar:
+* **Aria:** Nada tinggi lembut gelombang sinus ganda ($880\text{ Hz} - 1046\text{ Hz}$) bernuansa lonceng kristal.
+* **Vulcanus:** Nada rendah menggelegar gelombang segitiga kasar ($120\text{ Hz} - 180\text{ Hz}$) menyerupai dengung logam panas.
+* **The Grand Calligrapher:** Frekuensi harmonik ganda ($55\text{ Hz} + 440\text{ Hz}$) dengan resonansi gema kosmis tak terbatas.
+
+---
+
+## 🌿 19. Pohon Percabangan Dialog Interaktif & Resonansi Moril (Branching Trees)
+
+Saat berinteraksi dengan NPC di Suaka Vulcanus (Lantai 6), pemain disajikan pilihan dialog bercabang (*Branching Dialogue Choice*) yang memicu efek mekanis sementara (*Morale Surge Buff*):
+
+```
+                                [PERCAKAPAN DENGAN VULCANUS]
+                                "Untuk apa kau mengangkat pedang ini?"
+                                                │
+                ┌───────────────────────────────┴───────────────────────────────┐
+                ▼                                                               ▼
+     [PILIHAN A: PEMBALASAN DENDAM]                                  [PILIHAN B: RESTORASI WARNA]
+     "Untuk menghancurkan dewa yang                                  "Untuk mengembalikan keindahan
+      merampas wujud manusia kita!"                                   dan kehidupan semesta Aethelgard!"
+                │                                                               │
+                ▼                                                               ▼
+     [RESPON VULCANUS: API BARA]                                     [RESPON VULCANUS: HARMONI BAJA]
+     "Bagus! Kemarahan adalah bahan bakar                            "Jiwa yang mulia... Pedangmu akan
+      terbaik untuk membelah takdir!"                                 menjadi lentera di tengah kegelapan!"
+                │                                                               │
+                ▼                                                               ▼
+     [BUFF: KINETIC SURGE]                                           [BUFF: SPIRITUAL WARD]
+     +8% Base Attack Power di Lantai 7                               +15% Max HP & +1 HP/s Health Regen di Lantai 7
+```
+
+*Sistem percabangan ini memperkaya kedalaman RPG dan memberikan dampak naratif langsung pada performa pertarungan pemain.*
+
+---
+
 *Dokumen Game Design Document (GDD) v1.0 ini merupakan spesifikasi desain resmi dan kanon final untuk pengembangan dan produksi game **Stickman Tower Adventure**.*
+
 
 
 
