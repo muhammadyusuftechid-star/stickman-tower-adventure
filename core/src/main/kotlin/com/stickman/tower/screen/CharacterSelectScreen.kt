@@ -416,29 +416,45 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
             game.setScreen(MainMenuScreen(game))
         }
 
-        // Klik Mouse & Layar Sentuh
+        // Klik Mouse & Layar Sentuh Mobile
         if (Gdx.input.justTouched()) {
             touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             viewport.unproject(touchVec)
 
-            // Panah Kiri Podium
-            if (touchVec.x in 80f..160f && touchVec.y in 310f..390f) {
+            // Panah Kiri Podium & Zona Sentuh Kiri
+            if (touchVec.x in 50f..220f && touchVec.y in 260f..440f) {
                 selectedIndex = (selectedIndex - 1 + archetypes.size) % archetypes.size
                 AudioManager.playJump()
+                return
             }
-            // Panah Kanan Podium
-            if (touchVec.x in 520f..600f && touchVec.y in 310f..390f) {
+            // Panah Kanan Podium & Zona Sentuh Kanan
+            if (touchVec.x in 460f..620f && touchVec.y in 260f..440f) {
                 selectedIndex = (selectedIndex + 1) % archetypes.size
                 AudioManager.playJump()
+                return
             }
-            // Tombol Confirm & Play
-            if (touchVec.x in 720f..980f && touchVec.y in 45f..97f) {
+            // Ketuk Karakter / Altar di Podium untuk ganti karakter
+            if (touchVec.x in 220f..350f && touchVec.y in 140f..580f) {
+                selectedIndex = (selectedIndex - 1 + archetypes.size) % archetypes.size
+                AudioManager.playJump()
+                return
+            }
+            if (touchVec.x in 350f..460f && touchVec.y in 140f..580f) {
+                selectedIndex = (selectedIndex + 1) % archetypes.size
+                AudioManager.playJump()
+                return
+            }
+
+            // Tombol Confirm & Play (Area sentuh ekstra luas)
+            if (touchVec.x in 660f..1040f && touchVec.y in 25f..115f) {
                 confirmSelection()
+                return
             }
-            // Tombol Back
-            if (touchVec.x in 300f..520f && touchVec.y in 45f..97f) {
+            // Tombol Back (Area sentuh ekstra luas)
+            if (touchVec.x in 240f..580f && touchVec.y in 25f..115f) {
                 AudioManager.playDodge()
                 game.setScreen(MainMenuScreen(game))
+                return
             }
         }
     }

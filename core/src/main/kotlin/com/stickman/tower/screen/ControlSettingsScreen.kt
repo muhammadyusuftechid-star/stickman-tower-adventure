@@ -101,6 +101,11 @@ class ControlSettingsScreen(
         renderUIHeader()
     }
 
+    private fun isRectTouched(r: Rectangle, tx: Float, ty: Float, padding: Float = 14f): Boolean {
+        return tx >= r.x - padding && tx <= r.x + r.width + padding &&
+               ty >= r.y - padding && ty <= r.y + r.height + padding
+    }
+
     private fun handleInput() {
         // Tombol Kembali (ESC atau Android BACK)
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.BACK)) {
@@ -114,40 +119,40 @@ class ControlSettingsScreen(
             val tx = touchVec.x
             val ty = touchVec.y
 
-            // Cek Klik Tombol Konfigurasi Atas
+            // Cek Klik Tombol Konfigurasi Atas dengan padding toleransi sentuh
             when {
-                btnScaleMinus.contains(tx, ty) -> {
+                isRectTouched(btnScaleMinus, tx, ty) -> {
                     settings.scale = (settings.scale - 0.05f).coerceAtLeast(0.70f)
                     applyAndPreview()
                     AudioManager.playJump()
                 }
-                btnScalePlus.contains(tx, ty) -> {
+                isRectTouched(btnScalePlus, tx, ty) -> {
                     settings.scale = (settings.scale + 0.05f).coerceAtMost(1.30f)
                     applyAndPreview()
                     AudioManager.playJump()
                 }
-                btnOpacityMinus.contains(tx, ty) -> {
+                isRectTouched(btnOpacityMinus, tx, ty) -> {
                     settings.opacity = (settings.opacity - 0.05f).coerceAtLeast(0.30f)
                     applyAndPreview()
                     AudioManager.playJump()
                 }
-                btnOpacityPlus.contains(tx, ty) -> {
+                isRectTouched(btnOpacityPlus, tx, ty) -> {
                     settings.opacity = (settings.opacity + 0.05f).coerceAtMost(1.00f)
                     applyAndPreview()
                     AudioManager.playJump()
                 }
-                btnToggleAutoHide.contains(tx, ty) -> {
+                isRectTouched(btnToggleAutoHide, tx, ty) -> {
                     settings.autoHideOnGamepad = !settings.autoHideOnGamepad
                     applyAndPreview()
                     AudioManager.playDodge()
                 }
-                btnTestRumble.contains(tx, ty) -> {
+                isRectTouched(btnTestRumble, tx, ty) -> {
                     HapticManager.vibrateHeavy()
                     gamepadInput.vibrate(300, 1.0f)
                     rumbleFeedbackTimer = 0.6f
                     AudioManager.playParry()
                 }
-                btnResetDefaults.contains(tx, ty) -> {
+                isRectTouched(btnResetDefaults, tx, ty) -> {
                     val def = TouchSettingsManager.resetToDefault()
                     settings.dpadOffsetX = def.dpadOffsetX
                     settings.dpadOffsetY = def.dpadOffsetY
@@ -159,7 +164,7 @@ class ControlSettingsScreen(
                     applyAndPreview()
                     AudioManager.playChest()
                 }
-                btnSaveExit.contains(tx, ty) -> {
+                isRectTouched(btnSaveExit, tx, ty, padding = 18f) -> {
                     saveAndExit()
                     return
                 }

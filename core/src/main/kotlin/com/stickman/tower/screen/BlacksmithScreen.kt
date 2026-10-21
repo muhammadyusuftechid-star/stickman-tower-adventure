@@ -310,7 +310,7 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
             returnToMenu()
         }
 
-        // Sentuh / Klik Mouse
+        // Sentuh / Klik Mouse (Area Sentuh Ekstra Luas)
         if (Gdx.input.justTouched()) {
             touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             viewport.unproject(touchVec)
@@ -323,7 +323,7 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
 
             for (i in 0 until 3) {
                 val cardY = startY - (i * spacingY)
-                if (touchVec.x in cardX..(cardX + cardW) && touchVec.y in cardY..(cardY + cardH)) {
+                if (touchVec.x in (cardX - 40f)..(cardX + cardW + 40f) && touchVec.y in (cardY - 8f)..(cardY + cardH + 8f)) {
                     selectedIndex = i
                     executeSelection()
                     return
@@ -335,7 +335,7 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
             val returnW = 340f
             val returnH = 46f
             val returnX = (1280f - returnW) / 2f
-            if (touchVec.x in returnX..(returnX + returnW) && touchVec.y in returnY..(returnY + returnH)) {
+            if (touchVec.x in (returnX - 80f)..(returnX + returnW + 80f) && touchVec.y in (returnY - 15f)..(returnY + returnH + 25f)) {
                 selectedIndex = 3
                 executeSelection()
             }

@@ -16,16 +16,12 @@ class CompositeInput(
     fun update(viewport: Viewport? = null) {
         gamepad.update()
 
-        // Auto-detection: Sembunyikan tombol layar sentuh jika gamepad aktif digunakan,
-        // namun segera tampilkan kembali jika pemain menyentuh layar.
-        val settings = TouchSettingsManager.load()
-        if (settings.autoHideOnGamepad && gamepad.hasActiveGamepad()) {
+        // Auto-detection: Sembunyikan tombol layar sentuh HANYA jika gamepad fisik aktif digunakan dan autoHide diaktifkan.
+        // Segera pulihkan visibilitas tombol jika pemain menyentuh layar.
+        val settings = virtual.settings
+        if (settings.autoHideOnGamepad && gamepad.hasActiveGamepad() && gamepad.isGamepadInUse) {
             val isScreenTouched = Gdx.input != null && (Gdx.input.isTouched(0) || Gdx.input.isTouched(1))
-            if (isScreenTouched) {
-                virtual.isVisible = true
-            } else if (gamepad.isGamepadInUse) {
-                virtual.isVisible = false
-            }
+            virtual.isVisible = isScreenTouched
         } else {
             virtual.isVisible = true
         }

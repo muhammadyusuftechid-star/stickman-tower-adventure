@@ -208,10 +208,10 @@ class GamepadInput : GameInput, ControllerListener {
         wasUp = upPressed
         wasDown = downPressed
 
-        // 4. Deteksi Interaktivitas Gamepad
-        val hasAnyInput = moveLeftPressed || moveRightPressed || upPressed || downPressed ||
-            btnA || btnX || btnB || btnL1 || btnR1 || btnStart || abs(axisX) > 0.15f || abs(axisY) > 0.15f
-        if (hasAnyInput) {
+        // 4. Deteksi Interaktivitas Gamepad (Abaikan sensor noise/drift, utamakan tombol fisik nyata)
+        val hasExplicitButtonInput = btnA || btnX || btnB || btnL1 || btnR1 || btnStart || dpadLeft || dpadRight || dpadUp || dpadDown
+        val hasDefiniteStickMotion = abs(axisX) > 0.65f || abs(axisY) > 0.65f
+        if (hasExplicitButtonInput || hasDefiniteStickMotion) {
             isGamepadInUse = true
         }
     }

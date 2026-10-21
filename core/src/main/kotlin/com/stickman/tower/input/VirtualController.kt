@@ -86,6 +86,13 @@ class VirtualController : GameInput {
         btnUltimate.set(actionBaseX - 105f * scale, actionBaseY + 165f * scale, 44f * scale)
     }
 
+    private fun isCircleTouched(c: Circle, tx: Float, ty: Float, padding: Float): Boolean {
+        val r = c.radius + padding
+        val dx = tx - c.x
+        val dy = ty - c.y
+        return (dx * dx + dy * dy) <= (r * r)
+    }
+
     /**
      * Memperbarui status penekanan tombol menggunakan deteksi multi-touch (pointer 0..4).
      * Jika [viewport] disertakan, koordinat sentuhan fisik di-unproject ke koordinat canvas virtual UI.
@@ -106,6 +113,10 @@ class VirtualController : GameInput {
         var curSkill = false
         var curUltimate = false
 
+        val sc = settings.scale
+        val dpadMidX = (btnLeft.x + btnRight.x) / 2f
+        val pad = 26f * sc
+
         for (pointer in 0..4) {
             if (Gdx.input != null && Gdx.input.isTouched(pointer)) {
                 touchVec.set(Gdx.input.getX(pointer).toFloat(), Gdx.input.getY(pointer).toFloat(), 0f)
@@ -117,17 +128,33 @@ class VirtualController : GameInput {
                 val touchX = touchVec.x
                 val touchY = touchVec.y
 
-                if (btnLeft.contains(touchX, touchY)) pressedLeft = true
-                if (btnRight.contains(touchX, touchY)) pressedRight = true
+                // D-Pad Kiri: Toleransi radius + zona slider kontinu tanpa dead zone
+                val isDpadYRange = touchY in (btnLeft.y - 75f * sc)..(btnLeft.y + 75f * sc)
+                if (isCircleTouched(btnLeft, touchX, touchY, pad + 10f) ||
+                    (touchX <= dpadMidX && touchX >= btnLeft.x - 120f * sc && isDpadYRange)) {
+                    pressedLeft = true
+                }
+                if (isCircleTouched(btnRight, touchX, touchY, pad + 10f) ||
+                    (touchX > dpadMidX && touchX <= btnRight.x + 120f * sc && isDpadYRange)) {
+                    pressedRight = true
+                }
 
-                if (btnAttack.contains(touchX, touchY)) curAttack = true
-                if (btnJump.contains(touchX, touchY)) {
+                // Tombol Attack: Radius diperluas + zona tepi kanan yang ramah jempol
+                if (isCircleTouched(btnAttack, touchX, touchY, pad + 14f) ||
+                    (touchX >= btnAttack.x - 20f * sc && touchY in (btnAttack.y - 65f * sc)..(btnAttack.y + 65f * sc))) {
+                    curAttack = true
+                }
+
+                // Tombol Jump: Responsif terhadap tekanan jempol bawah
+                if (isCircleTouched(btnJump, touchX, touchY, pad + 10f) ||
+                    (touchY <= btnJump.y + 15f * sc && touchX in (btnJump.x - 55f * sc)..(btnJump.x + 55f * sc))) {
                     curJump = true
                     pressedJump = true
                 }
-                if (btnDodge.contains(touchX, touchY)) curDodge = true
-                if (btnSkill.contains(touchX, touchY)) curSkill = true
-                if (btnUltimate.contains(touchX, touchY)) curUltimate = true
+
+                if (isCircleTouched(btnDodge, touchX, touchY, pad + 10f)) curDodge = true
+                if (isCircleTouched(btnSkill, touchX, touchY, pad + 10f)) curSkill = true
+                if (isCircleTouched(btnUltimate, touchX, touchY, pad + 12f)) curUltimate = true
             }
         }
 

@@ -57,6 +57,12 @@ class TalentTreeScreen(
         HapticManager.init()
         FontManager.init()
         talentManager.loadFromSave(saveData)
+        // Otomatis sinkronkan sub-class agar selalu sesuai dengan archetype aktif
+        if (talentManager.selectedSubClass == SubClass.NONE || talentManager.selectedSubClass.archetype != currentArchetype) {
+            if (subClasses.isNotEmpty()) {
+                talentManager.selectSubClass(subClasses.first(), currentArchetype)
+            }
+        }
     }
 
     override fun render(delta: Float) {
@@ -98,14 +104,14 @@ class TalentTreeScreen(
             val tx = touchVec.x
             val ty = touchVec.y
 
-            // Cek Tombol Exit (Pojok Kiri Bawah)
-            if (tx in 50f..230f && ty in 25f..65f) {
+            // Cek Tombol Exit (Pojok Kiri Bawah - Area Sentuh Ekstra Luas)
+            if (tx in 15f..280f && ty in 10f..85f) {
                 exitAndSave()
                 return
             }
 
-            // Cek Tombol Respec (Pojok Kanan Bawah)
-            if (tx in (1280f - 240f)..(1280f - 50f) && ty in 25f..65f) {
+            // Cek Tombol Respec (Pojok Kanan Bawah - Area Sentuh Ekstra Luas)
+            if (tx in 980f..1265f && ty in 10f..85f) {
                 talentManager.respecTalents()
                 AudioManager.playDodge()
                 HapticManager.vibrateMedium()
@@ -123,9 +129,9 @@ class TalentTreeScreen(
                 val subClass = subClasses[cIndex]
                 val colX = if (cIndex == 0) 65f else 655f
 
-                // Tombol Select Sub-Class
+                // Tombol Select Sub-Class (Hitbox responsif)
                 val selectBtnY = startY + colH - 80f
-                if (tx in (colX + 20f)..(colX + colW - 20f) && ty in selectBtnY..(selectBtnY + 36f)) {
+                if (tx in (colX - 10f)..(colX + colW + 10f) && ty in (selectBtnY - 12f)..(selectBtnY + 48f)) {
                     talentManager.selectSubClass(subClass, currentArchetype)
                     AudioManager.playParry()
                     HapticManager.vibrateHeavy()
@@ -134,28 +140,28 @@ class TalentTreeScreen(
                     return
                 }
 
-                // Cek Klik Tiap Talent Card
+                // Cek Klik Tiap Talent Card (Otomatis aktifkan sub-class jika disentuh)
                 val talents = TalentCatalog.getTalentsFor(subClass)
                 val nodeStartY = selectBtnY - 95f
                 for (tIndex in talents.indices) {
                     val talent = talents[tIndex]
                     val nodeY = nodeStartY - (tIndex * 98f)
                     val nodeH = 88f
-                    val nodeW = colW - 40f
 
-                    if (tx in (colX + 20f)..(colX + 20f + nodeW) && ty in nodeY..(nodeY + nodeH)) {
+                    if (tx in (colX - 10f)..(colX + colW + 10f) && ty in (nodeY - 6f)..(nodeY + nodeH + 6f)) {
+                        if (talentManager.selectedSubClass != subClass) {
+                            talentManager.selectSubClass(subClass, currentArchetype)
+                            HapticManager.vibrateLight()
+                        }
+
                         if (talentManager.isTalentUnlocked(talent.id)) {
                             feedbackText = "Talent ${talent.name} sudah aktif!"
                             feedbackTimer = 1.5f
-                        } else if (talentManager.selectedSubClass != subClass) {
-                            feedbackText = "Aktifkan Sub-Class ${subClass.displayName} terlebih dahulu!"
-                            feedbackTimer = 2.0f
-                            AudioManager.playHit()
                         } else if (talentManager.canUnlockTalent(talent)) {
                             talentManager.unlockTalent(talent)
                             AudioManager.playChest()
                             HapticManager.vibrateHeavy()
-                            feedbackText = "Talent ${talent.name} Terbuka!"
+                            feedbackText = "Talent ${talent.name} Berhasil Dipelajari!"
                             feedbackTimer = 2.0f
                         } else {
                             feedbackText = "Poin tidak cukup atau butuh tier sebelumnya!"

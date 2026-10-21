@@ -79,7 +79,8 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "QUIT GAME"
     )
     private var selectedIndex = 0
-    private var selectorY = 540f
+    private var selectorX = 140f
+    private var selectorY = 505f
     private var animTime = 0f
     private var feedbackNotice = ""
     private var feedbackTimer = 0f
@@ -92,7 +93,10 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         HapticManager.init()
         FontManager.init()
         currentSaveData = SaveManager.load()
-        selectorY = 540f - (selectedIndex * 40f)
+        val colX = if (selectedIndex < 5) 140f else 670f
+        val rowIdx = if (selectedIndex < 5) selectedIndex else selectedIndex - 5
+        selectorX = colX
+        selectorY = 505f - (rowIdx * 64f)
         particles.clear()
         for (i in 0 until 45) {
             val p = MenuParticle()
@@ -139,17 +143,15 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         // Partikel Ember Atmosferik (Dual-Core: Soft Halo + Bright Core)
         for (p in particles) {
             val alpha = (1f - (p.life / p.maxLife)).coerceIn(0f, 1f)
-            // Outer Halo
             shapeRenderer.color = Color(p.color.r, p.color.g, p.color.b, p.color.a * alpha * 0.4f)
             shapeRenderer.circle(p.pos.x, p.pos.y, p.size * 1.5f)
-            // Bright Core
             shapeRenderer.color = Color(1f, 1f, 1f, alpha * 0.85f)
             shapeRenderer.circle(p.pos.x, p.pos.y, p.size * 0.55f)
         }
 
         // Panel Judul & Kartu Status Pemain (Dark Slate Obsidian dengan Gold Line)
         shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.92f)
-        shapeRenderer.rect(140f, 40f, 1000f, 118f)
+        shapeRenderer.rect(140f, 38f, 1000f, 120f)
         shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
         shapeRenderer.rectLine(140f, 158f, 1140f, 158f, 2.5f)
 
@@ -157,48 +159,53 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         shapeRenderer.color = Color(0.10f, 0.14f, 0.22f, 1f)
         shapeRenderer.rect(770f, 80f, 340f, 32f)
 
-        // Wadah Tombol-tombol Menu (Glassmorphism Cards)
-        val buttonWidth = 440f
-        val buttonHeight = 34f
-        val startY = 540f
-        val spacingY = 40f
-        val btnX = (1280f - buttonWidth) / 2f
+        // Wadah Tombol-tombol Menu (Glassmorphism Cards 2 Kolom Responsif)
+        val buttonWidth = 470f
+        val buttonHeight = 52f
+        val startY = 505f
+        val spacingY = 64f
 
         // Render Latar Belakang Kartu untuk Seluruh Tombol Menu
         for (i in menuItems.indices) {
-            val itemY = startY - (i * spacingY)
-            shapeRenderer.color = Color(0.07f, 0.10f, 0.16f, 0.75f)
-            shapeRenderer.rect(btnX, itemY, buttonWidth, buttonHeight)
-            shapeRenderer.color = Color(0.16f, 0.22f, 0.32f, 0.60f)
-            shapeRenderer.rectLine(btnX, itemY, btnX + buttonWidth, itemY, 1.5f)
-            shapeRenderer.rectLine(btnX, itemY + buttonHeight, btnX + buttonWidth, itemY + buttonHeight, 1.5f)
+            val colX = if (i < 5) 140f else 670f
+            val rowIdx = if (i < 5) i else i - 5
+            val itemY = startY - (rowIdx * spacingY)
+
+            shapeRenderer.color = Color(0.07f, 0.10f, 0.16f, 0.85f)
+            shapeRenderer.rect(colX, itemY, buttonWidth, buttonHeight)
+            shapeRenderer.color = Color(0.16f, 0.22f, 0.32f, 0.65f)
+            shapeRenderer.rectLine(colX, itemY, colX + buttonWidth, itemY, 1.5f)
+            shapeRenderer.rectLine(colX, itemY + buttonHeight, colX + buttonWidth, itemY + buttonHeight, 1.5f)
         }
 
         // Smooth Lerp Indikator Seleksi Tombol
-        val targetY = startY - (selectedIndex * spacingY)
-        selectorY += (targetY - selectorY) * (18f * delta).coerceAtMost(1f)
+        val targetX = if (selectedIndex < 5) 140f else 670f
+        val targetRow = if (selectedIndex < 5) selectedIndex else selectedIndex - 5
+        val targetY = startY - (targetRow * spacingY)
+        selectorX += (targetX - selectorX) * (20f * delta).coerceAtMost(1f)
+        selectorY += (targetY - selectorY) * (20f * delta).coerceAtMost(1f)
 
         val pulse = sin(animTime * 6f) * 0.08f
         shapeRenderer.color = Color(0.12f, 0.18f, 0.28f, 0.94f)
-        shapeRenderer.rect(btnX - 8f, selectorY - 5f, buttonWidth + 16f, buttonHeight + 10f)
+        shapeRenderer.rect(selectorX - 6f, selectorY - 4f, buttonWidth + 12f, buttonHeight + 8f)
 
         // Frame Emas Menyala dengan Aksen Sudut
         shapeRenderer.color = Color(0.95f, 0.78f, 0.25f, 0.88f + pulse)
-        shapeRenderer.rectLine(btnX - 8f, selectorY - 5f, btnX + buttonWidth + 8f, selectorY - 5f, 2f)
-        shapeRenderer.rectLine(btnX - 8f, selectorY + buttonHeight + 5f, btnX + buttonWidth + 8f, selectorY + buttonHeight + 5f, 2f)
-        shapeRenderer.rectLine(btnX - 8f, selectorY - 5f, btnX - 8f, selectorY + buttonHeight + 5f, 3f)
-        shapeRenderer.rectLine(btnX + buttonWidth + 8f, selectorY - 5f, btnX + buttonWidth + 8f, selectorY + buttonHeight + 5f, 3f)
+        shapeRenderer.rectLine(selectorX - 6f, selectorY - 4f, selectorX + buttonWidth + 6f, selectorY - 4f, 2f)
+        shapeRenderer.rectLine(selectorX - 6f, selectorY + buttonHeight + 4f, selectorX + buttonWidth + 6f, selectorY + buttonHeight + 4f, 2f)
+        shapeRenderer.rectLine(selectorX - 6f, selectorY - 4f, selectorX - 6f, selectorY + buttonHeight + 4f, 3f)
+        shapeRenderer.rectLine(selectorX + buttonWidth + 6f, selectorY - 4f, selectorX + buttonWidth + 6f, selectorY + buttonHeight + 4f, 3f)
 
         // Notch Vektor Segitiga Kursor Samping
         shapeRenderer.triangle(
-            btnX - 16f, selectorY + buttonHeight / 2f,
-            btnX - 7f, selectorY + buttonHeight / 2f + 7f,
-            btnX - 7f, selectorY + buttonHeight / 2f - 7f
+            selectorX - 14f, selectorY + buttonHeight / 2f,
+            selectorX - 5f, selectorY + buttonHeight / 2f + 7f,
+            selectorX - 5f, selectorY + buttonHeight / 2f - 7f
         )
         shapeRenderer.triangle(
-            btnX + buttonWidth + 16f, selectorY + buttonHeight / 2f,
-            btnX + buttonWidth + 7f, selectorY + buttonHeight / 2f + 7f,
-            btnX + buttonWidth + 7f, selectorY + buttonHeight / 2f - 7f
+            selectorX + buttonWidth + 14f, selectorY + buttonHeight / 2f,
+            selectorX + buttonWidth + 5f, selectorY + buttonHeight / 2f + 7f,
+            selectorX + buttonWidth + 5f, selectorY + buttonHeight / 2f - 7f
         )
 
         shapeRenderer.end()
@@ -221,7 +228,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         glyphLayout.setText(regF, subtitle)
         regF.draw(batch, subtitle, (1280f - glyphLayout.width) / 2f, 595f)
 
-        // Tombol-tombol Navigasi
+        // Tombol-tombol Navigasi 2 Kolom
         for (i in menuItems.indices) {
             val itemText = when (i) {
                 6 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
@@ -229,16 +236,19 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
                 else -> menuItems[i]
             }
 
-            val curY = startY - (i * spacingY) + 25f
+            val colX = if (i < 5) 140f else 670f
+            val rowIdx = if (i < 5) i else i - 5
+            val curY = startY - (rowIdx * spacingY) + 33f
+
             if (i == selectedIndex) {
                 headF.color = Color(1f, 0.88f, 0.3f, 1f)
                 val markedText = "⚔  $itemText  ⚔"
                 glyphLayout.setText(headF, markedText)
-                headF.draw(batch, markedText, (1280f - glyphLayout.width) / 2f, curY)
+                headF.draw(batch, markedText, colX + (buttonWidth - glyphLayout.width) / 2f, curY)
             } else {
-                headF.color = Color(0.82f, 0.86f, 0.95f, 0.9f)
+                headF.color = Color(0.85f, 0.88f, 0.95f, 0.92f)
                 glyphLayout.setText(headF, itemText)
-                headF.draw(batch, itemText, (1280f - glyphLayout.width) / 2f, curY)
+                headF.draw(batch, itemText, colX + (buttonWidth - glyphLayout.width) / 2f, curY)
             }
         }
 
@@ -268,35 +278,61 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
         // Petunjuk Kontrol
         regF.color = Color(0.6f, 0.65f, 0.75f, 0.8f)
-        glyphLayout.setText(regF, "[W/S / UP/DOWN / CLICK] Navigate  |  [ENTER / SPACE] Select")
-        regF.draw(batch, "[W/S / UP/DOWN / CLICK] Navigate  |  [ENTER / SPACE] Select", (1280f - glyphLayout.width) / 2f, 25f)
+        glyphLayout.setText(regF, "[SENTUH TOMBOL / WASD] Pilih  |  [ENTER / SPACE] Konfirmasi")
+        regF.draw(batch, "[SENTUH TOMBOL / WASD] Pilih  |  [ENTER / SPACE] Konfirmasi", (1280f - glyphLayout.width) / 2f, 25f)
 
         batch.end()
     }
 
     private fun handleInput() {
         if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
-            selectedIndex = (selectedIndex - 1 + menuItems.size) % menuItems.size
+            selectedIndex = if (selectedIndex in 1..4 || selectedIndex in 6..9) {
+                selectedIndex - 1
+            } else if (selectedIndex == 0) {
+                4
+            } else {
+                9
+            }
             AudioManager.playJump()
         }
         if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
-            selectedIndex = (selectedIndex + 1) % menuItems.size
+            selectedIndex = if (selectedIndex in 0..3 || selectedIndex in 5..8) {
+                selectedIndex + 1
+            } else if (selectedIndex == 4) {
+                0
+            } else {
+                5
+            }
             AudioManager.playJump()
         }
+        if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)) {
+            if (selectedIndex >= 5) {
+                selectedIndex -= 5
+                AudioManager.playJump()
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.D)) {
+            if (selectedIndex < 5) {
+                selectedIndex += 5
+                AudioManager.playJump()
+            }
+        }
 
-        // Deteksi Hover & Klik Mouse
+        // Deteksi Hover & Klik Mouse / Layar Sentuh Mobile
         if (Gdx.input.isTouched) {
             touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             viewport.unproject(touchVec)
-            val buttonWidth = 440f
-            val buttonHeight = 34f
-            val startY = 540f
-            val spacingY = 40f
-            val btnX = (1280f - buttonWidth) / 2f
+            val buttonWidth = 470f
+            val buttonHeight = 52f
+            val startY = 505f
+            val spacingY = 64f
 
             for (i in menuItems.indices) {
-                val btnY = startY - (i * spacingY)
-                if (touchVec.x in btnX..(btnX + buttonWidth) && touchVec.y in btnY..(btnY + buttonHeight)) {
+                val colX = if (i < 5) 140f else 670f
+                val rowIdx = if (i < 5) i else i - 5
+                val btnY = startY - (rowIdx * spacingY)
+
+                if (touchVec.x in (colX - 25f)..(colX + buttonWidth + 25f) && touchVec.y in (btnY - 8f)..(btnY + buttonHeight + 8f)) {
                     selectedIndex = i
                     if (Gdx.input.justTouched()) {
                         executeSelection()

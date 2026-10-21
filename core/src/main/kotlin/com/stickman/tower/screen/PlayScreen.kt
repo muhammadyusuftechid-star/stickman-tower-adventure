@@ -279,11 +279,11 @@ class PlayScreen(
             if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
         }
 
-        // Cek klik tombol Pause di pojok kanan atas HUD
+        // Cek klik tombol Pause di pojok kanan atas HUD (Toleransi area sentuh luas & aman dari notch layar HP)
         if (Gdx.input.justTouched() && (gameStatus == GameStatus.PLAYING || isPaused)) {
             uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             uiViewport.unproject(uiTouchVec)
-            if (uiTouchVec.x in (1280f - 110f)..1280f && uiTouchVec.y in (720f - 45f)..720f) {
+            if (uiTouchVec.x in (1280f - 180f)..1280f && uiTouchVec.y in (720f - 75f)..720f) {
                 isPaused = !isPaused
                 pauseSelectedIndex = 0
                 if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
@@ -1010,24 +1010,90 @@ class PlayScreen(
     }
 
     private fun handleStatusInput() {
+        val w = 1280f
+        val h = 720f
+
         if (gameStatus == GameStatus.GAME_OVER) {
-            if (Gdx.input.isKeyJustPressed(Keys.R)) {
+            val keyRespawn = Gdx.input.isKeyJustPressed(Keys.R) ||
+                             Gdx.input.isKeyJustPressed(Keys.SPACE) ||
+                             Gdx.input.isKeyJustPressed(Keys.ENTER) ||
+                             input.isJumpJustPressed() ||
+                             input.isAttackJustPressed()
+            var touchRespawn = false
+            var touchMenu = false
+
+            if (Gdx.input.justTouched()) {
+                uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                uiViewport.unproject(uiTouchVec)
+                val tx = uiTouchVec.x
+                val ty = uiTouchVec.y
+
+                // Tombol Menu Utama di Layar Game Over: [w/2 + 20 .. w/2 + 260, h/2 - 85 .. h/2 - 25]
+                if (tx in (w / 2f + 20f)..(w / 2f + 260f) && ty in (h / 2f - 85f)..(h / 2f - 25f)) {
+                    touchMenu = true
+                } else {
+                    // Sentuhan di tombol Respawn atau di mana saja pada layar HP akan membangkitkan pemain
+                    touchRespawn = true
+                }
+            }
+
+            if (touchMenu) {
+                AudioManager.playDodge()
+                if (game != null) game.setScreen(MainMenuScreen(game))
+                return
+            }
+
+            if (keyRespawn || touchRespawn) {
                 player.position.set(activeCheckpointPos.x, activeCheckpointPos.y)
                 player.velocity.set(0f, 0f)
                 player.resetToStats()
                 gameStatus = GameStatus.PLAYING
+                AudioManager.playSlashLight()
             }
         } else if (gameStatus == GameStatus.STAGE_CLEAR) {
-            val proceedTriggered = Gdx.input.isKeyJustPressed(Keys.SPACE) ||
-                                   Gdx.input.isKeyJustPressed(Keys.ENTER) ||
-                                   input.isJumpJustPressed() ||
-                                   (Gdx.input.justTouched() && Gdx.input.y > Gdx.graphics.height / 2)
+            val keyProceed = Gdx.input.isKeyJustPressed(Keys.SPACE) ||
+                             Gdx.input.isKeyJustPressed(Keys.ENTER) ||
+                             input.isJumpJustPressed() ||
+                             input.isAttackJustPressed()
+            val keyRestart = Gdx.input.isKeyJustPressed(Keys.R)
+            var touchProceed = false
+            var touchRetry = false
+            var touchMenu = false
+
+            if (Gdx.input.justTouched()) {
+                uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                uiViewport.unproject(uiTouchVec)
+                val tx = uiTouchVec.x
+                val ty = uiTouchVec.y
+
+                val btnYMin = h / 2f - 95f
+                val btnYMax = h / 2f - 35f
+
+                if (tx in (w / 2f - 270f)..(w / 2f - 10f) && ty in btnYMin..btnYMax) {
+                    touchProceed = true
+                } else if (tx in (w / 2f + 10f)..(w / 2f + 270f) && ty in btnYMin..btnYMax) {
+                    touchRetry = true
+                } else if (ty < h / 2f - 105f) {
+                    touchMenu = true
+                } else {
+                    touchProceed = true
+                }
+            }
+
+            if (touchMenu) {
+                AudioManager.playDodge()
+                if (game != null) game.setScreen(MainMenuScreen(game))
+                return
+            }
+
+            val proceedTriggered = keyProceed || touchProceed
+            val retryTriggered = keyRestart || touchRetry
 
             if (gameMode == GameMode.STORY) {
                 if (currentFloorNumber < 3) {
                     if (proceedTriggered) {
                         loadFloor(currentFloorNumber + 1)
-                    } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+                    } else if (retryTriggered) {
                         loadFloor(currentFloorNumber)
                     }
                 } else {
@@ -1035,7 +1101,7 @@ class PlayScreen(
                     if (proceedTriggered) {
                         gameMode = GameMode.ENDLESS
                         loadFloor(4)
-                    } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+                    } else if (retryTriggered) {
                         loadFloor(1)
                     }
                 }
@@ -1043,7 +1109,7 @@ class PlayScreen(
                 // Endless Mode: Lanjut ke Lantai Berikutnya
                 if (proceedTriggered) {
                     loadFloor(currentFloorNumber + 1)
-                } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+                } else if (retryTriggered) {
                     loadFloor(currentFloorNumber)
                 }
             }
@@ -1201,6 +1267,59 @@ class PlayScreen(
             shapeRenderer.rectLine(w / 2f - 240f, h - 72f, w / 2f + 240f, h - 72f, 2f)
         }
 
+        // Overlays Game Over / Stage Clear Buttons (ShapeRenderer)
+        if (gameStatus == GameStatus.GAME_OVER) {
+            shapeRenderer.color = Color(0f, 0f, 0f, 0.75f)
+            shapeRenderer.rect(0f, 0f, w, h)
+
+            val cardW = 560f
+            val cardH = 220f
+            val cardX = w / 2f - cardW / 2f
+            val cardY = h / 2f - cardH / 2f
+            shapeRenderer.color = Color(0.08f, 0.10f, 0.16f, 0.95f)
+            shapeRenderer.rect(cardX, cardY, cardW, cardH)
+            shapeRenderer.color = Color(0.9f, 0.2f, 0.25f, 0.92f)
+            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
+
+            // Tombol 1: Respawn (Emerald)
+            shapeRenderer.color = Color(0.14f, 0.38f, 0.22f, 0.95f)
+            shapeRenderer.rect(w / 2f - 250f, h / 2f - 75f, 230f, 50f)
+            shapeRenderer.color = Color(0.25f, 0.9f, 0.45f, 0.95f)
+            shapeRenderer.rectLine(w / 2f - 250f, h / 2f - 25f, w / 2f - 20f, h / 2f - 25f, 2.5f)
+
+            // Tombol 2: Menu Utama (Dark Slate)
+            shapeRenderer.color = Color(0.14f, 0.18f, 0.26f, 0.95f)
+            shapeRenderer.rect(w / 2f + 20f, h / 2f - 75f, 230f, 50f)
+            shapeRenderer.color = Color(0.7f, 0.78f, 0.9f, 0.9f)
+            shapeRenderer.rectLine(w / 2f + 20f, h / 2f - 25f, w / 2f + 250f, h / 2f - 25f, 2.5f)
+        }
+
+        if (gameStatus == GameStatus.STAGE_CLEAR) {
+            shapeRenderer.color = Color(0f, 0f, 0f, 0.70f)
+            shapeRenderer.rect(0f, 0f, w, h)
+
+            val cardW = 600f
+            val cardH = 240f
+            val cardX = w / 2f - cardW / 2f
+            val cardY = h / 2f - cardH / 2f
+            shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.96f)
+            shapeRenderer.rect(cardX, cardY, cardW, cardH)
+            shapeRenderer.color = Color(0.95f, 0.75f, 0.25f, 0.95f)
+            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
+
+            // Tombol 1: Lanjut Menara (Glowing Emerald / Gold)
+            shapeRenderer.color = Color(0.16f, 0.36f, 0.20f, 0.95f)
+            shapeRenderer.rect(w / 2f - 270f, h / 2f - 85f, 250f, 52f)
+            shapeRenderer.color = Color(0.3f, 0.95f, 0.45f, 0.95f)
+            shapeRenderer.rectLine(w / 2f - 270f, h / 2f - 33f, w / 2f - 20f, h / 2f - 33f, 2.5f)
+
+            // Tombol 2: Main Ulang (Cyan Slate)
+            shapeRenderer.color = Color(0.14f, 0.20f, 0.30f, 0.95f)
+            shapeRenderer.rect(w / 2f + 20f, h / 2f - 85f, 250f, 52f)
+            shapeRenderer.color = Color(0.35f, 0.85f, 1f, 0.9f)
+            shapeRenderer.rectLine(w / 2f + 20f, h / 2f - 33f, w / 2f + 270f, h / 2f - 33f, 2.5f)
+        }
+
         shapeRenderer.end()
 
         // 2. Render Teks HUD Informasi
@@ -1313,38 +1432,45 @@ class PlayScreen(
 
         // Overlays Game Over / Victory
         if (gameStatus == GameStatus.GAME_OVER) {
-            headF.color = Color.RED
-            headF.draw(batch, "=== GAME OVER ===", w / 2f - 120f, h / 2f + 40f)
-            regF.color = Color.WHITE
-            regF.draw(batch, "Tekan [R] untuk Respawn di Checkpoint", w / 2f - 160f, h / 2f)
+            headF.color = Color(1f, 0.25f, 0.25f, 1f)
+            headF.draw(batch, "=== GAME OVER ===", w / 2f - 110f, h / 2f + 65f)
+            regF.color = Color(0.9f, 0.9f, 0.95f, 1f)
+            regF.draw(batch, "Pahlawan gugur! Sentuh tombol di bawah atau ketuk layar:", w / 2f - 230f, h / 2f + 20f)
+
+            // Tombol Teks
+            headF.color = Color.WHITE
+            headF.draw(batch, "RESPAWN (R)", w / 2f - 200f, h / 2f - 42f)
+            headF.color = Color(0.9f, 0.95f, 1f, 1f)
+            headF.draw(batch, "MENU UTAMA", w / 2f + 70f, h / 2f - 42f)
         }
 
         if (gameStatus == GameStatus.STAGE_CLEAR) {
-            if (gameMode == GameMode.STORY) {
-                if (currentFloorNumber < 3) {
-                    headF.color = Color.GOLD
-                    headF.draw(batch, "★ ${currentFloor.floorName.uppercase()} SELESAI! ★", w / 2f - 180f, h / 2f + 45f)
-                    regF.color = Color.WHITE
-                    regF.draw(batch, "Tekan [SPACE] untuk Naik ke Lantai ${currentFloorNumber + 1}", w / 2f - 170f, h / 2f + 12f)
-                    regF.color = Color.CYAN
-                    regF.draw(batch, "Tekan [R] untuk Main Ulang Lantai Ini", w / 2f - 140f, h / 2f - 18f)
-                } else {
-                    headF.color = Color.GOLD
-                    headF.draw(batch, "★ CONGRATULATIONS! SELURUH MENARA TELAH DITAKLUKKAN! ★", w / 2f - 290f, h / 2f + 45f)
-                    regF.color = Color.WHITE
-                    regF.draw(batch, "Tower Guardian Berhasil Ditumbangkan! Player Lv.${player.stats.level} | Gold: ${player.stats.gold} G", w / 2f - 240f, h / 2f + 12f)
-                    regF.color = Color.YELLOW
-                    regF.draw(batch, "Tekan [SPACE] untuk Memasuki MODE MENARA TANPA BATAS (ENDLESS SPIRE)!", w / 2f - 280f, h / 2f - 18f)
-                }
+            val isStory = gameMode == GameMode.STORY
+            headF.color = Color.GOLD
+            val bannerTitle = if (isStory) {
+                if (currentFloorNumber < 3) "★ ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! ★"
             } else {
-                headF.color = Color.GOLD
-                headF.draw(batch, "★ ENDLESS FLOOR $currentFloorNumber CLEARED! ★", w / 2f - 190f, h / 2f + 45f)
-                regF.color = Color.WHITE
-                val talentPtText = if (currentFloorNumber % 2 == 0) " | +1 TALENT POINT ACQUIRED!" else ""
-                regF.draw(batch, "Musuh Tereliminasi: $endlessEnemiesKilled | Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText", w / 2f - 230f, h / 2f + 12f)
-                regF.color = Color.YELLOW
-                regF.draw(batch, "Tekan [SPACE] / [A] untuk Mendaki ke Lantai ${currentFloorNumber + 1}", w / 2f - 210f, h / 2f - 18f)
+                "★ ENDLESS FLOOR $currentFloorNumber CLEARED! ★"
             }
+            headF.draw(batch, bannerTitle, w / 2f - 180f, h / 2f + 75f)
+
+            regF.color = Color.WHITE
+            val subText = if (isStory) {
+                if (currentFloorNumber < 3) "Musuh telah dibersihkan! Bersiap untuk lantai berikutnya."
+                else "Guardian tumbang! Lv.${player.stats.level} | Gold: ${player.stats.gold} G"
+            } else {
+                val talentPtText = if (currentFloorNumber % 2 == 0) " | +1 TALENT POINT!" else ""
+                "Kills: $endlessEnemiesKilled | Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText"
+            }
+            regF.draw(batch, subText, w / 2f - 220f, h / 2f + 25f)
+
+            val nextFloorNumber = if (isStory && currentFloorNumber >= 3) 4 else currentFloorNumber + 1
+            val nextFloorLabel = if (isStory && currentFloorNumber >= 3) "ENDLESS SPIRE" else "LANTAI $nextFloorNumber"
+
+            headF.color = Color.WHITE
+            headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 240f, h / 2f - 52f)
+            headF.color = Color(0.85f, 0.95f, 1f, 1f)
+            headF.draw(batch, "MAIN ULANG (R)", w / 2f + 55f, h / 2f - 52f)
         }
 
         batch.end()
@@ -1383,7 +1509,7 @@ class PlayScreen(
 
             for (i in pauseMenuItems.indices) {
                 val itemY = startY - (i * itemH)
-                if (touchX in menuX..(menuX + menuW) && touchY in (itemY - 10f)..(itemY + itemH - 10f)) {
+                if (touchX in (menuX - 35f)..(menuX + menuW + 35f) && touchY in (itemY - 14f)..(itemY + itemH - 4f)) {
                     pauseSelectedIndex = i
                     executePauseSelection()
                     break

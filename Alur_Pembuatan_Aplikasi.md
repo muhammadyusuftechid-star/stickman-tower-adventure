@@ -496,6 +496,19 @@ flowchart LR
   - [x] *Mage:* Archmage (Arcane Conduit, Overload Wave, Mana Shield) vs Spellblade (Elemental Infusion, Flame Cleave, Arcane Execute).
   - [x] Antarmuka interaktif `TalentTreeScreen.kt` dengan alokasi poin, reset gratis (respec), dan sinkronisasi save file.
 
+#### Modul 13.3: Mobile Touch Ergonomics & Responsiveness Overhaul
+- **Task 13.3.1: Virtual Controller Robustness & Anti-Disappearing Fix**
+  - [x] Perbaiki bug kontrol sentuh yang hilang di HP Android akibat noise sensor accelerometer/gyroscope yang salah dideteksi sebagai controller fisik (`GamepadInput.kt`).
+  - [x] Tambahkan toleransi radius sentuhan ekstra (+26-32%) pada seluruh tombol aksi (`btnAttack`, `btnJump`, `btnDodge`, `btnSkill`, `btnUltimate`).
+  - [x] Implementasikan zona slider jempol D-pad kontinu tanpa dead zone di sudut kiri bawah layar.
+- **Task 13.3.2: On-Screen Status Buttons (Game Over & Stage Clear)**
+  - [x] Tambahkan tombol visual taktil di layar Game Over (`[ RESPAWN DI CHECKPOINT ]` & `[ MENU UTAMA ]`), plus ketuk layar mana saja untuk respawn instan tanpa keyboard fisik.
+  - [x] Tambahkan tombol visual di layar Stage Clear (`[ LANJUT LANTAI BERIKUTNYA ]` & `[ MAIN ULANG ]`).
+  - [x] Perluas zona sentuh tombol Pause pojok kanan atas agar terhindar dari pemotongan notch/kamera HP.
+- **Task 13.3.3: Main Menu 2-Kolom & Screen Touch Targets**
+  - [x] Restrukturisasi Menu Utama menjadi 2 kolom rapi dan luas dengan tinggi tombol 52px (lebih besar 53%) dan padding sentuhan lebar.
+  - [x] Perluas area sentuh pada `CharacterSelectScreen` (ketuk podium/altar ganti karakter), `TalentTreeScreen` (otomatis aktifkan sub-class yang sesuai arketipe saat dipilih), dan `BlacksmithScreen`.
+
 ---
 
 ### FASE 14: Layanan Google Play Games & Kesiapan Publikasi Play Store
