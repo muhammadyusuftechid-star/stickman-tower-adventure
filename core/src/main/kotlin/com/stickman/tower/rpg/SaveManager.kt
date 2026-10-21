@@ -323,6 +323,8 @@ object SaveManager {
             prefs.putString("unlockedAchievements", data.unlockedAchievements.joinToString(","))
             prefs.putString("unlockedTalents", data.unlockedTalents.joinToString(","))
             prefs.putString("unlockedLoreTablets", data.unlockedLoreTablets.joinToString(","))
+            prefs.putString("activeQuestId", data.activeQuestId)
+            prefs.putString("completedQuests", data.completedQuests.joinToString(","))
             prefs.putInteger("weaponAtkLevel", data.weaponAtkLevel)
             prefs.putInteger("weaponCritLevel", data.weaponCritLevel)
             prefs.putInteger("weaponSpdLevel", data.weaponSpdLevel)
@@ -356,6 +358,9 @@ object SaveManager {
                 val loreStr = prefs.getString("unlockedLoreTablets", "")
                 val loreList = ArrayList(loreStr.split(",").filter { it.isNotBlank() })
 
+                val questStr = prefs.getString("completedQuests", "")
+                val completedList = ArrayList(questStr.split(",").filter { it.isNotBlank() })
+
                 return SaveData(
                     playerLevel = prefs.getInteger("playerLevel", 1),
                     currentExp = prefs.getInteger("currentExp", 0),
@@ -367,6 +372,8 @@ object SaveManager {
                     unlockedAchievements = achvList,
                     unlockedTalents = talentList,
                     unlockedLoreTablets = loreList,
+                    activeQuestId = prefs.getString("activeQuestId", "MQ_1"),
+                    completedQuests = completedList,
                     selectedArchetype = prefs.getString("selectedArchetype", "BALANCED"),
                     selectedSubClass = prefs.getString("selectedSubClass", "BERSERKER"),
                     weaponAtkLevel = prefs.getInteger("weaponAtkLevel", 0),
@@ -586,6 +593,20 @@ object SaveManager {
 
         val loreSet = (local.unlockedLoreTablets + remote.unlockedLoreTablets).distinct()
         merged.unlockedLoreTablets = ArrayList(loreSet)
+
+        merged.activeQuestId = if (local.lastSavedTimestamp >= remote.lastSavedTimestamp) local.activeQuestId else remote.activeQuestId
+        val questSet = (local.completedQuests + remote.completedQuests).distinct()
+        merged.completedQuests = ArrayList(questSet)
+
+        val combinedProgress = HashMap<String, Int>()
+        for ((k, v) in local.questProgressMap) {
+            combinedProgress[k] = v
+        }
+        for ((k, v) in remote.questProgressMap) {
+            val curr = combinedProgress[k] ?: 0
+            combinedProgress[k] = maxOf(curr, v)
+        }
+        merged.questProgressMap = combinedProgress
 
         merged.sanitize()
         merged.updateChecksum()

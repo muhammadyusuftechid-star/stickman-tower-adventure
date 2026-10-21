@@ -18,6 +18,9 @@ data class SaveData(
     var unlockedAchievements: ArrayList<String> = arrayListOf(),
     var unlockedTalents: ArrayList<String> = arrayListOf(),
     var unlockedLoreTablets: ArrayList<String> = arrayListOf(),
+    var activeQuestId: String = "MQ_1",
+    var completedQuests: ArrayList<String> = arrayListOf(),
+    var questProgressMap: HashMap<String, Int> = hashMapOf(),
     var selectedArchetype: String = "BALANCED",
     var selectedSubClass: String = "BERSERKER",
     var weaponAtkLevel: Int = 0,
@@ -75,6 +78,13 @@ data class SaveData(
         unlockedTalents.sorted().forEach { mixString(it) }
         unlockedLoreTablets.sorted().forEach { mixString(it) }
 
+        mixString(activeQuestId)
+        completedQuests.sorted().forEach { mixString(it) }
+        questProgressMap.keys.sorted().forEach { key ->
+            mixString(key)
+            mix(questProgressMap[key]?.toLong() ?: 0L)
+        }
+
         return hash and 0x7FFFFFFFFFFFFFFFL // Bilangan bulat positif 63-bit
     }
 
@@ -114,6 +124,10 @@ data class SaveData(
         playTimeSeconds = playTimeSeconds.coerceAtLeast(0L)
         saveSlotId = saveSlotId.coerceIn(1, 10)
         saveVersion = saveVersion.coerceAtLeast(1)
+
+        if (activeQuestId.isBlank()) {
+            activeQuestId = "MQ_1"
+        }
 
         if (unlockedCharacters.isEmpty()) {
             unlockedCharacters.add("STICKMAN_SWORD")

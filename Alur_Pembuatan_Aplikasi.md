@@ -585,7 +585,7 @@ flowchart TD
   - [x] Notifikasi banner melayang (floating toast) dengan partikel emas dan audio chime saat trofi terbuka di tengah pertarungan [PlayScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/PlayScreen.kt).
   - [x] Layar interaktif galeri trofi [AchievementScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/AchievementScreen.kt) dengan kartu status dan persentase progress penyelesaian.
 - **Task 15.1.2: Leaderboard & Papan Peringkat**
-  - [ ] Papan peringkat rekor lokal & global: "Highest Floor Cleared" & "Speedrun Clear Time".
+  - [x] Papan peringkat rekor lokal: "Highest Floor Cleared" (Endless) & "Speedrun Clear Time" (Campaign) dengan [LeaderboardEntry.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/leaderboard/LeaderboardEntry.kt), [LeaderboardManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/leaderboard/LeaderboardManager.kt), dan [LeaderboardScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/LeaderboardScreen.kt).
 
 #### Modul 15.2: Release Packaging (.aab) & Store Assets
 - **Task 15.2.1: Android App Bundle (.aab)**
@@ -603,8 +603,10 @@ flowchart TD
   - [x] Siklus status: `LOCKED -> AVAILABLE -> ACTIVE -> OBJECTIVES_MET -> COMPLETED / FAILED`.
   - [x] Integrasi pelacakan status quest di `SaveData.kt` V2 schema dengan salted 64-bit FNV-1a checksum.
 - **Task 16.1.2: Minimalist HUD Quest Compass Tracker**
-  - [x] Desain widget minimalis semi-transparan ($220 \times 60$ dp) di sudut kanan atas layar (di bawah bar HP/Mana).
+  - [x] Desain widget minimalis semi-transparan ($220 \times 60$ dp) di sudut kanan atas layar (di bawah bar HP/Mana) [QuestCompassWidget.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/quest/QuestCompassWidget.kt).
   - [x] Penampil ikon kategori (`◈` Main, `◇` Side, `⚔` Bounty), progres objektif bertingkat, dan efek kilau emas partikel saat selesai.
+- **Task 16.1.3: Layar Interaktif Jurnal Misi (Quest Journal Screen)**
+  - [x] Layar interaktif jurnal misi [QuestLogScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/QuestLogScreen.kt) dengan tab Cerita Utama, Warisan Kuno, Misi Selesai, dan penanganan klaim hadiah (Gold, EXP, Relik, Talent Point).
 
 #### Modul 16.2: Implementasi 7 Misi Utama Kampanye Cerita (Main Quest Odyssey)
 - **Task 16.2.1: Main Quest 1 s/d 4 (Act I & II)**

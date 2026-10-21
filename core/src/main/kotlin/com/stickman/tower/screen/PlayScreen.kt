@@ -31,6 +31,11 @@ import com.stickman.tower.input.GameInput
 import com.stickman.tower.input.KeyboardInput
 import com.stickman.tower.input.TouchSettingsManager
 import com.stickman.tower.input.VirtualController
+import com.stickman.tower.leaderboard.LeaderboardEntry
+import com.stickman.tower.leaderboard.LeaderboardManager
+import com.stickman.tower.quest.ObjectiveType
+import com.stickman.tower.quest.QuestCompassWidget
+import com.stickman.tower.quest.QuestManager
 import com.stickman.tower.relic.RelicManager
 import com.stickman.tower.relic.RelicType
 import com.stickman.tower.rpg.CharacterStats
@@ -185,6 +190,9 @@ class PlayScreen(
     private var activeAchievementBanner: com.stickman.tower.achievement.Achievement? = null
     private var achievementBannerTimer: Float = 0f
 
+    // Sistem Quest & The Heritage Saga (Fase 16)
+    private val questCompass = QuestCompassWidget()
+
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
@@ -194,6 +202,7 @@ class PlayScreen(
         val freshSave = SaveManager.load()
         stats.loadFromSaveData(freshSave)
         com.stickman.tower.achievement.AchievementManager.loadFromSave(freshSave)
+        QuestManager.initFromSave(freshSave)
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
             uiViewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
         }
@@ -353,6 +362,7 @@ class PlayScreen(
         }
         saveData.totalEnemiesDefeated += endlessEnemiesKilled
         saveData.selectedArchetype = archetype.name
+        QuestManager.saveTo(saveData)
         val updatedSave = player.stats.applyToSaveData(saveData)
         SaveManager.save(updatedSave)
         saveNotificationText = "Progress Tersimpan ($reason)"
@@ -450,7 +460,20 @@ class PlayScreen(
                     pauseSelectedIndex = 0
                     if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
                     inputCooldown = 0.20f
+                } else if (gameStatus == GameStatus.PLAYING && !isPaused && gameMode == GameMode.STORY && questCompass.contains(uiTouchVec.x, uiTouchVec.y)) {
+                    AudioManager.playSlashLight()
+                    (game as? StickmanGame)?.preserveScreen(this)
+                    game?.setScreen(QuestLogScreen(game, player.stats, this))
+                    return
                 }
+            }
+
+            // Pintasan Keyboard [J] untuk membuka Quest Log
+            if (Gdx.input.isKeyJustPressed(Keys.J) && gameStatus == GameStatus.PLAYING && !isPaused) {
+                AudioManager.playSlashLight()
+                (game as? StickmanGame)?.preserveScreen(this)
+                game?.setScreen(QuestLogScreen(game, player.stats, this))
+                return
             }
         }
 
@@ -667,6 +690,7 @@ class PlayScreen(
                     if (Gdx.input.isKeyJustPressed(Keys.E)) {
                         activeLoreTablet = tablet
                         tablet.isRead = true
+                        QuestManager.notifyEvent(ObjectiveType.READ_TABLET, tablet.tabletId)
                         if (!saveData.unlockedLoreTablets.contains(tablet.tabletId)) {
                             saveData.unlockedLoreTablets.add(tablet.tabletId)
                             SaveManager.saveAsync(saveData)
@@ -728,6 +752,7 @@ class PlayScreen(
                     particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 35, color = Color.GOLD)
                     grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
                     com.stickman.tower.achievement.AchievementManager.onEnemyKilled(true, currentFloorNumber, boss.name, saveData = saveData)
+                    QuestManager.notifyEvent(ObjectiveType.DEFEAT_BOSS, boss.type.name)
                     floatingTexts.add(
                         FloatingText("★ BOSS DEFEATED! ★", boss.position.x, boss.position.y + 3.2f, Color.GOLD, duration = 3.5f)
                     )
@@ -1149,6 +1174,7 @@ class PlayScreen(
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
                         com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
+                        QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
                         HapticManager.vibrateHeavy()
                         input.gamepad.vibrate(200, 1.0f)
                         cameraManager.shake(0.5f, 0.25f)
@@ -1209,6 +1235,7 @@ class PlayScreen(
                     hitStopManager.trigger(0.08f)
                     AudioManager.playParry()
                     com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
+                    QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
                     HapticManager.vibrateHeavy()
                     input.gamepad.vibrate(250, 1.0f)
                     cameraManager.shake(0.8f, 0.35f)
@@ -1360,6 +1387,17 @@ class PlayScreen(
             floatingTexts.add(
                 FloatingText("DEFEATED!", player.position.x, player.position.y + 2.2f, Color.RED, duration = 2.0f)
             )
+            if (gameMode == GameMode.ENDLESS) {
+                LeaderboardManager.addEndlessRecord(
+                    LeaderboardEntry(
+                        playerName = "Hero",
+                        characterArchetype = archetype.name,
+                        floorReached = currentFloorNumber,
+                        score = (player.stats.currentExp * 10L + player.stats.gold * 5L),
+                        clearTimeSeconds = hudAnimTime.toLong()
+                    )
+                )
+            }
         }
 
         val isFloorCleared = if (currentFloor.isSafeZone) {
@@ -1383,9 +1421,20 @@ class PlayScreen(
                     val goldReward = if (currentFloor.isBossFloor) (currentFloor.boss?.goldReward ?: 150) else (60 + currentFloorNumber * 10)
                     grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
 
+                    QuestManager.notifyEvent(ObjectiveType.CLEAR_FLOOR, "FLOOR_$currentFloorNumber")
+
                     if (currentFloorNumber == 10) {
                         triggerSave("Puncak Menara Ditaklukkan! (Story Selesai)", highestFloor = 11)
                         saveData.highestEndlessFloor = kotlin.math.max(saveData.highestEndlessFloor, 11)
+                        LeaderboardManager.addSpeedrunRecord(
+                            LeaderboardEntry(
+                                playerName = "Hero",
+                                characterArchetype = archetype.name,
+                                floorReached = 10,
+                                score = (player.stats.currentExp * 15L + player.stats.gold * 10L),
+                                clearTimeSeconds = hudAnimTime.toLong()
+                            )
+                        )
                     } else {
                         triggerSave("Lantai $currentFloorNumber Selesai", highestFloor = nextFloorNum)
                     }
@@ -1411,6 +1460,15 @@ class PlayScreen(
                         )
                     }
                     com.stickman.tower.achievement.AchievementManager.onEndlessFloorReached(currentFloorNumber, saveData)
+                    LeaderboardManager.addEndlessRecord(
+                        LeaderboardEntry(
+                            playerName = "Hero",
+                            characterArchetype = archetype.name,
+                            floorReached = currentFloorNumber,
+                            score = (player.stats.currentExp * 10L + player.stats.gold * 5L),
+                            clearTimeSeconds = hudAnimTime.toLong()
+                        )
+                    )
                     triggerSave("Endless Lantai $currentFloorNumber Selesai", highestFloor = currentFloorNumber + 1)
                 }
             }
@@ -1776,6 +1834,10 @@ class PlayScreen(
         renderActBannerShapes()
         renderAchievementBannerShapes()
 
+        if (gameStatus == GameStatus.PLAYING && gameMode == GameMode.STORY && !isPaused) {
+            questCompass.renderShapes(shapeRenderer, hudAnimTime)
+        }
+
         shapeRenderer.end()
     }
 
@@ -1866,6 +1928,10 @@ class PlayScreen(
         regF.color = Color.WHITE
         regF.draw(batch, "PAUSE", w - 88f, h - 23f)
 
+        if (gameStatus == GameStatus.PLAYING && gameMode == GameMode.STORY && !isPaused) {
+            questCompass.renderText(batch, headF, regF, smallF)
+        }
+
         // Teks Bar Boss
         if (boss != null && !boss.health.isDead) {
             if (boss.isPhase2) regF.setColor(1f, 0.65f, 0.35f, 1f) else regF.color = Color.WHITE
@@ -1954,6 +2020,7 @@ class PlayScreen(
                     if (uiTouchVec.x in px..(px + pw) && uiTouchVec.y in py..(py + ph)) {
                         activeLoreTablet = tablet
                         tablet.isRead = true
+                        QuestManager.notifyEvent(ObjectiveType.READ_TABLET, tablet.tabletId)
                         if (!saveData.unlockedLoreTablets.contains(tablet.tabletId)) {
                             saveData.unlockedLoreTablets.add(tablet.tabletId)
                             SaveManager.saveAsync(saveData)
