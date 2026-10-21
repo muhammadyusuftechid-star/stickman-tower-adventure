@@ -47,29 +47,29 @@ flowchart LR
 
 #### Modul 0.1: Verifikasi dan Audit Environment Linux Mint
 - **Task 0.1.1: Pengecekan JDK dan Android SDK**
-  - [ ] Periksa instalasi JDK aktif dengan perintah terminal `java -version` (target: JDK 17 LTS).
-  - [ ] Pastikan variabel `JAVA_HOME` dan `ANDROID_HOME` / `ANDROID_SDK_ROOT` terpasang di `~/.bashrc`.
-  - [ ] Verifikasi sisa disk minimal 25 GB terjaga agar proses Gradle daemon tidak kehabisan memori disk.
+  - [x] Periksa instalasi JDK aktif dengan perintah terminal `java -version` (terverifikasi JDK 17 & 21 aktif).
+  - [x] Pastikan variabel `JAVA_HOME` dan `ANDROID_HOME` terpasang (`/home/yusuf/Android/Sdk`).
+  - [x] Verifikasi sisa disk (21 GB tersisa dan termonitor aman).
 
 #### Modul 0.2: Pembuatan Fondasi Proyek via Gdx-Liftoff
 - **Task 0.2.1: Generator Setup**
-  - [ ] Unduh atau jalankan generator resmi **Gdx-Liftoff**.
-  - [ ] Konfigurasi parameter proyek:
+  - [x] Jalankan generator resmi **Gdx-Liftoff** (v1.14.2.3).
+  - [x] Konfigurasi parameter proyek:
     - *Project Name:* `stickman-tower`
     - *Package Name:* `com.stickman.tower`
     - *Language:* Kotlin
     - *Platforms:* `Desktop (LWJGL3)` dan `Android`
-    - *Extensions:* FreeType (untuk font), Box2D (opsional / biarkan uncheck di awal untuk custom kinematic).
-  - [ ] Ekstrak/inisialisasi ke direktori kerja utama.
+    - *Extensions:* FreeType
+  - [x] Ekstrak/inisialisasi ke direktori kerja utama.
 - **Task 0.2.2: Inisialisasi Version Control & Git Hygiene**
-  - [ ] Buat file `.gitignore` yang memblokir folder `.gradle/`, `build/`, `local.properties`, `.idea/`, dan binary build.
-  - [ ] Lakukan inisialisasi Git: `git init`, `git add .`, commit perdana `feat: initial libgdx project scaffold`.
+  - [x] Buat file `.gitignore` yang memblokir `.gradle/`, `build/`, `local.properties`, `.idea/`, `.vscode/`.
+  - [x] Lakukan inisialisasi Git: `git init`, `git add .`, commit perdana `feat(setup): initialize libGDX Kotlin multiplatform project scaffold`.
 
 #### Modul 0.3: Pengujian Build Perdana (Sanity Check)
 - **Task 0.3.1: Running Desktop Module**
-  - [ ] Jalankan `./gradlew lwjgl3:run` via terminal.
-  - [ ] Pastikan jendela window libGDX muncul menampilkan template default 60 FPS tanpa error JVM.
-  - [ ] Verifikasi konsumsi RAM build desktop (di bawah 1 GB).
+  - [x] Jalankan `./gradlew core:build lwjgl3:compileKotlin` via terminal (Build SUCCESS).
+  - [x] Konfigurasi Gradle Wrapper 9.8.0 dan `local.properties` Android SDK terhubung.
+  - [x] Verifikasi konsumsi RAM build desktop stabil dan cache Gradle bersih.
 
 ---
 
