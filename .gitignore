@@ -167,3 +167,4 @@ Thumbs.db
 ## Local Save Data
 *save*.json
 .sfx_cache/
+*.apk
