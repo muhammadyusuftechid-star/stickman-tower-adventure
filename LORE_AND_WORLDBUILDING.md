@@ -573,5 +573,246 @@ Ketika seorang pejuang siluet gugur dan tidak sanggup kembali ke checkpoint, tub
 > *"Terbanglah bersama angin astral, saudaraku. Debumu kini bebas dari gravitasi tanah. Di puncak menara, warnamu kan bersinar kembali."*
 
 ---
-*Dokumen ini merupakan kanon resmi lore, narasi cerita utama, ensiklopedia monster, dan worldbuilding komprehensif untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+
+## 👹 BAGIAN 12: BESTIARIUM KANONIKAL & JURNAL EKOLOGI TINTA (THE INKED BESTIARY)
+
+*Diringkas dari "Catatan Lapangan Ekspedisi Sayap Patah" oleh Cendekiawan Aurelius dan Kapten Valerius dari Legiun Pertama Aethelgard.*
+
+```
+               [KORUPSI TINTA PURBA / PRIMORDIAL DROSS]
+                                  │
+         ┌────────────────────────┼────────────────────────┐
+         ▼                        ▼                        ▼
+  [CRIMSON GRUNT]        [OBSIDIAN KNIGHT]        [AMETHYST SNIPER]
+  Naluri Amuk Murni       Pertahanan Monolit       Kaca Beracun Jarak Jauh
+  Serangan Cakar Liar     Perisai Pemantul         Gerilya Kiting & Miasma
+```
+
+### 12.1 Crimson Grunt (*Prajurit Tinta Buas*)
+* **Klasifikasi:** *Inked Abomination / Terdistorsi Akut*
+* **Habitat:** Lantai 1 s/d 3 (Benteng Bawah & Jurang Duri)
+* **Karakteristik Fisik:** Sosok siluet dengan garis tubuh berombak tak beraturan, mata menyala merah crimson menyengat. Tangan kanannya bermutasi menjadi cakar tinta bergerigi setajam obsidian.
+* **Catatan Lapangan Cendekiawan Aurelius:**
+  > *"Mereka adalah saudara-saudara kita yang kehilangan kewarasan saat The Great Inking melanda. Ketika otak biologis mereka tertekan menjadi garis hitam, ingatan tentang keluarga dan martabat manusia terhapus, menyisakan satu-satunya naluri binatang: lapar akan kinetika. Mereka berlari membabi buta tanpa memperhitungkan keselamatan diri. Satu tebasan pembuka yang tepat akan memutus sumbu gravitasi mereka dan membubarkan tubuh mereka menjadi kabut hitam."*
+* **Nasihat Tempur Kapten Valerius:**
+  > *"Jangan menangkis cakar mereka terlalu awal; tunggu hingga siluet mereka condong ke depan dalam animasi ayunan. Satu Perfect Parry akan membanting mereka ke tanah selama 1.5 detik."*
+
+### 12.2 Obsidian Shield Knight (*Ksatria Perisai Batu Hitam*)
+* **Klasifikasi:** *Garrison Automaton / Sisa Tentara Penjaga*
+* **Habitat:** Lantai 4, 7, dan Koridor Pertahanan Elit
+* **Karakteristik Fisik:** Siluet jangkung berpostur tegap mengenakan lempengan perisai obsidian setinggi 2 meter di tangan kirinya. Menggenggam gada berduri pendek di tangan kanan.
+* **Catatan Lapangan Cendekiawan Aurelius:**
+  > *"Ksatria-ksatria ini tidak kehilangan akal budi karena panik, melainkan karena sumpah militer abadi. Saat para dewa menumpahkan tinta, Legiun Obsidian memilih untuk mengunci perisai mereka dan bersumpah menjaga lorong menara selamanya. Perisai mereka memadatkan partikel tinta menjadi batuan sekeras intan—baja tertajam sekalipun akan memantul jika dihantamkan dari depan."*
+* **Nasihat Tempur Kapten Valerius:**
+  > *"Menyerang perisai mereka dari depan adalah tindakan bunuh diri. Lompatlah melompati kepala mereka (cross-up), atau gunakan tebasan ketiga dari kombo pedangmu untuk menghancurkan kuda-kuda perisai mereka (Guard Break), lalu serang punggung mereka dengan Backstab fatal!"*
+
+### 12.3 Amethyst Sniper (*Pemanah Kaca Ungu*)
+* **Klasifikasi:** *Alchemical Wraith / Penenun Kristal Racun*
+* **Habitat:** Lantai 2, 4, 5, dan 7 (Platform Tinggi & Langit-langit Menara)
+* **Karakteristik Fisik:** Siluet ramping lincah berselubungkan kabut keunguan. Membawa busur panjang yang dirangkai dari pecahan kaca kristal Amethyst kuno.
+* **Catatan Lapangan Cendekiawan Aurelius:**
+  > *"Sebelum kataklisme, para sarjana di The Sunken Archives mencoba menciptakan vaksin penawar tinta dari ekstrak kristal ungu. Eksperimen itu gagal total; kristal tersebut justru mengkristalkan paru-paru mereka. Kini, mereka tidak bisa bernafas tanpa kabut racun Miasma. Mereka memanjat ke platform tertinggi dan melepaskan panah racun dari jarak jauh untuk mencegah siapapun mendekati arsip rahasia mereka."*
+* **Nasihat Tempur Kapten Valerius:**
+  > *"Mereka sangat pengecut. Begitu kau mendekat dalam jarak dua langkah, mereka akan melompat mundur (kiting). Kunci pergerakan mereka dengan Gale Crescent atau lemparan Shuriken, lalu tutup jarak menggunakan Dash I-Frames untuk memenggal busur mereka."*
+
+### 12.4 Shadow Phantom / Flying Wraith (*Hantu Cakar Astral*)
+* **Klasifikasi:** *Astral Anomaly / Jiwa Mengambang*
+* **Habitat:** Lantai 7 s/d 9 (Tebing Angkasa & Kuil Gerhana)
+* **Karakteristik Fisik:** Siluet tanpa kaki berwujud bayangan melayang dengan sepasang sayap tinta compang-camping dan sepasang cakar melengkung tajam.
+* **Catatan Lapangan Cendekiawan Aurelius:**
+  > *"Ketika menara retak dan menembus ruang hampa astral, gravitasi melemah. Jiwa-jiwa pendaki yang tewas di jurang kosmis tidak pernah menyentuh tanah, sehingga tubuh mereka tidak pernah terlarut sepenuhnya. Mereka terombang-ambing di antara angin bintang, membenci siapapun yang masih memiliki kaki untuk berpijak."*
+* **Nasihat Tempur Kapten Valerius:**
+  > *"Gunakan lompatan tinggi di zona Low Gravity lantai 7. Tebas mereka di udara menggunakan teknik Rising Dragon atau kombo aerial juggle sebelum mereka menukik ke bawah."*
+
+---
+
+## 💍 BAGIAN 13: ANTOLOGI SASTRA RELIK KUNO & INSKRIPSI EPIGRAF (RELIC EPIGRAPHS)
+
+*Teks epigraf puitis yang terpahat pada kotak relik kuno peninggalan era sebelum The Great Inking.*
+
+```
+╔══════════════════════════════════════════════════════════════════════════════════╗
+║                    EMPAT PUSAKA AGUNG PENENTANG KANVAS                           ║
+║                                                                                  ║
+║   [VAMPIRIC FANG]         [THUNDER CHARM]        [WINGS OF HERMES]  [CHRONOS]   ║
+║   Darah Sang Pangeran    Pijar Halilintar       Keringanan Hampa    Keping Detik ║
+║   Lifesteal +15%         Petir Rantai 25 DMG    Kecepatan Gerak     Waktu Lambat ║
+╚══════════════════════════════════════════════════════════════════════════════════╝
+```
+
+### 13.1 Vampiric Fang (*Taring Darah Sang Pangeran*)
+* **Tipe Item:** Relik Roguelite Pasif ([RelicType.VAMPIRIC_FANG](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt))
+* **Efek Mekanik:** Setiap tebasan yang mendarat memulihkan 15% damage sebagai HP.
+* **Epigraf Sastra Pahat Besi:**
+  > *"Ketika seratus prajuritku merangkak di lantai kuil bermandikan tinta maut,  
+  > Kuambil belati terlarang, kurobek nadiku sendiri di hadapan rembulan ungu.  
+  > 'Minumlah!' seruku pada takdir, 'Jadikan darah kami abadi,  
+  > Sekalipun kami harus mengunyah nyawa musuh kami untuk tetap berdiri!'  
+  > Kini taring ini menuntut persembahan yang sama:  
+  > Lukai mereka, atau biarkan tubuh bayangmu mengering menjadi abu."*  
+  > — **Pangeran Valtheor, Catatan Altar Gerhana Darah (Tahun ke-3 Pasca-Tinta)**
+
+### 13.2 Thunder Charm (*Jimat Badai Ordo Zephyros*)
+* **Tipe Item:** Relik Roguelite Pasif ([RelicType.THUNDER_CHARM](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt))
+* **Efek Mekanik:** 25% peluang memicu sengatan petir radial berdaya hancur 25 damage listrik saat mendaratkan tebasan.
+* **Epigraf Sastra Pahat Besi:**
+  > *"Tinta adalah cairan; dan cairan gemetar di hadapan kilat.  
+  > Saat para dewa mengira mereka telah membungkam langit Aethelgard,  
+  > Para rahib Zephyros menjebak halilintar terakhir ke dalam permata topaz hitam.  
+  > Genggam jimat ini erat di hulu pedangmu:  
+  > Biarkan setiap benturan bilah bajamu melolongkan guntur,  
+  > Membakar urat-urat tinta musuh hingga menyala terang dalam gelapnya malam."*  
+  > — **Kidung Rahib Zephyros, Kuil Puncak Awan**
+
+### 13.3 Wings of Hermes (*Bulu Sayap Utusan Kosmis*)
+* **Tipe Item:** Relik Roguelite Pasif ([RelicType.WINGS_OF_HERMES](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt))
+* **Efek Mekanik:** Meningkatkan kecepatan gerak sebesar +25% dan kelincahan manuver di udara.
+* **Epigraf Sastra Pahat Besi:**
+  > *"Gravitasi bukanlah hukum alam; ia adalah rantai besi yang dipasang tiran.  
+  > Siapa bilang garis siluet harus merangkak di atas lantai batu?  
+  > Ambil sehelai bulu sayap utusan langit ini,  
+  > Selipkan di antara celah tumit bayanganmu.  
+  > Rasakan bagaimana bumi melolong memanggilmu kembali ke lumpur,  
+  > Namun kakimu telah menari bebas di atas kepala para raksasa."*  
+  > — **Prasasti Penjelajah Icarus, Tepi Tebing Retak Lantai 7**
+
+### 13.4 Chronos Hourglass (*Jam Pasir Pelambat Waktu*)
+* **Tipe Item:** Relik Roguelite Pasif ([RelicType.CHRONOS_HOURGLASS](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt))
+* **Efek Mekanik:** Mengurangi kecepatan proyektil musuh sebesar 30% dan memperpanjang jendela Perfect Parry.
+* **Epigraf Sastra Pahat Besi:**
+  > *"Satu butir pasir jatuh: seorang ksatria terlahir.  
+  > Butir pasir kedua jatuh: bilah pedang diayunkan.  
+  > Butir pasir ketiga membeku di udara: takdir menahan nafasnya.  
+  > Para dewa menulis waktu dengan pena yang tak kenal ampun,  
+  > Namun dalam serpihan kaca jam ini, detak jarum semesta dapat kau paksa bertekuk lutut.  
+  > Tataplah mata musuhmu dalam gerak lambat,  
+  > Dan tusukkan baja kebenaran tepat di sela tarikan napas mereka."*  
+  > — **Wasiat Alkemis Kronologis Lantai 10**
+
+---
+
+## 🎭 BAGIAN 14: MATRIKS BARK PERCAKAPAN TEMPUR (IN-COMBAT DIALOGUE BARKS)
+
+*Skrip seruan tempur dan suara batin karakter yang terpicu saat pertarungan intensif.*
+
+```
+                  [KONDISI TEMPUR PEMAIN]
+                             │
+     ┌───────────────────────┼───────────────────────┐
+     ▼                       ▼                       ▼
+ [HP < 20% DISKUSI]     [PERFECT PARRY]        [ULTIMATE UNLEASHED]
+ "Garisku menipis!"     "Denting penolakan!"   "Bilah membelah kanvas!"
+```
+
+### 14.1 Seruan Darurat Saat Integritas Jiwa Kritis (HP < 20% / Near Dissolution)
+* **Kaelen The Bladeweaver:**
+  * *"Tubuhku... kakiku mulai larut! Tidak, aku belum boleh menjadi tinta mati!"*
+  * *"Baja ini masih di tanganku. Selama pedang ini utuh, jiwaku takkan padam!"*
+  * *"Aria... pinjamkan aku lentera cahayamu sekali lagi!"*
+* **Zephyr The Shadowstalker:**
+  * *"Kerapatanku memudar... Terlalu lambat! Aku harus bergerak lebih cepat dari maut!"*
+  * *"Hanya goresan tipis... Belatiku masih sanggup merobek satu jantung lagi!"*
+* **Gorgon The Ironbreaker:**
+  * *"Retakan di pelat besiku... HAH! Kalian butuh palu dewa untuk benar-benar meremukkanku!"*
+  * *"Berdirilah, Gorgon! Gunung batu tidak pernah tunduk pada tumpahan tinta!"*
+
+### 14.2 Seruan Kemenangan Usai Menangkis Sempurna (Perfect Parry Deflect Voice Lines)
+* **Saat Menangkis Tebasan Bos:**
+  * *"Terlalu lambat!"*
+  * *"Bilahmu terbaca!"*
+  * *"Patahkan kuda-kudamu!"*
+  * *"Denting ini adalah vonis matimu!"*
+* **Efek Refleksi Batin Protagonis:**
+  * *(Saat layar membeku dalam Hitstop 80ms)*: *"Di titik henti ini... semesta berputar di bawah komandoku."*
+
+### 14.3 Teriakan Jurus Pamungkas (Ultimate Unleashed Chants)
+* **Kaelen — Bladestorm 360°:**
+  > *"Dari ketiadaan garis, kembali ke pusaran badai! ROBEKLAH KANVAS KEGELAPAN INI! BLADESTORM!"*
+* **Zephyr — Phantom Flurry:**
+  > *"Bayangan mendahului wujud, racun mendahului jeritan! LENYAPLAH DALAM SERIBU TUSUKAN!"*
+* **Gorgon — Meteor Cleave:**
+  > *"Bumi runtuh, langit terbelah! HANTAMAN METEOR PENGHANCUR TAKDIR!"*
+
+### 14.4 Kalimat Terakhir Para Bos Saat Menemui Ajal (Boss Dying Barks)
+1. **Jenderal Oakhaven (Lantai 3):**
+   > *"Tebasan yang indah... Pintu gerbang... kini menjadi milikmu, anak muda. Buktikan... bahwa sumpah ksatria kita tidak sia-sia..."* *(Berlutut dan memudar menjadi abu emas)*
+2. **The Amethyst Matron (Lantai 5):**
+   > *"Busurku... patah. Panah racun ini... akhirnya membasahi dadaku sendiri... Kebebasan... betapa indahnya rasa sakit ini..."* *(Luruh menjadi kristal ungu yang berserak)*
+3. **The Shadow Doppelgänger (Lantai 8):**
+   > *"Kau... berhasil menepis keraguanmu sendiri... Namun ingatlah, Kaelen... jika kau ragu sedetik saja di hadapan Sang Penulis... aku akan kembali dari bayanganmu..."* *(Tersenyum dan menyatu kembali ke tumit Kaelen)*
+4. **The Crimson Sovereign (Lantai 9):**
+   > *"Darahku... dingin. Gerhana ini padam... Ribuan tahun meminum rasa sakit orang lain... akhirnya aku bisa tertidur dalam damai..."* *(Menutup mata seraya belati darahnya hancur)*
+5. **The Grand Calligrapher (Lantai 10):**
+   > *"TIDAK MUNGKIN! Bagaimana mungkin segores tinta ciptaanku... sanggup mematahkan pena penciptanya?! Kanvas ini... warnanya... MELEDAK KEMBALI—AAAAARRRGH!"* *(Tersedot ke pusaran kosmis)*
+
+---
+
+## 📜 BAGIAN 15: MANUSKRIP PENUH 10 PRASASTI BATU HITAM (THE UNABRIDGED 10 LORE TABLETS)
+
+*Transkripsi puitis kanonikal dari kesepuluh prasasti batu hitam obsidian yang terpahat di sudut tersembunyi setiap lantai The Obsidian Spire, sebagaimana tersimpan di [TowerLevelBuilder.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/world/TowerLevelBuilder.kt).*
+
+### 📜 Tablet I: Catatan Hari ke-47 (Lantai 1 — Lower Bastion)
+> **Inskripsi Koordinat:** Sektor Gerbang Bawah (Posisi $X=14.0$, $Y=5.4$)  
+> **Penulis:** Kapten Valerius dari Legiun Pertama  
+>
+> *"Hari ke-47. Kami tiba di gerbang bawah dengan seratus prajurit terbaik bangsa. Tubuh kami telah menghitam, jemari tangan kami menyatu menjadi garis padat tak beruas. Makanan tak lagi memiliki rasa di lidah kami, namun pedang baja tua ini terasa seratus kali lebih ringan dan mematikan di genggaman. Jika catatan ini kau temukan, wahai pengelana masa depan, pasang telingamu baik-baik: jangan pernah berhenti bergerak saat berada di atas platform. Di tanah ini, diam adalah awal dari pembubaran abadi."*
+
+### 📜 Tablet II: Catatan Para Pendaki (Lantai 2 — Spire of Hazards)
+> **Inskripsi Koordinat:** Teras Jurang Duri Obsidian (Posisi $X=12.0$, $Y=5.6$)  
+> **Penulis:** Pendaki Tak Dikenal dari Ordo Elang  
+>
+> *"Kutukan gravitasi yang mencabik lututmu ini bukanlah tarikan dari inti bumi, melainkan rantai spiritual yang sengaja diturunkan dari singgasana langit. Para dewa tidak ingin kita terbang bebas. Mereka memasang duri-duri obsidian hitam ini agar darah kita kembali menyuburkan tanah yang telah mati. Jangan pernah ragu saat melangkah di antara platform yang goyah: hanya mereka yang terus bergerak yang kan sanggup melihat fajar di puncak menara."*
+
+### 📜 Tablet III: Gerbang Hakim Oakhaven (Lantai 3 — Boss Hall)
+> **Inskripsi Koordinat:** Di Depan Singgasana Ksatria Tanduk Emas (Posisi $X=1.8$, $Y=1.2$)  
+> **Penulis:** Ajudan Garnisun Benteng Bawah  
+>
+> *"Jenderal Oakhaven berdiri di ambang gerbang ini bukan karena kebencian, bukan pula untuk menghalangi kita mencari kebenaran. Ia berdiri sebagai batu ujian terakhir: memastikan bahwa jiwa yang melangkah ke lantai atas cukup tegar untuk menanggung kepedihan rahasia para dewa. Hormatilah bilah pedangnya. Jika kau harus membunuhnya, lakukan dengan tebasan yang bersih tanpa keraguan."*
+
+### 📜 Tablet IV: Kutukan Sang Penulis (Lantai 4 — The Sunken Archives)
+> **Inskripsi Koordinat:** Rak Manuskrip Kristal Amethyst (Posisi $X=14.2$, $Y=5.6$)  
+> **Penulis:** Cendekiawan Alkimia Kaca Ungu  
+>
+> *"Mereka menyebut kami monster tak berbelas kasihan karena kami menghujani para pendaki dengan panah amethyst dari kejauhan. Tapi mereka yang memegang pedang tidak pernah mengerti: mendekati bilah di menara terkutuk ini adalah kepastian mati. Kami menyegel diri dalam ruang arsip kaca ini selama ratusan tahun demi meracik penawar racun Tinta Primordial... namun tinta itu sendiri telah meresap dan menjadi darah kami. Maafkan kami, saudaraku."*
+
+### 📜 Tablet V: Dinding Kawah Alkimia (Lantai 5 — Crucible of Mutations)
+> **Inskripsi Koordinat:** Kawah Miasma Beracun (Posisi $X=1.8$, $Y=1.2$)  
+> **Penulis:** Murid Terakhir Sang Ratu Busur  
+>
+> *"Racun Miasma ungu yang mendidih di kawah ini tidak membunuh dagingmu—sebab kita tidak lagi memiliki daging berdosa. Racun ini dirancang khusus untuk melarutkan tekad dan cita-citamu. Jika kau menghirup uapnya terlalu lama, kau akan melupakan wajah kekasihmu, melupakan warna langit biru, dan melupakan untuk apa kau mendaki menara ini. Kalahkan Sang Ratu sebelum kabut ini mencuri namamu!"*
+
+### 📜 Tablet VI: Wasiat Sang Penempa (Lantai 6 — The Iron Foundry)
+> **Inskripsi Koordinat:** Paron Meteorit Suaka Vulcanus (Posisi $X=8.8$, $Y=2.0$)  
+> **Penulis:** Vulcanus Sang Penempa Jiwa  
+>
+> *"Besi meteorit emas yang terbakar di tungkuku adalah satu-satunya materi di semesta ini yang tidak mempan terhadap korupsi Tinta Primordial. Koin-koin emas yang kau pungut dari bangkai monster? Itu bukanlah uang logam biasa; itu adalah tetesan cahaya mentari yang dipadatkan oleh kehendak juang para pendaki yang gugur sebelummu. Berikan padaku, kan kutempa bilah bajamu. Selama denting paluku masih bergaung, harapan manusia untuk merebut kembali warna takkan pernah padam!"*
+
+### 📜 Tablet VII: Tebing Angkasa Retak (Lantai 7 — The Fractured Precipice)
+> **Inskripsi Koordinat:** Ambang Jurang Kosmis Nir-Gravitasi (Posisi $X=5.0$, $Y=3.2$)  
+> **Penulis:** Penjelajah Dimensi Astral  
+>
+> *"Lihatlah ke luar celah dinding yang hancur ini... Tidak ada langit biru, tidak ada cakrawala bumi. Hanya ada jurang kosmis tanpa batas dengan bintang-bintang mati yang membeku. Sadarilah kebenaran yang mengerikan ini: kita tidak sedang mendaki menara batu di atas tanah air kita... kita sedang memanjat keluar dari sangkar dimensi yang dibangun para dewa untuk memenjarakan jiwa kita!"*
+
+### 📜 Tablet VIII: Paradoks Menara Abadi (Lantai 8 — The Hall of Echoes)
+> **Inskripsi Koordinat:** Depan Cermin Kristal Obsidian Gelap (Posisi $X=10.5$, $Y=4.8$)  
+> **Penulis:** Pendekar Bayangan Tanpa Nama  
+>
+> *"Musuh paling berbahaya di lantai puncak menara ini bukanlah monster berkepala seribu, bukan pula dewa yang bertahta di langit. Musuh terbesarmu adalah dirimu sendiri yang menyerah pada keputusasaan dan rasa bersalah. Ketika kau menatap cermin dan melihat bayanganmu sendiri mengayunkan pedang yang sama, jangan menundukkan pandanganmu! Tatap matanya, dan lakukan Perfect Parry tepat saat kilatan matanya menyala terang!"*
+
+### 📜 Tablet IX: Altar Kuil Gerhana (Lantai 9 — The Blood Moon Sanctum)
+> **Inskripsi Koordinat:** Altar Marmer Berlumur Darah (Posisi $X=1.8$, $Y=1.2$)  
+> **Penulis:** Mantan Kesatria Pengawal Pangeran Valtheor  
+>
+> *"Pangeran kami telah meminum tinta darah terlarang. Tubuhnya memang menjadi abadi di bawah gerhana vampirik ini, namun akal budinya telah membusuk menjadi rasa lapar yang tak pernah kenyang. Jangan biarkan air matamu menetes untuknya. Tebaskan pedangmu tanpa ragu! Kematian di ujung bilah bajamu adalah hadiah terindah dan belas kasihan terakhir yang bisa kau berikan kepada pangeran kami."*
+
+### 📜 Tablet X: Ambang Kanvas Takdir (Lantai 10 — The Primordial Canvas)
+> **Inskripsi Koordinat:** Tangga Marmer Putih Depan Singgasana Dewa (Posisi $X=2.0$, $Y=1.3$)  
+> **Penulis:** Aria Sang Gema Warna Terakhir  
+>
+> *"Jika matamu sanggup membaca prasasti terakhir ini, berarti kakimu telah berpijak di hadapan Sang Penulis Takdir Semesta. Genggam erat hulu pedangmu, wahai saudaraku. Ingatlah satu hal yang abadi ini: pena mereka memang menuliskan takdir kehancuran kita di masa lalu, tapi dengan pedang, darah, dan tekad kita di lantai inilah KITA YANG AKAN MENULISKAN MASA DEPAN!"*
+
+---
+
+*Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+
 

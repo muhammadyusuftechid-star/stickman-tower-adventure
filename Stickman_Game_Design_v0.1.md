@@ -223,4 +223,75 @@ Diimplementasikan pada [VirtualController.kt](file:///home/yusuf/projekan/game/g
 * **Integritas Versi:** Kode sumber dan dokumen desain tersinkronisasi penuh pada branch utama Git repository (`origin/main`).
 
 ---
+
+## 📖 9. Panduan Gaya Penulisan & Glosarium Diegetik (Lead Writer Style Guide)
+
+Untuk menjamin kohesi ludonaratif tingkat tinggi, seluruh teks in-game, antarmuka pengguna (UI/HUD), deskripsi item, dialog, dan catatan codex harus mematuhi nomenklatur diegetik berikut:
+
+```
+                    [TABEL TRANSISI TERMINOLOGI DIEGETIK]
+┌───────────────────────────┬──────────────────────────────┬─────────────────────────────────────┐
+│ Istilah Standar Video Game│ Nomenklatur Diegetik Game    │ Konsep Sastra Fiksi                 │
+├───────────────────────────┼──────────────────────────────┼─────────────────────────────────────┤
+│ Hit Points (HP)           │ Integritas Anima             │ Kepadatan garis siluet tubuh.       │
+│ Special Points / Mana (SP)│ Resonansi Tinta              │ Energi kinetik batin untuk jurus.   │
+│ Gold Currency             │ Pecahan Aethel / Tetesan Surya│ Serpihan emas kebal korupsi tinta.  │
+│ Experience Points (EXP)   │ Rekoleksi Memori             │ Puing ingatan masa lampau.          │
+│ Level Up                  │ Penebalan Garis Jiwa         │ Pemadatan eksistensi melawan gravitasi│
+│ Checkpoint                │ Prasasti Gema Aria           │ Lentera penambat jiwa pengelana.    │
+│ Game Over / Player Death  │ Pelarutan Jiwa (Dissolution) │ Garis memudar menjadi tinta mati.   │
+│ Perfect Parry             │ Dentang Penolakan Takdir     │ Pemadatan instan saat benturan bilah│
+│ Dodge Roll                │ Selip Bayang (Shadow Slip)   │ Mengurai massa sesaat untuk meluncur│
+└───────────────────────────┴──────────────────────────────┴─────────────────────────────────────┘
+```
+
+### 9.1 Pilar Nada Bicara Karakter (Character Voice & Tone Pillars)
+1. **Arkais & Puitis Minimalis:** Hindari slang modern, humor internet, atau gaya bahasa santai. Gunakan diksi yang tajam, bermartabat, dan penuh resonansi filosofis selayaknya karya sastra fantasi gelap klasik.
+2. **Heroik Melankolis (*Grim-Defiant*):** Dunia telah kehilangan warnanya, jutaan jiwa telah luruh menjadi tinta mati, namun protagonis menolak meratap dalam kepasrahan. Setiap kalimat mencerminkan bara tekad yang menyala di tengah keheningan kanvas.
+3. **Kontras Sensoris Tajam:** Deskripsi visual selalu menekankan kontras dramatis antara *hitam pekat tinta*, *putih kanvas kosong*, *merah darah gerhana*, dan *pijar emas bilah baja meteorit*.
+
+---
+
+## 🏆 10. Matriks Prestasi Naratif & Kutipan Epigraf (Narrative Achievement Matrix)
+
+Setiap pencapaian yang terdaftar di [AchievementManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/achievement/AchievementManager.kt) bukan sekadar angka statistik, melainkan memiliki kutipan epigraf sastra (*Lore Flavor Epigraph*) yang dapat dibaca pemain di menu pencapaian:
+
+| ID Achievement | Nama Prestasi Resmi | Syarat Teknis | Kutipan Epigraf Sastra (Lore Flavor Text) |
+| :--- | :--- | :--- | :--- |
+| `FIRST_BLOOD` | **Goresan Pertama di Kanvas** | Tumbangkan 1 musuh pertama | *"Ketika bilah bajamu menorehkan tinta musuh, semesta tersadar bahwa kau bukanlah sketsa pasif yang rela dihapus."* |
+| `FLOOR_5_REACHED` | **Penembus Kawah Racun** | Tumbangkan Sang Ratu Busur di Lantai 5 | *"Uap Miasma membakar siluetmu, namun langkah kakimu menolak mundur. Panah sang ratu telah patah di bawah tumitmu."* |
+| `TOWER_CONQUEROR` | **Patahnya Pena Takdir** | Kalahkan The Grand Calligrapher di Lantai 10 | *"Dewa pencipta telah tersungkur ke jurang kosmis. Di atas kanvas yang hening, seluruh warna Aethelgard meledak kembali!"* |
+| `COMBO_MASTER` | **Tarian Tiga Puluh Garis** | Capai rentetan kombo 30x berturut-turut | *"Tebasan tanpa henti, manuver tanpa cela; waktu menahan napas menyaksikan keindahan simfoni kematianmu."* |
+| `PERFECT_PARRY_MASTER` | **Baja Penantang Ajal** | Lakukan 20x Perfect Parry tanpa gagal | *"Dua puluh kali takdir mencoba merobek dadamu, dua puluh kali pula bilah bajamu menertawakan ajal dengan satu denting suci."* |
+| `GOLD_HOARDER` | **Penyimpan Cahaya Surya** | Kumpulkan akumulasi 5.000 Pecahan Aethel | *"Lima ribu tetesan matahari di kantongmu; cukup untuk menyalakan kembali tungku peradaban yang telah lama membeku."* |
+| `ENDLESS_SURVIVOR` | **Pengelana Paradoks Abadi** | Capai Lantai 20 di mode Endless Spire | *"Dua puluh lantai menembus dinding waktu; hukum kematian telah menyerah untuk mengejar langkah bayanganmu."* |
+| `LORE_SCHOLAR` | **Pewaris Seluruh Ratapan** | Buka dan baca seluruh 10 Prasasti Batu Hitam | *"Kau telah mendengarkan ratapan seluruh batu nisan; kini masa lalu Aethelgard yang hilang berdenyut di dalam nadimu."* |
+
+---
+
+## 🎭 11. Desain Naratif Progresi Dinamis & Resonansi Hub (Dynamic NPC State Engine)
+
+Sistem dialog di [StoryDialogue.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/world/StoryDialogue.kt) dan layar hub dirancang bereaksi secara dinamis terhadap kondisi pemain:
+
+### 11.1 Dialog Khusus Berdasarkan Arketipe Karakter (Class-Specific Reactions)
+* **Reaksi Vulcanus di Lantai 6:**
+  * *Kepada Kaelen (Warrior):* *"Bilah pedangmu seimbang dan kokoh, kapten. Rawat keseimbangannya; hanya pedang yang setia pada pemiliknya yang sanggup menembus kanvas dewa."*
+  * *Kepada Zephyr (Rogue):* *"Sepasang belati kaca amethyst? Berbahaya dan licik. Jangan sampai racunnya memakan jemarimu sendiri saat kau menusuk dari kegelapan."*
+  * *Kepada Gorgon (Heavy):* *"Hahaha! Ini baru senjata! Pedang kolosal sebesar batu nisan! Dibutuhkan otot siluet berkekuatan raksasa untuk mengayunkannya. Mari kita buat ayunannya sanggup meruntuhkan pilar menara!"*
+
+### 11.2 Dialog Khusus Tingkat Penempaan Senjata (Forge Milestones)
+* **Senjata Level 1:** *"Bilahmu telah bersih dari kerak tinta lama. Kau siap menghadapi ksatria benteng bawah."*
+* **Senjata Level 3:** *"Kulihat kilatan petir dan api mulai merambat di tepian bilahmu. Logam meteorit ini mulai mengenali niat jiwamu!"*
+* **Senjata Level 5 (Masterwork Apex):** *"SEMPURNA! Tidak ada lagi palu yang sanggup menyentuh pedang ini. Ini bukan lagi buatan tanganku; ini adalah karya seni penentang takdir. Naiklah ke puncak, dan hancurkan pena dewa itu!"*
+
+### 11.3 Dialog Dinamis Frekuensi Kematian (Death-Count Resilience System)
+Ketika pemain gugur lebih dari 3 kali di lantai yang sama:
+* **Gema Suara Aria di Checkpoint:**
+  * Kematian 1–2: *"Bangkitlah, saudaraku. Kematian hanyalah jeda sesaat bagi mereka yang memiliki tekad."*
+  * Kematian 3–5: *"Aku merasakan kerapatan jiwamu menipis... Tapi tataplah ke atas! Cahaya di puncak menara masih menunggumu. Tarik napas, baca ritme serangan mereka, dan tangkis pada detik yang tepat!"*
+  * Kematian > 5: *"Jangan pernah membiarkan menara ini mematahkan martabatmu! Kita telah melangkah terlalu jauh dari gerbang bawah untuk menyerah di tempat ini!"*
+
+---
+
 *Dokumen Game Design Document (GDD) v1.0 ini merupakan spesifikasi desain resmi dan kanon final untuk pengembangan dan produksi game **Stickman Tower Adventure**.*
+
