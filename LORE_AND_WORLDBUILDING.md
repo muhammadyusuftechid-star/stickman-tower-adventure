@@ -306,4 +306,272 @@ Di setiap sudut tersembunyi tiap lantai, terpahat prasasti batu hitam peninggala
 | **Susunan Tombol Busur Melengkung** ([VirtualController.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/input/VirtualController.kt)) | Postur bela diri rahasia *Shadow Martial Stance*: tangan dominan berporos pada serangan utama (Attack), sementara jari-jari memancarkan energi magis ke orbit melengkung di sekelilingnya untuk memicu 3 Active Skill dan pelepasan segel Ultimate. |
 
 ---
+
+## 🏺 BAGIAN 7: MITOLOGI RELIK KUNO & BENDA PUSAKA (THE CODEX OF RELICS & ANCIENT HEIRLOOMS)
+
+Sebelum *The Great Inking* menghapus warna dari Aethelgard, para kaisar, archmage, dan penempa legendaris menciptakan artefak suci yang mampu menampung percikan murni *Prismatic Anima*. Ketika dunia diratakan menjadi hitam dan putih, artefak-artefak ini tidak musnah; mereka membatu dan terlempar ke sudut-sudut rahasia Menara Obsidian. Para pendaki yang menemukan peti harta karun dapat menyerap resonansi pusaka ini selama pendakian berlangsung ([RelicType.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt)).
+
+### 7.1 Vampiric Fang (Taring Sang Pangeran Darah)
+* **Klasifikasi Relik:** `VAMPIRIC_FANG` | Simbol Rune: 🩸
+* **Efek Mekanik:** Memulihkan 5% Max HP setiap kali pemain menumbangkan musuh.
+* **Kisah & Asal Usul:**
+  Taring obsidian ini dipatahkan dari belati seremonial milik *The Crimson Sovereign* saat ia masih menjadi komandan pelindung gerbang barat Aethelgard. Konon, taring ini ditempa dari meteorit merah darah yang jatuh di Danau Rubicund. Saat kataklisme tinta menelan bentengnya, sang pangeran menolak membiarkan pasukannya mati sia-sia. Dalam keputusasaan gila, ia menusukkan taring ini ke jantungnya sendiri, mengikat jiwanya pada hukum lintah kosmis: meminum esensi kinetik dari setiap nyawa yang ia renggut. Ketika seorang pendaki memegang relik ini, taring tersebut berdenyut seirama dengan detak jantungnya, menarik kabut merah sisa jiwa musuh yang terbunuh untuk menambal retakan pada tubuh siluet sang pendekar.
+* **Kutipan Kitab Kuno:**
+  > *"Jangan pernah meminum darah musuhmu dengan rasa haus kekuasaan, melainkan minumlah dengan duka seorang pengelana yang bersumpah untuk bertahan hidup satu tarikan nafas lebih lama."*
+
+### 7.2 Thunder Charm (Jimat Murka Badai Zephyr)
+* **Klasifikasi Relik:** `THUNDER_CHARM` | Simbol Rune: ⚡
+* **Efek Mekanik:** Menyambar musuh terdekat dengan petir 30 DMG setiap kali kombo serangan mencapai kelipatan 10x.
+* **Kisah & Asal Usul:**
+  Sebuah lempengan perak bertatahkan kristal safir yang pernah digantungkan di panji perang *Ordo Zephyros*. Para pendekar aliran pedang badai percaya bahwa ritme serangan yang tidak terputus adalah doa pemanggil petir para dewa langit. Ketika seorang pendekar mampu melancarkan 10 tebasan berturut-turut tanpa jeda, gesekan kinetik antara bilah pedang dan udara menara memicu resonansi elektrostatik purba. Udara di sekeliling bilah berderak, dan kilatan petir cyan murni melesat dari langit-langit menara, menghanguskan musuh terdekat menjadi abu tinta.
+* **Kutipan Kitab Kuno:**
+  > *"Satu tebasan adalah niat. Tiga tebasan adalah tarian. Sepuluh tebasan adalah murka langit yang menuntut kembali keadilannya."*
+
+### 7.3 Wings of Hermes (Sayap Bulu Emas Sang Utusan Langit)
+* **Klasifikasi Relik:** `WINGS_OF_HERMES` | Simbol Rune: 🪶
+* **Efek Mekanik:** Menganugerahkan kemampuan *Triple Jump* (melompat 3 kali berturut-turut di udara).
+* **Kisah & Asal Usul:**
+  Sisa bulu sayap yang diawetkan dari burung pelindung kuil langit *Hermes of the Astral Winds*. Ketika para Calligrapher memasang kutukan gravitasi $g = -28.0\text{ m/s}^2$ ke seluruh permukaan bumi untuk mengurung umat manusia di tanah, burung-burung astral menolak jatuh. Mereka terbang menembus pusaran tinta hitam pekat hingga sayap mereka terbakar dan rontok. Setiap bulu yang tersisa membawa memori perlawanan terhadap gravitasi. Saat pendaki menyematkan bulu ini ke pinggangnya, hukum gravitasi ketiga terdistorsi sesaat, memungkinkan sang pendekar menginjak udara kosong untuk melompat ketiga kalinya ke platform tertinggi yang sebelumnya dianggap mustahil dicapai.
+* **Kutipan Kitab Kuno:**
+  > *"Gravitasi adalah rantai yang dipasang oleh dewa penakut. Terbangkan jiwamu, walau sayapmu terbuat dari sisa debu."*
+
+### 7.4 Hourglass of Chronos (Jam Pasir Fraktur Temporal)
+* **Klasifikasi Relik:** `CHRONOS_HOURGLASS` | Simbol Rune: ⏳
+* **Efek Mekanik:** Mempercepat pendinginan (Cooldown Reduction) seluruh Active Skill dan Dash sebesar 25%.
+* **Kisah & Asal Usul:**
+  Ditemukan di reruntuhan jam matahari raksasa Lantai 10, jam pasir ini berisi butiran debu emas yang mengalir terbalik dari bawah ke atas. Ketika *The Primordial Stylus* membelah realitas semesta, garis waktu Aethelgard retak berkeping-keping. Debu di dalam jam pasir ini adalah serpihan detik yang tercecer dari masa lalu. Bagi pendaki yang membawa artefak ini, aliran waktu di sekitarnya melambat 25%, memungkinkan otot siluet mereka memulihkan energi jurus dan manuver *Dash Roll* jauh lebih cepat daripada musuh-musuh di sekitarnya.
+* **Kutipan Kitab Kuno:**
+  > *"Waktu bukanlah sungai yang mengalir searah. Bagi mereka yang menggenggam pedang tanpa ragu, waktu adalah ombak yang dapat dibalikkan."*
+
+---
+
+## 🥋 BAGIAN 8: KANONIKAL SUB-CLASS & FILOSOFI BELA DIRI BAYANG (THE MARTIAL DISCIPLINES)
+
+Dalam [TalentManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/talent/TalentManager.kt) dan [SubClass.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/talent/SubClass.kt), setiap arketipe karakter dapat mengambil spesialisasi jalan pedang (*Martial Discipline*). Pilihan sub-class ini mencerminkan bagaimana sang pendekar merespons trauma eksistensial *The Great Inking*.
+
+```
+       [BALANCED ARHETYPE]        [AGILE ARCHETYPE]         [HEAVY ARCHETYPE]
+         /           \              /           \             /           \
+   [BERSERKER]   [GUARDIAN]  [SHADOW STALKER] [VENOMANCER] [ARCHMAGE]   [SPELLBLADE]
+  "Amukan Darah" "Perisai Jiwa" "Belati Senyap" "Racun Kaca" "Sihir Kehancuran" "Badai Petir"
+```
+
+### 8.1 Disiplin Arketipe Seimbang (Balanced Blade)
+1. **Berserker (Aliran Darah & Amukan Kinetik):**
+   * *Filosofi:* Memeluk kepedihan sebagai bahan bakar kehancuran. Kaum Berserker menolak mati; saat darah mereka kritis, *Anima Core* di dada mereka berdenyut semakin kencang, melipatgandakan kecepatan tebasan dan membuka bakat sakti *Undying Will*—menahan pukulan maut satu kali per lantai.
+   * *Mantra Aliran:* *"Darahku mungkin menetes, tapi setiap tetesnya adalah bara yang akan membakar habis istana para dewa!"*
+2. **Guardian (Aliran Benteng Obsidian & Kehormatan Vulcanus):**
+   * *Filosofi:* Menjadi dinding pemisah antara kehampaan dan peradaban. Pendekar Guardian mempelajari seni pertahanan mutlak, memproyeksikan perisai *Aegis Stance* yang kebal terhadap efek pentalan (*Super Armor*), serta menyerap daya benturan *Perfect Parry* untuk memulihkan 15% HP (*Counter Fortitude*).
+   * *Mantra Aliran:* *"Batu karang tak pernah berlutut pada deburan ombak. Selama perisaiku tegak, takdir takkan sanggup merobohkanku!"*
+
+### 8.2 Disiplin Arketipe Lincah (Shadow Daggers)
+1. **Shadow Stalker (Aliran Pembunuh Bayangan Ordo Eclipse):**
+   * *Filosofi:* Menjadi satu dengan kegelapan mutlak menara. Mereka tidak pernah menyerang dari arah depan yang tertebak; mereka meluncur di celah bayangan musuh (*Phantom Blink*) dan menusukkan belati tepat ke simpul saraf Anima musuh untuk menghasilkan serangan kritikal 220% (*Lethal Precision*).
+   * *Mantra Aliran:* *"Kau takkan pernah bisa membunuh apa yang tidak bisa kau lihat. Aku adalah hembusan angin terakhir sebelum lehermu terbelah."*
+2. **Venomancer (Aliran Alkimiawan Racun Kristal Amethyst):**
+   * *Filosofi:* Memanfaatkan racun *Toxic Miasma* peninggalan *The Amethyst Matron* yang disuling menjadi racun pembusuk tinta (*Toxic Blade*). Setiap tusukan belati menanamkan tumpukan racun korosif yang meremukkan pertahanan lawan dan memperlambat langkah gerak mereka.
+   * *Mantra Aliran:* *"Pedang tajam hanya membunuh tubuh; racunku membusukkan kehendak jiwa hingga musuh memohon kematian."*
+
+### 8.3 Disiplin Arketipe Berat (Titan Juggernaut)
+1. **Archmage (Aliran Manipulator Anima & Ruang Kosmis):**
+   * *Filosofi:* Mengubah massa pedang raksasa menjadi antena penyerap frekuensi kosmis. Mereka mempersingkat jeda cooldown jurus hingga 30% (*Arcane Conduit*) dan menyelimuti tubuh batu mereka dengan *Mana Shield*, menyerap sepertiga damage musuh menggunakan cadangan energi Ultimate.
+   * *Mantra Aliran:* *"Kata-kata para dewa tertulis dalam gravitasi dan bintang. Dengarkan lantunan manaku, dan lihatlah bagaimana semesta tunduk pada kehendakku!"*
+2. **Spellblade (Aliran Penguasa Badai Elemental):**
+   * *Filosofi:* Memadukan hantaman pedang raksasa dengan letupan api meteorit dan sengatan petir badai. Setiap tebasan kolosal melepaskan percikan partikel api yang memicu ledakan radial di medan tempur.
+   * *Mantra Aliran:* *"Baja dingin hanyalah logam mati; percikan api jiwakulah yang memberinya nyawa untuk membelah cakrawala!"*
+
+---
+
+## 🗺️ BAGIAN 9: PANDUAN ATMOSFER & SENSORIS LANTAI (SENSORY WORLD ATLAS)
+
+Dalam tradisi Narrative Architecture, setiap lantai Menara Obsidian bukan sekadar arena platforming, melainkan sebuah babak ekologis yang menceritakan fase kehancuran Aethelgard melalui panca indera:
+
+```
+[LANTAI 1-3: MILITARY ARCHIVES] ──> Dingin, bau karat, lolongan angin jurang, batu bata hitam kasar.
+[LANTAI 4-6: FORGOTTEN SCIENCE]  ──> Suara dengung kristal ungu, uap belerang tempaan, lantai kaca rapuh.
+[LANTAI 7-9: VOID HORIZON]       ──> Keheningan hampa udara, pendaran nebula merah darah, bayangan berbisik.
+[LANTAI 10: PRIMORDIAL INCEPTION]──> Putih menyilaukan, tetesan tinta bergaung tak terbatas, lantai mutlak.
+[LANTAI 11+: THE ENDLESS SPIRE]  ──> Realitas yang terdistorsi, distorsi gelombang suara, paradoks waktu.
+```
+
+### 9.1 Lantai 1: Gerbang Keheningan Beku (*The Cold Vestibule*)
+* **Palet Visual:** Hitam arang (`#0F141C`), abu-abu batu nisan (`#2C3540`), dan pendaran emas redup patung Checkpoint Aria.
+* **Atmosfer & Partikel:** Debu-debu tinta kering melayang perlahan bagaikan salju hitam. Angin malam berdesir di sela-sela celah gerbang besi raksasa yang retak.
+* **Soundscape:** Denting bilah pedang tua berkarat yang diseret di atas lantai batu, ketukan langkah kaki siluet yang padat dan bergema di lorong kosong.
+* **Makna Naratif:** Tempat kelahiran kembali. Kesadaran fana yang baru terlempar ke dalam bentuk siluet merasakan dinginnya dunia tanpa warna untuk pertama kali.
+
+### 9.2 Lantai 2: Labirin Duri Berbisik (*The Whispering Spikes*)
+* **Palet Visual:** Obsidian kelam dengan kilau merah darah tua pada ujung-ujung paku duri (`#7A1F2D`).
+* **Atmosfer & Partikel:** Percikan darah hitam para pendaki masa lalu yang telah membatu menjadi kristal tajam. Platform kayu dan batu berderit rapuh saat dipijak.
+* **Soundscape:** Gemeretak rantai besi tua yang menggantung di langit-langit menara, desisan proyektil panah sniper amethyst yang membelah udara dingin.
+* **Makna Naratif:** Realitas kematian. Menara memberi tahu sang pendekar bahwa satu kesalahan langkah akan mengembalikannya menjadi genangan tinta mati di dasar jurang.
+
+### 9.3 Lantai 3: Balairung Kehormatan Oakhaven (*The Guardian's Bastion*)
+* **Palet Visual:** Megah dan khidmat. Pilar-pilar marmer hitam dengan ukiran relief singa emas kerajaan Aethelgard kuno.
+* **Atmosfer & Partikel:** Percikan api obor seremonial biru safir yang tidak pernah padam, debu emas berkilauan di sekitar arena duel bos.
+* **Soundscape:** Hantaman pedang raksasa *Runed Greatcleaver* yang menggetarkan fondasi menara, auman perang sang Jenderal yang memantul di kubah batu.
+* **Makna Naratif:** Benteng terakhir martabat ksatria fana. Pertarungan di sini bukanlah tentang kebencian monster, melainkan estafet tanggung jawab antara penjaga tua yang lelah dan penerus takdir yang baru bangkit.
+
+### 9.4 Lantai 4: Arsip Kaca Hitam yang Tenggelam (*The Submerged Crystal Library*)
+* **Palet Visual:** Kristal ungu amethyst tembus pandang (`#4A2D6E`), lemari buku raksasa berlapis kaca hitam setinggi 12 meter.
+* **Atmosfer & Partikel:** Serpihan kaca kristal melayang bercahaya saat terkena proyektil panah, aroma debu kertas manuskrip kuno yang terendam cairan pengawet tinta.
+* **Soundscape:** Dengungan harmonik frekuensi tinggi dari kristal amethyst, gesekan tali busur sutra pemanah bayangan yang bersembunyi di rak-rak buku atas.
+* **Makna Naratif:** Tempat terlarang di mana para dewa menyembunyikan kebenaran tentang formula *Golden Anima*. Pengetahuan yang terlalu berbahaya bagi kaum fana.
+
+### 9.5 Lantai 5: Kawah Alkimia Miasma (*The Cauldron of Miasma*)
+* **Palet Visual:** Hijau zamrud beracun (`#1B4D3E`) bercampur ungu lebam (`#6B2D5C`).
+* **Atmosfer & Partikel:** Gelembung-gelembung gas asam meletup dari kolam lantai dasar, kabut racun tebal membatasi jarak pandang vertikal.
+* **Soundscape:** Desisan uap asam yang mendidih, tawa histeris *The Amethyst Matron* yang melompat di antara pipa-pipa penyulingan kaca.
+* **Makna Naratif:** Keputusasaan intelektual. Tragedi para ilmuwan istana yang mencoba menciptakan vaksin penawar tinta, namun justru terjerumus menjadi monster mutasi akibat racun yang mereka racik sendiri.
+
+### 9.6 Lantai 6: Suaka Tempa Meteorit Vulcanus (*The Undying Forge*)
+* **Palet Visual:** Hangat dan membakar. Cahaya jingga menyala (`#E67E22`) dari tungku meteorit emas, percikan api kuning keemasan.
+* **Atmosfer & Partikel:** Udara panas bergelombang (*heat distortion*), aroma belerang dan besi tempa panas, partikel arang emas melayang santai.
+* **Soundscape:** Denting palu gada Vulcanus yang menghantam paron baja dengan irama ketukan 4/4 yang tenang, desisan air saat pedang yang baru ditempa dicelupkan ke pendingin.
+* **Makna Naratif:** Titik balik moral. Satu-satunya oasis keselamatan di tengah menara terkutuk, di mana sang pendekar dapat bernafas, memperbaiki bilah pedang yang retak, dan mengingat kembali mengapa ia bertarung.
+
+### 9.7 Lantai 7: Tebing Angkasa Hampa Gravitasi (*The Fractured Precipice*)
+* **Palet Visual:** Langit kosmis biru dongker (`#0A0E17`) bertabur debu nebula perak dan bintang-bintang yang hancur berkeping-keping.
+* **Atmosfer & Partikel:** Pulau-pulau batu obsidian melayang tanpa bobot, partikel gravitasi berpendar biru cyan meluncur ke atas melawan arah jatuh.
+* **Soundscape:** Hening mutlak ruang hampa yang sesekali dipecahkan oleh pekikan tajam sayap cakar *Obsidian Gargoyles* yang menukik menembus angin astral.
+* **Makna Naratif:** Terbukanya tabir ilusi. Pemain menyadari bahwa menara ini bukan sekadar bangunan fisik di atas tanah, melainkan pilar penyangga dimensi yang menembus kubah langit para dewa.
+
+### 9.8 Lantai 8: Balairung Cermin Ilusi Batin (*The Hall of Echoes*)
+* **Palet Visual:** Monokrom kontras ekstrem. Cermin kristal obsidian mengkilap tanpa noda yang memantulkan bayangan pemain secara sempurna ke segala arah.
+* **Atmosfer & Partikel:** Aura kabut hitam bayangan mengepul dari lantai cermin, pendaran mata merah menyala pada pantulan cermin.
+* **Soundscape:** Suara detak jantung pemain yang diperbesar sepuluh kali lipat, bisikan keraguan batin ("Kau akan gagal", "Menyerahlah", "Kau hanya goresan tinta"), denting parry yang persis meniru timing pemain.
+* **Makna Naratif:** Ujian psikologis eksistensial. Menara memaksa sang pendekar menghadapi ketakutan terbesarnya: bahwa perjuangannya sia-sia dan ia hanyalah boneka yang ditakdirkan mati.
+
+### 9.9 Lantai 9: Kuil Gerhana Darah (*The Blood Moon Sanctum*)
+* **Palet Visual:** Merah delima menyala (`#8B0000`), dinaungi bola gerhana bulan hitam berbingkai cincin api darah kosmis.
+* **Atmosfer & Partikel:** Tetesan cairan merah kental menetes dari langit-langit kuil, kabut merah darah menyelimuti lantai altar.
+* **Soundscape:** Ratapan paduan suara gaib kuno, desing belati kembar *The Crimson Sovereign* yang membelah udara dengan kecepatan teleportasi bayangan.
+* **Makna Naratif:** Bahaya dari keabadian palsu. Menunjukkan nasib mengenaskan dari mereka yang memilih tunduk pada kutukan tinta darah demi menghindari kematian fana.
+
+### 9.10 Lantai 10: Puncak Kanvas Takdir (*The Primordial Canvas*)
+* **Palet Visual:** Putih mutlak menyilaukan (`#F5F5FA`) berpadu dengan garis-garis kaligrafi hitam sempurna (`#050508`).
+* **Atmosfer & Partikel:** Tetesan tinta emas cair mengambang di udara bebas gravitasi, kanvas putih tanpa batas yang meregang hingga batas pandang semesta.
+* **Soundscape:** Suara goresan pena raksasa di atas perkamen kosmis yang berdesir seperti petir halilintar, dengungan gelombang suara kosmis berfrekuensi 432 Hz yang meremukkan gendang telinga.
+* **Makna Naratif:** Konfrontasi takdir. Pertemuan antara Sang Pencipta yang arogan dan ciptaan yang memberontak demi merebut hak atas kebebasan berkehendak dan warna kehidupan.
+
+---
+
+## 🎭 BAGIAN 10: NASKAH DRAMATIK KANONIKAL & SKENARIO DIALOG BOS (THE COMPLETE DRAMATIC SCREENPLAY)
+
+Berikut adalah transkripsi naskah dramatik teatrikal penuh yang menjadi dasar pertunjukan narasi dalam [StoryDialogue.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/world/StoryDialogue.kt) dan [StoryCodexScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/StoryCodexScreen.kt):
+
+### Adegan 1: Panggilan Sang Gema di Gerbang Bawah
+**Lokasi:** Gerbang Besi Menara Obsidian (Lantai 1)  
+**Karakter:** KAELEN (Pendekar Siluet), ARIA (Sang Gema Warna)
+
+> **KAELEN** *(memandangi kedua tangannya yang kini berupa garis hitam pekat, suaranya bergetar)*  
+> "Tubuhku... apa yang terjadi pada jemariku? Di mana pakaian sutraku? Di mana wajahku?!"
+>
+> **ARIA** *(muncul sebagai gumpalan cahaya cyan keemasan yang menari di udara)*  
+> "Jangan melihat ke bawah, Kaelen. Jika kau memandangi kakimu terlalu lama, tanah terkutuk ini akan menelanmu kembali menjadi genangan tinta mati."
+>
+> **KAELEN** *(mencabut pedang baja tua dari tanah)*  
+> "Siapa kau? Dan mengapa kau memanggil namaku?"
+>
+> **ARIA**  
+> "Aku adalah sisa kenangan terakhir tentang fajar yang hangat. Nama adalah hal pertama yang dicuri oleh para Calligrapher saat mereka menumpahkan tinta ke langit kita. Tapi di dalam dadamu, bara itu masih menyala. Masuklah ke dalam menara, Pendekar. Di puncaknya, pena dewa yang mencuri warnamu sedang menunggumu!"
+
+---
+
+### Adegan 2: Duel Kehormatan Sang Penjaga Gerbang
+**Lokasi:** Gerbang Hakim Oakhaven (Lantai 3)  
+**Karakter:** KAELEN, JENDERAL OAKHAVEN
+
+> **JENDERAL OAKHAVEN** *(berdiri tegak di depan segel runik raksasa, pedang besarnya menancap di lantai)*  
+> "Berhenti di situ, siluet muda. Langkahmu tergesa-gesa bagaikan anak panah tanpa busur."
+>
+> **KAELEN**  
+> "Buka segel ini, Jenderal. Aku tidak berniat menumpahkan darah sesama siluet yang selamat."
+>
+> **JENDERAL OAKHAVEN** *(terkekeh dingin, kilatan emas menyala di rongga matanya)*  
+> "Selamat? Kau menyebut hidup terkutuk sebagai garis hitam tanpa rasa ini sebagai 'selamat'? Anak muda, aku berdiri di sini selama tiga ratus tahun bukan untuk melindungi menara dari kalian... TAPI UNTUK MELINDUNGI KALIAN DARI KEBENARAN YANG MENGERIKAN DI PUNCAK SANA!"
+>
+> *(Oakhaven mencabut pedang besarnya, memicu gelombang angin kencang)*
+>
+> **JENDERAL OAKHAVEN**  
+> "Angkat pedangmu! Tunjukkan padaku apakah tekad jiwamu sanggup menanggung kepedihan para dewa!"
+
+---
+
+### Adegan 3: Percakapan di Hadapan Paron Abadi
+**Lokasi:** Bengkel Tempa Vulcanus (Lantai 6)  
+**Karakter:** KAELEN, VULCANUS SANG PENEMPA JIWA
+
+> **VULCANUS** *(memukul paron baja dengan palu godam raksasa, dentingan bergaung suci)*  
+> **KLAAANG! KLAAANG!**  
+> "Taruh bilah bajamu di atas paron ini, Kaelen. Aku bisa mencium bau asam Miasma dari lantai 5 yang mengikis ketajaman pedangmu."
+>
+> **KAELEN** *(meletakkan pedangnya yang retak di atas paron panas)*  
+> "Mengapa kau tetap berada di sini, Vulcanus? Di lantai bawah, monster saling mencabik. Di lantai atas, ruang dan waktu telah hancur."
+>
+> **VULCANUS** *(menyeka keringat bara dari kening siluetnya)*  
+> "Karena seseorang harus tetap memegang palu saat semesta memilih berlutut, bocah. Para dewa mengira mereka bisa menghapus eksistensi kita hanya dengan mengubah wujud kita menjadi garis hitam. Tapi mereka lupa satu hal: baja yang ditempa di tengah kobaran api paling panas adalah baja yang kelak sanggup mematahkan pena penciptanya sendiri. Pegang kembali pedangmu. Sekarang, ia telah bernyawa!"
+
+---
+
+### Adegan 4: Konfrontasi Cermin Jiwa
+**Lokasi:** Balairung Cermin Ilusi (Lantai 8)  
+**Karakter:** KAELEN, THE SHADOW DOPPELGÄNGER
+
+> **SHADOW DOPPELGÄNGER** *(melangkah keluar dari cermin kristal hitam, menggenggam pedang yang sama)*  
+> "Kau terlihat lelah, kapten... Berapa banyak saudaramu yang telah kau tebas untuk tiba di lantai ini?"
+>
+> **KAELEN** *(mengambil kuda-kuda pedang)*  
+> "Kau hanya ilusi tipuan menara! Enyahlah dari jalanku!"
+>
+> **SHADOW DOPPELGÄNGER** *(tersenyum sinis, suaranya menggema dari dalam tengkorak Kaelen)*  
+> "Ilusi? Aku adalah penyesalanmu yang terkubur. Ingatkah kau malam saat kataklisme melanda? Kau menyegel jiwamu sendiri ke dalam rune emas dan membiarkan seluruh anak buahmu luruh menjadi lumpur tinta di gerbang kota! Kau bukan pahlawan, Kaelen. Kau hanyalah pengecut yang takut mati!"
+>
+> **KAELEN** *(menarik nafas dalam, memejamkan mata sesaat lalu membuka matanya yang kini memancarkan cahaya putih murni)*  
+> "Aku memang gagal menyelamatkan mereka di masa lalu... Tapi kematian mereka takkan kusia-siakan dengan menyerah pada bayangan busuk sepertimu. Majulah!"
+
+---
+
+### Adegan 5: Patahnya Pena Dewa di Kanvas Takdir
+**Lokasi:** Singgasana Primordial (Lantai 10)  
+**Karakter:** KAELEN, THE GRAND CALLIGRAPHER
+
+> **THE GRAND CALLIGRAPHER** *(mengambang megah di atas kanvas putih, memutar The Primordial Stylus)*  
+> "Luar biasa. Seekor semut tinta berhasil merangkak hingga ke meja kerja tuannya. Apa yang kau cari di puncak takdir ini, wahai makhluk buatan?"
+>
+> **KAELEN**  
+> "Kembalikan warna dunia kami! Kembalikan langit biru, hangatnya mentari, dan hak kami untuk bernafas sebagai manusia seutuhnya!"
+>
+> **THE GRAND CALLIGRAPHER** *(tertawa dingin, suaranya bergaung bagai gempa kosmis)*  
+> "Betapa piciknya pikiran fana. Warna adalah racun yang melahirkan ego, keserakahan, dan kehancuran perang. Dalam kesunyian hitam dan putih ini, tidak ada lagi perbedaan kasta, tidak ada lagi rasa lapar, dan tidak ada lagi kematian biologis. Aku telah menganugerahkan keabadian yang damai kepadamu!"
+>
+> **KAELEN** *(mengacungkan bilah bajanya yang berselimutkan api keemasan murni)*  
+> "Keabadian tanpa rasa bukanlah kedamaian... ITU ADALAH KUBURAN MASSAL! Jika takdir kami harus ditulis dengan tinta kehampaanmu, maka dengan pedang ini, AKU AKAN MEROBEK KANVASMU!"
+>
+> *(Kaelen melompat menerjang badai kosmis, melancarkan tebasan pamungkas Bladestorm yang membelah The Primordial Stylus menjadi dua kepingan hancur)*
+
+---
+
+## 🔤 BAGIAN 11: LINGUISTIK RUNIK, FALSAFAH TINTA & RITUAL SILUET
+
+### 11.1 Bahasa Garis (*The Linear Script of Aethelgard*)
+Kaum Siluet tidak lagi menggunakan alfabet fonetik biologis yang rumit. Komunikasi tertulis mereka disederhanakan menjadi rangkaian garis geometris berarah yang dipahat pada batu hitam:
+* `─` (Horizontal Tunggal): Ketenangan, platform berpijak, gencatan senjata.
+* `│` (Vertikal Tunggal): Ketinggian, pendakian menara, tantangan duel satu lawan satu.
+* `▲` (Segitiga Puncak): Tempat suci para dewa, singgasana Calligrapher, bahaya maut.
+* `◈` (Belah Ketupat Bersinar): Inti Anima, peti pusaka, kebangkitan warna.
+* `✕` (Silang Ganda): Peringatan jurang duri, kematian abadi (*Dissolution hazard*).
+
+### 11.2 Falsafah "Bilah Sebelum Nafas" (*The Code of the Moving Silhouette*)
+Doktrin bela diri yang diwariskan secara turun-temurun oleh para penyintas kataklisme:
+1. **Keheningan adalah Kematian:** Berdiam diri terlalu lama di atas tanah berarti menyerahkan diri pada pelarutan jiwa. Bergeraklah, melompatlah, dan kuasai udara.
+2. **Presisi di Atas Tenaga:** Kekuatan kasar tidak ada artinya di hadapan hukum fisika menara. Satu tangkisan tepat waktu (*Perfect Parry*) lebih berharga daripada seribu ayunan pedang membabi buta.
+3. **Baja Sebagai Penjaga Jiwa:** Tubuhmu hanyalah garis tinta, namun senjatamu adalah pemancar niat jiwamu. Rawatlah senjatamu di tungku Vulcanus bagaikan merawat detak jantungmu sendiri.
+
+### 11.3 Ritual Pemakaman Debu Tinta (*The Dissolution Vigil*)
+Ketika seorang pejuang siluet gugur dan tidak sanggup kembali ke checkpoint, tubuhnya tidak membusuk menjadi bangkai. Garis tubuhnya retak dan hancur menjadi serpihan debu tinta hitam kering. Pejuang yang masih hidup akan mengumpulkan debu tersebut ke dalam kendi tembikar kecil, membawanya mendaki satu lantai lebih tinggi, lalu meniupkannya ke arah angin jurang kosmis seraya melantunkan doa kuno:
+> *"Terbanglah bersama angin astral, saudaraku. Debumu kini bebas dari gravitasi tanah. Di puncak menara, warnamu kan bersinar kembali."*
+
+---
 *Dokumen ini merupakan kanon resmi lore, narasi cerita utama, ensiklopedia monster, dan worldbuilding komprehensif untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+
