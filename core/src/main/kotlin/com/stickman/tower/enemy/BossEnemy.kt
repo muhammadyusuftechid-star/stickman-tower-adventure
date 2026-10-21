@@ -52,7 +52,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
     var rewardClaimed = false
 
     var state = BossState.IDLE
-        private set
+        internal set
     var facingRight = false
         private set
     var isPhase2 = false
@@ -79,6 +79,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
 
     val projectiles = mutableListOf<Projectile>()
     private var hasFiredWindSlash = false
+    private var hasLanded = false
 
     companion object {
         const val BASE_SPEED = 3.2f
@@ -137,6 +138,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
             state = BossState.DEAD
             hitbox.reset()
             hurtbox.isActive = false
+            velocity.x = 0f
             velocity.y += GameConfig.GRAVITY * delta
             resolveCollision(delta, platforms)
             return
@@ -157,7 +159,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
                 actionTimer += delta
                 facingRight = distToPlayer > 0
                 velocity.x = 0f
-                if (actionTimer >= 0.5f) {
+                if (actionTimer >= 0.4f) {
                     state = BossState.CHASE
                     actionTimer = 0f
                 }
@@ -168,7 +170,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
                 val moveSpeed = if (isPhase2) ENRAGE_SPEED else BASE_SPEED
                 velocity.x = if (facingRight) moveSpeed else -moveSpeed
 
-                // Pilih Pola Serangan Jika Cooldown Selesai
+                // Pilih Pola Serangan Taktikal Berdasarkan Jarak
                 if (attackCooldown <= 0f) {
                     if (absDist <= CLEAVE_RANGE) {
                         state = BossState.CLEAVE
@@ -178,18 +180,25 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
                         hitbox.knockbackY = 4.0f
                         hitbox.reset()
                         velocity.x = 0f
-                    } else if (isPhase2 && absDist > 4.0f && MathUtils.randomBoolean(0.6f)) {
-                        // Fase 2: Luncurkan Wind Slash dari Jarak Jauh
+                    } else if (isPhase2 && absDist > 6.0f) {
+                        // Fase 2 Long Range: Luncurkan Wind Slash dari Jarak Jauh
                         state = BossState.WIND_SLASH
                         actionTimer = 0f
                         hasFiredWindSlash = false
                         velocity.x = 0f
-                    } else if (absDist > 3.0f && MathUtils.randomBoolean(0.5f)) {
-                        // Ground Slam Melompat Menghantam Tanah
+                    } else if (absDist in 2.5f..7.5f) {
+                        // Mid Range: Ground Slam Melompat Menghantam Tanah ke Posisi Pemain
                         state = BossState.GROUND_SLAM_UP
                         actionTimer = 0f
                         velocity.y = 12.5f
-                        velocity.x = if (facingRight) moveSpeed * 1.2f else -moveSpeed * 1.2f
+                        // Trajectory leap terarah: waktu menuju apex sekitar 0.45s
+                        val leapTargetVx = (distToPlayer / 0.45f).coerceIn(-moveSpeed * 1.5f, moveSpeed * 1.5f)
+                        velocity.x = leapTargetVx
+                    } else if (isPhase2) {
+                        state = BossState.WIND_SLASH
+                        actionTimer = 0f
+                        hasFiredWindSlash = false
+                        velocity.x = 0f
                     }
                 }
             }
@@ -225,27 +234,42 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
 
             BossState.GROUND_SLAM_UP -> {
                 hitbox.isActive = false
+                hasLanded = false
                 if (velocity.y <= 0f) {
-                    // Mulai Menghunjam ke Bawah dengan Kecepatan Tinggi
+                    // Capai puncak lompatan: Menghunjam ke Bawah dengan Kecepatan Tinggi
                     state = BossState.GROUND_SLAM_DOWN
                     velocity.y = -22.0f
                     velocity.x = 0f
+                    actionTimer = 0f
                 }
             }
 
             BossState.GROUND_SLAM_DOWN -> {
-                if (isGrounded) {
-                    // Hantam Tanah! Aktifkan Shockwave Hitbox Luas
-                    val shockW = 4.2f
-                    val shockH = 1.0f
-                    hitbox.damage = if (isPhase2) 32f else 25f
-                    hitbox.knockbackX = 9.0f
-                    hitbox.knockbackY = 6.0f
-                    hitbox.set(position.x + width / 2f - shockW / 2f, position.y, shockW, shockH, active = true)
+                if (isGrounded || hasLanded) {
+                    hasLanded = true
+                    actionTimer += delta
+                    velocity.set(0f, 0f)
 
-                    state = BossState.IDLE
-                    attackCooldown = if (isPhase2) 1.0f else 1.6f
-                    actionTimer = -0.35f // Jeda singkat setelah slam
+                    if (actionTimer < 0.18f) {
+                        // Hantam Tanah! Aktifkan Shockwave Hitbox Luas
+                        val shockW = 4.2f
+                        val shockH = 1.0f
+                        hitbox.damage = if (isPhase2) 32f else 25f
+                        hitbox.knockbackX = 9.0f
+                        hitbox.knockbackY = 6.0f
+                        hitbox.set(position.x + width / 2f - shockW / 2f, position.y, shockW, shockH, active = true)
+                    } else {
+                        // Shockwave mereda: matikan hitbox segera agar adil bagi pemain (punish window)
+                        hitbox.reset()
+                    }
+
+                    if (actionTimer >= 0.65f) {
+                        hitbox.reset()
+                        hasLanded = false
+                        attackCooldown = if (isPhase2) 0.9f else 1.4f
+                        state = BossState.IDLE
+                        actionTimer = 0f
+                    }
                 }
             }
 

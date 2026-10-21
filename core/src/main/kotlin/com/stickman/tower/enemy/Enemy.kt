@@ -227,17 +227,37 @@ class Enemy(
                 }
                 velocity.x = if (canRetreat) retreatDir * (PATROL_SPEED * 1.3f) else 0f
             } else if (dist > 7.2f) {
-                // Terlalu jauh! Maju mendekat ke pemain
+                // Terlalu jauh! Maju mendekat ke pemain jika ada platform di depan (anti-jurang)
                 val approachDir = if (dx > 0) 1f else -1f
-                velocity.x = approachDir * (CHASE_SPEED * 0.85f)
+                var canApproach = true
+                if (isGrounded) {
+                    val checkX = if (approachDir > 0) position.x + width + 0.25f else position.x - 0.25f
+                    val checkY = position.y - 0.3f
+                    canApproach = platforms.any { checkX >= it.left && checkX <= it.right && checkY >= it.bottom && checkY <= it.top + 0.1f }
+                }
+                velocity.x = if (canApproach) approachDir * (CHASE_SPEED * 0.85f) else 0f
             } else {
-                // Berada di sweet spot (3.2m .. 7.2m): Berhenti dan bersiap menembak
-                velocity.x = MathUtils.lerp(velocity.x, 0f, 15f * delta)
-                if (attackCooldown <= 0f && dy < 2.5f) {
-                    state = EnemyState.ATTACK
-                    attackTimer = 0f
-                    hasFiredProjectile = false
-                    velocity.x = 0f
+                // Berada di sweet spot (3.2m .. 7.2m)
+                val clearShot = hasLineOfSight(player, platforms)
+                if (clearShot) {
+                    // Jalur tembakan bebas hambatan: Berhenti dan lepaskan panah
+                    velocity.x = MathUtils.lerp(velocity.x, 0f, 15f * delta)
+                    if (attackCooldown <= 0f && dy < 2.5f) {
+                        state = EnemyState.ATTACK
+                        attackTimer = 0f
+                        hasFiredProjectile = false
+                        velocity.x = 0f
+                    }
+                } else {
+                    // Jalur tembakan terhalang pilar/tembok solid: Reposisi mendekati tepi platform untuk cari sudut pandang bebas
+                    val approachDir = if (dx > 0) 1f else -1f
+                    var canReposition = true
+                    if (isGrounded) {
+                        val checkX = if (approachDir > 0) position.x + width + 0.25f else position.x - 0.25f
+                        val checkY = position.y - 0.3f
+                        canReposition = platforms.any { checkX >= it.left && checkX <= it.right && checkY >= it.bottom && checkY <= it.top + 0.1f }
+                    }
+                    velocity.x = if (canReposition) approachDir * (PATROL_SPEED * 1.1f) else 0f
                 }
             }
         } else {
@@ -252,8 +272,22 @@ class Enemy(
                     velocity.x = MathUtils.lerp(velocity.x, 0f, 15f * delta)
                 }
             } else {
-                val targetVx = if (dx > 0) CHASE_SPEED else -CHASE_SPEED
-                velocity.x = MathUtils.lerp(velocity.x, targetVx, 12f * delta)
+                // Maju mengejar pemain dengan Cliff Avoidance (Anti-Terjun Bebas)
+                val chaseDir = if (dx > 0) 1f else -1f
+                var canAdvance = true
+                if (isGrounded) {
+                    val checkX = if (chaseDir > 0) position.x + width + 0.25f else position.x - 0.25f
+                    val checkY = position.y - 0.3f
+                    canAdvance = platforms.any { checkX >= it.left && checkX <= it.right && checkY >= it.bottom && checkY <= it.top + 0.1f }
+                }
+
+                if (!canAdvance) {
+                    // Tepi platform/jurang terdeteksi: Bertahan di tepian dan siaga tempur
+                    velocity.x = MathUtils.lerp(velocity.x, 0f, 15f * delta)
+                } else {
+                    val targetVx = chaseDir * CHASE_SPEED
+                    velocity.x = MathUtils.lerp(velocity.x, targetVx, 12f * delta)
+                }
             }
         }
     }
@@ -288,7 +322,7 @@ class Enemy(
             }
 
             if (attackTimer >= rangedTotalTime) {
-                attackCooldown = 1.8f
+                attackCooldown = 1.6f + MathUtils.random(0.1f, 0.4f)
                 state = EnemyState.CHASE
             }
         } else {
@@ -310,7 +344,7 @@ class Enemy(
                 }
                 else -> {
                     hitbox.reset()
-                    attackCooldown = 1.2f
+                    attackCooldown = 1.0f + MathUtils.random(0.1f, 0.35f)
                     state = EnemyState.CHASE
                 }
             }
@@ -390,6 +424,7 @@ class Enemy(
 
     /**
      * Menerima damage dari serangan pemain.
+     * Menjaga status STUNNED (Guard Break) jika sedang aktif agar pemain dapat menyelesaikan combo parry.
      */
     fun takeHit(damage: Float, knockX: Float, knockY: Float): Boolean {
         if (health.takeDamage(damage)) {
@@ -400,13 +435,39 @@ class Enemy(
                 state = EnemyState.DEAD
                 hitbox.reset()
                 hurtbox.isActive = false
-            } else {
+                velocity.x = 0f
+            } else if (state != EnemyState.STUNNED || stunTimer <= 0f) {
                 state = EnemyState.HURT
                 hitbox.isActive = false
             }
             return true
         }
         return false
+    }
+
+    /**
+     * Memeriksa apakah jalur pandang / tembakan proyektil (Line of Sight) antara musuh dan pemain bebas dari halangan platform solid.
+     */
+    fun hasLineOfSight(player: Player, platforms: List<Platform>): Boolean {
+        val startX = if (facingRight) position.x + width else position.x
+        val endX = if (facingRight) player.position.x else player.position.x + player.width
+        val minX = kotlin.math.min(startX, endX)
+        val maxX = kotlin.math.max(startX, endX)
+
+        val arrowY = position.y + height * 0.62f
+
+        for (platform in platforms) {
+            if (platform.isOneWay) continue // Panah sihir melesat menembus platform one-way
+
+            // Cek apakah platform solid memotong garis tembak horizontal
+            val overlapsX = platform.right > minX && platform.left < maxX
+            val overlapsY = arrowY >= platform.bottom && arrowY <= platform.top
+
+            if (overlapsX && overlapsY) {
+                return false // Jalur terhalang rintangan solid
+            }
+        }
+        return true
     }
 
     /**
