@@ -270,7 +270,12 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         regF.color = Color.WHITE
         regF.draw(batch, "Level: ${currentSaveData.playerLevel}", 170f, 95f)
         regF.draw(batch, "❖ ${currentSaveData.gold} Coins", 360f, 95f)
-        regF.draw(batch, "⚑ Highest Floor: ${currentSaveData.highestTowerFloor}", 550f, 95f)
+        val floorText = if (currentSaveData.highestEndlessFloor > 0) {
+            "⚑ Story: F${currentSaveData.highestTowerFloor} | Endless: F${currentSaveData.highestEndlessFloor}"
+        } else {
+            "⚑ Highest Floor: ${currentSaveData.highestTowerFloor}"
+        }
+        regF.draw(batch, floorText, 550f, 95f)
 
         when (currentArchetype) {
             CharacterArchetype.BALANCED -> regF.setColor(0.4f, 0.8f, 1f, 1f)
@@ -409,8 +414,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
                 AudioManager.playSlashLight()
             }
             8 -> {
-                SaveManager.save(SaveData())
-                currentSaveData = SaveManager.load()
+                currentSaveData = SaveManager.resetSave()
                 feedbackNotice = "Save Data Successfully Reset!"
                 feedbackTimer = 3.0f
                 AudioManager.playDeath()

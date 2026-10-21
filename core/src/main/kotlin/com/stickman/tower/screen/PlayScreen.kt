@@ -254,8 +254,13 @@ class PlayScreen(
     }
 
     private fun triggerSave(reason: String, highestFloor: Int = currentFloorNumber) {
-        val saveFloor = kotlin.math.max(saveData.highestTowerFloor, highestFloor)
-        saveData.highestTowerFloor = saveFloor
+        if (gameMode == GameMode.STORY) {
+            val saveFloor = kotlin.math.max(saveData.highestTowerFloor, highestFloor)
+            saveData.highestTowerFloor = saveFloor
+        } else if (gameMode == GameMode.ENDLESS) {
+            saveData.highestEndlessFloor = kotlin.math.max(saveData.highestEndlessFloor, highestFloor)
+        }
+        saveData.totalEnemiesDefeated += endlessEnemiesKilled
         saveData.selectedArchetype = archetype.name
         val updatedSave = player.stats.applyToSaveData(saveData)
         SaveManager.save(updatedSave)
