@@ -1,15 +1,19 @@
 # ⚔️ Stickman Tower Adventure
 
+<p align="center">
+  <img src="assets/logo.png" alt="Stickman Tower Adventure Logo" width="220" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</p>
+
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![libGDX](https://img.shields.io/badge/libGDX-1.13.1-EA2027.svg?logo=libgdx&logoColor=white)](https://libgdx.com/)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean%20%7C%20Zero--GC-brightgreen.svg)](#-arsitektur--prinsip-rekayasa-perangkat-lunak)
 [![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Desktop%20(LWJGL3)-48bb78.svg)](#-skema-kontrol-cross-platform)
-[![Tests](https://img.shields.io/badge/Tests-33%20Passed%20(Headless)-success.svg?logo=checkmarx&logoColor=white)](#-automated-testing--qa-pipeline)
+[![Tests](https://img.shields.io/badge/Tests-47%20Passed%20(Headless)-success.svg?logo=checkmarx&logoColor=white)](#-automated-testing--qa-pipeline)
 [![APK Size](https://img.shields.io/badge/APK%20Size-10.6%20MB-blue.svg?logo=android&logoColor=white)](https://github.com/muhammadyusuftechid-star/stickman-tower-adventure/releases)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **Stickman Tower Adventure** adalah game **2D Action Roguelite RPG** performa tinggi yang dibangun dari nol menggunakan bahasa pemrograman **Kotlin** dan framework **libGDX** untuk platform **Android** dan **Desktop (PC)**.  
-> Dirancang dengan standar rekayasa perangkat lunak kelas industri: modularitas tinggi, **zero-allocation rendering** untuk garansi 60 FPS mulus di perangkat mobile, sistem fisika kinematika terkalibrasi presisi, abstraksi multi-input terpadu (*Keyboard, Gamepad, Touch*), serta 33 automated unit tests yang siap diintegrasikan pada CI/CD pipeline.
+> Dirancang dengan standar rekayasa perangkat lunak kelas industri: modularitas tinggi, **zero-allocation rendering** untuk garansi 60 FPS mulus di perangkat mobile, sistem fisika kinematika terkalibrasi presisi, abstraksi multi-input terpadu (*Keyboard, Gamepad, Touch*), serta 47 automated unit tests yang siap diintegrasikan pada CI/CD pipeline.
 
 ---
 
@@ -171,8 +175,9 @@ stickman-tower-adventure/
 │   │   ├── talent/          # 15-Node Talent tree & Sub-Class unlocking managers
 │   │   ├── ui/              # FontManager & resolution-independent HUD rendering
 │   │   ├── vfx/             # Particle pooling systems & procedural screen shakes
+│   │   ├── tools/           # LevelSanityValidator, DevToolsOverlay & in-game profiler
 │   │   └── world/           # Tower floor generator, checkpoints, and calibrated hazards
-│   └── src/test/kotlin/     # 33 Automated Unit Tests (Headless QA Architecture)
+│   └── src/test/kotlin/     # 47 Automated Unit Tests (Headless QA Architecture)
 ├── lwjgl3/                  # Desktop PC Launcher Module (LWJGL3 / OpenGL backend)
 │   └── src/main/kotlin/com/stickman/tower/lwjgl3/
 │       └── Lwjgl3Launcher.kt
@@ -201,7 +206,7 @@ stickman-tower-adventure/
 
 ## 🧪 Automated Testing & QA Pipeline
 
-Logika inti game dilindungi oleh **33 automated unit tests** yang dapat dieksekusi secara **headless** tanpa memerlukan display server atau OpenGL context:
+Logika inti game dilindungi oleh **47 automated unit tests** yang dapat dieksekusi secara **headless** tanpa memerlukan display server atau OpenGL context:
 
 ```bash
 # Eksekusi unit test suite:
@@ -212,18 +217,19 @@ Logika inti game dilindungi oleh **33 automated unit tests** yang dapat diekseku
 > Task :core:test
 com.stickman.tower.audio.HapticManagerTest           > testHapticPatternTrigger() PASSED
 com.stickman.tower.character.CharacterArchetypeTest  > testArchetypeAttributes() PASSED
-com.stickman.tower.character.CharacterArchetypeTest  > testArchetypeFromString() PASSED
 com.stickman.tower.combat.ParryTest                  > testPerfectParryWindow() PASSED
-com.stickman.tower.combat.ParryTest                  > testParryDamageMitigation() PASSED
 com.stickman.tower.endless.EndlessAndTalentTest      > testSpireFloorMutators() PASSED
-com.stickman.tower.endless.EndlessAndTalentTest      > testTalentNodePrerequisites() PASSED
 com.stickman.tower.enemy.EnemyTest                   > testEnemyFSMTransitions() PASSED
 com.stickman.tower.input.GamepadAndTouchSettingsTest > testInputBindingIntegrity() PASSED
 com.stickman.tower.relic.RelicManagerTest            > testRelicStackingCalculations() PASSED
+com.stickman.tower.rpg.SaveManagerTest               > testAtomicSaveAndChecksum() PASSED
+com.stickman.tower.tools.LevelSanityValidatorTest    > testStoryFloors1To3Sanity() PASSED
+com.stickman.tower.tools.LevelSanityValidatorTest    > testEndlessFloorsSanity() PASSED
+com.stickman.tower.tools.LevelSanityValidatorTest    > testPlayerGodModeImmunity() PASSED
 com.stickman.tower.ui.FontManagerTest                > testFontGlyphCache() PASSED
 
-BUILD SUCCESSFUL in 17s
-33 actionable tasks: 33 executed (100% Success Rate)
+BUILD SUCCESSFUL in 18s
+47 actionable tasks: 47 executed (100% Success Rate)
 ```
 
 ---
