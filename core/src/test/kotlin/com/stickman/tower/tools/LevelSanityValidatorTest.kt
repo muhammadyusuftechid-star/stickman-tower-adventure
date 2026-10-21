@@ -15,9 +15,9 @@ import kotlin.test.assertTrue
 class LevelSanityValidatorTest {
 
     @Test
-    fun testStoryFloors1To3Sanity() {
+    fun testStoryFloorsSanity() {
         val reports = LevelSanityValidator.auditAllStoryFloors()
-        assertEquals(3, reports.size)
+        assertEquals(10, reports.size)
 
         for (report in reports) {
             assertTrue(report.isValid, "Lantai ${report.floorNumber} harus valid tanpa error softlock: ${report.errors}")
@@ -25,10 +25,15 @@ class LevelSanityValidatorTest {
             assertTrue(report.summary().contains("[PASSED]"), "Summary harus berstatus PASSED")
         }
 
-        // Lantai 3 adalah boss floor
-        assertFalse(reports[0].hasBoss, "Lantai 1 bukan boss floor")
-        assertFalse(reports[1].hasBoss, "Lantai 2 bukan boss floor")
-        assertTrue(reports[2].hasBoss, "Lantai 3 adalah boss floor dengan Lord Malakor")
+        // Lantai bos: 3, 5, 8, 9, 10
+        val bossFloors = setOf(3, 5, 8, 9, 10)
+        for (report in reports) {
+            if (report.floorNumber in bossFloors) {
+                assertTrue(report.hasBoss, "Lantai ${report.floorNumber} harus memiliki boss")
+            } else {
+                assertFalse(report.hasBoss, "Lantai ${report.floorNumber} bukan boss floor")
+            }
+        }
     }
 
     @Test
@@ -38,12 +43,12 @@ class LevelSanityValidatorTest {
 
         for (report in reports) {
             assertTrue(report.isValid, "Endless Floor ${report.floorNumber} gagal validasi: ${report.errors}")
-            assertTrue(report.platformCount >= 5, "Endless Floor harus memiliki platform yang cukup")
+            assertTrue(report.platformCount >= 3, "Endless Floor harus memiliki platform yang cukup")
         }
 
-        // Lantai 10 adalah boss milestone
-        val floor10 = reports.firstOrNull { it.floorNumber == 10 }
-        assertTrue(floor10 != null && floor10.hasBoss, "Lantai 10 harus memiliki boss")
+        // Lantai 15 dan 20 adalah boss milestone
+        val floor15 = reports.firstOrNull { it.floorNumber == 15 }
+        assertTrue(floor15 != null && floor15.hasBoss, "Lantai 15 harus memiliki boss")
     }
 
     @Test

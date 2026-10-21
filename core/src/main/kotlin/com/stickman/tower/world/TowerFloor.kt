@@ -21,5 +21,11 @@ data class TowerFloor(
     val boss: BossEnemy? = null,
     val checkpoint: Checkpoint?,
     val exitPortal: StageExit,
-    val isBossFloor: Boolean = false
+    val isBossFloor: Boolean = false,
+    val actTitle: String = "ACT I: THE INITIATION",
+    val actSubtitle: String = "LOWER SPIRE",
+    val loreTablets: List<LoreTablet> = emptyList(),
+    val storyDialogues: List<StoryDialogue> = emptyList(),
+    val isSafeZone: Boolean = false,
+    val gravityScale: Float = 1.0f
 )

@@ -87,16 +87,30 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.85f)
         shapeRenderer.rect(620f, 596f, 560f, 3f)
 
-        // Skill Showcase Card Containers (Kanan Bawah)
+        // Skill Showcase Card Containers (Kanan Bawah - 3 Active Skills + 1 Ultimate)
+        // Skill 1 (Cyan)
         shapeRenderer.setColor(0.08f, 0.12f, 0.18f, 0.85f)
-        shapeRenderer.rect(645f, 225f, 510f, 44f)
+        shapeRenderer.rect(645f, 238f, 510f, 32f)
         shapeRenderer.setColor(0.2f, 0.85f, 1f, 0.9f)
-        shapeRenderer.rect(645f, 225f, 4f, 44f)
+        shapeRenderer.rect(645f, 238f, 4f, 32f)
 
+        // Skill 2 (Amber)
         shapeRenderer.setColor(0.08f, 0.12f, 0.18f, 0.85f)
-        shapeRenderer.rect(645f, 168f, 510f, 44f)
+        shapeRenderer.rect(645f, 200f, 510f, 32f)
+        shapeRenderer.setColor(1f, 0.65f, 0.2f, 0.9f)
+        shapeRenderer.rect(645f, 200f, 4f, 32f)
+
+        // Skill 3 (Purple)
+        shapeRenderer.setColor(0.08f, 0.12f, 0.18f, 0.85f)
+        shapeRenderer.rect(645f, 162f, 510f, 32f)
+        shapeRenderer.setColor(0.85f, 0.45f, 1f, 0.9f)
+        shapeRenderer.rect(645f, 162f, 4f, 32f)
+
+        // Ultimate (Solar Gold)
+        shapeRenderer.setColor(0.08f, 0.12f, 0.18f, 0.85f)
+        shapeRenderer.rect(645f, 124f, 510f, 32f)
         shapeRenderer.setColor(1f, 0.8f, 0.2f, 0.9f)
-        shapeRenderer.rect(645f, 168f, 4f, 44f)
+        shapeRenderer.rect(645f, 124f, 4f, 32f)
 
         // Podium Karakter di Kiri (Runic Slate Altar)
         val podiumCenterX = 350f
@@ -257,22 +271,39 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         regF.color = critColor
         regF.draw(batch, critRank, 1104f, 315f)
 
-        // Info Kemampuan Unik (Skill & Ult Showcase)
-        val (skillDesc, ultDesc) = when (currentArchetype) {
-            CharacterArchetype.BALANCED -> Pair("Piercing dash thrust that stuns foes", "Rapid 360° spinning cyclone sword storm")
-            CharacterArchetype.AGILE -> Pair("Teleport strike through enemy defense", "Torrent of multi-target shadowblade strikes")
-            CharacterArchetype.HEAVY -> Pair("Earth-slam that creates heavy shockwaves", "Cataclysmic overhead ground-shattering strike")
+        // Info Kemampuan Unik (Multi-Skill & Ult Showcase)
+        val (s1Desc, s2Desc, s3Desc, ultDesc) = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> listOf(
+                "Blade wave projectile slices ahead",
+                "Rising dragon leap uppercut",
+                "Piercing high-speed dash thrust",
+                "Cataclysmic 360° cyclone sword storm"
+            )
+            CharacterArchetype.AGILE -> listOf(
+                "Triple shadow shuriken fan burst",
+                "Rapid venom shadow dagger flurry",
+                "Instant teleport blink behind target",
+                "Torrent of multi-target shadowblades"
+            )
+            CharacterArchetype.HEAVY -> listOf(
+                "Earth-shattering ground shockwave",
+                "Whirling cyclone greatsword cleave",
+                "War roar: heals 15% HP & knocks foes back",
+                "Cataclysmic overhead ground-shattering strike"
+            )
         }
 
         smallF.color = Color.CYAN
-        smallF.draw(batch, "SKILL [U]: ${currentArchetype.skillName}", 660f, 260f)
-        smallF.setColor(0.82f, 0.88f, 0.95f, 1f)
-        smallF.draw(batch, skillDesc, 660f, 242f)
+        smallF.draw(batch, "SKILL 1 [U]: ${currentArchetype.skill1Name} (${currentArchetype.skill1Cooldown.toInt()}s) - $s1Desc", 655f, 258f)
+
+        smallF.color = Color(1f, 0.65f, 0.2f, 1f)
+        smallF.draw(batch, "SKILL 2 [I]: ${currentArchetype.skill2Name} (${currentArchetype.skill2Cooldown.toInt()}s) - $s2Desc", 655f, 220f)
+
+        smallF.color = Color(0.85f, 0.45f, 1f, 1f)
+        smallF.draw(batch, "SKILL 3 [O]: ${currentArchetype.skill3Name} (${currentArchetype.skill3Cooldown.toInt()}s) - $s3Desc", 655f, 182f)
 
         smallF.color = Color.GOLD
-        smallF.draw(batch, "ULTIMATE [O]: ${currentArchetype.ultName}", 660f, 203f)
-        smallF.setColor(0.82f, 0.88f, 0.95f, 1f)
-        smallF.draw(batch, ultDesc, 660f, 185f)
+        smallF.draw(batch, "ULTIMATE [P]: ${currentArchetype.ultName} - $ultDesc", 655f, 144f)
 
         // Teks Tombol Bawah
         headF.color = Color.WHITE

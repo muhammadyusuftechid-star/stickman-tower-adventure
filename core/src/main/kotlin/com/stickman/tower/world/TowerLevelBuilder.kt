@@ -3,16 +3,18 @@ package com.stickman.tower.world
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Rectangle
 import com.stickman.tower.enemy.BossEnemy
+import com.stickman.tower.enemy.BossType
 import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.enemy.EnemyType
 import com.stickman.tower.physics.Platform
-
 import com.stickman.tower.endless.FloorMutator
 
 /**
  * Pembangun Level Menara Bertingkat (Tower Level Builder).
- * Menyediakan layout preset untuk Lantai 1 s/d Lantai 3 (Apex Boss Arena),
- * serta generator prosedural dinamis untuk Mode Endless Spire (Lantai 4 ke atas).
+ * Mengimplementasikan 10 Lantai Kampanye Cerita Utama (The 10-Floor Story Odyssey)
+ * yang terbagi dalam 4 Babak Epik (Act I - Act IV), 5 Pertarungan Bos Legendaris,
+ * Prasasti Batu Hitam Kuno (The Lore Tablets), Tempat Perlindungan Vulcanus,
+ * serta Generator Prosedural Dinamis untuk Mode Endless Spire (Lantai 11 ke atas).
  */
 object TowerLevelBuilder {
 
@@ -21,9 +23,20 @@ object TowerLevelBuilder {
             1 -> buildFloor1()
             2 -> buildFloor2()
             3 -> buildFloor3()
+            4 -> buildFloor4()
+            5 -> buildFloor5()
+            6 -> buildFloor6()
+            7 -> buildFloor7()
+            8 -> buildFloor8()
+            9 -> buildFloor9()
+            10 -> buildFloor10()
             else -> buildEndlessFloor(floorNumber, mutator ?: FloorMutator.getRandomMutator(floorNumber))
         }
     }
+
+    // =========================================================================
+    // BABAK I: UJIAN INISIASI (ACT I: THE INITIATION — LANTAI 1 S/D 3)
+    // =========================================================================
 
     private fun buildFloor1(): TowerFloor {
         val platforms = mutableListOf<Platform>()
@@ -55,6 +68,32 @@ object TowerLevelBuilder {
             Enemy(spawnX = 23.0f, spawnY = 1.2f, type = EnemyType.MELEE)
         )
 
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 14.0f,
+                y = 5.4f,
+                tabletId = "TABLET_1",
+                title = "Tablet I: Catatan Hari ke-47",
+                text = "Hari ke-47. Kami tiba di gerbang bawah dengan 100 prajurit terbaik. Tubuh kami telah menghitam, jari-jari menyatu menjadi garis padat. Makanan tak lagi berasa, namun pedang terasa seratus kali lebih ringan. Jika catatan ini kau temukan, ketahuilah: jangan pernah berhenti bergerak saat berada di atas platform."
+            )
+        )
+
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 2.0f,
+                triggerY = 1.0f,
+                triggerRadius = 2.5f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Mereka merampas merahnya mawar, birunya samudra, dan hangatnya fajar dari kita, saudaraku. Tunjukkan pada mereka bahwa di balik tubuh siluet ini, ada jiwa yang membakar lebih terang daripada bintang!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 1,
             floorName = "Lantai 1: Lower Bastion",
@@ -68,7 +107,11 @@ object TowerLevelBuilder {
             boss = null,
             checkpoint = Checkpoint(x = 12f, y = 1f),
             exitPortal = StageExit(x = 28f, y = 1f),
-            isBossFloor = false
+            isBossFloor = false,
+            actTitle = "ACT I: THE INITIATION",
+            actSubtitle = "LOWER BASTION",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
         )
     }
 
@@ -123,7 +166,9 @@ object TowerLevelBuilder {
             boss = null,
             checkpoint = Checkpoint(x = 13.5f, y = 6.1f),
             exitPortal = StageExit(x = 27.5f, y = 9.1f),
-            isBossFloor = false
+            isBossFloor = false,
+            actTitle = "ACT I: THE INITIATION",
+            actSubtitle = "SPIRE OF HAZARDS"
         )
     }
 
@@ -143,7 +188,7 @@ object TowerLevelBuilder {
             TreasureChest(x = 0.5f, y = 1.2f) // Peti Potion Darurat
         )
 
-        val boss = BossEnemy(spawnX = 17.0f, spawnY = 1.5f)
+        val boss = BossEnemy(spawnX = 17.0f, spawnY = 1.5f, type = BossType.TOWER_GUARDIAN)
 
         return TowerFloor(
             floorNumber = 3,
@@ -158,12 +203,384 @@ object TowerLevelBuilder {
             boss = boss,
             checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
             exitPortal = StageExit(x = 23.5f, y = 1.2f),
-            isBossFloor = true
+            isBossFloor = true,
+            actTitle = "ACT I: THE INITIATION",
+            actSubtitle = "APEX BOSS ARENA"
         )
     }
 
+    // =========================================================================
+    // BABAK II: RAHASIA TINTA & LOGAM ABADI (ACT II: SECRETS OF THE INK — LANTAI 4 S/D 6)
+    // =========================================================================
+
+    private fun buildFloor4(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        // Perpustakaan Kaca Kristal Amethyst
+        val amethystFloor = Color(0.20f, 0.15f, 0.28f, 1f)
+        val amethystWall = Color(0.14f, 0.10f, 0.22f, 1f)
+        val crystalPlatform = Color(0.26f, 0.20f, 0.38f, 1f)
+
+        platforms.add(Platform(x = -8f, y = 0f, width = 44f, height = 1f, color = amethystFloor))
+        platforms.add(Platform(x = -8f, y = 1f, width = 1f, height = 16f, color = amethystWall))
+        platforms.add(Platform(x = 35f, y = 1f, width = 1f, height = 16f, color = amethystWall))
+
+        // Meja-meja Arsip Kuno & Tangga Kaca Kristal
+        platforms.add(Platform(x = 2.0f, y = 2.4f, width = 4.5f, height = 0.5f, color = crystalPlatform))
+        platforms.add(Platform(x = 8.5f, y = 4.0f, width = 4.0f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 14.0f, y = 5.6f, width = 5.5f, height = 0.5f, color = crystalPlatform))
+        platforms.add(Platform(x = 21.0f, y = 4.0f, width = 4.5f, height = 0.5f, color = crystalPlatform))
+        platforms.add(Platform(x = 27.0f, y = 5.8f, width = 4.5f, height = 0.35f, isOneWay = true))
+
+        // Tangga Penyelamat
+        platforms.add(Platform(x = 8.5f, y = 2.2f, width = 4.0f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 21.0f, y = 2.2f, width = 4.5f, height = 0.35f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 6.0f, y = 1.0f, width = 2.5f, height = 0.5f),
+            SpikeHazard(x = 18.5f, y = 1.0f, width = 2.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 16.5f, y = 6.1f),
+            TreasureChest(x = 29.0f, y = 6.3f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 4.0f, spawnY = 2.9f, type = EnemyType.MELEE),
+            Enemy(spawnX = 15.0f, spawnY = 6.1f, type = EnemyType.RANGED),
+            Enemy(spawnX = 22.0f, spawnY = 4.5f, type = EnemyType.MELEE),
+            Enemy(spawnX = 28.5f, spawnY = 6.3f, type = EnemyType.RANGED)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 14.2f,
+                y = 5.6f,
+                tabletId = "TABLET_4",
+                title = "Tablet IV: Kutukan Sang Penulis",
+                text = "Mereka menyebut kami monster karena kami menggunakan panah amethyst dari kejauhan. Tapi mereka tidak mengerti: mendekati bilah pedang di menara ini berarti kematian. Kami menyegel diri dalam ruang arsip ini untuk mencari penawar racun tinta... namun tinta itu sendiri telah menjadi darah kami."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 4,
+            floorName = "Lantai 4: The Sunken Archives",
+            mapBounds = Rectangle(-8f, -1f, 44f, 16f),
+            spawnX = -1f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 14.0f, y = 1.0f),
+            exitPortal = StageExit(x = 32.0f, y = 1.0f),
+            isBossFloor = false,
+            actTitle = "ACT II: SECRETS OF THE INK",
+            actSubtitle = "THE SUNKEN ARCHIVES",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor5(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        // Kawah Alkimia Anomali — Arena Bos Sang Ratu Busur Bayang
+        val vatFloor = Color(0.18f, 0.12f, 0.24f, 1f)
+        val vatWall = Color(0.12f, 0.08f, 0.18f, 1f)
+
+        platforms.add(Platform(x = -5f, y = 0f, width = 36f, height = 1.2f, color = vatFloor))
+        platforms.add(Platform(x = -5f, y = 1.2f, width = 1.2f, height = 15f, color = vatWall))
+        platforms.add(Platform(x = 30f, y = 1.2f, width = 1.2f, height = 15f, color = vatWall))
+
+        // Platform Akrobatik Menghindari Volley Panah Amethyst
+        platforms.add(Platform(x = 3.5f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 17.0f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 10.0f, y = 4.8f, width = 5.0f, height = 0.35f, isOneWay = true))
+
+        val chests = listOf(
+            TreasureChest(x = 1.0f, y = 1.2f)
+        )
+
+        val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.AMETHYST_MATRON)
+
+        return TowerFloor(
+            floorNumber = 5,
+            floorName = "Lantai 5: Crucible of Mutations",
+            mapBounds = Rectangle(-5f, -1f, 36f, 16f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
+            exitPortal = StageExit(x = 27.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "ACT II: SECRETS OF THE INK",
+            actSubtitle = "CRUCIBLE OF MUTATIONS"
+        )
+    }
+
+    private fun buildFloor6(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        // Bengkel Tempa Logam Vulcanus (Zona Istirahat Aman / Safe Haven)
+        val forgeFloor = Color(0.28f, 0.18f, 0.12f, 1f)
+        val forgeWall = Color(0.18f, 0.10f, 0.08f, 1f)
+        val anvilStone = Color(0.42f, 0.25f, 0.14f, 1f)
+
+        platforms.add(Platform(x = -6f, y = 0f, width = 38f, height = 1.2f, color = forgeFloor))
+        platforms.add(Platform(x = -6f, y = 1.2f, width = 1.2f, height = 15f, color = forgeWall))
+        platforms.add(Platform(x = 31f, y = 1.2f, width = 1.2f, height = 15f, color = forgeWall))
+
+        // Meja Tempa & Tungku Api Emas
+        platforms.add(Platform(x = 8.0f, y = 1.2f, width = 7.0f, height = 0.8f, color = anvilStone))
+        platforms.add(Platform(x = 2.0f, y = 3.5f, width = 4.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 19.0f, y = 3.5f, width = 5.0f, height = 0.4f, isOneWay = true))
+
+        val chests = listOf(
+            TreasureChest(x = 3.5f, y = 1.2f),
+            TreasureChest(x = 11.5f, y = 2.0f), // Master Blacksmith Relic Chest
+            TreasureChest(x = 22.0f, y = 1.2f)
+        )
+
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 10.5f,
+                triggerY = 1.5f,
+                triggerRadius = 2.8f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "Vulcanus",
+                        title = "Sang Penempa Jiwa",
+                        text = "Denting paluku adalah satu-satunya irama yang menolak tunduk pada keheningan menara ini.",
+                        speakerColor = Color.ORANGE
+                    ),
+                    DialogueLine(
+                        speaker = "Vulcanus",
+                        title = "Sang Penempa Jiwa",
+                        text = "Koin emas yang kau bawa adalah tetesan cahaya matahari para pendaki masa lalu. Berikan padaku di tempaan, kan kutempa bilah bajamu agar sanggup membelah takdir!",
+                        speakerColor = Color.ORANGE
+                    )
+                )
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 6,
+            floorName = "Lantai 6: The Iron Foundry",
+            mapBounds = Rectangle(-6f, -1f, 38f, 16f),
+            spawnX = -1f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = null,
+            checkpoint = Checkpoint(x = 8.5f, y = 2.0f),
+            exitPortal = StageExit(x = 27.5f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "ACT II: SECRETS OF THE INK",
+            actSubtitle = "THE IRON FOUNDRY",
+            storyDialogues = storyDialogues,
+            isSafeZone = true
+        )
+    }
+
+    // =========================================================================
+    // BABAK III: PENDAKIAN ASTRAL & CERMIN JIWA (ACT III: THE ASTRAL CLIMB — LANTAI 7 S/D 9)
+    // =========================================================================
+
+    private fun buildFloor7(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val astralColor = Color(0.16f, 0.22f, 0.36f, 1f)
+
+        // Pulau Mengambang di Luar Angkasa Astral (Anomali Gravitasi Rendah)
+        platforms.add(Platform(x = -4f, y = 1.0f, width = 6.0f, height = 1.0f, color = astralColor)) // Pulau Start
+        platforms.add(Platform(x = 4.5f, y = 3.2f, width = 4.5f, height = 0.5f, color = astralColor))
+        platforms.add(Platform(x = 11.0f, y = 5.5f, width = 5.0f, height = 0.5f, color = astralColor))
+        platforms.add(Platform(x = 18.5f, y = 4.2f, width = 4.5f, height = 0.5f, color = astralColor))
+        platforms.add(Platform(x = 25.0f, y = 6.2f, width = 6.5f, height = 0.6f, color = astralColor)) // Pulau Puncak Exit
+
+        // Dek Pengaman Bawah Jurang & Jembatan Satu Arah
+        platforms.add(Platform(x = 2.0f, y = 0.0f, width = 26.0f, height = 0.6f, color = Color(0.10f, 0.14f, 0.22f, 1f)))
+        platforms.add(Platform(x = 11.5f, y = 2.5f, width = 4.0f, height = 0.35f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 6.0f, y = 0.6f, width = 3.0f, height = 0.5f),
+            SpikeHazard(x = 16.0f, y = 0.6f, width = 3.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 12.5f, y = 6.0f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 6.0f, spawnY = 3.7f, type = EnemyType.MELEE),
+            Enemy(spawnX = 13.0f, spawnY = 6.0f, type = EnemyType.RANGED),
+            Enemy(spawnX = 20.0f, spawnY = 4.7f, type = EnemyType.MELEE),
+            Enemy(spawnX = 27.5f, spawnY = 6.8f, type = EnemyType.RANGED)
+        )
+
+        return TowerFloor(
+            floorNumber = 7,
+            floorName = "Lantai 7: The Fractured Precipice",
+            mapBounds = Rectangle(-6f, -1f, 40f, 18f),
+            spawnX = -1f,
+            spawnY = 2.0f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 12.0f, y = 6.0f),
+            exitPortal = StageExit(x = 29.0f, y = 6.8f),
+            isBossFloor = false,
+            actTitle = "ACT III: THE ASTRAL CLIMB",
+            actSubtitle = "THE FRACTURED PRECIPICE",
+            gravityScale = 0.65f // Gravitasi Rendah (-35%) untuk Akrobatik Udara
+        )
+    }
+
+    private fun buildFloor8(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        // Balairung Gema Bayangan — Duel Cermin Jiwa (Doppelgänger)
+        val mirrorFloor = Color(0.12f, 0.14f, 0.20f, 1f)
+        val mirrorWall = Color(0.08f, 0.09f, 0.14f, 1f)
+
+        platforms.add(Platform(x = -5f, y = 0f, width = 36f, height = 1.2f, color = mirrorFloor))
+        platforms.add(Platform(x = -5f, y = 1.2f, width = 1.2f, height = 15f, color = mirrorWall))
+        platforms.add(Platform(x = 30f, y = 1.2f, width = 1.2f, height = 15f, color = mirrorWall))
+
+        platforms.add(Platform(x = 3.5f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 17.0f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 10.0f, y = 4.8f, width = 5.0f, height = 0.35f, isOneWay = true))
+
+        val chests = listOf(
+            TreasureChest(x = 1.0f, y = 1.2f)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 10.5f,
+                y = 4.8f,
+                tabletId = "TABLET_8",
+                title = "Tablet VIII: Paradoks Menara Abadi",
+                text = "Musuh paling berbahaya di puncak menara bukanlah dewa, melainkan dirimu sendiri yang menyerah pada keputusasaan. Ketika kau melihat bayanganmu mengayunkan pedang yang sama, jangan menunduk. Lakukan parry tepat saat kilatan matanya menyala!"
+            )
+        )
+
+        val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.SHADOW_DOPPELGANGER)
+
+        return TowerFloor(
+            floorNumber = 8,
+            floorName = "Lantai 8: The Hall of Echoes",
+            mapBounds = Rectangle(-5f, -1f, 36f, 16f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
+            exitPortal = StageExit(x = 27.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "ACT III: THE ASTRAL CLIMB",
+            actSubtitle = "THE HALL OF ECHOES",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor9(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        // Kuil Gerhana Darah — Pertarungan Pangeran Belati Darah
+        val bloodFloor = Color(0.28f, 0.08f, 0.12f, 1f)
+        val bloodWall = Color(0.18f, 0.04f, 0.08f, 1f)
+
+        platforms.add(Platform(x = -5f, y = 0f, width = 36f, height = 1.2f, color = bloodFloor))
+        platforms.add(Platform(x = -5f, y = 1.2f, width = 1.2f, height = 15f, color = bloodWall))
+        platforms.add(Platform(x = 30f, y = 1.2f, width = 1.2f, height = 15f, color = bloodWall))
+
+        platforms.add(Platform(x = 3.5f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 17.0f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 10.0f, y = 4.8f, width = 5.0f, height = 0.35f, isOneWay = true))
+
+        val chests = listOf(
+            TreasureChest(x = 1.0f, y = 1.2f)
+        )
+
+        val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.CRIMSON_SOVEREIGN)
+
+        return TowerFloor(
+            floorNumber = 9,
+            floorName = "Lantai 9: The Blood Moon Sanctum",
+            mapBounds = Rectangle(-5f, -1f, 36f, 16f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
+            exitPortal = StageExit(x = 27.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "ACT III: THE ASTRAL CLIMB",
+            actSubtitle = "THE BLOOD MOON SANCTUM"
+        )
+    }
+
+    // =========================================================================
+    // BABAK IV: PUNCAK KANVAS TAKDIR (ACT IV: THE PRIMORDIAL CANVAS — LANTAI 10)
+    // =========================================================================
+
+    private fun buildFloor10(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        // Platform Marmer Putih Primordial di Atas Samudra Tinta Hitam Kosmik
+        val primordialMarble = Color(0.88f, 0.90f, 0.96f, 1f)
+        val divinePillar = Color(0.70f, 0.75f, 0.86f, 1f)
+
+        platforms.add(Platform(x = -6f, y = 0f, width = 38f, height = 1.3f, color = primordialMarble))
+        platforms.add(Platform(x = -6f, y = 1.3f, width = 1.3f, height = 16f, color = divinePillar))
+        platforms.add(Platform(x = 31f, y = 1.3f, width = 1.3f, height = 16f, color = divinePillar))
+
+        // Altar Langit
+        platforms.add(Platform(x = 2.5f, y = 3.0f, width = 4.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 18.0f, y = 3.0f, width = 4.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 10.0f, y = 5.2f, width = 5.5f, height = 0.4f, isOneWay = true))
+
+        val chests = listOf(
+            TreasureChest(x = 1.0f, y = 1.3f) // Peti Relik Primordial
+        )
+
+        val boss = BossEnemy(spawnX = 18.5f, spawnY = 1.5f, type = BossType.GRAND_CALLIGRAPHER)
+
+        return TowerFloor(
+            floorNumber = 10,
+            floorName = "Lantai 10: The Primordial Canvas",
+            mapBounds = Rectangle(-6f, -1f, 38f, 17f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 1.5f, y = 1.3f),
+            exitPortal = StageExit(x = 28.5f, y = 1.3f),
+            isBossFloor = true,
+            actTitle = "ACT IV: THE PRIMORDIAL CANVAS",
+            actSubtitle = "SUMMIT OF REALITY"
+        )
+    }
+
+    // =========================================================================
+    // POST-GAME: PARADOKS ENDLESS SPIRE (LANTAI 11 KE ATAS)
+    // =========================================================================
+
     fun buildEndlessFloor(floorNumber: Int, mutator: FloorMutator): TowerFloor {
-        val endlessRank = (floorNumber - 3).coerceAtLeast(1)
+        val endlessRank = (floorNumber - 10).coerceAtLeast(1)
         val hpScale = 1.0f + endlessRank * 0.15f
         val dmgScale = (1.0f + endlessRank * 0.12f) * mutator.enemyDamageMultiplier
         val isBossFloor = (floorNumber % 5 == 0)
@@ -185,8 +602,17 @@ object TowerLevelBuilder {
 
             chests.add(TreasureChest(x = 0.5f, y = 1.2f))
 
-            val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f)
-            boss.health.setMaxHp(350f * hpScale)
+            // Rotasi Bos Menara di Endless Spire
+            val bossType = when ((floorNumber / 5) % 5) {
+                1 -> BossType.AMETHYST_MATRON
+                2 -> BossType.SHADOW_DOPPELGANGER
+                3 -> BossType.CRIMSON_SOVEREIGN
+                4 -> BossType.GRAND_CALLIGRAPHER
+                else -> BossType.TOWER_GUARDIAN
+            }
+
+            val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = bossType)
+            boss.health.setMaxHp(boss.health.maxHp * hpScale)
             boss.hitbox.damage *= dmgScale
 
             return TowerFloor(
@@ -202,7 +628,9 @@ object TowerLevelBuilder {
                 boss = boss,
                 checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
                 exitPortal = StageExit(x = 24.5f, y = 1.2f),
-                isBossFloor = true
+                isBossFloor = true,
+                actTitle = "ENDLESS PARADOX",
+                actSubtitle = "FLOOR $floorNumber"
             )
         }
 
@@ -285,7 +713,9 @@ object TowerLevelBuilder {
             boss = null,
             checkpoint = Checkpoint(x = 16.0f, y = 6.0f),
             exitPortal = StageExit(x = mapWidth - 12f, y = 1.0f),
-            isBossFloor = false
+            isBossFloor = false,
+            actTitle = "ENDLESS PARADOX",
+            actSubtitle = "FLOOR $floorNumber"
         )
     }
 }

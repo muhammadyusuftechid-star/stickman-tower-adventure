@@ -383,7 +383,8 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             }
             1 -> {
                 AudioManager.playSlashLight()
-                game.setScreen(PlayScreen(game, 4, GameMode.ENDLESS))
+                val startingFloor = if (currentSaveData.highestEndlessFloor >= 11) currentSaveData.highestEndlessFloor else 11
+                game.setScreen(PlayScreen(game, startingFloor, GameMode.ENDLESS))
             }
             2 -> {
                 AudioManager.playSlashLight()

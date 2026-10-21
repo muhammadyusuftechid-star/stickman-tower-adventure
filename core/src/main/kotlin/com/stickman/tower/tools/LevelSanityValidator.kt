@@ -126,20 +126,20 @@ object LevelSanityValidator {
     }
 
     /**
-     * Mengaudit seluruh lantai Story Mode (Lantai 1, 2, 3).
+     * Mengaudit seluruh lantai Story Mode (Lantai 1 s/d 10).
      */
     fun auditAllStoryFloors(): List<LevelValidationReport> {
-        return (1..3).map { floorNum ->
+        return (1..10).map { floorNum ->
             val floor = TowerLevelBuilder.buildFloor(floorNum)
             validateFloor(floor)
         }
     }
 
     /**
-     * Mengaudit sampel lantai prosedural Endless Spire.
+     * Mengaudit sampel lantai prosedural Endless Spire (Lantai 11 ke atas).
      */
     fun auditEndlessFloors(count: Int = 10): List<LevelValidationReport> {
-        return (4 until 4 + count).map { floorNum ->
+        return (11 until 11 + count).map { floorNum ->
             val floor = TowerLevelBuilder.buildFloor(floorNum)
             validateFloor(floor)
         }

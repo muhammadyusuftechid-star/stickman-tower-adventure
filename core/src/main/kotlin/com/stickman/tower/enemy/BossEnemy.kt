@@ -27,28 +27,99 @@ enum class BossState {
     DEAD
 }
 
+enum class BossType {
+    TOWER_GUARDIAN,      // Floor 3 (General Oakhaven)
+    AMETHYST_MATRON,     // Floor 5 (Sang Ratu Busur Bayang)
+    SHADOW_DOPPELGANGER, // Floor 8 (Cermin Jiwa Gelap)
+    CRIMSON_SOVEREIGN,   // Floor 9 (Pangeran Belati Darah)
+    GRAND_CALLIGRAPHER   // Floor 10 (Sang Penulis Takdir)
+}
+
 /**
- * Boss Menara Lantai 3: "Tower Guardian"
- * Karakter Boss raksasa berukuran 1.4m x 2.8m dengan 2 Fase Combat:
- * - Fase 1 (HP > 50%): Heavy Cleave + Ground Slam Shockwave.
- * - Fase 2 (HP <= 50% - Enrage Mode): Aura merah menyala, movement speed +50%, dan menembakkan proyektil Wind Slash!
+ * Boss Menara:
+ * Mendukung 5 tipe bos kampanye naratif (Lantai 3, 5, 8, 9, 10) serta bos Endless Spire.
  */
-class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
+class BossEnemy(
+    spawnX: Float = 14f,
+    spawnY: Float = 2.5f,
+    val type: BossType = BossType.TOWER_GUARDIAN,
+    customMaxHp: Float? = null,
+    customName: String? = null
+) {
     val position = Vector2(spawnX, spawnY)
     val velocity = Vector2(0f, 0f)
 
-    val width = 1.4f
-    val height = 2.8f
+    val width: Float = when (type) {
+        BossType.AMETHYST_MATRON -> 1.2f
+        BossType.SHADOW_DOPPELGANGER -> 1.1f
+        BossType.CRIMSON_SOVEREIGN -> 1.3f
+        BossType.GRAND_CALLIGRAPHER -> 1.8f
+        else -> 1.4f
+    }
+    val height: Float = when (type) {
+        BossType.AMETHYST_MATRON -> 2.5f
+        BossType.SHADOW_DOPPELGANGER -> 2.2f
+        BossType.CRIMSON_SOVEREIGN -> 2.6f
+        BossType.GRAND_CALLIGRAPHER -> 3.4f
+        else -> 2.8f
+    }
     val bounds = Rectangle(position.x, position.y, width, height)
 
-    val name: String = "TOWER GUARDIAN"
-    val health = Health(maxHp = 350f, invulnerableDuration = 0.15f)
+    val name: String = customName ?: when (type) {
+        BossType.TOWER_GUARDIAN -> "TOWER GUARDIAN"
+        BossType.AMETHYST_MATRON -> "THE AMETHYST MATRON"
+        BossType.SHADOW_DOPPELGANGER -> "SHADOW DOPPELGANGER"
+        BossType.CRIMSON_SOVEREIGN -> "CRIMSON SOVEREIGN"
+        BossType.GRAND_CALLIGRAPHER -> "THE GRAND CALLIGRAPHER"
+    }
+
+    val subtitle: String = when (type) {
+        BossType.TOWER_GUARDIAN -> "General Oakhaven"
+        BossType.AMETHYST_MATRON -> "Queen of the Shadow Bow"
+        BossType.SHADOW_DOPPELGANGER -> "Dark Reflection"
+        BossType.CRIMSON_SOVEREIGN -> "Prince of Blood Daggers"
+        BossType.GRAND_CALLIGRAPHER -> "Architect of Fate"
+    }
+
+    val health = Health(
+        maxHp = customMaxHp ?: when (type) {
+            BossType.TOWER_GUARDIAN -> 350f
+            BossType.AMETHYST_MATRON -> 480f
+            BossType.SHADOW_DOPPELGANGER -> 620f
+            BossType.CRIMSON_SOVEREIGN -> 780f
+            BossType.GRAND_CALLIGRAPHER -> 1100f
+        },
+        invulnerableDuration = 0.15f
+    )
     val hurtbox = Hurtbox(this)
-    val hitbox = Hitbox(this, damage = 22f, knockbackX = 8.5f, knockbackY = 4.5f)
+    val hitbox = Hitbox(
+        this,
+        damage = when (type) {
+            BossType.TOWER_GUARDIAN -> 22f
+            BossType.AMETHYST_MATRON -> 18f
+            BossType.SHADOW_DOPPELGANGER -> 25f
+            BossType.CRIMSON_SOVEREIGN -> 30f
+            BossType.GRAND_CALLIGRAPHER -> 36f
+        },
+        knockbackX = 8.5f,
+        knockbackY = 4.5f
+    )
 
     // Hadiah Kemenangan Boss
-    val expReward = 200
-    val goldReward = 100
+    val expReward: Int = when (type) {
+        BossType.TOWER_GUARDIAN -> 200
+        BossType.AMETHYST_MATRON -> 350
+        BossType.SHADOW_DOPPELGANGER -> 500
+        BossType.CRIMSON_SOVEREIGN -> 700
+        BossType.GRAND_CALLIGRAPHER -> 1200
+    }
+    val goldReward: Int = when (type) {
+        BossType.TOWER_GUARDIAN -> 100
+        BossType.AMETHYST_MATRON -> 180
+        BossType.SHADOW_DOPPELGANGER -> 250
+        BossType.CRIMSON_SOVEREIGN -> 350
+        BossType.GRAND_CALLIGRAPHER -> 600
+    }
     var rewardClaimed = false
 
     var state = BossState.IDLE
@@ -289,17 +360,39 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
                 velocity.x = 0f
                 if (actionTimer >= 0.25f && !hasFiredWindSlash) {
                     hasFiredWindSlash = true
-                    // Tembakkan Proyektil Wind Slash ke Arah Pemain
                     val projVx = if (facingRight) 14f else -14f
                     val projStartX = if (facingRight) position.x + width else position.x - 0.8f
-                    projectiles.add(
-                        Projectile(
-                            startX = projStartX,
-                            startY = position.y + height * 0.45f,
-                            velocityX = projVx,
-                            damage = 22f
-                        )
-                    )
+                    when (type) {
+                        BossType.TOWER_GUARDIAN -> {
+                            projectiles.add(
+                                Projectile(
+                                    startX = projStartX,
+                                    startY = position.y + height * 0.45f,
+                                    velocityX = projVx,
+                                    damage = 22f,
+                                    color = Color(0.3f, 0.85f, 1f, 1f)
+                                )
+                            )
+                        }
+                        BossType.AMETHYST_MATRON -> {
+                            // Hujan Panah Kristal Amethyst (Triple Fan Volley)
+                            projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.6f, velocityX = projVx * 1.15f, velocityY = 2.0f, damage = 16f, color = Color(0.85f, 0.45f, 1f, 1f)))
+                            projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.45f, velocityX = projVx * 1.25f, velocityY = 0f, damage = 18f, color = Color(0.85f, 0.45f, 1f, 1f)))
+                            projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.3f, velocityX = projVx * 1.15f, velocityY = -2.0f, damage = 16f, color = Color(0.85f, 0.45f, 1f, 1f)))
+                        }
+                        BossType.SHADOW_DOPPELGANGER -> {
+                            // Tebasan Sabit Bayangan Cermin
+                            projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.45f, velocityX = projVx * 1.35f, damage = 24f, color = Color(0.4f, 0.85f, 1f, 1f)))
+                        }
+                        BossType.CRIMSON_SOVEREIGN -> {
+                            // Bilah Sabit Darah Vampiric
+                            projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.45f, velocityX = projVx * 1.3f, damage = 28f, color = Color(1f, 0.2f, 0.25f, 1f)))
+                        }
+                        BossType.GRAND_CALLIGRAPHER -> {
+                            // Komet Tinta Kosmis Raksasa
+                            projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.5f, velocityX = projVx * 1.1f, damage = 35f, width = 1.6f, height = 0.8f, color = Color(1f, 0.85f, 0.25f, 1f)))
+                        }
+                    }
                 }
                 if (actionTimer >= 0.55f) {
                     attackCooldown = 1.1f
@@ -421,9 +514,40 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         shapeRenderer.color = if (health.isDead) Color.GRAY else COLOR_BOSS_EYE
         shapeRenderer.circle(centerX + lookDir * 0.16f, headCenterY + 0.05f, 0.08f, 10)
 
-        // Tanduk Baja di Kepala
-        shapeRenderer.color = COLOR_BOSS_HORN
-        shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX + lookDir * 0.45f, headCenterY + headRadius + 0.35f, 0.09f)
+        // Tanduk / Mahkota / Halo di Kepala sesuai Tipe Bos
+        when (type) {
+            BossType.TOWER_GUARDIAN -> {
+                shapeRenderer.color = COLOR_BOSS_HORN
+                shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX + lookDir * 0.45f, headCenterY + headRadius + 0.35f, 0.09f)
+            }
+            BossType.AMETHYST_MATRON -> {
+                // Mahkota Kristal Amethyst
+                shapeRenderer.color = Color(0.85f, 0.45f, 1f, 1f)
+                shapeRenderer.triangle(
+                    centerX - 0.25f, headCenterY + headRadius,
+                    centerX, headCenterY + headRadius + 0.35f,
+                    centerX + 0.25f, headCenterY + headRadius
+                )
+            }
+            BossType.SHADOW_DOPPELGANGER -> {
+                // Wisp Bayangan Mengambang di Kepala
+                shapeRenderer.color = Color.CYAN
+                shapeRenderer.circle(centerX, headCenterY + headRadius + 0.15f, 0.14f, 10)
+            }
+            BossType.CRIMSON_SOVEREIGN -> {
+                // Tanduk Sayap Kelelawar Darah Ganda
+                shapeRenderer.color = Color(1f, 0.15f, 0.25f, 1f)
+                shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX + lookDir * 0.45f, headCenterY + headRadius + 0.4f, 0.08f)
+                shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX - lookDir * 0.35f, headCenterY + headRadius + 0.35f, 0.08f)
+            }
+            BossType.GRAND_CALLIGRAPHER -> {
+                // Cincin Halo Ilahi Emas Kosmis
+                shapeRenderer.color = Color.GOLD
+                shapeRenderer.circle(centerX, headCenterY + 0.15f, headRadius + 0.28f, 20)
+                shapeRenderer.color = Color.WHITE
+                shapeRenderer.circle(centerX, headCenterY + 0.15f, headRadius + 0.20f, 16)
+            }
+        }
 
         // Visual Guard Break / Stun Stars di atas kepala Bos
         if (state == BossState.STUNNED) {
@@ -448,23 +572,68 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         shapeRenderer.rectLine(centerX, pelvisY, footLeftX, footY, 0.14f)
         shapeRenderer.rectLine(centerX, pelvisY, footRightX, footY, 0.14f)
 
-        // Tangan & Pedang Raksasa (Greatsword)
+        // Tangan & Senjata Sesuai Tipe Bos
         val handX = centerX + lookDir * 0.55f
         val handY = shoulderY - 0.25f
         shapeRenderer.rectLine(centerX, shoulderY, handX, handY, 0.12f)
 
-        // Pedang Raksasa
-        val bladeLen = 2.0f
         val bladeAngle = when (state) {
             BossState.CLEAVE -> if (facingRight) 25f else 155f
             BossState.GROUND_SLAM_DOWN -> -90f
             else -> if (facingRight) 65f else 115f
         }
-        val swordEndX = handX + MathUtils.cosDeg(bladeAngle) * bladeLen
-        val swordEndY = handY + MathUtils.sinDeg(bladeAngle) * bladeLen
 
-        shapeRenderer.color = if (isPhase2) COLOR_BLADE_PHASE2 else COLOR_BLADE_NORMAL
-        shapeRenderer.rectLine(handX, handY, swordEndX, swordEndY, 0.15f)
+        when (type) {
+            BossType.AMETHYST_MATRON -> {
+                // Busur Bayangan Amethyst
+                val bowRadius = 1.1f
+                shapeRenderer.color = Color(0.85f, 0.45f, 1f, 1f)
+                shapeRenderer.rectLine(handX, handY - 0.8f, handX + lookDir * 0.4f, handY, 0.08f)
+                shapeRenderer.rectLine(handX + lookDir * 0.4f, handY, handX, handY + 0.8f, 0.08f)
+                shapeRenderer.color = Color.WHITE
+                shapeRenderer.rectLine(handX, handY - 0.8f, handX, handY + 0.8f, 0.03f)
+            }
+            BossType.SHADOW_DOPPELGANGER -> {
+                // Belati Bayangan Ganda
+                val daggerLen = 1.2f
+                val tipX = handX + MathUtils.cosDeg(bladeAngle) * daggerLen
+                val tipY = handY + MathUtils.sinDeg(bladeAngle) * daggerLen
+                shapeRenderer.color = Color.CYAN
+                shapeRenderer.rectLine(handX, handY, tipX, tipY, 0.08f)
+            }
+            BossType.CRIMSON_SOVEREIGN -> {
+                // Sabit Darah (Blood Scythe)
+                val shaftLen = 2.2f
+                val shaftEndX = handX + MathUtils.cosDeg(bladeAngle) * shaftLen
+                val shaftEndY = handY + MathUtils.sinDeg(bladeAngle) * shaftLen
+                shapeRenderer.color = Color(0.3f, 0.1f, 0.15f, 1f)
+                shapeRenderer.rectLine(handX, handY, shaftEndX, shaftEndY, 0.10f)
+                // Bilah Melengkung Sabit
+                shapeRenderer.color = Color(1f, 0.2f, 0.25f, 1f)
+                shapeRenderer.rectLine(shaftEndX, shaftEndY, shaftEndX + lookDir * 0.9f, shaftEndY - 0.6f, 0.16f)
+            }
+            BossType.GRAND_CALLIGRAPHER -> {
+                // Kuas Tinta Kosmis Raksasa
+                val brushLen = 2.6f
+                val brushEndX = handX + MathUtils.cosDeg(bladeAngle) * brushLen
+                val brushEndY = handY + MathUtils.sinDeg(bladeAngle) * brushLen
+                shapeRenderer.color = Color(0.85f, 0.70f, 0.25f, 1f)
+                shapeRenderer.rectLine(handX, handY, brushEndX, brushEndY, 0.16f)
+                // Ujung Bulu Kuas Bertabur Bintang
+                shapeRenderer.color = Color.WHITE
+                shapeRenderer.circle(brushEndX, brushEndY, 0.25f, 12)
+                shapeRenderer.color = Color(0.2f, 0.8f, 1f, 0.8f)
+                shapeRenderer.circle(brushEndX, brushEndY, 0.15f, 8)
+            }
+            else -> {
+                // TOWER_GUARDIAN: Standard Colossal Greatsword
+                val bladeLen = 2.0f
+                val swordEndX = handX + MathUtils.cosDeg(bladeAngle) * bladeLen
+                val swordEndY = handY + MathUtils.sinDeg(bladeAngle) * bladeLen
+                shapeRenderer.color = if (isPhase2) COLOR_BLADE_PHASE2 else COLOR_BLADE_NORMAL
+                shapeRenderer.rectLine(handX, handY, swordEndX, swordEndY, 0.15f)
+            }
+        }
     }
 
     fun renderDebug(shapeRenderer: ShapeRenderer) {

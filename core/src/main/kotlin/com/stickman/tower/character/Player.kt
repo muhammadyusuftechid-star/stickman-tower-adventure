@@ -11,6 +11,7 @@ import com.stickman.tower.combat.ComboStep
 import com.stickman.tower.combat.Health
 import com.stickman.tower.combat.Hitbox
 import com.stickman.tower.combat.Hurtbox
+import com.stickman.tower.combat.Projectile
 import com.stickman.tower.combat.Skill
 import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.audio.HapticManager
@@ -49,14 +50,19 @@ class Player(
 
     val comboManager = ComboManager()
     val skill1 = Skill(
-        name = archetype.skillName,
-        cooldown = when (archetype) {
-            CharacterArchetype.AGILE -> 3.2f
-            CharacterArchetype.HEAVY -> 5.5f
-            CharacterArchetype.BALANCED -> 4.5f
-        }
+        name = archetype.skill1Name,
+        cooldown = archetype.skill1Cooldown
     )
-    val ultimate = UltimateEnergy(maxEnergy = 100f)
+    val skill2 = Skill(
+        name = archetype.skill2Name,
+        cooldown = archetype.skill2Cooldown
+    )
+    val skill3 = Skill(
+        name = archetype.skill3Name,
+        cooldown = archetype.skill3Cooldown
+    )
+    val ultimate = UltimateEnergy(maxEnergy = archetype.ultEnergyCost)
+    val projectiles = mutableListOf<Projectile>()
     val baseAttackPower: Float get() = stats.attackPower
 
     // Callbacks untuk efek partikel & visual luar
@@ -78,12 +84,18 @@ class Player(
     private val afterimagePool = Array(4) { Vector2() }
     private var afterimageCount = 0
 
-    // Parameter Skill 1 (Dash Strike)
-    var isSkillStriking = false
+    // Parameter Multi-Skill (Skill 1, 2, 3)
+    var isSkillStriking = false // Skill 1
+        private set
+    var isSkill2Active = false  // Skill 2
+        private set
+    var isSkill3Active = false  // Skill 3
         private set
     private var skillTimer = 0f
+    private var skill2Timer = 0f
+    private var skill3Timer = 0f
 
-    // Parameter Ultimate (Bladestorm)
+    // Parameter Ultimate (Bladestorm / Phantom Flurry / Meteor Cleave)
     var isUlting = false
         private set
     private var ultTimer = 0f
@@ -159,7 +171,17 @@ class Player(
         animTime += delta
         health.update(delta)
         skill1.update(delta)
+        skill2.update(delta)
+        skill3.update(delta)
         comboManager.update(delta, attackPhase != AttackPhase.INACTIVE)
+
+        // Update proyektil aktif pemain
+        val projIter = projectiles.iterator()
+        while (projIter.hasNext()) {
+            val p = projIter.next()
+            p.update(delta)
+            if (p.isDestroyed) projIter.remove()
+        }
 
         if (dodgeCooldown > 0f) {
             dodgeCooldown = (dodgeCooldown - delta).coerceAtLeast(0f)
@@ -183,7 +205,7 @@ class Player(
         updateSpecialActions(delta)
 
         // 3. Gerak Horizontal & Fisika (Jika tidak dalam Dodge / Skill / Attack Startup)
-        val canControlMove = !isDodging && !isSkillStriking && !isUlting &&
+        val canControlMove = !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting &&
                              (attackPhase == AttackPhase.INACTIVE || attackPhase == AttackPhase.RECOVERY)
 
         val moveDir = when {
@@ -258,7 +280,7 @@ class Player(
 
     private fun handleActionTriggers(input: GameInput) {
         // Pemicu Dodge Roll
-        if (input.isDodgeJustPressed() && !isDodging && !isSkillStriking && !isUlting && dodgeCooldown <= 0f) {
+        if (input.isDodgeJustPressed() && !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting && dodgeCooldown <= 0f) {
             isDodging = true
             dodgeTimer = 0f
             dodgeCooldown = DODGE_COOLDOWN * cooldownMultiplier
@@ -273,8 +295,8 @@ class Player(
             return
         }
 
-        // Pemicu Skill 1 (Dash Strike / Shadow Dash / Ground Breaker)
-        if (input.isSkillJustPressed() && skill1.isReady && !isDodging && !isSkillStriking && !isUlting) {
+        // Pemicu Skill 1 (Gale Crescent / Shadow Shuriken / Earth Shockwave)
+        if ((input.isSkill1JustPressed() || input.isSkillJustPressed()) && skill1.isReady && !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting) {
             if (skill1.use(cooldownMultiplier)) {
                 isSkillStriking = true
                 skillTimer = 0f
@@ -284,22 +306,177 @@ class Player(
                     hasParryBuff = false
                     parryBuffTimer = 0f
                 }
-                val (baseDmg, isCrit) = stats.calculateDamage(30f)
-                val finalDmg = baseDmg * archetype.baseDamageMultiplier * parryBonus
-                val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
-                hitbox.damage = finalDmg
-                hitbox.isCritical = finalCrit
-                hitbox.knockbackX = if (archetype == CharacterArchetype.HEAVY) 11.5f else 8.5f
-                hitbox.knockbackY = 4.0f
-                hitbox.reset()
-                AudioManager.playSlashHeavy()
+                val dir = if (facingRight) 1f else -1f
+                when (archetype) {
+                    CharacterArchetype.BALANCED -> {
+                        val (baseDmg, isCrit) = stats.calculateDamage(30f)
+                        val finalDmg = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        projectiles.add(
+                            Projectile(
+                                startX = position.x + (if (facingRight) width + 0.1f else -1.3f),
+                                startY = position.y + 0.5f,
+                                velocityX = dir * 18f,
+                                damage = finalDmg * 0.95f,
+                                width = 1.2f,
+                                height = 0.5f,
+                                color = Color.CYAN
+                            )
+                        )
+                        hitbox.damage = finalDmg
+                        hitbox.isCritical = isCrit
+                        hitbox.knockbackX = 8.0f
+                        hitbox.knockbackY = 3.5f
+                        hitbox.reset()
+                        AudioManager.playSlashHeavy()
+                    }
+                    CharacterArchetype.AGILE -> {
+                        val (baseDmg, isCrit) = stats.calculateDamage(20f)
+                        val finalDmg = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        val startPx = position.x + (if (facingRight) width else -0.6f)
+                        projectiles.add(Projectile(startPx, position.y + 0.6f, dir * 22f, velocityY = 2.0f, damage = finalDmg * 0.75f, width = 0.5f, height = 0.5f, color = Color(0.85f, 0.45f, 1f, 1f)))
+                        projectiles.add(Projectile(startPx, position.y + 0.6f, dir * 24f, velocityY = 0f, damage = finalDmg * 0.85f, width = 0.6f, height = 0.5f, color = Color(0.85f, 0.45f, 1f, 1f)))
+                        projectiles.add(Projectile(startPx, position.y + 0.6f, dir * 22f, velocityY = -2.0f, damage = finalDmg * 0.75f, width = 0.5f, height = 0.5f, color = Color(0.85f, 0.45f, 1f, 1f)))
+                        hitbox.damage = finalDmg
+                        hitbox.isCritical = isCrit || (Random.nextFloat() < 0.25f)
+                        hitbox.knockbackX = 6.0f
+                        hitbox.knockbackY = 2.0f
+                        hitbox.reset()
+                        AudioManager.playSlashLight()
+                    }
+                    CharacterArchetype.HEAVY -> {
+                        val (baseDmg, isCrit) = stats.calculateDamage(44f)
+                        val finalDmg = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        projectiles.add(
+                            Projectile(
+                                startX = position.x + (if (facingRight) width + 0.1f else -1.5f),
+                                startY = position.y,
+                                velocityX = dir * 13f,
+                                damage = finalDmg,
+                                width = 1.4f,
+                                height = 1.1f,
+                                color = Color(1f, 0.55f, 0.15f, 1f)
+                            )
+                        )
+                        hitbox.damage = finalDmg
+                        hitbox.isCritical = isCrit
+                        hitbox.knockbackX = 12.0f
+                        hitbox.knockbackY = 5.5f
+                        hitbox.reset()
+                        AudioManager.playSlashHeavy()
+                    }
+                }
+                HapticManager.vibrateMedium()
+                return
+            }
+        }
+
+        // Pemicu Skill 2 (Rising Dragon / Venom Flurry / Cyclone Cleave)
+        if (input.isSkill2JustPressed() && skill2.isReady && !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting) {
+            if (skill2.use(cooldownMultiplier)) {
+                isSkill2Active = true
+                skill2Timer = 0f
+                attackPhase = AttackPhase.INACTIVE
+                val parryBonus = if (hasParryBuff) 1.25f else 1.0f
+                if (hasParryBuff) {
+                    hasParryBuff = false
+                    parryBuffTimer = 0f
+                }
+                val dir = if (facingRight) 1f else -1f
+                when (archetype) {
+                    CharacterArchetype.BALANCED -> {
+                        velocity.y = 11.5f
+                        velocity.x = dir * 3.5f
+                        isGrounded = false
+                        val (baseDmg, isCrit) = stats.calculateDamage(36f)
+                        hitbox.damage = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        hitbox.isCritical = isCrit
+                        hitbox.knockbackX = 3.5f
+                        hitbox.knockbackY = 10.5f
+                        hitbox.reset()
+                        AudioManager.playJump()
+                        AudioManager.playSlashHeavy()
+                    }
+                    CharacterArchetype.AGILE -> {
+                        velocity.x = dir * 3.0f
+                        val (baseDmg, isCrit) = stats.calculateDamage(38f)
+                        hitbox.damage = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        hitbox.isCritical = isCrit
+                        hitbox.knockbackX = 4.5f
+                        hitbox.knockbackY = 2.0f
+                        hitbox.reset()
+                        AudioManager.playSlashLight()
+                    }
+                    CharacterArchetype.HEAVY -> {
+                        velocity.x = dir * 4.5f
+                        val (baseDmg, isCrit) = stats.calculateDamage(52f)
+                        hitbox.damage = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        hitbox.isCritical = isCrit
+                        hitbox.knockbackX = 12.0f
+                        hitbox.knockbackY = 4.0f
+                        hitbox.reset()
+                        AudioManager.playSlashHeavy()
+                    }
+                }
+                HapticManager.vibrateMedium()
+                return
+            }
+        }
+
+        // Pemicu Skill 3 (Dash Strike / Phantom Blink / Titan Roar)
+        if (input.isSkill3JustPressed() && skill3.isReady && !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting) {
+            if (skill3.use(cooldownMultiplier)) {
+                isSkill3Active = true
+                skill3Timer = 0f
+                attackPhase = AttackPhase.INACTIVE
+                val parryBonus = if (hasParryBuff) 1.25f else 1.0f
+                if (hasParryBuff) {
+                    hasParryBuff = false
+                    parryBuffTimer = 0f
+                }
+                val dir = if (facingRight) 1f else -1f
+                when (archetype) {
+                    CharacterArchetype.BALANCED -> {
+                        velocity.x = dir * SKILL_SPEED
+                        velocity.y = 0f
+                        val (baseDmg, isCrit) = stats.calculateDamage(35f)
+                        hitbox.damage = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        hitbox.isCritical = isCrit
+                        hitbox.knockbackX = 9.0f
+                        hitbox.knockbackY = 3.5f
+                        hitbox.reset()
+                        AudioManager.playSlashHeavy()
+                    }
+                    CharacterArchetype.AGILE -> {
+                        position.x += dir * 4.5f
+                        bounds.setPosition(position.x, position.y)
+                        val (baseDmg, _) = stats.calculateDamage(44f)
+                        hitbox.damage = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        hitbox.isCritical = true
+                        hitbox.knockbackX = 8.0f
+                        hitbox.knockbackY = 2.5f
+                        hitbox.reset()
+                        AudioManager.playDodge()
+                        AudioManager.playSlashHeavy()
+                    }
+                    CharacterArchetype.HEAVY -> {
+                        health.heal(health.maxHp * 0.15f)
+                        val (baseDmg, isCrit) = stats.calculateDamage(34f)
+                        hitbox.damage = baseDmg * archetype.baseDamageMultiplier * parryBonus
+                        hitbox.isCritical = isCrit
+                        hitbox.knockbackX = 14.0f
+                        hitbox.knockbackY = 5.0f
+                        hitbox.reset()
+                        AudioManager.playHit()
+                        AudioManager.playSlashHeavy()
+                    }
+                }
                 HapticManager.vibrateMedium()
                 return
             }
         }
 
         // Pemicu Ultimate (Bladestorm / Phantom Flurry / Meteor Cleave)
-        if (input.isUltimateJustPressed() && ultimate.isReady && !isDodging && !isSkillStriking && !isUlting) {
+        if (input.isUltimateJustPressed() && ultimate.isReady && !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting) {
             if (ultimate.consume()) {
                 isUlting = true
                 ultTimer = 0f
@@ -325,7 +502,7 @@ class Player(
         }
 
         // Pemicu Serangan Kombo (Attack)
-        if (input.isAttackJustPressed() && !isDodging && !isSkillStriking && !isUlting) {
+        if (input.isAttackJustPressed() && !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting) {
             if (attackPhase == AttackPhase.INACTIVE) {
                 val hitConfig = comboManager.startNextHit()
                 attackPhase = AttackPhase.STARTUP
@@ -377,18 +554,85 @@ class Player(
             return
         }
 
-        // B. Update Skill 1 (Dash Strike)
+        // B. Update Skill 1 (Gale Crescent / Shadow Shuriken / Earth Shockwave)
         if (isSkillStriking) {
             skillTimer += delta
             val strikeDir = if (facingRight) 1f else -1f
-            velocity.x = strikeDir * SKILL_SPEED
-            velocity.y = 0f
+            if (archetype == CharacterArchetype.BALANCED) {
+                velocity.x = strikeDir * 8f
+            } else if (archetype == CharacterArchetype.HEAVY) {
+                velocity.x = strikeDir * 4f
+            }
 
             // Aktifkan Hitbox Dash Strike di sepanjang tubuh
             hitbox.set(position.x - 0.2f, position.y, width + 0.8f, height, active = true)
 
             if (skillTimer >= SKILL_DURATION) {
                 isSkillStriking = false
+                hitbox.reset()
+                velocity.x *= 0.2f
+            }
+            return
+        }
+
+        // B2. Update Skill 2 (Rising Dragon / Venom Flurry / Cyclone Cleave)
+        if (isSkill2Active) {
+            skill2Timer += delta
+            val dur = when (archetype) {
+                CharacterArchetype.BALANCED -> 0.32f
+                CharacterArchetype.AGILE -> 0.30f
+                CharacterArchetype.HEAVY -> 0.38f
+            }
+
+            when (archetype) {
+                CharacterArchetype.BALANCED -> {
+                    hitbox.set(position.x - 0.2f, position.y, width + 0.7f, height + 0.6f, active = true)
+                }
+                CharacterArchetype.AGILE -> {
+                    val hbX = if (facingRight) position.x + width * 0.4f else position.x - 1.2f + width * 0.4f
+                    hitbox.set(hbX, position.y + 0.1f, 1.4f, 1.2f, active = true)
+                }
+                CharacterArchetype.HEAVY -> {
+                    hitbox.set(position.x - 0.5f, position.y, width + 1.0f, height + 0.4f, active = true)
+                }
+            }
+
+            if (skill2Timer >= dur) {
+                isSkill2Active = false
+                hitbox.reset()
+                velocity.x *= 0.2f
+            }
+            return
+        }
+
+        // B3. Update Skill 3 (Dash Strike / Phantom Blink / Titan Roar)
+        if (isSkill3Active) {
+            skill3Timer += delta
+            val dur = when (archetype) {
+                CharacterArchetype.BALANCED -> 0.22f
+                CharacterArchetype.AGILE -> 0.15f
+                CharacterArchetype.HEAVY -> 0.32f
+            }
+
+            when (archetype) {
+                CharacterArchetype.BALANCED -> {
+                    val strikeDir = if (facingRight) 1f else -1f
+                    velocity.x = strikeDir * SKILL_SPEED
+                    velocity.y = 0f
+                    hitbox.set(position.x - 0.2f, position.y, width + 0.8f, height, active = true)
+                }
+                CharacterArchetype.AGILE -> {
+                    val hbX = if (facingRight) position.x + width * 0.3f else position.x - 1.2f
+                    hitbox.set(hbX, position.y, 1.5f, 1.2f, active = true)
+                }
+                CharacterArchetype.HEAVY -> {
+                    velocity.x = 0f
+                    hitbox.set(position.x - 1.2f, position.y, width + 2.4f, height + 1.0f, active = true)
+                }
+            }
+
+            if (skill3Timer >= dur) {
+                isSkill3Active = false
                 hitbox.reset()
                 velocity.x *= 0.2f
             }
@@ -811,6 +1055,14 @@ class Player(
         if (isUlting) {
             renderBladestorm(shapeRenderer, centerX, shoulderY)
         }
+
+        // 5. Efek Visual Skill 2 & Skill 3
+        if (isSkill2Active) {
+            renderSkill2Visual(shapeRenderer, centerX, shoulderY, lookDir)
+        }
+        if (isSkill3Active) {
+            renderSkill3Visual(shapeRenderer, centerX, shoulderY, lookDir)
+        }
     }
 
     private fun renderComboSlashArc(shapeRenderer: ShapeRenderer, centerX: Float, centerY: Float, lookDir: Float) {
@@ -861,6 +1113,65 @@ class Player(
         // Cincin Luar Cahaya Emas
         shapeRenderer.color = Color.WHITE
         shapeRenderer.circle(centerX, centerY, expand * 0.95f, 20)
+    }
+
+    private fun renderSkill2Visual(shapeRenderer: ShapeRenderer, centerX: Float, centerY: Float, lookDir: Float) {
+        when (archetype) {
+            CharacterArchetype.BALANCED -> {
+                // Rising Dragon: Dragon claw / ascending aura
+                shapeRenderer.color = Color.CYAN
+                shapeRenderer.rectLine(centerX - 0.2f * lookDir, centerY - 0.8f, centerX + 0.5f * lookDir, centerY + 1.2f, 0.16f)
+                shapeRenderer.color = Color.WHITE
+                shapeRenderer.rectLine(centerX, centerY - 0.4f, centerX + 0.3f * lookDir, centerY + 1.0f, 0.08f)
+            }
+            CharacterArchetype.AGILE -> {
+                // Venom Flurry: Triple violet slash arcs
+                shapeRenderer.color = Color(0.85f, 0.35f, 1f, 1f)
+                shapeRenderer.rectLine(centerX, centerY + 0.3f, centerX + 1.2f * lookDir, centerY + 0.5f, 0.12f)
+                shapeRenderer.rectLine(centerX, centerY, centerX + 1.4f * lookDir, centerY - 0.1f, 0.14f)
+                shapeRenderer.rectLine(centerX, centerY - 0.3f, centerX + 1.1f * lookDir, centerY - 0.4f, 0.12f)
+            }
+            CharacterArchetype.HEAVY -> {
+                // Cyclone Cleave: Whirling fire ring
+                shapeRenderer.color = Color(1f, 0.55f, 0.1f, 0.8f)
+                shapeRenderer.circle(centerX, centerY, 1.4f, 16)
+                shapeRenderer.color = Color.GOLD
+                shapeRenderer.circle(centerX, centerY, 1.1f, 12)
+            }
+        }
+    }
+
+    private fun renderSkill3Visual(shapeRenderer: ShapeRenderer, centerX: Float, centerY: Float, lookDir: Float) {
+        when (archetype) {
+            CharacterArchetype.BALANCED -> {
+                // Dash Strike: Piercing beam thrust
+                shapeRenderer.color = Color(0.3f, 0.85f, 1f, 0.9f)
+                shapeRenderer.rectLine(centerX - 1.2f * lookDir, centerY, centerX + 1.8f * lookDir, centerY, 0.18f)
+                shapeRenderer.color = Color.WHITE
+                shapeRenderer.rectLine(centerX - 0.6f * lookDir, centerY, centerX + 1.6f * lookDir, centerY, 0.08f)
+            }
+            CharacterArchetype.AGILE -> {
+                // Phantom Blink: Glitch rift circle
+                shapeRenderer.color = Color(0.9f, 0.4f, 1f, 0.9f)
+                shapeRenderer.circle(centerX, centerY, 0.9f, 12)
+                shapeRenderer.color = Color.WHITE
+                shapeRenderer.circle(centerX, centerY, 0.5f, 8)
+            }
+            CharacterArchetype.HEAVY -> {
+                // Titan Roar: Ground shockwave ring
+                val progress = (skill3Timer / 0.32f).coerceIn(0f, 1f)
+                shapeRenderer.color = Color(1f, 0.7f, 0.2f, 1f - progress)
+                shapeRenderer.circle(centerX, position.y + 0.1f, 2.2f * progress, 20)
+                shapeRenderer.color = Color.RED
+                shapeRenderer.circle(centerX, position.y + 0.1f, 1.4f * progress, 16)
+            }
+        }
+    }
+
+    fun renderProjectiles(shapeRenderer: ShapeRenderer) {
+        for (i in 0 until projectiles.size) {
+            projectiles[i].render(shapeRenderer)
+        }
     }
 
     fun renderDebug(shapeRenderer: ShapeRenderer) {

@@ -37,8 +37,11 @@ import com.stickman.tower.rpg.SaveManager
 import com.stickman.tower.talent.TalentManager
 import com.stickman.tower.ui.FontManager
 import com.stickman.tower.vfx.ParticleManager
+import com.badlogic.gdx.utils.Align
 import com.stickman.tower.world.CameraManager
 import com.stickman.tower.tools.DevToolsOverlay
+import com.stickman.tower.world.LoreTablet
+import com.stickman.tower.world.StoryDialogue
 import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.world.TowerLevelBuilder
 import kotlin.math.sin
@@ -166,6 +169,13 @@ class PlayScreen(
     private var isFirstShow = true
     private var inputCooldown = 0.25f
 
+    // Story Odyssey Presentation & Dialogues (Fase 14)
+    var actBannerTimer: Float = 0f
+    var activeLoreTablet: LoreTablet? = null
+    var activeStoryDialogue: StoryDialogue? = null
+    var nearbyTabletPrompt: LoreTablet? = null
+    var nearbyDialoguePrompt: StoryDialogue? = null
+
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
@@ -186,7 +196,7 @@ class PlayScreen(
 
         // Hubungkan Callback DevTools QA & Profiler
         devTools.onWarpFloor = { targetFloor ->
-            gameMode = if (targetFloor >= 4) GameMode.ENDLESS else GameMode.STORY
+            gameMode = if (targetFloor >= 11) GameMode.ENDLESS else GameMode.STORY
             loadFloor(targetFloor)
             floatingTexts.add(
                 FloatingText("WARPED TO FLOOR $targetFloor", player.position.x, player.position.y + 2.5f, Color.CYAN)
@@ -232,7 +242,7 @@ class PlayScreen(
      * Memuat layout lantai menara tertentu (Story 1-3 atau Endless 4+).
      */
     fun loadFloor(floorNumber: Int) {
-        currentFloorNumber = if (gameMode == GameMode.STORY) floorNumber.coerceIn(1, 3) else floorNumber.coerceAtLeast(4)
+        currentFloorNumber = if (gameMode == GameMode.STORY) floorNumber.coerceIn(1, 10) else floorNumber.coerceAtLeast(11)
         activeMutator = if (gameMode == GameMode.ENDLESS) FloorMutator.getRandomMutator(currentFloorNumber) else FloorMutator.NONE
         currentFloor = if (gameMode == GameMode.STORY) TowerLevelBuilder.buildFloor(currentFloorNumber) else TowerLevelBuilder.buildEndlessFloor(currentFloorNumber, activeMutator)
 
@@ -248,7 +258,7 @@ class PlayScreen(
         player.maxAirJumps = relicManager.getMaxAirJumps()
         player.airJumpsRemaining = player.maxAirJumps
         player.cooldownMultiplier = relicManager.getCooldownMultiplier() * talentManager.getCooldownMultiplier()
-        player.gravityScale = activeMutator.gravityMultiplier
+        player.gravityScale = currentFloor.gravityScale * activeMutator.gravityMultiplier
         player.damageReductionMultiplier = talentManager.getDamageReductionMultiplier()
         player.hasSuperArmor = talentManager.hasSuperArmor()
         player.hasUndyingWill = talentManager.hasUndyingWill()
@@ -273,6 +283,12 @@ class PlayScreen(
         bossSlowMoTimer = 0f
         isBossShockwaveActive = false
         shockwaveRadius = 0f
+
+        actBannerTimer = 3.5f
+        activeLoreTablet = null
+        activeStoryDialogue = null
+        nearbyTabletPrompt = null
+        nearbyDialoguePrompt = null
 
         if (currentFloor.isBossFloor && !hasPlayedBossIntro) {
             isBossIntroActive = true
@@ -421,6 +437,28 @@ class PlayScreen(
             return
         }
 
+        if (activeLoreTablet != null) {
+            handleLoreTabletInput()
+            renderWorld(0f)
+            uiViewport.apply()
+            shapeRenderer.projectionMatrix = uiCamera.combined
+            batch.projectionMatrix = uiCamera.combined
+            renderHUD()
+            renderLoreTabletOverlay()
+            return
+        }
+
+        if (activeStoryDialogue != null) {
+            handleStoryDialogueInput()
+            renderWorld(0f)
+            uiViewport.apply()
+            shapeRenderer.projectionMatrix = uiCamera.combined
+            batch.projectionMatrix = uiCamera.combined
+            renderHUD()
+            renderStoryDialogueOverlay()
+            return
+        }
+
         // Pembaruan Sinematik Boss Intro (Fase 11)
         if (isBossIntroActive) {
             if (Gdx.input.isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.justTouched()) {
@@ -455,6 +493,9 @@ class PlayScreen(
         handleStatusInput()
 
         hudAnimTime += safeDelta
+        if (actBannerTimer > 0f) {
+            actBannerTimer = (actBannerTimer - safeDelta).coerceAtLeast(0f)
+        }
 
         // Pembaruan Ghost HP Bar Pemain (Smooth Decay Lag)
         if (playerGhostDelay > 0f) {
@@ -560,6 +601,38 @@ class PlayScreen(
                 triggerSave("Checkpoint Lantai $currentFloorNumber")
             }
 
+            // Pembaruan Prasasti Batu Hitam Kuno (The Lore Tablets)
+            nearbyTabletPrompt = null
+            for (tablet in currentFloor.loreTablets) {
+                tablet.update(updateDelta)
+                val dist = player.position.dst(tablet.x + tablet.width / 2f, tablet.y + tablet.height / 2f)
+                if (dist < 2.0f || player.bounds.overlaps(tablet.bounds)) {
+                    nearbyTabletPrompt = tablet
+                    if (Gdx.input.isKeyJustPressed(Keys.E)) {
+                        activeLoreTablet = tablet
+                        tablet.isRead = true
+                        AudioManager.playChest()
+                        break
+                    }
+                }
+            }
+
+            // Pembaruan Dialog Naratif Karakter (NPC & Cutscenes)
+            nearbyDialoguePrompt = null
+            for (dialogue in currentFloor.storyDialogues) {
+                val dist = player.position.dst(dialogue.triggerX, dialogue.triggerY)
+                if (dist <= dialogue.triggerRadius) {
+                    if (!dialogue.isTriggered) {
+                        nearbyDialoguePrompt = dialogue
+                        if (activeStoryDialogue == null && activeLoreTablet == null) {
+                            activeStoryDialogue = dialogue
+                            AudioManager.playLevelUp()
+                            break
+                        }
+                    }
+                }
+            }
+
             // Pembaruan Musuh Biasa
             for (enemy in currentFloor.enemies) {
                 enemy.update(updateDelta, player, currentFloor.platforms)
@@ -637,6 +710,8 @@ class PlayScreen(
             batch,
             FontManager.smallFont,
             player.skill1,
+            player.skill2,
+            player.skill3,
             player.ultimate
         )
 
@@ -657,9 +732,15 @@ class PlayScreen(
         val targetCamY = if (isBossIntroActive && currentFloor.boss != null) currentFloor.boss!!.position.y + 1.2f else player.position.y + player.height / 2f + 0.5f
         cameraManager.update(targetCamX, targetCamY, delta)
 
-        val clearR = if (currentFloor.isBossFloor) 0.12f else 0.08f
-        val clearG = if (currentFloor.isBossFloor) 0.08f else 0.09f
-        val clearB = if (currentFloor.isBossFloor) 0.12f else 0.13f
+        val (clearR, clearG, clearB) = when {
+            currentFloor.isSafeZone -> Triple(0.14f, 0.08f, 0.04f)
+            currentFloor.floorNumber == 9 -> Triple(0.16f, 0.03f, 0.05f)
+            currentFloor.floorNumber in 4..5 -> Triple(0.10f, 0.05f, 0.15f)
+            currentFloor.floorNumber in 7..8 -> Triple(0.04f, 0.05f, 0.12f)
+            currentFloor.floorNumber == 10 -> Triple(0.02f, 0.02f, 0.05f)
+            currentFloor.isBossFloor -> Triple(0.12f, 0.08f, 0.12f)
+            else -> Triple(0.08f, 0.09f, 0.13f)
+        }
         ScreenUtils.clear(clearR, clearG, clearB, 1f)
 
         cameraManager.viewport.apply()
@@ -672,12 +753,21 @@ class PlayScreen(
         for (platform in currentFloor.platforms) platform.render(shapeRenderer)
         for (spike in currentFloor.spikes) spike.render(shapeRenderer)
         for (chest in currentFloor.chests) chest.render(shapeRenderer)
+        for (tablet in currentFloor.loreTablets) tablet.render(shapeRenderer)
         currentFloor.checkpoint?.render(shapeRenderer)
         currentFloor.exitPortal.render(shapeRenderer)
+
+        // Render Tokoh Cerita (NPC)
+        if (currentFloor.floorNumber == 6) {
+            renderVulcanusNPC(shapeRenderer)
+        } else if (currentFloor.floorNumber == 1) {
+            renderAriaNPC(shapeRenderer)
+        }
 
         for (enemy in currentFloor.enemies) enemy.render(shapeRenderer)
         currentFloor.boss?.render(shapeRenderer)
         player.render(shapeRenderer)
+        player.renderProjectiles(shapeRenderer)
 
         // Render Efek Partikel VFX
         particleManager.render(shapeRenderer)
@@ -853,6 +943,51 @@ class PlayScreen(
                         )
                     }
                 }
+            }
+        }
+
+        // A2. Proyektil Pemain (Skill 1: Gale Crescent / Shuriken / Shockwave) mengenai Musuh & Boss
+        for (i in 0 until player.projectiles.size) {
+            val proj = player.projectiles[i]
+            if (proj.isDestroyed) continue
+
+            for (enemy in currentFloor.enemies) {
+                if (!enemy.health.isDead && proj.bounds.overlaps(enemy.hurtbox.bounds)) {
+                    val knockX = if (proj.velocityX > 0) 6f else -6f
+                    if (enemy.takeHit(proj.damage, knockX, 2f)) {
+                        particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 8, color = proj.color)
+                        floatingTexts.add(
+                            FloatingText(
+                                "-${proj.damage.toInt()}",
+                                enemy.position.x + enemy.width / 2f,
+                                enemy.position.y + enemy.height + 0.35f,
+                                proj.color
+                            )
+                        )
+                        player.comboManager.registerHit()
+                        player.ultimate.addEnergy(8f)
+                    }
+                    proj.isDestroyed = true
+                    break
+                }
+            }
+
+            if (!proj.isDestroyed && boss != null && !boss.health.isDead && proj.bounds.overlaps(boss.hurtbox.bounds)) {
+                val knockX = if (proj.velocityX > 0) 4f else -4f
+                if (boss.takeHit(proj.damage, knockX, 1.5f)) {
+                    particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 10, color = proj.color)
+                    floatingTexts.add(
+                        FloatingText(
+                            "-${proj.damage.toInt()}",
+                            boss.position.x + boss.width / 2f,
+                            boss.position.y + boss.height + 0.5f,
+                            proj.color
+                        )
+                    )
+                    player.comboManager.registerHit()
+                    player.ultimate.addEnergy(10f)
+                }
+                proj.isDestroyed = true
             }
         }
 
@@ -1085,7 +1220,9 @@ class PlayScreen(
             )
         }
 
-        val isFloorCleared = if (currentFloor.isBossFloor) {
+        val isFloorCleared = if (currentFloor.isSafeZone) {
+            true
+        } else if (currentFloor.isBossFloor) {
             currentFloor.boss?.health?.isDead == true
         } else {
             currentFloor.enemies.all { it.health.isDead }
@@ -1099,13 +1236,21 @@ class PlayScreen(
             if (!hasSavedStageClear) {
                 hasSavedStageClear = true
                 if (gameMode == GameMode.STORY) {
-                    val nextFloorNum = (currentFloorNumber + 1).coerceAtMost(3)
-                    val expReward = if (currentFloor.isBossFloor) 250 else 100
-                    val goldReward = if (currentFloor.isBossFloor) 150 else 60
+                    val nextFloorNum = (currentFloorNumber + 1).coerceAtMost(10)
+                    val expReward = if (currentFloor.isBossFloor) (currentFloor.boss?.expReward ?: 250) else (100 + currentFloorNumber * 20)
+                    val goldReward = if (currentFloor.isBossFloor) (currentFloor.boss?.goldReward ?: 150) else (60 + currentFloorNumber * 10)
                     grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
-                    triggerSave("Lantai $currentFloorNumber Selesai", highestFloor = nextFloorNum)
+
+                    if (currentFloorNumber == 10) {
+                        triggerSave("Puncak Menara Ditaklukkan! (Story Selesai)", highestFloor = 11)
+                        saveData.highestEndlessFloor = kotlin.math.max(saveData.highestEndlessFloor, 11)
+                    } else {
+                        triggerSave("Lantai $currentFloorNumber Selesai", highestFloor = nextFloorNum)
+                    }
 
                     if (currentFloorNumber == 1 && relicManager.activeRelics.isEmpty()) {
+                        triggerRelicChoice()
+                    } else if (currentFloorNumber in listOf(3, 5, 8) && relicManager.activeRelics.size < 4) {
                         triggerRelicChoice()
                     }
                 } else {
@@ -1221,17 +1366,17 @@ class PlayScreen(
             val retryTriggered = keyRestart || touchRetry
 
             if (gameMode == GameMode.STORY) {
-                if (currentFloorNumber < 3) {
+                if (currentFloorNumber < 10) {
                     if (proceedTriggered) {
                         loadFloor(currentFloorNumber + 1)
                     } else if (retryTriggered) {
                         loadFloor(currentFloorNumber)
                     }
                 } else {
-                    // Lantai 3 Selesai (Boss Kalah) -> Buka Akses Endless Spire!
+                    // Lantai 10 Selesai (Final Story Boss Kalah) -> Buka Akses Endless Spire!
                     if (proceedTriggered) {
                         gameMode = GameMode.ENDLESS
-                        loadFloor(4)
+                        loadFloor(11)
                     } else if (retryTriggered) {
                         loadFloor(1)
                     }
@@ -1593,24 +1738,26 @@ class PlayScreen(
             val isStory = gameMode == GameMode.STORY
             headF.color = Color.GOLD
             val bannerTitle = if (isStory) {
-                if (currentFloorNumber < 3) "★ ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! ★"
+                if (currentFloorNumber < 10) "★ ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! THE ENDLESS PARADOX BEGINS! ★"
             } else {
                 "★ ENDLESS FLOOR $currentFloorNumber CLEARED! ★"
             }
-            headF.draw(batch, bannerTitle, w / 2f - 180f, h / 2f + 75f)
+            glyphLayout.setText(headF, bannerTitle)
+            headF.draw(batch, bannerTitle, (w - glyphLayout.width) / 2f, h / 2f + 75f)
 
             regF.color = Color.WHITE
             val subText = if (isStory) {
-                if (currentFloorNumber < 3) "Musuh telah dibersihkan! Bersiap untuk lantai berikutnya."
-                else "Guardian tumbang! Lv.${player.stats.level} | Gold: ${player.stats.gold} G"
+                if (currentFloorNumber < 10) "Musuh telah dibersihkan! Bersiap untuk lantai berikutnya."
+                else "Sang Penulis Takdir tumbang! Pecahnya pena takdir membuka dimensi Endless Spire."
             } else {
                 val talentPtText = if (currentFloorNumber % 2 == 0) " | +1 TALENT POINT!" else ""
                 "Kills: $endlessEnemiesKilled | Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText"
             }
-            regF.draw(batch, subText, w / 2f - 220f, h / 2f + 25f)
+            glyphLayout.setText(regF, subText)
+            regF.draw(batch, subText, (w - glyphLayout.width) / 2f, h / 2f + 25f)
 
-            val nextFloorNumber = if (isStory && currentFloorNumber >= 3) 4 else currentFloorNumber + 1
-            val nextFloorLabel = if (isStory && currentFloorNumber >= 3) "ENDLESS SPIRE" else "LANTAI $nextFloorNumber"
+            val nextFloorNumber = if (isStory && currentFloorNumber >= 10) 11 else currentFloorNumber + 1
+            val nextFloorLabel = if (isStory && currentFloorNumber >= 10) "ENDLESS SPIRE (F11)" else "LANTAI $nextFloorNumber"
 
             headF.color = Color.WHITE
             headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 240f, h / 2f - 40f)
@@ -1619,6 +1766,42 @@ class PlayScreen(
             headF.setColor(0.9f, 0.75f, 0.25f, 1f)
             headF.draw(batch, "MENU UTAMA (ESC)", w / 2f - 105f, h / 2f - 98f)
         }
+
+        if (gameStatus == GameStatus.PLAYING) {
+            nearbyTabletPrompt?.let { tablet ->
+                val promptText = if (tablet.isRead) "[E] / [TAP] BACA ULANG PRASASTI" else "✦ [E] / [TAP] BACA PRASASTI KUNO ✦"
+                glyphLayout.setText(regF, promptText)
+                val pw = glyphLayout.width + 30f
+                val ph = 36f
+                val px = (w - pw) / 2f
+                val py = 135f
+
+                batch.end()
+                shapeRenderer.projectionMatrix = uiCamera.combined
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+                shapeRenderer.setColor(0.08f, 0.12f, 0.18f, 0.90f)
+                shapeRenderer.rect(px, py, pw, ph)
+                shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 0.90f)
+                shapeRenderer.rectLine(px, py + ph, px + pw, py + ph, 2f)
+                shapeRenderer.end()
+
+                batch.begin()
+                regF.color = Color.GOLD
+                regF.draw(batch, promptText, px + 15f, py + 25f)
+
+                if (Gdx.input.justTouched()) {
+                    uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                    uiViewport.unproject(uiTouchVec)
+                    if (uiTouchVec.x in px..(px + pw) && uiTouchVec.y in py..(py + ph)) {
+                        activeLoreTablet = tablet
+                        tablet.isRead = true
+                        AudioManager.playChest()
+                    }
+                }
+            }
+        }
+
+        renderActBannerOverlay()
 
         batch.end()
     }
@@ -2025,14 +2208,15 @@ class PlayScreen(
         val smallF = FontManager.smallFont
 
         // Boss Title in Gold
+        val currentBoss = currentFloor.boss
         titleF.setColor(1f, 0.85f, 0.25f, 1f)
-        val bossTitle = "⚔ GIGAS - THE ANCIENT GOLEM ⚔"
+        val bossTitle = "⚔ ${currentBoss?.name ?: "BOSS"} ⚔"
         glyphLayout.setText(titleF, bossTitle)
         titleF.draw(batch, bossTitle, (w - glyphLayout.width) / 2f, cardY + cardH - 24f)
 
         // Boss Subtitle / Lore
         regF.setColor(0.85f, 0.90f, 1f, 0.95f)
-        val bossSub = "Titan of the Obsidian Spire  •  Floor 3 Guardian"
+        val bossSub = "${currentBoss?.subtitle ?: "Tower Boss"}  •  Lantai $currentFloorNumber"
         glyphLayout.setText(regF, bossSub)
         regF.draw(batch, bossSub, (w - glyphLayout.width) / 2f, cardY + 38f)
 
@@ -2044,6 +2228,284 @@ class PlayScreen(
         smallF.draw(batch, skipText, (w - glyphLayout.width) / 2f, barHeight / 2f + 6f)
 
         batch.end()
+    }
+
+    private fun handleLoreTabletInput() {
+        val tablet = activeLoreTablet ?: return
+        if (Gdx.input.isKeyJustPressed(Keys.E) ||
+            Gdx.input.isKeyJustPressed(Keys.SPACE) ||
+            Gdx.input.isKeyJustPressed(Keys.ENTER) ||
+            Gdx.input.isKeyJustPressed(Keys.ESCAPE) ||
+            Gdx.input.isKeyJustPressed(Keys.BACK) ||
+            input.isAttackJustPressed() ||
+            input.isJumpJustPressed() ||
+            Gdx.input.justTouched()) {
+            tablet.isRead = true
+            activeLoreTablet = null
+            AudioManager.playSlashLight()
+            inputCooldown = 0.2f
+        }
+    }
+
+    private fun handleStoryDialogueInput() {
+        val dialogue = activeStoryDialogue ?: return
+        if (Gdx.input.isKeyJustPressed(Keys.E) ||
+            Gdx.input.isKeyJustPressed(Keys.SPACE) ||
+            Gdx.input.isKeyJustPressed(Keys.ENTER) ||
+            input.isAttackJustPressed() ||
+            input.isJumpJustPressed() ||
+            Gdx.input.justTouched()) {
+            val hasNext = dialogue.advance()
+            if (!hasNext) {
+                dialogue.isTriggered = true
+                activeStoryDialogue = null
+            }
+            AudioManager.playSlashLight()
+            inputCooldown = 0.2f
+        }
+    }
+
+    private fun renderLoreTabletOverlay() {
+        val tablet = activeLoreTablet ?: return
+        val w = 1280f
+        val h = 720f
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Dark dim background
+        shapeRenderer.setColor(0f, 0f, 0f, 0.82f)
+        shapeRenderer.rect(0f, 0f, w, h)
+
+        // Ancient Obsidian Tablet Plaque
+        val boxW = 860f
+        val boxH = 460f
+        val boxX = (w - boxW) / 2f
+        val boxY = (h - boxH) / 2f
+
+        shapeRenderer.setColor(0.08f, 0.10f, 0.16f, 0.96f)
+        shapeRenderer.rect(boxX, boxY, boxW, boxH)
+
+        // Ancient Gold Border with pulse
+        val pulse = (sin(hudAnimTime * 4f) + 1f) * 0.15f
+        shapeRenderer.setColor(0.85f + pulse, 0.70f + pulse, 0.25f, 0.9f)
+        val borderThick = 2.5f
+        shapeRenderer.rectLine(boxX, boxY, boxX + boxW, boxY, borderThick)
+        shapeRenderer.rectLine(boxX, boxY + boxH, boxX + boxW, boxY + boxH, borderThick)
+        shapeRenderer.rectLine(boxX, boxY, boxX, boxY + boxH, borderThick)
+        shapeRenderer.rectLine(boxX + boxW, boxY, boxX + boxW, boxY + boxH, borderThick)
+
+        // Top Rune Symbol Center Circle
+        shapeRenderer.setColor(0.3f, 0.75f, 1f, 0.85f)
+        shapeRenderer.circle(w / 2f, boxY + boxH - 45f, 22f, 16)
+        shapeRenderer.color = Color.WHITE
+        shapeRenderer.circle(w / 2f, boxY + boxH - 45f, 10f, 10)
+
+        // Close Button Bar at bottom
+        val btnW = 320f
+        val btnH = 42f
+        val btnX = (w - btnW) / 2f
+        val btnY = boxY + 28f
+        shapeRenderer.setColor(0.14f, 0.20f, 0.30f, 0.95f)
+        shapeRenderer.rect(btnX, btnY, btnW, btnH)
+        shapeRenderer.setColor(0.3f, 0.8f, 1f, 0.85f)
+        shapeRenderer.rectLine(btnX, btnY, btnX + btnW, btnY, 1.5f)
+        shapeRenderer.rectLine(btnX, btnY + btnH, btnX + btnW, btnY + btnH, 1.5f)
+
+        shapeRenderer.end()
+
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
+
+        // Header Title
+        headF.setColor(1f, 0.85f, 0.3f, 1f)
+        glyphLayout.setText(headF, tablet.title)
+        headF.draw(batch, tablet.title, (w - glyphLayout.width) / 2f, boxY + boxH - 85f)
+
+        // Tablet Lore Body Text
+        regF.setColor(0.90f, 0.92f, 0.98f, 0.96f)
+        regF.draw(batch, tablet.text, boxX + 60f, boxY + boxH - 145f, boxW - 120f, Align.left, true)
+
+        // Button Label
+        headF.setColor(0.4f, 0.9f, 1f, 1f)
+        val closeLabel = "[SPACE / TAP] TUTUP PRASASTI"
+        glyphLayout.setText(headF, closeLabel)
+        headF.draw(batch, closeLabel, (w - glyphLayout.width) / 2f, btnY + 28f)
+
+        batch.end()
+    }
+
+    private fun renderStoryDialogueOverlay() {
+        val dialogue = activeStoryDialogue ?: return
+        val line = dialogue.currentLine ?: return
+        val w = 1280f
+        val h = 720f
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Dialogue Box at screen bottom
+        val boxX = 100f
+        val boxY = 40f
+        val boxW = 1080f
+        val boxH = 175f
+
+        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.95f)
+        shapeRenderer.rect(boxX, boxY, boxW, boxH)
+
+        // Border colored with speaker color
+        shapeRenderer.setColor(line.speakerColor.r, line.speakerColor.g, line.speakerColor.b, 0.9f)
+        shapeRenderer.rectLine(boxX, boxY + boxH, boxX + boxW, boxY + boxH, 2.5f)
+        shapeRenderer.rectLine(boxX, boxY, boxX + boxW, boxY, 2f)
+        shapeRenderer.rectLine(boxX, boxY, boxX, boxY + boxH, 2f)
+        shapeRenderer.rectLine(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 2f)
+
+        // Speaker Tag Box
+        val tagW = 320f
+        val tagH = 38f
+        val tagX = boxX + 25f
+        val tagY = boxY + boxH - 6f
+        shapeRenderer.setColor(0.12f, 0.16f, 0.24f, 0.98f)
+        shapeRenderer.rect(tagX, tagY, tagW, tagH)
+        shapeRenderer.setColor(line.speakerColor)
+        shapeRenderer.rectLine(tagX, tagY + tagH, tagX + tagW, tagY + tagH, 2f)
+
+        shapeRenderer.end()
+
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
+
+        // Speaker Name
+        headF.setColor(line.speakerColor)
+        val speakerTag = "${line.speaker.uppercase()}  •  ${line.title}"
+        headF.draw(batch, speakerTag, tagX + 15f, tagY + tagH - 12f)
+
+        // Dialogue Text
+        regF.setColor(0.95f, 0.96f, 1f, 1f)
+        regF.draw(batch, line.text, boxX + 40f, boxY + boxH - 35f, boxW - 80f, Align.left, true)
+
+        // Advance Prompt
+        val blink = (sin(hudAnimTime * 6f) + 1f) * 0.5f
+        regF.setColor(1f, 0.85f, 0.3f, 0.65f + 0.35f * blink)
+        regF.draw(batch, "LANJUT [TAP / SPACE] ▶", boxX + boxW - 220f, boxY + 30f)
+
+        batch.end()
+    }
+
+    private fun renderActBannerOverlay() {
+        if (actBannerTimer <= 0f) return
+        val w = 1280f
+
+        val alpha = if (actBannerTimer > 2.8f) {
+            (3.5f - actBannerTimer) / 0.7f
+        } else if (actBannerTimer < 0.7f) {
+            actBannerTimer / 0.7f
+        } else {
+            1.0f
+        }.coerceIn(0f, 1f)
+
+        if (alpha <= 0.01f) return
+
+        batch.end()
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Background banner strip
+        val bannerY = 590f
+        val bannerH = 85f
+        shapeRenderer.setColor(0.04f, 0.06f, 0.10f, 0.80f * alpha)
+        shapeRenderer.rect(0f, bannerY, w, bannerH)
+
+        // Golden glow accent lines
+        shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 0.85f * alpha)
+        shapeRenderer.rectLine(0f, bannerY, w, bannerY, 1.5f)
+        shapeRenderer.rectLine(0f, bannerY + bannerH, w, bannerY + bannerH, 1.5f)
+
+        shapeRenderer.end()
+
+        batch.begin()
+        val titleF = FontManager.titleFont
+        val regF = FontManager.regularFont
+
+        titleF.setColor(1f, 0.85f, 0.3f, alpha)
+        val actTitle = currentFloor.actTitle
+        glyphLayout.setText(titleF, actTitle)
+        titleF.draw(batch, actTitle, (w - glyphLayout.width) / 2f, bannerY + bannerH - 18f)
+
+        regF.setColor(0.75f, 0.85f, 1f, alpha)
+        val actSub = currentFloor.actSubtitle
+        glyphLayout.setText(regF, actSub)
+        regF.draw(batch, actSub, (w - glyphLayout.width) / 2f, bannerY + 28f)
+    }
+
+    private fun renderVulcanusNPC(shapeRenderer: ShapeRenderer) {
+        val anvilX = 10.5f
+        val anvilY = 2.0f
+        val vulcanusX = 9.8f
+        val vulcanusY = 2.0f
+
+        // Forge Anvil Iron Block
+        shapeRenderer.setColor(0.20f, 0.22f, 0.26f, 1f)
+        shapeRenderer.rect(anvilX - 0.4f, anvilY, 0.8f, 0.7f)
+        shapeRenderer.rect(anvilX - 0.6f, anvilY + 0.5f, 1.2f, 0.25f)
+
+        // Ember Glow on Anvil
+        val emberPulse = (sin(hudAnimTime * 4f) + 1f) * 0.5f
+        shapeRenderer.setColor(1f, 0.45f + 0.2f * emberPulse, 0.1f, 0.75f)
+        shapeRenderer.circle(anvilX, anvilY + 0.76f, 0.14f, 10)
+
+        // Vulcanus Legs
+        shapeRenderer.setColor(0.12f, 0.08f, 0.06f, 1f)
+        shapeRenderer.rect(vulcanusX - 0.22f, vulcanusY, 0.16f, 0.9f)
+        shapeRenderer.rect(vulcanusX + 0.06f, vulcanusY, 0.16f, 0.9f)
+
+        // Torso & Leather Apron
+        shapeRenderer.setColor(0.38f, 0.20f, 0.10f, 1f)
+        shapeRenderer.rect(vulcanusX - 0.35f, vulcanusY + 0.9f, 0.7f, 1.1f)
+
+        // Head & Headband
+        shapeRenderer.setColor(0.15f, 0.12f, 0.10f, 1f)
+        shapeRenderer.circle(vulcanusX, vulcanusY + 2.25f, 0.26f, 14)
+        shapeRenderer.setColor(1.0f, 0.55f, 0.15f, 1f)
+        shapeRenderer.rect(vulcanusX - 0.28f, vulcanusY + 2.22f, 0.56f, 0.08f)
+
+        // Massive Sledgehammer resting on anvil
+        shapeRenderer.setColor(0.45f, 0.30f, 0.15f, 1f)
+        shapeRenderer.rectLine(vulcanusX + 0.2f, vulcanusY + 1.4f, anvilX, anvilY + 0.8f, 0.08f)
+        shapeRenderer.setColor(0.5f, 0.52f, 0.58f, 1f)
+        shapeRenderer.rect(anvilX - 0.15f, anvilY + 0.75f, 0.35f, 0.22f)
+    }
+
+    private fun renderAriaNPC(shapeRenderer: ShapeRenderer) {
+        val ariaX = 2.0f
+        val hoverY = 1.6f + sin(hudAnimTime * 3f) * 0.12f
+        val pulse = (sin(hudAnimTime * 5f) + 1f) * 0.5f
+
+        // Golden Anima Spirit Aura
+        shapeRenderer.setColor(1f, 0.85f, 0.25f, 0.35f + 0.25f * pulse)
+        shapeRenderer.circle(ariaX, hoverY, 0.42f, 16)
+
+        // Inner glowing soul sphere
+        shapeRenderer.setColor(1f, 0.92f, 0.55f, 0.85f)
+        shapeRenderer.circle(ariaX, hoverY, 0.22f, 14)
+
+        // Center white core
+        shapeRenderer.color = Color.WHITE
+        shapeRenderer.circle(ariaX, hoverY, 0.10f, 10)
     }
 
     override fun resize(width: Int, height: Int) {

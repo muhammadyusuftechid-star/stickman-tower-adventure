@@ -201,10 +201,10 @@ class ControlSettingsScreen(
                 initialDpadY = settings.dpadOffsetY
             }
 
-            // Cek Mulai Drag Action Cluster
-            val actionCenterX = previewController.btnAttack.x - 60f * settings.scale
-            val actionCenterY = previewController.btnAttack.y + 60f * settings.scale
-            if (Vector3.dst(tx, ty, 0f, actionCenterX, actionCenterY, 0f) < 170f * settings.scale) {
+            // Cek Mulai Drag Action Cluster (Meliputi seluruh busur aksi)
+            val actionCenterX = previewController.btnAttack.x - 70f * settings.scale
+            val actionCenterY = previewController.btnAttack.y + 100f * settings.scale
+            if (Vector3.dst(tx, ty, 0f, actionCenterX, actionCenterY, 0f) < 200f * settings.scale) {
                 currentDrag = DragTarget.ACTION
                 dragTouchStartX = tx
                 dragTouchStartY = ty

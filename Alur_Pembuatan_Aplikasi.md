@@ -1,6 +1,9 @@
 # Alur dan Rencana Kerja Pembuatan Aplikasi: Stickman Tower Adventure
 
-> **Dokumen Rujukan Utama:** [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md)  
+> **Dokumen Rujukan Utama:**
+> - 📄 Desain Mekanik & Arsitektur: [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md)
+> - 📜 Kanon Cerita, Worldbuilding & 10-Floor Odyssey: [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md)
+> 
 > **Tech Stack:** Kotlin, libGDX, Gradle, Tiled Map Editor, Target Android & Desktop (LWJGL3)  
 > **Metode Pembagian:** Dekomposisi Bertingkat — dari Makro (Fase Utama), Meso (Modul Fungsional), Mikro (Komponen/Task), hingga Terkecil (Atomic Checklist & Kriteria Selesai).
 
@@ -13,9 +16,9 @@ Alur kerja ini dibedah ke dalam 4 tingkatan presisi:
 ```mermaid
 graph TD
     L1["<b>LEVEL 1: FASE UTAMA (Makro)</b><br/>Tahapan milestone besar proyek dari setup hingga rilis"]
-    L2["<b>LEVEL 2: MODUL & FITUR (Meso)</b><br/>Kelompok fungsional sistem & subsistem arsitektur"]
-    L3["<b>LEVEL 3: KOMPONEN & TASK TEKNIS (Mikro)</b><br/>Class, logika algoritma, integrasi file & UI"]
-    L4["<b>LEVEL 4: ATOMIC CHECKLIST (Terkecil)</b><br/>Tugas sekali jalan, pengujian, dan kriteria selesai (DoD)"]
+    L2["<b>LEVEL 2: MODUL & FITUR (Meso)</b><br/>Kelompok fungsional sistem, alur naratif & arsitektur"]
+    L3["<b>LEVEL 3: KOMPONEN & TASK TEKNIS (Mikro)</b><br/>Class, logika algoritma, integrasi lore/dialog & UI"]
+    L4["<b>LEVEL 4: ATOMIC CHECKLIST (Terkecil)</b><br/>Tugas sekali jalan, pengujian unit test, dan DoD"]
 
     L1 --> L2 --> L3 --> L4
 ```
@@ -26,23 +29,24 @@ graph TD
 
 ```mermaid
 flowchart LR
-    subgraph Fondasi["Fase 0 - 8: Fondasi Inti (Selesai)"]
+    subgraph Fondasi["Fase 0 - 8: Fondasi Inti Engine (Selesai)"]
         Fase0["F0: Setup"] --> Fase1["F1: Platforming"]
         Fase1 --> Fase2["F2: Combat"]
         Fase2 --> Fase3["F3: MVP Loop"]
-        Fase3 --> Fase4["F4: Combo & Touch"]
+        Fase3 --> Fase4["F4: Combo & Arc Skills"]
         Fase4 --> Fase5["F5: RPG Save"]
-        Fase5 --> Fase6["F6: Tower Boss"]
-        Fase6 --> Fase7["F7: Polish & SFX"]
+        Fase5 --> Fase6["F6: Multi-Floor Tower"]
+        Fase6 --> Fase7["F7: Audio & Hero Classes"]
         Fase7 --> Fase8["F8: Android QA"]
     end
-    subgraph Ekspansi["Fase 9 - 14: Roadmap Ekspansi (Pengembangan Lanjutan)"]
+    subgraph Ekspansi["Fase 9 - 15: Roadmap Naratif & Ekspansi Endgame"]
         Fase8 --> Fase9["F9: Ranged & Haptic"]
-        Fase9 --> Fase10["F10: Blacksmith & Relics"]
-        Fase10 --> Fase11["F11: Parry & Boss Intro"]
-        Fase11 --> Fase12["F12: Gamepad & Touch Layout"]
-        Fase12 --> Fase13["F13: Endless & Talent"]
-        Fase13 --> Fase14["F14: Play Games & Publish"]
+        Fase9 --> Fase10["F10: Vulcanus Forge & Relics"]
+        Fase10 --> Fase11["F11: Parry & Cinematic Boss"]
+        Fase11 --> Fase12["F12: Gamepad & Arc Layout"]
+        Fase12 --> Fase13["F13: Endless Spire & Talents"]
+        Fase13 --> Fase14["F14: The 10-Floor Story Odyssey"]
+        Fase14 --> Fase15["F15: Play Games & Publish"]
     end
 ```
 
@@ -212,28 +216,31 @@ flowchart LR
   - [x] Aktifkan status `isInvulnerable = true` (kebal damage) selama durasi dodge.
   - [x] Berikan cooldown singkat (misal: 0.6 detik) agar pemain tidak melakukan *spam* dodge tanpa batas.
 
-#### Modul 4.3: Hybrid Skill System (Cooldown + Ultimate Energy)
-- **Task 4.3.1: Skill Biasa (Cooldown-Based)**
-  - [x] Buat class `Skill.kt` dengan properti `cooldownTime` dan `remainingCooldown`.
-  - [x] Implementasikan Skill 1: Serangan tebasan meluncur (*Dash Strike* / AoE).
-  - [x] Buat logika aktivasi: jika cooldown == 0, aktifkan skill dan set cooldown timer.
+#### Modul 4.3: Multi-Skill System & Proyektil (3 Active Skills + 1 Ultimate Energy)
+- **Task 4.3.1: Arsitektur Multi-Skill Khusus Tiap Karakter**
+  - [x] Perluas `CharacterArchetype.kt` agar setiap pahlawan memiliki 3 Active Skills unik ber-cooldown independen (`skill1`, `skill2`, `skill3`) + 1 Ultimate Power:
+    - *BALANCED:* Skill 1 `Gale Crescent` (Proyektil tebasan angin cyan), Skill 2 `Rising Dragon` (Launcher tebasan ke udara), Skill 3 `Dash Strike` (Tusukan kilat berpenetrasi).
+    - *AGILE:* Skill 1 `Shadow Shuriken` (Tiga bintang bayangan tri-spread), Skill 2 `Venom Flurry` (Rentetan 4 tusukan belati beracun), Skill 3 `Phantom Blink` (Teleportasi instan ke belakang musuh).
+    - *HEAVY:* Skill 1 `Earth Shockwave` (Gelombang kejut tanah berapi), Skill 2 `Cyclone Cleave` (Putaran 360° greatsword api), Skill 3 `Titan Roar` (Raungan perang heal +15% HP & knockback 14m).
+  - [x] Integrasikan sistem proyektil pemain (`Player.projectiles` via `Projectile.kt`) dengan deteksi tabrakan hurtbox musuh dan boss di `PlayScreen.kt`.
 - **Task 4.3.2: Ultimate Skill (Energy-Based)**
-  - [x] Buat komponen `UltimateEnergy.kt` (`currentEnergy`, `maxEnergy = 100`).
-  - [x] Tambahkan akumulasi energi: setiap serangan dasar atau combo yang berhasil mendarat menambah +5 hingga +10 energi.
-  - [x] Tombol ultimate hanya aktif saat energi mencapai 100%.
-  - [x] Saat aktif: luncurkan serangan dahsyat berarea luas, kurangi energi menjadi 0.
+  - [x] Buat komponen `UltimateEnergy.kt` (`currentEnergy`, `maxEnergy` dinamis per kelas 80-120).
+  - [x] Akumulasi energi: serangan dasar (+8), pukulan finisher kombo (+15), dan Perfect Parry (+35).
+  - [x] Saat energi 100%: tombol ultimate menyala keemasan; memicu jurus kataklismik area luas (*Bladestorm*, *Phantom Flurry*, *Meteor Cleave*).
 
-#### Modul 4.4: On-Screen Touch Controls (Virtual Buttons Android)
-- **Task 4.4.1: Virtual D-Pad / Touch Buttons**
-  - [x] Gunakan `Touchpad` bawaan libGDX (scene2d.ui) untuk analog kiri-kanan ATAU buat dua tombol sentuh panah Kiri dan Kanan (`VirtualController.kt`).
-  - [x] Buat tombol aksi di sisi kanan layar:
-    - Tombol `Attack` (ukuran terbesar)
-    - Tombol `Jump`
-    - Tombol `Dodge`
-    - Tombol `Skill 1` (dengan overlay lingkaran cooldown)
-    - Tombol `Ultimate` (dengan indikator glow/nyala saat energi penuh)
+#### Modul 4.4: On-Screen Touch Controls (Ergonomic Crescent Arc Layout)
+- **Task 4.4.1: Tata Letak Busur Melengkung Bergaya Shadow Martial Stance**
+  - [x] Rombak tata letak `VirtualController.kt` mengadopsi susunan busur ergonomis melingkar di sekeliling tombol Attack (mengacu pada gaya tarung *Shadow Fight* dan *League of Stickman*):
+    - Tombol `Attack` (radius 54px, jangkar utama kanan bawah)
+    - Tombol `Jump` (kiri bawah Attack) & `Dodge` (kiri tengah Attack)
+    - Tombol `Skill 1` (kanan atas Attack, ikon tebasan naga/sabit cyan)
+    - Tombol `Skill 2` (tengah atas Attack, ikon api magma amber)
+    - Tombol `Skill 3` (kiri atas Attack, ikon kilat/shuriken ungu)
+    - Tombol `Ultimate` (kiri atas puncak, ikon segel emas menyala)
+  - [x] Tampilkan sweep overlay cooldown radial semi-transparan dan angka hitung mundur detik pada tiap tombol skill.
+  - [x] Sistem multi-touch 5-pointer independen (bisa lari, lompat, dodge, dan merangkai multi-skill tanpa input drop).
 - **Task 4.4.2: Dual-Input Layer Abstraction**
-  - [x] Integrasikan `InputProcessor` sehingga sistem membaca input dari keyboard (desktop) dan tombol layar (Android) tanpa mengubah logika karakter `Player.kt` (`CompositeInput.kt`).
+  - [x] Integrasikan `CompositeInput.kt` menyatukan pembacaan keyboard desktop (`U`, `I`, `O`, `P`), gamepad controller fisik (`Btn Y`, `L1`, `R1`, `L2/R2`), dan on-screen touch controller secara transparan.
 
 ---
 
@@ -345,15 +352,25 @@ flowchart LR
   - [x] `PauseScreen` / In-Game Overlay (`[ESC]` / `[P]` / tombol HUD): Melanjutkan permainan, restart lantai, toggle audio, atau kembali ke Menu Utama.
   - [x] `GameOverScreen` dan `VictoryScreen` overlay interaktif dengan opsi respawn & replay.
 
-#### Modul 7.4: Diversifikasi Karakter (Sesuai GDD v0.1)
-- **Task 7.4.1: Arketipe 1 — Fast/Agile Stickman (Dual Daggers)**
-  - [x] Kecepatan lari tinggi (9.5f), durasi serangan sangat cepat, peluang critical tinggi (+15%), dual daggers visual.
-  - [x] Skill: Shadow Dash dan Phantom Flurry ultimate.
-- **Task 7.4.2: Arketipe 2 — Heavy/Strength Stickman (Greatsword)**
-  - [x] Kecepatan lari lebih lambat (5.8f), damage multiplier masif (1.55x), pertahanan tinggi (+3.5 DEF), Colossal Greatsword visual dengan tepian api.
-  - [x] Skill: Ground Breaker shockwave dan Meteor Cleave ultimate.
-- **Task 7.4.3: Arketipe 3 — Balanced Blade (The Wandering Swordsman)**
-  - [x] Kecepatan seimbang (7.5f), single sword, Dash Strike, dan Bladestorm 360°.
+#### Modul 7.4: Diversifikasi Tiga Arketipe Pendaki (Kanon Lore & Multi-Skill)
+- **Task 7.4.1: Kaelen The Bladeweaver (Arketipe: BALANCED)**
+  - [x] Senjata: Single Runed Broadsword; kecepatan seimbang (7.5f), daya tahan seimbang.
+  - [x] Skill 1: *Gale Crescent* (Proyektil tebasan sabit angin cyan 18 m/s).
+  - [x] Skill 2: *Rising Dragon* (Uppercut vertikal pelontar musuh ke udara $v_y = +11.5\text{ m/s}$).
+  - [x] Skill 3: *Dash Strike* (Tusukan kilat penetrasi berkecepatan 22 m/s).
+  - [x] Ultimate: *Bladestorm* (Badai pedang berputar 360° beradius 3.6m).
+- **Task 7.4.2: Zephyr The Shadowstalker (Arketipe: AGILE)**
+  - [x] Senjata: Dual Amethyst Daggers (Reverse-Grip); kecepatan lari tertinggi (9.5f), peluang critical tinggi (+15%).
+  - [x] Skill 1: *Shadow Shuriken* (Tiga bintang bayangan ungu tri-spread 24 m/s).
+  - [x] Skill 2: *Venom Flurry* (Rentetan 4 tusukan belati racun cepat multiplier tinggi).
+  - [x] Skill 3: *Phantom Blink* (Teleportasi instan 4.5m menembus punggung lawan bergaransi kritikal).
+  - [x] Ultimate: *Phantom Flurry* (Hujan bayangan ilusi siluet dari segala arah).
+- **Task 7.4.3: Gorgon The Ironbreaker (Arketipe: HEAVY)**
+  - [x] Senjata: Colossal Obsidian Greatsword; kecepatan lari lambat (5.8f), damage multiplier masif (1.55x), pertahanan baja (+3.5 DEF).
+  - [x] Skill 1: *Earth Shockwave* (Hantaman tanah memancarkan gelombang batu berapi $1.4\text{m} \times 1.1\text{m}$).
+  - [x] Skill 2: *Cyclone Cleave* (Pusaran 360° greatsword api merangsek maju).
+  - [x] Skill 3: *Titan Roar* (Raungan perang: memulihkan +15% HP seketika & gelombang repulsi 14m).
+  - [x] Ultimate: *Meteor Cleave* (Lompatan menghujamkan bilah meteorit berapi pemusnah massal).
 
 ---
 
@@ -511,18 +528,57 @@ flowchart LR
 
 ---
 
-### FASE 14: Layanan Google Play Games & Kesiapan Publikasi Play Store
+### FASE 14: Integrasi Kampanye Cerita 10 Lantai & Worldbuilding Odyssey
+> **Tujuan Terbesar:** Mewujudkan seluruh babak kampanye naratif 10 lantai sesuai [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md), mencakup 4 Act naratif, 5 pertarungan bos epik dengan mekanik dan visual signature, sistem dialog NPC (Aria & Vulcanus), serta prasasti batu hitam (*The Lore Tablets*).
+
+#### Modul 14.1: Arsitektur 4 Babak Naratif & Layout 10 Lantai Menara
+- **Task 14.1.1: Pemetaan Data Lantai Sesuai Babak Cerita**
+  - [x] Rancang konfigurasi data level pada `TowerLevelBuilder.kt` untuk mencakup 10 lantai terbagi dalam 4 Act:
+    - *Act I: The Initiation (Lantai 1-3):* Lower Bastion, Spire of Hazards, Apex Boss Arena.
+    - *Act II: Secrets of the Ink (Lantai 4-6):* The Sunken Archives, The Crucible of Mutations, The Iron Foundry (Bengkel aman Vulcanus).
+    - *Act III: The Astral Climb (Lantai 7-9):* The Fractured Precipice (Platforming melayang low-gravity 0.65f), The Hall of Echoes (Cermin jiwa Doppelgänger), The Blood Moon Sanctum (Kuil gerhana darah).
+    - *Act IV: The Primordial Canvas (Lantai 10):* Puncak marmer putih tanpa batas di atas samudra tinta melawan The Grand Calligrapher.
+- **Task 14.1.2: Sinematik Transisi Antar-Babak & Efek Atmosfer**
+  - [x] Overlay kartu judul babak bergaya gelap-emas saat pemain pertama kali menapaki lantai baru tiap Act (`renderActBannerOverlay()`).
+  - [x] Gradasi latar belakang dinamis yang berubah dari benteng karang gelap (Lantai 1-3), reruntuhan laboratorium ungu/hijau (Lantai 4-5), bengkel bara emas Vulcanus (Lantai 6), jurang kosmis bintang mati (Lantai 7-8), kuil gerhana darah (Lantai 9), hingga marmer putih bersih (Lantai 10).
+
+#### Modul 14.2: Bestiary & Hierarki 5 Boss Cerita
+- **Task 14.2.1: Jenderal Oakhaven — The Tower Guardian (Lantai 3 Boss)**
+  - [x] Boss inisiasi 2-fase: Heavy Cleave, Ground Slam, dan Enrage Wind Slash proyektil tebasan angin.
+- **Task 14.2.2: The Amethyst Matron — Sang Ratu Busur Bayang (Lantai 5 Boss)**
+  - [x] AI dan visual mahkota kristal tiara ungu & busur bayang: meluncurkan hujan panah multi-arah (*Triple Fan Volley*) berkecepatan tinggi.
+- **Task 14.2.3: The Shadow Doppelgänger — Cermin Jiwa Gelap (Lantai 8 Boss)**
+  - [x] AI cermin adaptif dengan mata cyan bercahaya dan belati ganda: mengeksekusi gelombang sabit bayangan berkecepatan tinggi dan kombo maut.
+- **Task 14.2.4: The Crimson Sovereign — Pangeran Belati Darah (Lantai 9 Boss)**
+  - [x] Boss vampiric berkecepatan tinggi dengan tanduk crimson dan jubah darah: badai pisau sabit darah dan lifesteal.
+- **Task 14.2.5: The Grand Calligrapher — Sang Penulis Takdir (Lantai 10 Final Boss)**
+  - [x] Pertarungan puncak kosmis dengan pena raksasa bertakhtakan bintang dan jubah tinta kosmis: hujan komet tinta semesta dan meteorit takdir (HP 1100).
+
+#### Modul 14.3: Dialog Interaktif NPC & Prasasti Kuno (Lore Tablets)
+- **Task 14.3.1: Sistem Dialog Interaktif NPC**
+  - [x] Sistem dialog RPG naratif interaktif dengan box semi-transparan dan warna identitas tokoh:
+    - *Aria (Sang Gema Warna Terakhir):* Membimbing pemain di gerbang Lantai 1 dengan lentera jiwa melayang.
+    - *Vulcanus (Sang Pandai Besi Abadi):* Berdialog di Lantai 6 mengenai asal-usul koin emas dan rahasia relik masa lalu di depan tungku tempa.
+- **Task 14.3.2: Prasasti Hitam Tersembunyi (The Lore Tablets)**
+  - [x] Tempatkan objek interaktif prasasti batu hitam obsidian dengan rune bercahaya (*Lore Tablet I, IV, VIII*) di sudut tersembunyi lantai:
+    - Membuka jendela pop-up gulungan perkamen yang berisi potongan sejarah dunia Aethelgard dan tips strategi bertarung.
+- **Task 14.3.3: Epilog & Transisi ke Endless Spire (The Endless Paradox)**
+  - [x] Sinematik akhir saat pena Calligrapher patah: spektrum warna merebak ke dunia, realitas menara menjadi paradoks tanpa akhir yang membuka mode *Endless Spire* (Lantai 11 ke atas).
+
+---
+
+### FASE 15: Layanan Google Play Games & Kesiapan Publikasi Play Store
 > **Tujuan Terbesar:** Integrasi Google Play Games (Leaderboard & Achievements), build Android App Bundle (.aab) bertanda tangan rilis, dan aset peluncuran store.
 
-#### Modul 14.1: Google Play Services Integration
-- **Task 14.1.1: Leaderboard & Achievements**
+#### Modul 15.1: Google Play Services Integration
+- **Task 15.1.1: Leaderboard & Achievements**
   - [ ] Papan peringkat global: "Highest Floor Cleared" & "Speedrun Clear Time".
   - [ ] Sistem achievement: "First Blood", "Untouchable Guardian", "Ascent Legend".
-- **Task 14.1.2: Cloud Save Backup**
+- **Task 15.1.2: Cloud Save Backup**
   - [ ] Backup otomatis save data ke Google Drive AppData / Play Games Cloud Save.
 
-#### Modul 14.2: Release Packaging (.aab) & Store Assets
-- **Task 14.2.1: Android App Bundle (.aab)**
+#### Modul 15.2: Release Packaging (.aab) & Store Assets
+- **Task 15.2.1: Android App Bundle (.aab)**
   - [ ] Konfigurasi signing key `keystore.jks` dan ProGuard / R8 minification rule.
   - [ ] Build file produksi `./gradlew android:bundleRelease`.
 
@@ -535,17 +591,18 @@ flowchart LR
 | **P0 (Kritis)** | Fase 0 & 1 | Environment, Viewport, Platforming Kinematik | Karakter kotak bisa lari & lompat di platform di laptop (desktop) |
 | **P0 (Kritis)** | Fase 2 | Hitbox, Hurtbox, Basic Attack, HP | Karakter bisa mengayunkan serangan dengan area deteksi hit yang valid |
 | **P0 (Kritis)** | Fase 3 | Enemy AI FSM, Win/Lose, 1 Stage Playable | **MILESTONE MVP TERCAPAI:** Game utuh 1 level bisa dimainkan & ditamatkan |
-| **P1 (Tinggi)** | Fase 4 | Combo 3-Hit, Dodge, Skills, Android Virtual Button | Combat terasa seru dan kontrol sentuh HP berfungsi |
+| **P1 (Tinggi)** | Fase 4 | Combo 3-Hit, Dodge, Arc Multi-Skills, Touch Controller | Combat seru dengan 3 skill aktif + 1 ulti per hero & kontrol sentuh busur |
 | **P1 (Tinggi)** | Fase 5 | Stats, EXP, Level Up, Local Save Data | Progres tersimpan di file lokal setelah aplikasi ditutup |
-| **P2 (Sedang)** | Fase 6 | Tiled Map Editor, Multi-Floor Tower, Boss | Level visual rapi dan terdapat pertarungan boss menantang |
-| **P2 (Sedang)** | Fase 7 | SpriteSheet, Sound Effects, Music, 2 Karakter | Tampilan stickman dinamis & audio imersif |
+| **P2 (Sedang)** | Fase 6 | Multi-Floor Tower Engine, Hazards, Boss | Level visual rapi, rintangan duri, dan pertarungan boss menantang |
+| **P2 (Sedang)** | Fase 7 | Visual Polish, Audio SFX, 3 Hero Archetypes | 3 karakter stickman dinamis dengan set skill unik & audio imersif |
 | **P3 (Rilis)** | Fase 8 | Profiling Android 60 FPS, Build Release APK | APK mandiri terpasang dan berjalan lancar di HP Android fisik |
 | **P4 (Ekspansi A)** | Fase 9 | Ranged Enemy Proyektil & Android Haptic | Variasi pertempuran jarak jauh & sensasi fisik kontrol |
-| **P4 (Ekspansi B)** | Fase 10 | Toko Blacksmith Senjata & Relik Pasif | Pemanfaatan Gold & variasi build karakter per run |
+| **P4 (Ekspansi B)** | Fase 10 | Toko Vulcanus Forge Senjata & Relik Pasif | Pemanfaatan Gold & variasi build karakter per run |
 | **P5 (Lanjutan A)** | Fase 11 | Sistem Parry Deflect & Boss Presentation | Skill ceiling aksi tinggi & visual sinematik bos |
 | **P5 (Lanjutan B)** | Fase 12 | Dukungan Gamepad & Touch Layout Editor | Fleksibilitas kontrol controller & ergonomi sentuh |
 | **P6 (Endgame)** | Fase 13 | Endless Spire Mode & Talent Tree | Replayability tanpa batas & kedalaman RPG mendalam |
-| **P6 (Publikasi)**| Fase 14 | Google Play Services & Release Bundle (.aab) | Kesiapan peluncuran komersial di Google Play Store |
+| **P6 (Naratif)** | Fase 14 | Kampanye Cerita 10 Lantai, 5 Boss & Lore Odyssey | Alur cerita epik 4 Act, dialog NPC Aria/Vulcanus, & tablet prasasti |
+| **P7 (Publikasi)**| Fase 15 | Google Play Services & Release Bundle (.aab) | Kesiapan peluncuran komersial di Google Play Store |
 
 
 ---

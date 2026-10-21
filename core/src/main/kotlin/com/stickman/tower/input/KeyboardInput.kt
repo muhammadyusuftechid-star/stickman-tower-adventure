@@ -53,12 +53,31 @@ class KeyboardInput : GameInput {
     override fun isSkillJustPressed(): Boolean {
         val input = Gdx.input ?: return false
         return input.isKeyJustPressed(Keys.U) ||
-               input.isKeyJustPressed(Keys.I)
+               input.isKeyJustPressed(Keys.NUM_1) ||
+               input.isKeyJustPressed(Keys.E)
+    }
+
+    override fun isSkill1JustPressed(): Boolean = isSkillJustPressed()
+
+    override fun isSkill2JustPressed(): Boolean {
+        val input = Gdx.input ?: return false
+        return input.isKeyJustPressed(Keys.I) ||
+               input.isKeyJustPressed(Keys.NUM_2) ||
+               input.isKeyJustPressed(Keys.R)
+    }
+
+    override fun isSkill3JustPressed(): Boolean {
+        val input = Gdx.input ?: return false
+        return input.isKeyJustPressed(Keys.O) ||
+               input.isKeyJustPressed(Keys.NUM_3) ||
+               input.isKeyJustPressed(Keys.F)
     }
 
     override fun isUltimateJustPressed(): Boolean {
         val input = Gdx.input ?: return false
-        return input.isKeyJustPressed(Keys.O) ||
-               input.isKeyJustPressed(Keys.Q)
+        return input.isKeyJustPressed(Keys.P) ||
+               input.isKeyJustPressed(Keys.NUM_4) ||
+               input.isKeyJustPressed(Keys.Q) ||
+               input.isKeyJustPressed(Keys.V)
     }
 }

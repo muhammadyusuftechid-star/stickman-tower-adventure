@@ -185,7 +185,7 @@ stickman-tower-adventure/
 │       └── Lwjgl3Launcher.kt
 ├── assets/                  # Typography (NotoSans TTF), Audio cues, and visual sprites
 ├── Alur_Pembuatan_Aplikasi.md  # Detailed Macro-to-Micro Engineering Roadmap
-├── ROADMAP.md               # 14-Phase Implementation Milestone Tracker
+├── LORE_AND_WORLDBUILDING.md    # Canonical Lore, Worldbuilding & Mythology Document
 └── Stickman_Game_Design_v0.1.md # Game Design Document (GDD)
 ```
 

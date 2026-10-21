@@ -36,6 +36,9 @@ class CompositeInput(
     override fun isAttackJustPressed() = keyboard.isAttackJustPressed() || virtual.isAttackJustPressed() || gamepad.isAttackJustPressed()
     override fun isDodgeJustPressed() = keyboard.isDodgeJustPressed() || virtual.isDodgeJustPressed() || gamepad.isDodgeJustPressed()
     override fun isSkillJustPressed() = keyboard.isSkillJustPressed() || virtual.isSkillJustPressed() || gamepad.isSkillJustPressed()
+    override fun isSkill1JustPressed() = keyboard.isSkill1JustPressed() || virtual.isSkill1JustPressed() || gamepad.isSkill1JustPressed()
+    override fun isSkill2JustPressed() = keyboard.isSkill2JustPressed() || virtual.isSkill2JustPressed() || gamepad.isSkill2JustPressed()
+    override fun isSkill3JustPressed() = keyboard.isSkill3JustPressed() || virtual.isSkill3JustPressed() || gamepad.isSkill3JustPressed()
     override fun isUltimateJustPressed() = keyboard.isUltimateJustPressed() || virtual.isUltimateJustPressed() || gamepad.isUltimateJustPressed()
     fun isPauseJustPressed() = gamepad.isPauseJustPressed()
 }

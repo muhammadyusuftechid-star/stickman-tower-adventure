@@ -26,6 +26,8 @@ class GamepadInput : GameInput, ControllerListener {
     private var attackPressed = false
     private var dodgePressed = false
     private var skillPressed = false
+    private var skill2Pressed = false
+    private var skill3Pressed = false
     private var ultimatePressed = false
     private var pausePressed = false
 
@@ -33,6 +35,8 @@ class GamepadInput : GameInput, ControllerListener {
     private var justPressedAttack = false
     private var justPressedDodge = false
     private var justPressedSkill = false
+    private var justPressedSkill2 = false
+    private var justPressedSkill3 = false
     private var justPressedUltimate = false
     private var justPressedPause = false
     private var justPressedUp = false
@@ -43,6 +47,8 @@ class GamepadInput : GameInput, ControllerListener {
     private var wasAttack = false
     private var wasDodge = false
     private var wasSkill = false
+    private var wasSkill2 = false
+    private var wasSkill3 = false
     private var wasUltimate = false
     private var wasPause = false
     private var wasUp = false
@@ -173,6 +179,9 @@ class GamepadInput : GameInput, ControllerListener {
         val btnB = mapping?.buttonB?.takeIf { it != ControllerMapping.UNDEFINED }?.let { controller.getButton(it) }
             ?: (if (controller.maxButtonIndex >= 1) controller.getButton(1) else false)
 
+        val btnY = mapping?.buttonY?.takeIf { it != ControllerMapping.UNDEFINED }?.let { controller.getButton(it) }
+            ?: (if (controller.maxButtonIndex >= 3) controller.getButton(3) else false)
+
         val btnL1 = mapping?.buttonL1?.takeIf { it != ControllerMapping.UNDEFINED }?.let { controller.getButton(it) }
             ?: (if (controller.maxButtonIndex >= 4) controller.getButton(4) else false)
 
@@ -186,7 +195,9 @@ class GamepadInput : GameInput, ControllerListener {
         attackPressed = btnX
         dodgePressed = btnB
         skillPressed = btnL1
-        ultimatePressed = btnR1
+        skill2Pressed = btnY
+        skill3Pressed = btnR1
+        ultimatePressed = (btnL1 && btnR1) || (btnY && btnB)
         pausePressed = btnStart
 
         // 3. Evaluasi Just Pressed
@@ -194,7 +205,9 @@ class GamepadInput : GameInput, ControllerListener {
         justPressedAttack = btnX && !wasAttack
         justPressedDodge = btnB && !wasDodge
         justPressedSkill = btnL1 && !wasSkill
-        justPressedUltimate = btnR1 && !wasUltimate
+        justPressedSkill2 = btnY && !wasSkill2
+        justPressedSkill3 = btnR1 && !wasSkill3
+        justPressedUltimate = ultimatePressed && !wasUltimate
         justPressedPause = btnStart && !wasPause
         justPressedUp = upPressed && !wasUp
         justPressedDown = downPressed && !wasDown
@@ -203,7 +216,9 @@ class GamepadInput : GameInput, ControllerListener {
         wasAttack = btnX
         wasDodge = btnB
         wasSkill = btnL1
-        wasUltimate = btnR1
+        wasSkill2 = btnY
+        wasSkill3 = btnR1
+        wasUltimate = ultimatePressed
         wasPause = btnStart
         wasUp = upPressed
         wasDown = downPressed
@@ -292,6 +307,9 @@ class GamepadInput : GameInput, ControllerListener {
     override fun isAttackJustPressed(): Boolean = justPressedAttack
     override fun isDodgeJustPressed(): Boolean = justPressedDodge
     override fun isSkillJustPressed(): Boolean = justPressedSkill
+    override fun isSkill1JustPressed(): Boolean = justPressedSkill
+    override fun isSkill2JustPressed(): Boolean = justPressedSkill2
+    override fun isSkill3JustPressed(): Boolean = justPressedSkill3
     override fun isUltimateJustPressed(): Boolean = justPressedUltimate
     fun isPauseJustPressed(): Boolean = justPressedPause
     fun isUpJustPressed(): Boolean = justPressedUp
