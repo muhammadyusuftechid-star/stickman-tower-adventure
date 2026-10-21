@@ -25,9 +25,11 @@ class StickmanGame : Game() {
 
     override fun dispose() {
         super.dispose()
-        screen?.dispose()
-        AudioManager.dispose()
-        FontManager.dispose()
+        runCatching { screen?.dispose() }
+        screen = null
+        runCatching { AudioManager.dispose() }
+        runCatching { FontManager.dispose() }
     }
 }
+
 

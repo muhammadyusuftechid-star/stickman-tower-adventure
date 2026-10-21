@@ -42,7 +42,6 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private val cameraManager = CameraManager()
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
-    private val font = BitmapFont()
 
     // Dedicated UI Viewport Pass (Pixel-Perfect 1280x720 Screen Space)
     private val uiCamera = OrthographicCamera()
@@ -363,7 +362,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         virtualController.render(
             shapeRenderer,
             batch,
-            if (FontManager.isInitialized) FontManager.smallFont else font,
+            FontManager.smallFont,
             player.skill1,
             player.ultimate
         )
@@ -417,7 +416,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             uiViewport.apply()
             batch.projectionMatrix = uiCamera.combined
             batch.begin()
-            val dmgFont = if (FontManager.isInitialized) FontManager.regularFont else font
+            val dmgFont = FontManager.regularFont
             for (ft in floatingTexts) {
                 ft.render(batch, dmgFont, cameraManager.camera)
             }
@@ -794,9 +793,9 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         batch.begin()
 
         // Level Badge Text
-        val smallF = if (FontManager.isInitialized) FontManager.smallFont else font
-        val regF = if (FontManager.isInitialized) FontManager.regularFont else font
-        val headF = if (FontManager.isInitialized) FontManager.headerFont else font
+        val smallF = FontManager.smallFont
+        val regF = FontManager.regularFont
+        val headF = FontManager.headerFont
 
         smallF.color = Color(0.7f, 0.85f, 1f, 1f)
         smallF.draw(batch, "LVL", 32f, h - 28f)
@@ -1006,8 +1005,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         batch.projectionMatrix = uiCamera.combined
         batch.begin()
-        val regF = if (FontManager.isInitialized) FontManager.regularFont else font
-        val headF = if (FontManager.isInitialized) FontManager.headerFont else font
+        val regF = FontManager.regularFont
+        val headF = FontManager.headerFont
 
         headF.color = Color.GOLD
         headF.draw(batch, "=== GAME PAUSED ===", w / 2f - 110f, cardY + cardH - 22f)
@@ -1043,6 +1042,5 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     override fun dispose() {
         shapeRenderer.dispose()
         batch.dispose()
-        font.dispose()
     }
 }
