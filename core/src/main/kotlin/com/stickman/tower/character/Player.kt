@@ -12,6 +12,7 @@ import com.stickman.tower.combat.Health
 import com.stickman.tower.combat.Hitbox
 import com.stickman.tower.combat.Hurtbox
 import com.stickman.tower.combat.Skill
+import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.combat.UltimateEnergy
 import com.stickman.tower.input.GameInput
 import com.stickman.tower.physics.Platform
@@ -19,16 +20,19 @@ import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.world.GameConfig
 import kotlin.math.abs
 import kotlin.math.sin
+import kotlin.random.Random
 
 /**
- * Entitas Karakter Pemain Fase 5:
- * Didukung model RPG CharacterStats (scaling level, HP, Attack, Defense, Critical),
- * Combo 3-Hit Chain, Dodge Roll ber-i-frames, Skill 1 Dash Strike, dan Ultimate Bladestorm.
+ * Entitas Karakter Pemain Fase 7:
+ * Didukung 3 Arketipe (BALANCED, AGILE, HEAVY), model RPG CharacterStats,
+ * Combo Hit Chain, Dodge Roll ber-i-frames, Skill & Ultimate unik,
+ * serta integrasi Audio SFX & Partikel VFX.
  */
 class Player(
     spawnX: Float = 0f,
     spawnY: Float = 2f,
-    val stats: CharacterStats = CharacterStats()
+    val stats: CharacterStats = CharacterStats(),
+    val archetype: CharacterArchetype = CharacterArchetype.BALANCED
 ) {
     val position = Vector2(spawnX, spawnY)
     val velocity = Vector2(0f, 0f)
@@ -40,11 +44,23 @@ class Player(
     // Komponen Pertarungan & RPG
     val health = Health(maxHp = stats.maxHp, invulnerableDuration = 0.35f)
     val hurtbox = Hurtbox(this)
-    val hitbox = Hitbox(this, damage = stats.calculateDamage(12f).first, knockbackX = 4f, knockbackY = 2.5f)
+    val hitbox = Hitbox(this, damage = stats.calculateDamage(12f).first * archetype.baseDamageMultiplier, knockbackX = 4f, knockbackY = 2.5f)
 
     val comboManager = ComboManager()
-    val skill1 = Skill(name = "Dash Strike", cooldown = 4.5f)
+    val skill1 = Skill(
+        name = archetype.skillName,
+        cooldown = when (archetype) {
+            CharacterArchetype.AGILE -> 3.2f
+            CharacterArchetype.HEAVY -> 5.5f
+            CharacterArchetype.BALANCED -> 4.5f
+        }
+    )
     val ultimate = UltimateEnergy(maxEnergy = 100f)
+
+    // Callbacks untuk efek partikel & visual luar
+    var onLand: ((Float, Float) -> Unit)? = null
+    var onJump: ((Float, Float) -> Unit)? = null
+    var onDodge: ((Float, Float) -> Unit)? = null
 
     // Siklus Fase Serangan Kombo
     var attackPhase: AttackPhase = AttackPhase.INACTIVE
@@ -125,7 +141,7 @@ class Player(
         if (canControlMove) {
             if (moveDir != 0f) {
                 facingRight = moveDir > 0
-                val targetVx = moveDir * GameConfig.MOVE_SPEED
+                val targetVx = moveDir * archetype.moveSpeed
                 velocity.x = MathUtils.lerp(velocity.x, targetVx, (GameConfig.ACCELERATION * delta).coerceAtMost(1f))
             } else {
                 velocity.x = MathUtils.lerp(velocity.x, 0f, (GameConfig.DECELERATION * delta).coerceAtMost(1f))
@@ -141,10 +157,12 @@ class Player(
         else jumpBufferTimer = (jumpBufferTimer - delta).coerceAtLeast(0f)
 
         if (jumpBufferTimer > 0f && coyoteTimer > 0f) {
-            velocity.y = GameConfig.JUMP_VELOCITY
+            velocity.y = archetype.jumpVelocity
             jumpBufferTimer = 0f
             coyoteTimer = 0f
             isGrounded = false
+            AudioManager.playJump()
+            onJump?.invoke(position.x + width / 2f, position.y)
         }
 
         // 5. Gravitasi
@@ -171,38 +189,46 @@ class Player(
             afterimages.clear()
             // Berikan i-Frames kebal penuh selama dodge
             health.takeDamage(0f)
+            AudioManager.playDodge()
+            onDodge?.invoke(position.x + width / 2f, position.y)
             return
         }
 
-        // Pemicu Skill 1 (Dash Strike)
+        // Pemicu Skill 1 (Dash Strike / Shadow Dash / Ground Breaker)
         if (input.isSkillJustPressed() && skill1.isReady && !isDodging && !isSkillStriking && !isUlting) {
             if (skill1.use()) {
                 isSkillStriking = true
                 skillTimer = 0f
                 attackPhase = AttackPhase.INACTIVE
-                val (dmg, isCrit) = stats.calculateDamage(30f)
-                hitbox.damage = dmg
-                hitbox.isCritical = isCrit
-                hitbox.knockbackX = 8.5f
+                val (baseDmg, isCrit) = stats.calculateDamage(30f)
+                val finalDmg = baseDmg * archetype.baseDamageMultiplier
+                val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
+                hitbox.damage = finalDmg
+                hitbox.isCritical = finalCrit
+                hitbox.knockbackX = if (archetype == CharacterArchetype.HEAVY) 11.5f else 8.5f
                 hitbox.knockbackY = 4.0f
                 hitbox.reset()
+                AudioManager.playSlashHeavy()
                 return
             }
         }
 
-        // Pemicu Ultimate (Bladestorm)
+        // Pemicu Ultimate (Bladestorm / Phantom Flurry / Meteor Cleave)
         if (input.isUltimateJustPressed() && ultimate.isReady && !isDodging && !isSkillStriking && !isUlting) {
             if (ultimate.consume()) {
                 isUlting = true
                 ultTimer = 0f
                 attackPhase = AttackPhase.INACTIVE
                 velocity.set(0f, 0f)
-                val (dmg, isCrit) = stats.calculateDamage(65f)
-                hitbox.damage = dmg
-                hitbox.isCritical = isCrit
-                hitbox.knockbackX = 12.0f
-                hitbox.knockbackY = 6.0f
+                val (baseDmg, isCrit) = stats.calculateDamage(65f)
+                val finalDmg = baseDmg * archetype.baseDamageMultiplier
+                val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
+                hitbox.damage = finalDmg
+                hitbox.isCritical = finalCrit
+                hitbox.knockbackX = 14.0f
+                hitbox.knockbackY = 7.0f
                 hitbox.reset()
+                AudioManager.playSlashHeavy()
                 return
             }
         }
@@ -213,13 +239,20 @@ class Player(
                 val hitConfig = comboManager.startNextHit()
                 attackPhase = AttackPhase.STARTUP
                 attackTimer = 0f
-                val (dmg, isCrit) = stats.calculateDamage(hitConfig.damage)
-                hitbox.damage = dmg
-                hitbox.isCritical = isCrit
-                hitbox.knockbackX = hitConfig.knockbackX
+                val (baseDmg, isCrit) = stats.calculateDamage(hitConfig.damage)
+                val finalDmg = baseDmg * archetype.baseDamageMultiplier
+                val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
+                hitbox.damage = finalDmg
+                hitbox.isCritical = finalCrit
+                hitbox.knockbackX = hitConfig.knockbackX * if (archetype == CharacterArchetype.HEAVY) 1.35f else 1f
                 hitbox.knockbackY = hitConfig.knockbackY
                 hitbox.reset()
                 velocity.x *= 0.3f
+                if (archetype == CharacterArchetype.HEAVY || comboManager.currentStep == ComboStep.HIT_3) {
+                    AudioManager.playSlashHeavy()
+                } else {
+                    AudioManager.playSlashLight()
+                }
             } else if (attackPhase == AttackPhase.RECOVERY || (attackPhase == AttackPhase.ACTIVE && attackTimer > 0.06f)) {
                 comboManager.hasBufferedInput = true
             }
@@ -309,12 +342,19 @@ class Player(
                         val nextCfg = comboManager.startNextHit()
                         attackPhase = AttackPhase.STARTUP
                         attackTimer = 0f
-                        val (dmg, isCrit) = stats.calculateDamage(nextCfg.damage)
-                        hitbox.damage = dmg
-                        hitbox.isCritical = isCrit
-                        hitbox.knockbackX = nextCfg.knockbackX
+                        val (baseDmg, isCrit) = stats.calculateDamage(nextCfg.damage)
+                        val finalDmg = baseDmg * archetype.baseDamageMultiplier
+                        val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
+                        hitbox.damage = finalDmg
+                        hitbox.isCritical = finalCrit
+                        hitbox.knockbackX = nextCfg.knockbackX * if (archetype == CharacterArchetype.HEAVY) 1.35f else 1f
                         hitbox.knockbackY = nextCfg.knockbackY
                         hitbox.reset()
+                        if (archetype == CharacterArchetype.HEAVY || comboManager.currentStep == ComboStep.HIT_3) {
+                            AudioManager.playSlashHeavy()
+                        } else {
+                            AudioManager.playSlashLight()
+                        }
                     } else {
                         attackPhase = AttackPhase.INACTIVE
                         hitbox.reset()
@@ -346,6 +386,7 @@ class Player(
     }
 
     private fun resolveCollisionY(delta: Float, platforms: List<Platform>) {
+        val wasGrounded = isGrounded
         val previousY = position.y
         isGrounded = false
         position.y += velocity.y * delta
@@ -377,6 +418,10 @@ class Player(
                 bounds.setPosition(position.x, position.y)
             }
         }
+
+        if (!wasGrounded && isGrounded) {
+            onLand?.invoke(position.x + width / 2f, position.y)
+        }
     }
 
     private fun updateState() {
@@ -394,7 +439,8 @@ class Player(
         // Jika sedang dalam Dodge Roll, kebal dari serangan musuh!
         if (isDodging) return false
 
-        val mitigatedDmg = kotlin.math.max(1f, amount - stats.defense)
+        val effectiveDef = stats.defense + archetype.baseDefenseBonus
+        val mitigatedDmg = kotlin.math.max(1f, amount - effectiveDef)
         if (health.takeDamage(mitigatedDmg)) {
             velocity.x = knockDirX
             velocity.y = knockDirY
@@ -502,9 +548,19 @@ class Player(
         shapeRenderer.rectLine(centerX, pelvisY, legRightFootX, footY, 0.07f)
 
         // Tangan Belakang
-        shapeRenderer.rectLine(centerX, shoulderY, centerX - 0.25f * lookDir - (armSwing * lookDir * 0.5f), shoulderY - 0.35f, 0.06f)
+        val armBackHandX = centerX - 0.25f * lookDir - (armSwing * lookDir * 0.5f)
+        val armBackHandY = shoulderY - 0.35f
+        shapeRenderer.rectLine(centerX, shoulderY, armBackHandX, armBackHandY, 0.06f)
 
-        // Tangan Depan (Pegang Pedang)
+        // Belati Tangan Belakang jika AGILE (Dual Daggers)
+        if (archetype == CharacterArchetype.AGILE) {
+            val daggerBackTipX = armBackHandX - 0.35f * lookDir
+            val daggerBackTipY = armBackHandY + 0.30f
+            shapeRenderer.color = Color(0.4f, 0.9f, 1f, 0.95f)
+            shapeRenderer.rectLine(armBackHandX, armBackHandY, daggerBackTipX, daggerBackTipY, 0.05f)
+        }
+
+        // Tangan Depan (Pegang Senjata Utama)
         val armFrontHandX: Float
         val armFrontHandY: Float
         val swordTipX: Float
@@ -529,13 +585,53 @@ class Player(
 
         shapeRenderer.rectLine(centerX, shoulderY, armFrontHandX, armFrontHandY, 0.06f)
 
-        // Bilah Pedang (Sword Blade)
-        shapeRenderer.color = when (comboManager.currentStep) {
-            ComboStep.HIT_1 -> Color(0.9f, 0.95f, 1f, 1f)
-            ComboStep.HIT_2 -> Color(1f, 0.85f, 0.4f, 1f)
-            ComboStep.HIT_3 -> Color(1f, 0.45f, 0.2f, 1f)
+        // Rendering Senjata Berdasarkan Arketipe (Bilah Pedang / Dagger / Greatsword)
+        if (archetype == CharacterArchetype.AGILE) {
+            val daggerFrontTipX = armFrontHandX + (if (attackPhase == AttackPhase.ACTIVE) 0.55f else 0.40f) * lookDir
+            val daggerFrontTipY = armFrontHandY + (if (attackPhase == AttackPhase.ACTIVE) -0.1f else -0.25f)
+            shapeRenderer.color = Color(0.4f, 0.9f, 1f, 1f)
+            shapeRenderer.rectLine(armFrontHandX, armFrontHandY, daggerFrontTipX, daggerFrontTipY, 0.06f)
+        } else if (archetype == CharacterArchetype.HEAVY) {
+            // Colossal Greatsword: Broad slab with glowing runes and crossguard
+            val heavyTipX = armFrontHandX + (swordTipX - armFrontHandX) * 1.35f
+            val heavyTipY = armFrontHandY + (swordTipY - armFrontHandY) * 1.35f
+
+            // Blade Core
+            shapeRenderer.color = Color(0.3f, 0.3f, 0.35f, 1f)
+            shapeRenderer.rectLine(armFrontHandX, armFrontHandY, heavyTipX, heavyTipY, 0.16f)
+
+            // Glowing Rune Edge
+            shapeRenderer.color = when (comboManager.currentStep) {
+                ComboStep.HIT_1 -> Color(1f, 0.55f, 0.1f, 1f)
+                ComboStep.HIT_2 -> Color(1f, 0.25f, 0.1f, 1f)
+                ComboStep.HIT_3 -> Color(1f, 0.85f, 0.2f, 1f)
+            }
+            shapeRenderer.rectLine(armFrontHandX, armFrontHandY, heavyTipX, heavyTipY, 0.08f)
+
+            // Crossguard
+            val guardPerpX = -(heavyTipY - armFrontHandY) * 0.12f
+            val guardPerpY = (heavyTipX - armFrontHandX) * 0.12f
+            val guardBaseX = armFrontHandX + (heavyTipX - armFrontHandX) * 0.12f
+            val guardBaseY = armFrontHandY + (heavyTipY - armFrontHandY) * 0.12f
+            shapeRenderer.color = Color.GOLD
+            shapeRenderer.rectLine(guardBaseX - guardPerpX, guardBaseY - guardPerpY, guardBaseX + guardPerpX, guardBaseY + guardPerpY, 0.10f)
+        } else {
+            // BALANCED: Standard Sword
+            shapeRenderer.color = when (comboManager.currentStep) {
+                ComboStep.HIT_1 -> Color(0.9f, 0.95f, 1f, 1f)
+                ComboStep.HIT_2 -> Color(1f, 0.85f, 0.4f, 1f)
+                ComboStep.HIT_3 -> Color(1f, 0.45f, 0.2f, 1f)
+            }
+            shapeRenderer.rectLine(armFrontHandX, armFrontHandY, swordTipX, swordTipY, 0.08f)
+
+            // Crossguard
+            val guardPerpX = -(swordTipY - armFrontHandY) * 0.10f
+            val guardPerpY = (swordTipX - armFrontHandX) * 0.10f
+            val guardBaseX = armFrontHandX + (swordTipX - armFrontHandX) * 0.12f
+            val guardBaseY = armFrontHandY + (swordTipY - armFrontHandY) * 0.12f
+            shapeRenderer.color = Color.GOLD
+            shapeRenderer.rectLine(guardBaseX - guardPerpX, guardBaseY - guardPerpY, guardBaseX + guardPerpX, guardBaseY + guardPerpY, 0.06f)
         }
-        shapeRenderer.rectLine(armFrontHandX, armFrontHandY, swordTipX, swordTipY, 0.08f)
 
         // 3. Efek Visual Tebasan Kombo
         if (attackPhase == AttackPhase.ACTIVE) {
@@ -549,11 +645,18 @@ class Player(
     }
 
     private fun renderComboSlashArc(shapeRenderer: ShapeRenderer, centerX: Float, centerY: Float, lookDir: Float) {
-        val (arcRadius, arcColor) = when (comboManager.currentStep) {
+        val (arcRadiusMult, arcColorOverride) = when (archetype) {
+            CharacterArchetype.AGILE -> 0.85f to Color(0.3f, 0.95f, 1f, 0.95f) // Cyan rapid slash
+            CharacterArchetype.HEAVY -> 1.45f to Color(1f, 0.35f, 0.1f, 0.95f) // Colossal fiery orange slash
+            CharacterArchetype.BALANCED -> 1.0f to null
+        }
+        val (baseRadius, defaultColor) = when (comboManager.currentStep) {
             ComboStep.HIT_1 -> 1.15f to Color(1f, 0.95f, 0.3f, 0.85f)      // Hit 1: Kuning Emas
             ComboStep.HIT_2 -> 1.35f to Color(1f, 0.6f, 0.15f, 0.9f)       // Hit 2: Oranye Api
             ComboStep.HIT_3 -> 1.70f to Color(1f, 0.2f, 0.25f, 0.95f)      // Hit 3: Merah Raksasa (Finisher)
         }
+        val arcRadius = baseRadius * arcRadiusMult
+        val arcColor = arcColorOverride ?: defaultColor
 
         shapeRenderer.color = arcColor
         val arcCenterX = centerX + 0.25f * lookDir

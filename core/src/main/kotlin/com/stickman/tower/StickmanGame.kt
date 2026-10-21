@@ -1,7 +1,8 @@
 package com.stickman.tower
 
 import com.badlogic.gdx.Game
-import com.stickman.tower.screen.PlayScreen
+import com.stickman.tower.audio.AudioManager
+import com.stickman.tower.screen.MainMenuScreen
 
 /**
  * Game root controller untuk Stickman Tower Adventure.
@@ -9,12 +10,13 @@ import com.stickman.tower.screen.PlayScreen
  */
 class StickmanGame : Game() {
     override fun create() {
-        // Luncurkan langsung ke PlayScreen untuk pengujian platformer
-        setScreen(PlayScreen())
+        AudioManager.init()
+        setScreen(MainMenuScreen(this))
     }
 
     override fun dispose() {
         super.dispose()
         screen?.dispose()
+        AudioManager.dispose()
     }
 }

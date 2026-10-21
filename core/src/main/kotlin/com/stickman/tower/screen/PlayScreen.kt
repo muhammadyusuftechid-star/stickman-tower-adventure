@@ -8,7 +8,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.ScreenUtils
+import com.stickman.tower.StickmanGame
+import com.stickman.tower.audio.AudioManager
+import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.character.Player
 import com.stickman.tower.combat.ComboStep
 import com.stickman.tower.combat.FloatingText
@@ -20,18 +24,18 @@ import com.stickman.tower.input.KeyboardInput
 import com.stickman.tower.input.VirtualController
 import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.rpg.SaveManager
+import com.stickman.tower.vfx.ParticleManager
 import com.stickman.tower.world.CameraManager
 import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.world.TowerLevelBuilder
 
 /**
- * Screen gameplay utama Fase 6:
- * Mengintegrasikan Arsitektur Menara Bertingkat (Lantai 1, Lantai 2, Lantai 3 Boss Arena),
- * Rintangan Dinamis (Spike Hazards, One-Way Platforms, Peti Harta Karun),
- * Boss Fight Epik 2-Fase ("Tower Guardian" Cleave, Slam & Wind Slash),
- * serta Transisi Multi-Floor & Progresi RPG Tersimpan.
+ * Screen gameplay utama Fase 7:
+ * Menghadirkan Menara Bertingkat, Boss Fight 2-Fase,
+ * Integrasi Audio Prosedural Lengkap, Partikel VFX (Dust, Sparks, Slashes),
+ * In-game Pause Menu Overlay, serta 3 Arketipe Karakter Berbeda.
  */
-class PlayScreen : Screen {
+class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private val cameraManager = CameraManager()
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
@@ -42,10 +46,19 @@ class PlayScreen : Screen {
     val virtualController = VirtualController()
     private val input = CompositeInput(keyboardInput, virtualController)
 
-    // Data Progresi RPG & Karakter Pemain
+    // Data Progresi RPG & Karakter Pemain (Sesuai Arketipe Tersimpan)
     private val saveData = SaveManager.load()
     private val stats = CharacterStats().apply { loadFromSaveData(saveData) }
-    private val player = Player(spawnX = -1f, spawnY = 1.5f, stats = stats)
+    private val archetype = CharacterArchetype.fromString(saveData.selectedArchetype)
+    private val player = Player(spawnX = -1f, spawnY = 1.5f, stats = stats, archetype = archetype)
+
+    // Manajer Partikel VFX
+    val particleManager = ParticleManager()
+
+    // Sistem Pause Menu
+    var isPaused: Boolean = false
+    private var pauseSelectedIndex: Int = 0
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "AUDIO: ON", "MAIN MENU")
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -66,7 +79,14 @@ class PlayScreen : Screen {
     private var showDebugBounds = false
 
     override fun show() {
+        AudioManager.init()
         virtualController.resize(Gdx.graphics.width, Gdx.graphics.height)
+
+        // Hubungkan Callback Partikel VFX Pemain
+        player.onLand = { x, y -> particleManager.spawnDust(x, y, count = 6) }
+        player.onJump = { x, y -> particleManager.spawnDust(x, y, count = 5) }
+        player.onDodge = { x, y -> particleManager.spawnDust(x, y, count = 8) }
+
         loadFloor(1)
     }
 
@@ -92,6 +112,7 @@ class PlayScreen : Screen {
         gameStatus = GameStatus.PLAYING
 
         floatingTexts.clear()
+        particleManager.clear()
         floatingTexts.add(
             FloatingText("=== ${currentFloor.floorName} ===", player.position.x, player.position.y + 2.5f, Color.GOLD, duration = 2.8f)
         )
@@ -99,7 +120,7 @@ class PlayScreen : Screen {
 
     private fun triggerSave(reason: String, highestFloor: Int = currentFloorNumber) {
         val saveFloor = kotlin.math.max(saveData.highestTowerFloor, highestFloor)
-        SaveManager.save(player.stats.toSaveData(highestFloor = saveFloor))
+        SaveManager.save(player.stats.toSaveData(highestFloor = saveFloor, selectedArchetype = archetype.name))
         saveNotificationText = "Progress Tersimpan ($reason)"
         saveNotificationTimer = 2.5f
     }
@@ -113,6 +134,8 @@ class PlayScreen : Screen {
 
         if (levelsGained > 0) {
             player.onLevelUp(levelsGained)
+            AudioManager.playLevelUp()
+            particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height, count = 25, color = Color.CYAN)
             floatingTexts.add(
                 FloatingText("★ LEVEL UP! Lv.${player.stats.level} ★", player.position.x, player.position.y + 2.5f, Color.ORANGE, duration = 2.4f)
             )
@@ -125,12 +148,40 @@ class PlayScreen : Screen {
             showDebugBounds = !showDebugBounds
         }
 
-        // Perbarui Input Virtual Controller
-        input.update()
+        // Toggle Pause dengan ESC atau P
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.P)) {
+            isPaused = !isPaused
+            pauseSelectedIndex = 0
+            if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
+        }
 
-        handleStatusInput()
+        // Cek klik tombol Pause di pojok kanan atas HUD
+        if (Gdx.input.justTouched()) {
+            val touchX = Gdx.input.x.toFloat()
+            val touchY = Gdx.graphics.height.toFloat() - Gdx.input.y.toFloat()
+            val w = Gdx.graphics.width.toFloat()
+            val h = Gdx.graphics.height.toFloat()
+            if (touchX in (w - 110f)..w && touchY in (h - 45f)..h) {
+                isPaused = !isPaused
+                pauseSelectedIndex = 0
+                if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
+            }
+        }
 
         val safeDelta = delta.coerceAtMost(1f / 30f)
+
+        if (isPaused) {
+            handlePauseInput()
+            renderWorld(0f)
+            renderHUD()
+            renderPauseOverlay()
+            return
+        }
+
+        // Perbarui Input Virtual Controller
+        input.update()
+        handleStatusInput()
+
         if (saveNotificationTimer > 0f) {
             saveNotificationTimer = (saveNotificationTimer - safeDelta).coerceAtLeast(0f)
         }
@@ -141,12 +192,15 @@ class PlayScreen : Screen {
         if (!isFrozen && gameStatus == GameStatus.PLAYING) {
             // Pembaruan Pemain
             player.update(safeDelta, input, currentFloor.platforms)
+            particleManager.update(safeDelta)
 
             // Cek Rintangan Duri Lantai (Spikes)
             for (spike in currentFloor.spikes) {
                 if (spike.checkCollision(player.bounds) && !player.health.isInvulnerable && !player.isDodging) {
                     if (player.takeHit(spike.damage, 0f, 8.0f)) {
                         hitStopManager.trigger(0.06f)
+                        AudioManager.playHit()
+                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color.RED)
                         floatingTexts.add(
                             FloatingText("-${spike.damage.toInt()}", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.RED)
                         )
@@ -163,6 +217,8 @@ class PlayScreen : Screen {
                         if (chest.open()) {
                             player.stats.addGold(chest.goldReward)
                             player.health.heal(chest.healReward)
+                            AudioManager.playChest()
+                            particleManager.spawnHitSparks(chest.x + chest.width / 2f, chest.y + chest.height / 2f, count = 22, color = Color.GOLD)
                             floatingTexts.add(FloatingText("+${chest.goldReward} G", chest.x + 0.2f, chest.y + 1.2f, Color.YELLOW, duration = 1.4f))
                             floatingTexts.add(FloatingText("+${chest.healReward.toInt()} HP", chest.x + 0.2f, chest.y + 1.7f, Color.GREEN, duration = 1.4f))
                             triggerSave("Peti Terbuka")
@@ -185,6 +241,8 @@ class PlayScreen : Screen {
                 enemy.update(safeDelta, player, currentFloor.platforms)
                 if (enemy.health.isDead && !enemy.rewardClaimed) {
                     enemy.rewardClaimed = true
+                    AudioManager.playDeath()
+                    particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 16, color = Color.RED)
                     grantRewards(enemy.expReward, enemy.goldReward, enemy.position.x + enemy.width / 2f, enemy.position.y + 1f)
                 }
             }
@@ -195,6 +253,8 @@ class PlayScreen : Screen {
                 boss.update(safeDelta, player, currentFloor.platforms)
                 if (boss.health.isDead && !boss.rewardClaimed) {
                     boss.rewardClaimed = true
+                    AudioManager.playDeath()
+                    particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 35, color = Color.GOLD)
                     grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
                     floatingTexts.add(
                         FloatingText("★ BOSS DEFEATED! ★", boss.position.x, boss.position.y + 3.2f, Color.GOLD, duration = 3.5f)
@@ -217,18 +277,26 @@ class PlayScreen : Screen {
             if (ft.isExpired) iterator.remove()
         }
 
-        // 5. Perbarui Kamera Mengikuti Pemain
+        // 5. Render Objek Dunia 2D & Partikel
+        renderWorld(safeDelta)
+
+        // 6. Render Virtual Controller (On-Screen Touch Buttons untuk Android/Desktop)
+        virtualController.render(shapeRenderer, batch, font, player.skill1, player.ultimate)
+
+        // 7. Render Enhanced In-Game RPG HUD
+        renderHUD()
+    }
+
+    private fun renderWorld(delta: Float) {
         val playerCenterX = player.position.x + player.width / 2f
         val playerCenterY = player.position.y + player.height / 2f + 0.5f
-        cameraManager.update(playerCenterX, playerCenterY, safeDelta)
+        cameraManager.update(playerCenterX, playerCenterY, delta)
 
-        // 6. Bersihkan Layar
         val clearR = if (currentFloor.isBossFloor) 0.12f else 0.08f
         val clearG = if (currentFloor.isBossFloor) 0.08f else 0.09f
         val clearB = if (currentFloor.isBossFloor) 0.12f else 0.13f
         ScreenUtils.clear(clearR, clearG, clearB, 1f)
 
-        // 7. Render Objek Dunia 2D
         cameraManager.viewport.apply()
         shapeRenderer.projectionMatrix = cameraManager.camera.combined
 
@@ -242,6 +310,9 @@ class PlayScreen : Screen {
         for (enemy in currentFloor.enemies) enemy.render(shapeRenderer)
         currentFloor.boss?.render(shapeRenderer)
         player.render(shapeRenderer)
+
+        // Render Efek Partikel VFX
+        particleManager.render(shapeRenderer)
         shapeRenderer.end()
 
         // Debug Bounding Boxes
@@ -257,18 +328,11 @@ class PlayScreen : Screen {
             shapeRenderer.end()
         }
 
-        // 8. Render Floating Texts
         batch.begin()
         for (ft in floatingTexts) {
             ft.render(batch, font, cameraManager.camera)
         }
         batch.end()
-
-        // 9. Render Virtual Controller (On-Screen Touch Buttons untuk Android/Desktop)
-        virtualController.render(shapeRenderer, batch, font, player.skill1, player.ultimate)
-
-        // 10. Render Enhanced In-Game RPG HUD
-        renderHUD()
     }
 
     private fun handleTwoWayCombat() {
@@ -286,6 +350,8 @@ class PlayScreen : Screen {
 
                         if (enemy.takeHit(player.hitbox.damage, knockX, knockY)) {
                             hitStopManager.trigger(0.06f)
+                            AudioManager.playHit()
+                            particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 10, color = if (player.hitbox.isCritical) Color.GOLD else Color.WHITE)
 
                             val energyGain = when {
                                 player.isUlting -> 0f
@@ -327,6 +393,8 @@ class PlayScreen : Screen {
 
                     if (boss.takeHit(player.hitbox.damage, knockX, knockY)) {
                         hitStopManager.trigger(0.06f)
+                        AudioManager.playHit()
+                        particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 14, color = Color.ORANGE)
 
                         val energyGain = when {
                             player.isUlting -> 0f
@@ -362,6 +430,8 @@ class PlayScreen : Screen {
 
                     if (player.takeHit(enemy.hitbox.damage, knockX, knockY)) {
                         hitStopManager.trigger(0.08f)
+                        AudioManager.playHit()
+                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
                         floatingTexts.add(
                             FloatingText(
                                 "-${enemy.hitbox.damage.toInt()}",
@@ -385,6 +455,8 @@ class PlayScreen : Screen {
 
                 if (player.takeHit(boss.hitbox.damage, knockX, knockY)) {
                     hitStopManager.trigger(0.09f)
+                    AudioManager.playHit()
+                    particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 12, color = Color.RED)
                     floatingTexts.add(
                         FloatingText(
                             "-${boss.hitbox.damage.toInt()}",
@@ -405,6 +477,8 @@ class PlayScreen : Screen {
                     val knockX = if (proj.velocityX > 0f) 6.5f else -6.5f
                     if (player.takeHit(proj.damage, knockX, 3.5f)) {
                         hitStopManager.trigger(0.06f)
+                        AudioManager.playHit()
+                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
                         floatingTexts.add(
                             FloatingText(
                                 "-${proj.damage.toInt()}",
@@ -527,6 +601,12 @@ class PlayScreen : Screen {
             shapeRenderer.rect(w / 2f - 110f, h - 38f, 220f, 26f)
         }
 
+        // Tombol Pause (Pojok Kanan Atas)
+        shapeRenderer.color = Color(0.15f, 0.20f, 0.30f, 0.90f)
+        shapeRenderer.rect(w - 110f, h - 45f, 98f, 32f)
+        shapeRenderer.color = Color.CYAN
+        shapeRenderer.rectLine(w - 110f, h - 45f, w - 12f, h - 45f, 2f)
+
         // Bar HP Boss Raksasa (Jika Berada di Boss Floor dan Boss Masih Hidup)
         val boss = currentFloor.boss
         if (boss != null && !boss.health.isDead) {
@@ -602,6 +682,10 @@ class PlayScreen : Screen {
         val dodgeStatus = if (player.dodgeCooldown <= 0f) "READY" else String.format("%.1fs", player.dodgeCooldown)
         font.draw(batch, "Dodge [L/Shift]: $dodgeStatus", 450f, h - 45f)
 
+        // Teks Tombol Pause
+        font.color = Color.WHITE
+        font.draw(batch, "[PAUSE]", w - 95f, h - 24f)
+
         // Teks Bar Boss
         if (boss != null && !boss.health.isDead) {
             font.color = Color.WHITE
@@ -641,6 +725,116 @@ class PlayScreen : Screen {
             }
         }
 
+        batch.end()
+    }
+
+    private fun handlePauseInput() {
+        if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
+            pauseSelectedIndex = (pauseSelectedIndex - 1 + pauseMenuItems.size) % pauseMenuItems.size
+            AudioManager.playJump()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
+            pauseSelectedIndex = (pauseSelectedIndex + 1) % pauseMenuItems.size
+            AudioManager.playJump()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)) {
+            executePauseSelection()
+        }
+
+        if (Gdx.input.justTouched()) {
+            val touchX = Gdx.input.x.toFloat()
+            val touchY = Gdx.graphics.height.toFloat() - Gdx.input.y.toFloat()
+            val w = Gdx.graphics.width.toFloat()
+            val h = Gdx.graphics.height.toFloat()
+            val menuW = 280f
+            val startY = h / 2f + 35f
+            val itemH = 46f
+            val menuX = w / 2f - menuW / 2f
+
+            for (i in pauseMenuItems.indices) {
+                val itemY = startY - (i * itemH)
+                if (touchX in menuX..(menuX + menuW) && touchY in itemY..(itemY + itemH)) {
+                    pauseSelectedIndex = i
+                    executePauseSelection()
+                    break
+                }
+            }
+        }
+    }
+
+    private fun executePauseSelection() {
+        when (pauseSelectedIndex) {
+            0 -> { // Resume
+                isPaused = false
+                AudioManager.playSlashLight()
+            }
+            1 -> { // Restart Floor
+                isPaused = false
+                loadFloor(currentFloorNumber)
+                AudioManager.playSlashLight()
+            }
+            2 -> { // Toggle Audio
+                AudioManager.toggleMute()
+                if (!AudioManager.isMuted) AudioManager.playChest()
+            }
+            3 -> { // Main Menu
+                isPaused = false
+                AudioManager.playDodge()
+                if (game != null) {
+                    game.setScreen(MainMenuScreen(game))
+                }
+            }
+        }
+    }
+
+    private fun renderPauseOverlay() {
+        val w = Gdx.graphics.width.toFloat()
+        val h = Gdx.graphics.height.toFloat()
+
+        // Dimmer background
+        shapeRenderer.projectionMatrix.setToOrtho2D(0f, 0f, w, h)
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        shapeRenderer.color = Color(0f, 0f, 0f, 0.75f)
+        shapeRenderer.rect(0f, 0f, w, h)
+
+        // Pause Menu Card
+        val cardW = 340f
+        val cardH = 280f
+        val cardX = w / 2f - cardW / 2f
+        val cardY = h / 2f - cardH / 2f
+        shapeRenderer.color = Color(0.1f, 0.13f, 0.20f, 0.95f)
+        shapeRenderer.rect(cardX, cardY, cardW, cardH)
+        shapeRenderer.color = Color.CYAN
+        shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
+
+        // Selected button highlight
+        val startY = h / 2f + 35f
+        val itemH = 46f
+        val btnY = startY - (pauseSelectedIndex * itemH)
+        shapeRenderer.color = Color(0.2f, 0.45f, 0.85f, 0.75f)
+        shapeRenderer.rect(cardX + 25f, btnY - 5f, cardW - 50f, 38f)
+
+        shapeRenderer.end()
+
+        batch.begin()
+        font.color = Color.GOLD
+        font.draw(batch, "=== GAME PAUSED ===", w / 2f - 85f, cardY + cardH - 25f)
+
+        for (i in pauseMenuItems.indices) {
+            val itemText = if (i == 2) {
+                if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+            } else {
+                pauseMenuItems[i]
+            }
+            val curY = startY - (i * itemH) + 20f
+            if (i == pauseSelectedIndex) {
+                font.color = Color.YELLOW
+                font.draw(batch, "> $itemText <", w / 2f - 60f, curY)
+            } else {
+                font.color = Color.WHITE
+                font.draw(batch, itemText, w / 2f - 45f, curY)
+            }
+        }
         batch.end()
     }
 

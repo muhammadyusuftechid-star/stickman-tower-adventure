@@ -308,38 +308,41 @@ flowchart LR
 
 #### Modul 7.1: Sprite Sheet & TextureAtlas Management
 - **Task 7.1.1: Pembuatan & Packing Asset Visual**
-  - [ ] Gunakan tool `TexturePacker` bawaan libGDX untuk menggabungkan frame sprite stickman ke dalam satu file `.atlas`.
-  - [ ] Muat animasi menggunakan class `Animation<TextureRegion>`:
-    - Animasi: `idle`, `run`, `jump_up`, `fall_down`, `attack1`, `attack2`, `attack3`, `dodge`, `hurt`, `death`.
+  - [x] Manajemen rendering procedural stickman dengan artikulasi sendi anatomi dinamis dan pose per aksi (idle, run, jump, fall, attack combo, dodge roll, hurt, ult).
+  - [x] Rendering gaya senjata per arketipe (Single Sword, Dual Daggers reverse-grip, Colossal Greatsword).
 - **Task 7.1.2: Partikel dan Efek Visual (VFX)**
-  - [ ] Buat efek partikel debu saat melompat/mendarat via `ParticleEffect`.
-  - [ ] Buat efek garis tebasan pedang (*Slash arc effect*) pada setiap ayunan senjata.
+  - [x] Buat efek partikel debu saat melompat/mendarat via `ParticleManager.kt` (`DustParticle`).
+  - [x] Buat efek garis tebasan pedang (*Slash arc effect*) pada setiap ayunan senjata combo dan percikan benturan emas (*Hit Sparks*).
 
 #### Modul 7.2: Audio & Sound Effects (SFX)
 - **Task 7.2.1: Sound Manager**
-  - [ ] Buat class `AudioManager.kt` untuk mengontrol volume master, musik, dan efek suara.
-  - [ ] Integrasikan SFX:
-    - `sfx_jump.wav`
-    - `sfx_slash_light.wav`, `sfx_slash_heavy.wav`
-    - `sfx_hit_impact.wav`
-    - `sfx_dodge_whoosh.wav`
-    - `sfx_enemy_death.wav`
-  - [ ] Integrasikan Background Music (BGM): musik bertema menara/aksi yang loop otomatis.
+  - [x] Buat class `AudioManager.kt` dengan sintesis PCM WAV instan tanpa dependensi unduhan eksternal.
+  - [x] Integrasikan SFX responsif:
+    - Jump sweep (`playJump()`)
+    - Slash light & heavy (`playSlashLight()`, `playSlashHeavy()`)
+    - Hit impact (`playHit()`)
+    - Dodge whoosh (`playDodge()`)
+    - Enemy & Boss death boom (`playDeath()`)
+    - Level up victory fanfare (`playLevelUp()`)
+    - Chest golden chime (`playChest()`)
+  - [x] Pengaturan audio: mute toggle dan volume SFX.
 
 #### Modul 7.3: Sistem Menu Lengkap
 - **Task 7.3.1: Screen Navigation Architecture**
-  - [ ] `MainMenuScreen`: Tombol Start, Character Select, Settings, Exit.
-  - [ ] `CharacterSelectScreen`: Memilih arketipe karakter sebelum memulai game.
-  - [ ] `PauseScreen`: Melanjutkan permainan atau kembali ke Menu Utama.
-  - [ ] `GameOverScreen` dan `VictoryScreen`.
+  - [x] `MainMenuScreen`: Tombol Start, Character Select, Toggle Audio, Reset Save Data, Exit.
+  - [x] `CharacterSelectScreen`: Memilih arketipe karakter dengan visual preview podium dan kartu statistik sebelum memulai game.
+  - [x] `PauseScreen` / In-Game Overlay (`[ESC]` / `[P]` / tombol HUD): Melanjutkan permainan, restart lantai, toggle audio, atau kembali ke Menu Utama.
+  - [x] `GameOverScreen` dan `VictoryScreen` overlay interaktif dengan opsi respawn & replay.
 
 #### Modul 7.4: Diversifikasi Karakter (Sesuai GDD v0.1)
 - **Task 7.4.1: Arketipe 1 — Fast/Agile Stickman (Dual Daggers)**
-  - [ ] Kecepatan lari tinggi, durasi startup/recovery serangan sangat cepat, damage per hit moderat.
-  - [ ] Skill: Dash ganda dan serangan berputar kilat.
+  - [x] Kecepatan lari tinggi (9.5f), durasi serangan sangat cepat, peluang critical tinggi (+15%), dual daggers visual.
+  - [x] Skill: Shadow Dash dan Phantom Flurry ultimate.
 - **Task 7.4.2: Arketipe 2 — Heavy/Strength Stickman (Greatsword)**
-  - [ ] Kecepatan lari lebih lambat, recovery serangan lebih lama, damage per hit besar, jangkauan serang lebar, knockback sangat kuat.
-  - [ ] Skill: Hantaman tanah area (*Ground Breaker*).
+  - [x] Kecepatan lari lebih lambat (5.8f), damage multiplier masif (1.55x), pertahanan tinggi (+3.5 DEF), Colossal Greatsword visual dengan tepian api.
+  - [x] Skill: Ground Breaker shockwave dan Meteor Cleave ultimate.
+- **Task 7.4.3: Arketipe 3 — Balanced Blade (The Wandering Swordsman)**
+  - [x] Kecepatan seimbang (7.5f), single sword, Dash Strike, dan Bladestorm 360°.
 
 ---
 

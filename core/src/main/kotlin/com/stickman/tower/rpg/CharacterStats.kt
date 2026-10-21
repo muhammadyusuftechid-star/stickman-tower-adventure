@@ -60,12 +60,13 @@ class CharacterStats(
         return Pair(finalDmg, isCrit)
     }
 
-    fun toSaveData(highestFloor: Int = 1): SaveData {
+    fun toSaveData(highestFloor: Int = 1, selectedArchetype: String = "BALANCED"): SaveData {
         return SaveData(
             playerLevel = level,
             currentExp = currentExp,
             gold = gold,
-            highestTowerFloor = highestFloor
+            highestTowerFloor = highestFloor,
+            selectedArchetype = selectedArchetype
         )
     }
 
