@@ -13,6 +13,9 @@ class CharacterArchetypeTest {
         // BALANCED
         val balanced = CharacterArchetype.BALANCED
         assertEquals("Balanced Blade", balanced.displayName)
+        assertEquals("Kaelen The Bladeweaver", balanced.characterName)
+        assertEquals("Runed Broadsword", balanced.weaponName)
+        assertEquals(100f, balanced.ultEnergyCost)
         assertEquals(7.5f, balanced.moveSpeed)
         assertEquals(11.5f, balanced.jumpVelocity)
         assertEquals(1.0f, balanced.baseDamageMultiplier)
@@ -20,6 +23,9 @@ class CharacterArchetypeTest {
         // AGILE
         val agile = CharacterArchetype.AGILE
         assertEquals("Shadow Daggers", agile.displayName)
+        assertEquals("Zephyr The Shadowstalker", agile.characterName)
+        assertEquals("Dual Amethyst Daggers", agile.weaponName)
+        assertEquals(80f, agile.ultEnergyCost)
         assertEquals(9.5f, agile.moveSpeed)
         assertTrue(agile.moveSpeed > balanced.moveSpeed)
         assertEquals(0.85f, agile.baseDamageMultiplier)
@@ -28,6 +34,9 @@ class CharacterArchetypeTest {
         // HEAVY
         val heavy = CharacterArchetype.HEAVY
         assertEquals("Titan Greatsword", heavy.displayName)
+        assertEquals("Gorgon The Ironbreaker", heavy.characterName)
+        assertEquals("Colossal Obsidian Greatsword", heavy.weaponName)
+        assertEquals(120f, heavy.ultEnergyCost)
         assertEquals(5.8f, heavy.moveSpeed)
         assertTrue(heavy.moveSpeed < balanced.moveSpeed)
         assertEquals(1.55f, heavy.baseDamageMultiplier)

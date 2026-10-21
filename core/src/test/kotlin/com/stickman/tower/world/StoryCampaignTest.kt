@@ -136,6 +136,13 @@ class StoryCampaignTest {
         assertTrue(tablet1.title.contains("Tablet I"))
         assertTrue(tablet1.text.contains("Hari ke-47"))
 
+        // Tablet II di Lantai 2
+        val floor2 = TowerLevelBuilder.buildFloor(2)
+        assertEquals(1, floor2.loreTablets.size)
+        val tablet2 = floor2.loreTablets.first()
+        assertEquals("TABLET_2", tablet2.tabletId)
+        assertTrue(tablet2.title.contains("Tablet II"))
+
         // Tablet IV di Lantai 4
         val floor4 = TowerLevelBuilder.buildFloor(4)
         assertEquals(1, floor4.loreTablets.size)
@@ -144,6 +151,13 @@ class StoryCampaignTest {
         assertTrue(tablet4.title.contains("Tablet IV"))
         assertTrue(tablet4.text.contains("panah amethyst"))
 
+        // Tablet VI di Lantai 6
+        val floor6 = TowerLevelBuilder.buildFloor(6)
+        assertEquals(1, floor6.loreTablets.size)
+        val tablet6 = floor6.loreTablets.first()
+        assertEquals("TABLET_6", tablet6.tabletId)
+        assertTrue(tablet6.title.contains("Tablet VI"))
+
         // Tablet VIII di Lantai 8
         val floor8 = TowerLevelBuilder.buildFloor(8)
         assertEquals(1, floor8.loreTablets.size)
@@ -151,25 +165,64 @@ class StoryCampaignTest {
         assertEquals("TABLET_8", tablet8.tabletId)
         assertTrue(tablet8.title.contains("Tablet VIII"))
         assertTrue(tablet8.text.contains("parry"))
+
+        // Tablet X di Lantai 10
+        val floor10 = TowerLevelBuilder.buildFloor(10)
+        assertEquals(1, floor10.loreTablets.size)
+        val tablet10 = floor10.loreTablets.first()
+        assertEquals("TABLET_10", tablet10.tabletId)
+        assertTrue(tablet10.title.contains("Tablet X"))
     }
 
     @Test
-    fun testStoryDialoguesAriaAndVulcanus() {
-        // Aria di Lantai 1
-        val floor1 = TowerLevelBuilder.buildFloor(1)
-        assertEquals(1, floor1.storyDialogues.size)
-        val ariaDialogue = floor1.storyDialogues.first()
-        assertEquals("Aria", ariaDialogue.lines.first().speaker)
-        assertTrue(ariaDialogue.lines.first().text.contains("merampas merahnya mawar"))
+    fun testStoryDialoguesAcrossAllStoryFloors() {
+        // Pastikan setiap lantai 1 s/d 10 memiliki dialog naratif pengantar cerita
+        for (fNum in 1..10) {
+            val floor = TowerLevelBuilder.buildFloor(fNum)
+            assertTrue(floor.storyDialogues.isNotEmpty(), "Lantai $fNum harus memiliki storyDialogues naratif!")
+            val firstDialogue = floor.storyDialogues.first()
+            assertTrue(firstDialogue.lines.isNotEmpty(), "StoryDialogue lantai $fNum harus memiliki baris dialog!")
+            assertTrue(firstDialogue.lines.first().speaker.isNotEmpty())
+            assertTrue(firstDialogue.lines.first().text.isNotEmpty())
+        }
 
-        // Vulcanus di Lantai 6
+        // Cek dialog khusus tokoh-tokoh utama:
+        val floor1 = TowerLevelBuilder.buildFloor(1)
+        assertEquals("Aria", floor1.storyDialogues.first().lines.first().speaker)
+
+        val floor3 = TowerLevelBuilder.buildFloor(3)
+        assertEquals("Jenderal Oakhaven", floor3.storyDialogues.first().lines.first().speaker)
+
+        val floor5 = TowerLevelBuilder.buildFloor(5)
+        assertEquals("The Amethyst Matron", floor5.storyDialogues.first().lines.first().speaker)
+
         val floor6 = TowerLevelBuilder.buildFloor(6)
-        assertEquals(1, floor6.storyDialogues.size)
-        val vulcanusDialogue = floor6.storyDialogues.first()
-        assertEquals("Vulcanus", vulcanusDialogue.lines.first().speaker)
-        assertEquals(2, vulcanusDialogue.lines.size)
-        assertTrue(vulcanusDialogue.lines[0].text.contains("Denting paluku"))
-        assertTrue(vulcanusDialogue.lines[1].text.contains("Koin emas"))
+        assertEquals("Vulcanus", floor6.storyDialogues.first().lines.first().speaker)
+
+        val floor8 = TowerLevelBuilder.buildFloor(8)
+        assertEquals("The Shadow Doppelgänger", floor8.storyDialogues.first().lines.first().speaker)
+
+        val floor9 = TowerLevelBuilder.buildFloor(9)
+        assertEquals("The Crimson Sovereign", floor9.storyDialogues.first().lines.first().speaker)
+
+        val floor10 = TowerLevelBuilder.buildFloor(10)
+        assertEquals("The Grand Calligrapher", floor10.storyDialogues.first().lines.first().speaker)
+    }
+
+    @Test
+    fun testBossEnrageAndDeathQuotesLore() {
+        val bossTypes = listOf(
+            BossType.TOWER_GUARDIAN,
+            BossType.AMETHYST_MATRON,
+            BossType.SHADOW_DOPPELGANGER,
+            BossType.CRIMSON_SOVEREIGN,
+            BossType.GRAND_CALLIGRAPHER
+        )
+        for (type in bossTypes) {
+            val boss = BossEnemy(type = type)
+            assertTrue(boss.enrageQuote.isNotEmpty(), "Boss $type harus memiliki enrageQuote!")
+            assertTrue(boss.deathQuote.isNotEmpty(), "Boss $type harus memiliki deathQuote!")
+        }
     }
 
     @Test
@@ -194,7 +247,7 @@ class StoryCampaignTest {
         // Lantai 11 (Endless Rank 1)
         val endless11 = TowerLevelBuilder.buildFloor(11, FloorMutator.NONE)
         assertEquals(11, endless11.floorNumber)
-        assertEquals("ENDLESS PARADOX", endless11.actTitle)
+        assertEquals("EPILOGUE: THE ENDLESS PARADOX", endless11.actTitle)
         assertEquals("FLOOR 11", endless11.actSubtitle)
 
         // Lantai 15 (Endless Boss)

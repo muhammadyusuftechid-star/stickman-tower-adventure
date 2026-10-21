@@ -9,6 +9,9 @@ package com.stickman.tower.character
 enum class CharacterArchetype(
     val displayName: String,
     val title: String,
+    val characterName: String,
+    val canonTitle: String,
+    val weaponName: String,
     val description: String,
     val moveSpeed: Float,
     val jumpVelocity: Float,
@@ -31,6 +34,9 @@ enum class CharacterArchetype(
     BALANCED(
         displayName = "Balanced Blade",
         title = "The Wandering Swordsman",
+        characterName = "Kaelen The Bladeweaver",
+        canonTitle = "Pendekar Pedang Badai (Aliran Zephyr)",
+        weaponName = "Runed Broadsword",
         description = "Gaya seimbang dengan mobilitas stabil dan kombo pedang 3-hit yang luwes.",
         moveSpeed = 7.5f,
         jumpVelocity = 11.5f,
@@ -53,6 +59,9 @@ enum class CharacterArchetype(
     AGILE(
         displayName = "Shadow Daggers",
         title = "The Silent Assassin",
+        characterName = "Zephyr The Shadowstalker",
+        canonTitle = "Pembunuh Bayangan (Eclipse Creed)",
+        weaponName = "Dual Amethyst Daggers",
         description = "Kecepatan luar biasa dengan serangan cepat bertubi-tubi dan peluang critical tinggi.",
         moveSpeed = 9.5f,
         jumpVelocity = 12.2f,
@@ -70,11 +79,14 @@ enum class CharacterArchetype(
         skill3Desc = "Teleportasi instan ke belakang musuh disertai tebasan kritis",
         ultName = "Phantom Flurry",
         ultDesc = "Mencabik-cabik seluruh musuh di layar dengan bayangan gelap",
-        ultEnergyCost = 100f
+        ultEnergyCost = 80f
     ),
     HEAVY(
         displayName = "Titan Greatsword",
         title = "The Tower Juggernaut",
+        characterName = "Gorgon The Ironbreaker",
+        canonTitle = "Sang Penghancur Benteng (Paladin Batu)",
+        weaponName = "Colossal Obsidian Greatsword",
         description = "Kekuatan brutal dengan pertahanan tebal dan hantaman pedang raksasa berdaya hancur tinggi.",
         moveSpeed = 5.8f,
         jumpVelocity = 10.8f,
@@ -92,7 +104,7 @@ enum class CharacterArchetype(
         skill3Desc = "Raungan radial pentalan musuh, pulihkan 15% HP & buff DEF",
         ultName = "Meteor Cleave",
         ultDesc = "Melompat tinggi lalu menghunjam bumi bagai komet pemecah arena",
-        ultEnergyCost = 100f
+        ultEnergyCost = 120f
     );
 
     val skillName: String get() = skill1Name

@@ -200,19 +200,21 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
 
         // Nama & Gelar Karakter Terpilih (Kiri Atas Podium)
         headF.setColor(auraR, auraG, auraB, 1f)
-        glyphLayout.setText(headF, currentArchetype.displayName)
-        headF.draw(batch, currentArchetype.displayName, podiumCenterX - glyphLayout.width / 2f, 595f)
+        val nameLabel = currentArchetype.characterName
+        glyphLayout.setText(headF, nameLabel)
+        headF.draw(batch, nameLabel, podiumCenterX - glyphLayout.width / 2f, 595f)
 
         regF.color = Color.GOLD
-        glyphLayout.setText(regF, currentArchetype.title)
-        regF.draw(batch, currentArchetype.title, podiumCenterX - glyphLayout.width / 2f, 560f)
+        val titleLabel = "${currentArchetype.canonTitle} • [${currentArchetype.displayName}]"
+        glyphLayout.setText(regF, titleLabel)
+        regF.draw(batch, titleLabel, podiumCenterX - glyphLayout.width / 2f, 560f)
 
         // Teks Kartu Statistik (Kanan)
         headF.color = Color.WHITE
         headF.draw(batch, "ATTRIBUTES & SKILLS", 650f, 570f)
 
         regF.setColor(0.85f, 0.88f, 0.95f, 1f)
-        regF.draw(batch, currentArchetype.description, 650f, 525f, 500f, -1, true)
+        regF.draw(batch, "${currentArchetype.description} Senjata: ${currentArchetype.weaponName}.", 650f, 525f, 500f, -1, true)
 
         regF.color = Color.WHITE
         regF.draw(batch, "Movement Speed:", 650f, 435f)

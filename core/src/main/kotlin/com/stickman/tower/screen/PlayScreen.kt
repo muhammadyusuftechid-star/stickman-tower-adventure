@@ -651,7 +651,15 @@ class PlayScreen(
             // Pembaruan Boss (Jika Ada)
             val boss = currentFloor.boss
             if (boss != null) {
+                val wasPhase2 = boss.isPhase2
                 boss.update(updateDelta, player, currentFloor.platforms)
+                if (!wasPhase2 && boss.isPhase2) {
+                    cameraManager.shake(0.35f, 0.25f)
+                    AudioManager.playDeath()
+                    floatingTexts.add(
+                        FloatingText("❖ ${boss.name}: \"${boss.enrageQuote}\"", boss.position.x + boss.width / 2f, boss.position.y + boss.height + 1.2f, Color.SCARLET, duration = 4.0f)
+                    )
+                }
                 if (boss.health.isDead && !boss.rewardClaimed) {
                     boss.rewardClaimed = true
                     endlessEnemiesKilled++
@@ -660,6 +668,9 @@ class PlayScreen(
                     grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
                     floatingTexts.add(
                         FloatingText("★ BOSS DEFEATED! ★", boss.position.x, boss.position.y + 3.2f, Color.GOLD, duration = 3.5f)
+                    )
+                    floatingTexts.add(
+                        FloatingText("\"${boss.deathQuote}\"", boss.position.x + boss.width / 2f, boss.position.y + 2.2f, Color.LIGHT_GRAY, duration = 4.5f)
                     )
                 }
             }

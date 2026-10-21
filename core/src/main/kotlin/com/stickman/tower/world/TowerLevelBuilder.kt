@@ -153,6 +153,32 @@ object TowerLevelBuilder {
             Enemy(spawnX = 26.0f, spawnY = 9.1f, type = EnemyType.RANGED)
         )
 
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 12.0f,
+                y = 5.6f,
+                tabletId = "TABLET_2",
+                title = "Tablet II: Catatan Para Pendaki",
+                text = "Tebing obsidian ini telah menelan puluhan prajurit. Jangan pernah ragu saat melangkah di tangga goyah. Hanya mereka yang bergerak cepat yang sampai ke puncak."
+            )
+        )
+
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 2.0f,
+                triggerY = 1.0f,
+                triggerRadius = 3.0f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Batu obsidian di tebing ini tajam dan tak berbelas kasihan. Teruslah melompat ke atas, jangan biarkan gravitasi menara menarik jiwamu ke jurang kehampaan!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 2,
             floorName = "Lantai 2: Spire of Hazards",
@@ -168,7 +194,9 @@ object TowerLevelBuilder {
             exitPortal = StageExit(x = 27.5f, y = 9.1f),
             isBossFloor = false,
             actTitle = "ACT I: THE INITIATION",
-            actSubtitle = "SPIRE OF HAZARDS"
+            actSubtitle = "SPIRE OF HAZARDS",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
         )
     }
 
@@ -190,6 +218,28 @@ object TowerLevelBuilder {
 
         val boss = BossEnemy(spawnX = 17.0f, spawnY = 1.5f, type = BossType.TOWER_GUARDIAN)
 
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 4.0f,
+                triggerY = 1.2f,
+                triggerRadius = 3.5f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "Jenderal Oakhaven",
+                        title = "The Tower Guardian",
+                        text = "Berhenti, pengelana bernisan emas! Aku adalah Jenderal Oakhaven, pelindung gerbang benteng bawah. Menara atas bukanlah tempat bagi jiwa yang fana! Buktikan tekadmu atau luruhlah kembali menjadi tinta!",
+                        speakerColor = Color.GOLD
+                    ),
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Hati-hati! Ayunan pedangnya sanggup membelah batu. Bersiaplah melakukan Perfect Parry saat bilahnya berkilat!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 3,
             floorName = "Lantai 3: Apex Boss Arena",
@@ -205,7 +255,8 @@ object TowerLevelBuilder {
             exitPortal = StageExit(x = 23.5f, y = 1.2f),
             isBossFloor = true,
             actTitle = "ACT I: THE INITIATION",
-            actSubtitle = "APEX BOSS ARENA"
+            actSubtitle = "APEX BOSS ARENA",
+            storyDialogues = storyDialogues
         )
     }
 
@@ -262,6 +313,22 @@ object TowerLevelBuilder {
             )
         )
 
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 2.0f,
+                triggerY = 1.5f,
+                triggerRadius = 3.0f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Perpustakaan Kaca Hitam... di sinilah para cendekiawan Amethyst Weavers meneliti rahasia Tinta Primordial sebelum mereka dikutuk menjadi pemanah bayangan.",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 4,
             floorName = "Lantai 4: The Sunken Archives",
@@ -278,7 +345,8 @@ object TowerLevelBuilder {
             isBossFloor = false,
             actTitle = "ACT II: SECRETS OF THE INK",
             actSubtitle = "THE SUNKEN ARCHIVES",
-            loreTablets = loreTablets
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
         )
     }
 
@@ -303,6 +371,28 @@ object TowerLevelBuilder {
 
         val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.AMETHYST_MATRON)
 
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 4.0f,
+                triggerY = 1.2f,
+                triggerRadius = 3.5f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "The Amethyst Matron",
+                        title = "Sang Ratu Busur Bayang",
+                        text = "Kalian yang berjalan dengan pedang tumpul takkan pernah mengerti... Mendekati bilah di menara ini adalah kebodohan! Tinta ini telah menjadi darah kami, dan panah kristal amethyst kami akan menembus jantungmu!",
+                        speakerColor = Color(0.85f, 0.45f, 1f, 1f)
+                    ),
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Gunakan platform udara untuk menghindari tembakan panah beracunnya! Dekati dan serang saat ia memulihkan busurnya!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 5,
             floorName = "Lantai 5: Crucible of Mutations",
@@ -318,7 +408,8 @@ object TowerLevelBuilder {
             exitPortal = StageExit(x = 27.0f, y = 1.2f),
             isBossFloor = true,
             actTitle = "ACT II: SECRETS OF THE INK",
-            actSubtitle = "CRUCIBLE OF MUTATIONS"
+            actSubtitle = "CRUCIBLE OF MUTATIONS",
+            storyDialogues = storyDialogues
         )
     }
 
@@ -342,6 +433,16 @@ object TowerLevelBuilder {
             TreasureChest(x = 3.5f, y = 1.2f),
             TreasureChest(x = 11.5f, y = 2.0f), // Master Blacksmith Relic Chest
             TreasureChest(x = 22.0f, y = 1.2f)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 8.8f,
+                y = 2.0f,
+                tabletId = "TABLET_6",
+                title = "Tablet VI: Wasiat Sang Penempa",
+                text = "Setiap koin emas yang kau kumpulkan adalah tetesan matahari para pendaki yang gugur. Kan kutempa senjatamu agar sanggup menembus tirai kegelapan para Penulis Takdir."
+            )
         )
 
         val storyDialogues = listOf(
@@ -382,6 +483,7 @@ object TowerLevelBuilder {
             isBossFloor = false,
             actTitle = "ACT II: SECRETS OF THE INK",
             actSubtitle = "THE IRON FOUNDRY",
+            loreTablets = loreTablets,
             storyDialogues = storyDialogues,
             isSafeZone = true
         )
@@ -422,6 +524,22 @@ object TowerLevelBuilder {
             Enemy(spawnX = 27.5f, spawnY = 6.8f, type = EnemyType.RANGED)
         )
 
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 1.0f,
+                triggerY = 1.5f,
+                triggerRadius = 3.0f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Dinding menara ini telah hancur... Kita berada di tepi jurang kosmis! Gravitasi di sini melemah (-35%). Rasakan ringannya lompatanmu saat melayang di antara pulau-pulau obsidian!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 7,
             floorName = "Lantai 7: The Fractured Precipice",
@@ -438,6 +556,7 @@ object TowerLevelBuilder {
             isBossFloor = false,
             actTitle = "ACT III: THE ASTRAL CLIMB",
             actSubtitle = "THE FRACTURED PRECIPICE",
+            storyDialogues = storyDialogues,
             gravityScale = 0.65f // Gravitasi Rendah (-35%) untuk Akrobatik Udara
         )
     }
@@ -472,6 +591,28 @@ object TowerLevelBuilder {
 
         val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.SHADOW_DOPPELGANGER)
 
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 4.0f,
+                triggerY = 1.2f,
+                triggerRadius = 3.5f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "The Shadow Doppelgänger",
+                        title = "Cermin Jiwa Gelap",
+                        text = "Aku adalah cermin jiwamu... keraguanmu, ketakutanmu, dan ambisimu. Menara ini tahu setiap tebasan yang akan kau ayunkan. Kau takkan pernah bisa melampaui bayanganmu sendiri!",
+                        speakerColor = Color(0.6f, 0.6f, 0.9f, 1f)
+                    ),
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Jangan ragu! Baca prasasti di depan cermin: lakukan parry tepat saat kilatan matanya menyala!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 8,
             floorName = "Lantai 8: The Hall of Echoes",
@@ -488,7 +629,8 @@ object TowerLevelBuilder {
             isBossFloor = true,
             actTitle = "ACT III: THE ASTRAL CLIMB",
             actSubtitle = "THE HALL OF ECHOES",
-            loreTablets = loreTablets
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
         )
     }
 
@@ -512,6 +654,28 @@ object TowerLevelBuilder {
 
         val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.CRIMSON_SOVEREIGN)
 
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 4.0f,
+                triggerY = 1.2f,
+                triggerRadius = 3.5f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "The Crimson Sovereign",
+                        title = "Pangeran Belati Darah",
+                        text = "Darah para pendaki adalah nektar keabadian! Selama gerhana vampirik ini menyala di langit menara, setiap tetes lukamu akan memulihkan kekuatanku! Bersujudlah di hadapan Pangeran Belati Darah!",
+                        speakerColor = Color(1f, 0.2f, 0.2f, 1f)
+                    ),
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Ksatria ini telah menyerahkan kewarasannya demi keabadian darah. Kalahkan dia untuk membuka portal tangga surga menuju Puncak Menara!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
+
         return TowerFloor(
             floorNumber = 9,
             floorName = "Lantai 9: The Blood Moon Sanctum",
@@ -527,7 +691,8 @@ object TowerLevelBuilder {
             exitPortal = StageExit(x = 27.0f, y = 1.2f),
             isBossFloor = true,
             actTitle = "ACT III: THE ASTRAL CLIMB",
-            actSubtitle = "THE BLOOD MOON SANCTUM"
+            actSubtitle = "THE BLOOD MOON SANCTUM",
+            storyDialogues = storyDialogues
         )
     }
 
@@ -554,7 +719,39 @@ object TowerLevelBuilder {
             TreasureChest(x = 1.0f, y = 1.3f) // Peti Relik Primordial
         )
 
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 2.0f,
+                y = 1.3f,
+                tabletId = "TABLET_10",
+                title = "Tablet X: Kanvas Primordial",
+                text = "Di sinilah takdir seluruh semesta digariskan. Siapa pun yang menantang Sang Penulis Takdir akan memikul nasib dunia dalam setiap ayunan pedangnya."
+            )
+        )
+
         val boss = BossEnemy(spawnX = 18.5f, spawnY = 1.5f, type = BossType.GRAND_CALLIGRAPHER)
+
+        val storyDialogues = listOf(
+            StoryDialogue(
+                triggerX = 4.0f,
+                triggerY = 1.3f,
+                triggerRadius = 3.5f,
+                lines = listOf(
+                    DialogueLine(
+                        speaker = "The Grand Calligrapher",
+                        title = "Sang Penulis Takdir Purba",
+                        text = "Kemanusiaan dan kehendak bebas adalah noda yang merusak keheningan kanvas semesta. Ribuan tahun lalu kutenggelamkan dunia ini ke dalam tinta murni, dan kau berani menodai ketenangan mutlak ini?",
+                        speakerColor = Color(0.95f, 0.95f, 1f, 1f)
+                    ),
+                    DialogueLine(
+                        speaker = "Aria",
+                        title = "Sang Gema Warna Terakhir",
+                        text = "Jangan dengarkan dia! Nyalakan Anima Emasmu! Hancurkan pena takdirnya dan kembalikan warna ke seluruh semesta Aethelgard!",
+                        speakerColor = Color.CYAN
+                    )
+                )
+            )
+        )
 
         return TowerFloor(
             floorNumber = 10,
@@ -571,7 +768,9 @@ object TowerLevelBuilder {
             exitPortal = StageExit(x = 28.5f, y = 1.3f),
             isBossFloor = true,
             actTitle = "ACT IV: THE PRIMORDIAL CANVAS",
-            actSubtitle = "SUMMIT OF REALITY"
+            actSubtitle = "SUMMIT OF REALITY",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
         )
     }
 
@@ -629,7 +828,7 @@ object TowerLevelBuilder {
                 checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
                 exitPortal = StageExit(x = 24.5f, y = 1.2f),
                 isBossFloor = true,
-                actTitle = "ENDLESS PARADOX",
+                actTitle = "EPILOGUE: THE ENDLESS PARADOX",
                 actSubtitle = "FLOOR $floorNumber"
             )
         }
@@ -714,7 +913,7 @@ object TowerLevelBuilder {
             checkpoint = Checkpoint(x = 16.0f, y = 6.0f),
             exitPortal = StageExit(x = mapWidth - 12f, y = 1.0f),
             isBossFloor = false,
-            actTitle = "ENDLESS PARADOX",
+            actTitle = "EPILOGUE: THE ENDLESS PARADOX",
             actSubtitle = "FLOOR $floorNumber"
         )
     }

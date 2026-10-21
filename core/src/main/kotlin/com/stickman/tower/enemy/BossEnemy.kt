@@ -81,6 +81,22 @@ class BossEnemy(
         BossType.GRAND_CALLIGRAPHER -> "Architect of Fate"
     }
 
+    val enrageQuote: String = when (type) {
+        BossType.TOWER_GUARDIAN -> "Cukup bermain-main! Segel ini tidak kubuat untuk kalian... TAPI UNTUK MELINDUNGI KALIAN DARI PUNCAK MENARA!"
+        BossType.AMETHYST_MATRON -> "Kalian takkan pernah lolos dari badai panah kristal amethyst kami!"
+        BossType.SHADOW_DOPPELGANGER -> "Keras kepala! Aku adalah bayanganmu yang tak terkalahkan!"
+        BossType.CRIMSON_SOVEREIGN -> "Gerhana Darah menyala! Jiwamu akan menjadi santapan abadi belatiku!"
+        BossType.GRAND_CALLIGRAPHER -> "Kehendak bebasmu berakhir di sini! Kanvas takdir ini akan kuhapus!"
+    }
+
+    val deathQuote: String = when (type) {
+        BossType.TOWER_GUARDIAN -> "Kau memiliki tekad ksatria masa lalu... Namun di atas sana, musuhmu adalah kebenaran mengerikan..."
+        BossType.AMETHYST_MATRON -> "Tinta ini... akhirnya membebaskan kami dari kutukan panah..."
+        BossType.SHADOW_DOPPELGANGER -> "Bayangan tak pernah mati... aku selalu ada di balik punggungmu..."
+        BossType.CRIMSON_SOVEREIGN -> "Gerhana telah runtuh... darah ini akhirnya tenang kembali..."
+        BossType.GRAND_CALLIGRAPHER -> "Pena takdir telah patah... Realitas ini kini terbelah menuju Paradoks Abadi..."
+    }
+
     val health = Health(
         maxHp = customMaxHp ?: when (type) {
             BossType.TOWER_GUARDIAN -> 350f
