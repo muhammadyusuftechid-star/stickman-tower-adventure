@@ -293,5 +293,125 @@ Ketika pemain gugur lebih dari 3 kali di lantai yang sama:
 
 ---
 
+## 🎯 12. Arsitektur Sistem Quest & Alur Siklus Objektif (Quest Engine Architecture)
+
+Untuk mendukung eksplorasi terarah dan retensi pemain, sistem quest *Stickman Tower Adventure* dirancang menggunakan arsitektur modular terdesentralisasi yang terintegrasi dengan skema penyimpanan V2 [SaveData.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rpg/SaveData.kt):
+
+```
+                        [FINITE STATE MACHINE SISTEM QUEST]
+┌───────────┐    Kondisi Terbuka     ┌─────────────┐     Pemain Terima     ┌───────────────────┐
+│  LOCKED   │ ─────────────────────> │  AVAILABLE  │ ────────────────────> │ ACTIVE/PROGRESS   │
+└───────────┘                        └─────────────┘                       └───────────────────┘
+                                                                                     │
+                                           ┌─────────────────────────────────────────┴─────────────────────────────────────────┐
+                                           ▼                                                                                    ▼
+                                 ┌───────────────────┐                                                                ┌───────────────────┐
+                                 │  OBJECTIVES MET   │                                                                │      FAILED       │
+                                 └───────────────────┘                                                                └───────────────────┘
+                                           │                                                                                    │
+                                           ▼ Klaim Hadiah di Checkpoint                                                         ▼ Ulangi Tantangan
+                                 ┌───────────────────┐                                                                ┌───────────────────┐
+                                 │     COMPLETED     │                                                                │       RETRY       │
+                                 └───────────────────┘                                                                └───────────────────┘
+```
+
+### 12.1 Struktur Data Model Quest (Kotlin Data Specification)
+```kotlin
+enum class QuestCategory {
+    MAIN_ODYSSEY,    // Kampanye Cerita Utama (Lantai 1-10)
+    SIDE_HERITAGE,   // Misi Sampingan Warisan Karakter (Aria, Valerius, Vulcanus)
+    SCRIBE_TRIAL,    // Ujian Ketangkasan & Kehormatan Kaligrafer (Lantai 6)
+    BOUNTY_HUNT      // Kontrak Perburuan Monster Elit
+}
+
+enum class ObjectiveType {
+    DEFEAT_BOSS,          // Menumbangkan bos lantai tertentu
+    REACH_COORDINATE,     // Mencapai koordinat platform tersembunyi
+    PARRY_STREAK,         // Eksekusi Perfect Parry beruntun
+    COLLECT_ITEM,         // Mengumpulkan pecahan pigmen / bijih meteorit
+    UPGRADE_WEAPON,       // Menempa senjata di Suaka Vulcanus
+    READ_TABLETS          // Membaca prasasti batu hitam
+}
+
+data class QuestObjective(
+    val id: String,
+    val type: ObjectiveType,
+    val targetCount: Int,
+    var currentCount: Int = 0,
+    val description: String
+) {
+    val isComplete: Boolean get() = currentCount >= targetCount
+}
+
+data class QuestDefinition(
+    val id: String,
+    val title: String,
+    val category: QuestCategory,
+    val actNumber: Int,
+    val recommendedLevel: Int,
+    val objectives: List<QuestObjective>,
+    val goldReward: Int,
+    val expReward: Int,
+    val relicReward: RelicType? = null,
+    val talentPointsReward: Int = 0
+)
+```
+
+### 12.2 Widget HUD Pelacak Misi (Quest Tracker Compass)
+* **Desain Visual:** Berada di sudut kanan atas layar permainan (di bawah bar HP/Mana), berukuran $220 \times 60$ dp dengan latar belakang hitam transparan $70\%$ berbingkai garis emas tipis $1$ dp.
+* **Informasi Ditampilkan:**
+  * Ikon Kategori Quest (`◈` Emas untuk Main Quest, `◇` Cyan untuk Side Quest, `⚔` Merah untuk Bounty).
+  * Judul Misi Aktif & Deskripsi Singkat Objektif.
+  * Bar Progres Bertingkat (contoh: `Fragmen Pigmen: 3/4`).
+  * Efek Partikel Pijar: Saat objektif terpenuhi, widget berkedip keemasan disertai denting audio lembut (*Quest Objective SFX*).
+
+---
+
+## 📋 13. Matriks Desain Misi Lengkap & Kondisi Pemicu (Quest Matrix)
+
+Seluruh misi dirancang dengan amplop kinematika platforming terverifikasi dan kurva kesulitan yang seimbang:
+
+| ID Misi | Kategori & Nama Misi | Level | Lokasi | Kondisi Pemicu (Trigger) | Rantai Objektif Tahap demi Tahap | Ganjaran (Rewards) |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `MQ_1` | **Main: Bangkitnya Siluet** | Lv. 1 | Lantai 1-2 | Permainan Dimulai | 1. Ambil pedang di gerbang.<br/>2. Tumbangkan 3 Grunts.<br/>3. Baca Tablet I & II.<br/>4. Masuki portal Lantai 3. | 150 EXP, 120 Gold |
+| `MQ_2` | **Main: Ujian Oakhaven** | Lv. 3 | Lantai 3 | Masuki Boss Hall | 1. Tumbangkan Jenderal Oakhaven.<br/>2. Lakukan minimal 1x Perfect Parry.<br/>3. Ambil Segel Benteng Bawah. | 400 EXP, 300 Gold, Relik Aegis |
+| `MQ_3` | **Main: Benang Racun Amethyst**| Lv. 5 | Lantai 4-5 | Buka Gerbang Babak II | 1. Hindari panah di Arsip Kaca.<br/>2. Kalahkan The Amethyst Matron.<br/>3. Purifikasi kawah Miasma. | 750 EXP, 450 Gold, Unlock Sub-Class |
+| `MQ_4` | **Main: Suaka Paron Logam** | Lv. 6 | Lantai 6 | Tiba di Safe Haven | 1. Temui Vulcanus.<br/>2. Tempa senjata minimal Level 1.<br/>3. Baca Wasiat Sang Penempa. | 300 EXP, Full Restore HP/Mana |
+| `MQ_5` | **Main: Cermin Gema Bayang** | Lv. 8 | Lantai 7-8 | Masuki Zona Astral | 1. Navigasi Low Gravity Lantai 7.<br/>2. Kalahkan Shadow Doppelgänger.<br/>3. Tangkis serangan bayangan 2x. | 1.200 EXP, 600 Gold, Relik Sayap Hermes |
+| `MQ_6` | **Main: Meredupkan Gerhana** | Lv. 9 | Lantai 9 | Masuki Altar Darah | 1. Kalahkan The Crimson Sovereign.<br/>2. Hindari serangan lifesteal bos.<br/>3. Buka tangga Kanvas Takdir. | 1.800 EXP, 900 Gold, Relik Taring Darah |
+| `MQ_7` | **Main: Patahnya Pena Dewa** | Lv. 10| Lantai 10| Tiba di Singgasana | 1. Kalahkan The Grand Calligrapher.<br/>2. Hancurkan The Primordial Stylus.<br/>3. Lepaskan spektrum warna semesta. | 5.000 EXP, 2.500 Gold, Endless Spire |
+| `SQ_1` | **Side: Spektrum Terakhir Aria**| Lv. 2-9| Menara | Baca Tablet I / Aria | Kumpulkan 4 Pigmen Warna (Merah di L2, Biru di L4, Hijau di L7, Emas di L9). | Pasif Regen SP +15%, Visual Aria Emas |
+| `SQ_2` | **Side: Sumpah Legiun Gugur** | Lv. 2 | Lantai 1-3 | Temukan Tablet I | Cari 3 Lencana Ksatria Legiun Pertama yang gugur di benteng bawah. | 50 Max HP, +25% Spike Resistance |
+| `SQ_3` | **Side: Api Penempa Bintang** | Lv. 6 | Lantai 6-7 | Tempa Senjata Lv. 3 | Kumpulkan 3 Bongkahan Meteorit Kosmis di tebing jurang gravitasi Lantai 7. | Senjata Apex Ascension, +10 Base ATK |
+
+---
+
+## ⚡ 14. Sistem Ujian Gauntlet & Papan Kontrak Buronan Hub (Challenge Engine)
+
+Di Suaka Vulcanus (Lantai 6), pemain dapat menguji keterampilan bela diri mereka pada dua fasilitas khusus:
+
+### 14.1 Monolit Ujian Para Kaligrafer (The Scribe's Gauntlets)
+Sistem arena tertutup dengan aturan handicap ketat dan pemeringkatan berbasis medali:
+1. **Trial of Deflection (Ujian Tangkisan):**
+   * *Handicap:* Pemain tidak dapat menyerang; hanya dibekali tombol Dodge/Parry.
+   * *Objektif:* Menangkis 10 proyektil dan tebasan musuh berturut-turut.
+   * *Skor Medali:* Perunggu (10 Parry), Perak (15 Parry), Emas (25 Parry tanpa henti).
+   * *Hadiah Utama:* Relik [CHRONOS_HOURGLASS](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt).
+2. **Trial of the Pacewalker (Ujian Langkah Bayang):**
+   * *Handicap:* Lantai arena runtuh secara progresif; jurang duri aktif di bawah.
+   * *Objektif:* Capai ujung lintasan platforming 45 meter dalam waktu $< 40$ detik tanpa menyentuh duri.
+   * *Hadiah Utama:* Relik [WINGS_OF_HERMES](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt).
+3. **Trial of the Iron Will (Ujian Kehendak Baja):**
+   * *Handicap:* Menghadapi bayangan ilusi Jenderal Oakhaven dan Sang Ratu Busur Amethyst sekaligus dengan HP awal terkunci pada $50\%$.
+   * *Hadiah Utama:* 2 Poin Bakat (*Talent Points*) instan dan gelar kehormatan *Titan of the Spire*.
+
+### 14.2 Papan Kontrak Buronan Elit (The Spire Bounty Board)
+Papan pengumuman obsidian di dekat tungku tempa yang menerbitkan kontrak harian:
+* Monster target memiliki penanda visual aura merah menyala (*Elite Champion Glow*), peningkatan HP $+50\%$, dan 1 affix kemampuan khusus (contoh: *Thorns*, *Vampiric*, *Haste*).
+* Menyelesaikan kontrak buronan memberikan koin Pecahan Aethel dalam jumlah besar dan bahan material tempa khusus untuk mempercepat progresi RPG pemain.
+
+---
+
 *Dokumen Game Design Document (GDD) v1.0 ini merupakan spesifikasi desain resmi dan kanon final untuk pengembangan dan produksi game **Stickman Tower Adventure**.*
+
 

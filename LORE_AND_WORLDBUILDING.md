@@ -813,6 +813,154 @@ Ketika seorang pejuang siluet gugur dan tidak sanggup kembali ke checkpoint, tub
 
 ---
 
-*Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+## 🗺️ BAGIAN 16: KRONIK MISI UTAMA & BABAK TAKDIR (THE GRAND QUEST ODYSSEY)
+
+*Panduan desain alur misi kampanye cerita utama, mengaitkan setiap langkah kaki pemain dengan narasi takdir Aethelgard.*
+
+```
+[MQ-1: BANGKITNYA SILUET] ──> [MQ-2: UJIAN OAKHAVEN] ──> [MQ-3: BENANG RACUN] ──> [MQ-4: SUAKA LOGAM]
+                                                                                        │
+[EPILOG: ENDLESS PARADOX] ◄── [MQ-7: PATAHNYA PENA] ◄── [MQ-6: GERHANA DARAH] ◄── [MQ-5: CERMIN JIWA]
+```
+
+### 16.1 Misi Utama I: Bangkitnya Siluet Bernisan (*The Awakening of the Marked One*)
+* **ID Misi:** `MQ_ACT1_AWAKENING` | **Lokasi:** Lantai 1 & Lantai 2
+* **Pemberi Misi:** Aria, Sang Gema Warna Terakhir
+* **Latar Belakang Naratif:** Kaelen terbangun di dasar menara tanpa ingatan. Tubuhnya telah tereduksi menjadi garis hitam siluet. Aria membimbingnya untuk mengenali kembali naluri bela dirinya sebelum jiwanya terlarut ke dalam tanah.
+* **Tujuan Misi (Objectives):**
+  1. Ambil bilah baja tua yang tertancap di depan Gerbang Bawah (Posisi $X=2.0$).
+  2. Pelajari kembali teknik tebasan kombo 3-hit dan tangkis serangan pertama Crimson Grunts dengan *Perfect Parry*.
+  3. Temukan dan baca Prasasti Batu Hitam Pertama (*Tablet I: Catatan Hari ke-47*).
+  4. Lintasi tebing jurang duri obsidian di Lantai 2 dan capai portal masuk Balairung Hakim.
+* **Hadiah Misi:** $+150\text{ EXP}$, $+120\text{ Pecahan Aethel}$, Terbukanya Akses Lantai 3.
+
+### 16.2 Misi Utama II: Ujian Sang Hakim Tanduk Emas (*The Trial of Oakhaven*)
+* **ID Misi:** `MQ_ACT1_OAKHAVEN` | **Lokasi:** Lantai 3 (Boss Hall)
+* **Pemberi Misi:** Jenderal Oakhaven (The Tower Guardian)
+* **Latar Belakang Naratif:** Jenderal Oakhaven mengunci gerbang menuju menara atas. Ia menolak membiarkan sembarang pendaki melangkah naik hanya untuk mati sia-sia. Kaelen harus membuktikan ketegaran jiwanya melalui duel satu lawan satu.
+* **Tujuan Misi (Objectives):**
+  1. Masuki arena singgasana gerbang bawah.
+  2. Hadapi Jenderal Oakhaven; pelajari pola tebasan badai angin dan hancurkan fase amuknya (*Enraged Phase* HP < 50%).
+  3. Terima segel gerbang dari Oakhaven yang berlutut dengan kehormatan militer kuno.
+* **Hadiah Misi:** $+400\text{ EXP}$, $+300\text{ Pecahan Aethel}$, Relik *Aegis Fragment*, Terbukanya Babak II (Lantai 4).
+
+### 16.3 Misi Utama III: Mengurai Benang Racun Amethyst (*Unweaving the Poisoned Silk*)
+* **ID Misi:** `MQ_ACT2_AMETHYST` | **Lokasi:** Lantai 4 & Lantai 5
+* **Pemberi Misi:** Manuskrip Kaca Hitam & Gema Aria
+* **Latar Belakang Naratif:** Perpustakaan kuno yang tenggelam menyimpan rahasia kutukan tinta, namun seluruh lorong telah tercemar uap beracun Miasma yang diproduksi oleh Sang Ratu Busur Bayang.
+* **Tujuan Misi (Objectives):**
+  1. Telusuri koridor kaca Lantai 4 dan pecahkan pertahanan penembak gerilya *Amethyst Snipers*.
+  2. Buka peti relik rahasia di rak perpustakaan tertinggi dan baca Tablet IV & V.
+  3. Tumbangkan *The Amethyst Matron* di kawah alkimia Lantai 5 dengan memanfaatkan platform udara untuk menghindari tembakan panah beracun.
+* **Hadiah Misi:** $+750\text{ EXP}$, $+450\text{ Pecahan Aethel}$, Pemilihan Sub-Class Karakter (Level 5 Milestone).
+
+### 16.4 Misi Utama IV: Denting Palu Suaka Logam (*The Sanctuary of the Golden Anvil*)
+* **ID Misi:** `MQ_ACT2_FORGE` | **Lokasi:** Lantai 6 (The Iron Foundry)
+* **Pemberi Misi:** Vulcanus Sang Penempa Jiwa
+* **Latar Belakang Naratif:** Menemukan satu-satunya suaka peristirahatan aman di dalam menara. Vulcanus menawarkan bantuan untuk menempa senjata pemain menggunakan api meteorit emas yang tak pernah padam.
+* **Tujuan Misi (Objectives):**
+  1. Berbicaralah dengan Vulcanus di hadapan paron meteorit raksasa.
+  2. Belanjakan Pecahan Aethel untuk memperkuat senjata minimal ke Level 1.
+  3. Buka peti pusaka master blacksmith dan baca Tablet VI (*Wasiat Sang Penempa*).
+* **Hadiah Misi:** $+300\text{ EXP}$, Fitur Penempaan Senjata Terbuka Penuh, Pemulihan Penuh Integritas Anima.
+
+### 16.5 Misi Utama V: Melampaui Bayangan Diri (*Severing the Echo*)
+* **ID Misi:** `MQ_ACT3_DOPPELGANGER` | **Lokasi:** Lantai 7 & Lantai 8
+* **Pemberi Misi:** Refleksi Cermin Ilusi
+* **Latar Belakang Naratif:** Menara retak dan menembus jurang kosmis. Di balairung kristal hitam, ketakutan dan penyesalan masa lalu Kaelen memadat menjadi *The Shadow Doppelgänger*.
+* **Tujuan Misi (Objectives):**
+  1. Kuasai akrobatik udara di zona gravitasi rendah Lantai 7 (*Low Gravity Mechanics*).
+  2. Masuki Balairung Gema Lantai 8 dan hadapi bayangan dirimu sendiri.
+  3. Kalahkan *The Shadow Doppelgänger* dengan mengeksekusi minimal 2x *Perfect Parry* saat kilatan matanya menyala.
+* **Hadiah Misi:** $+1.200\text{ EXP}$, $+600\text{ Pecahan Aethel}$, Relik *Astral Feather*, Terbukanya Gerbang Kuil Gerhana.
+
+### 16.6 Misi Utama VI: Meredupkan Gerhana Darah (*The Sunken Eclipse*)
+* **ID Misi:** `MQ_ACT3_CRIMSON` | **Lokasi:** Lantai 9 (The Blood Moon Sanctum)
+* **Pemberi Misi:** Roh Ksatria Pengawal Valtheor
+* **Latar Belakang Naratif:** Pangeran Valtheor telah kehilangan kewarasan dan meminum tinta darah demi keabadian, menyerap vitalitas siapa pun yang terluka di bawah gerhana vampirik.
+* **Tujuan Misi (Objectives):**
+  1. Masuki altar kuil berlumur darah di bawah langit gerhana merah membara.
+  2. Kalahkan *The Crimson Sovereign* seraya meminimalkan luka agar sang pangeran tidak memulihkan HP-nya (*Anti-Lifesteal Discipline*).
+  3. Bebaskan jiwa sang pangeran dan baca Tablet IX.
+* **Hadiah Misi:** $+1.800\text{ EXP}$, $+900\text{ Pecahan Aethel}$, Relik *Vampiric Fang*, Terbukanya Tangga Menuju Kanvas Takdir.
+
+### 16.7 Misi Utama VII: Patahnya Pena Semesta (*The Broken Stylus*)
+* **ID Misi:** `MQ_ACT4_CALLIGRAPHER` | **Lokasi:** Lantai 10 (The Primordial Canvas)
+* **Pemberi Misi:** Aria & Takdir Seluruh Kaum Siluet
+* **Latar Belakang Naratif:** Berpijak di atas marmer putih tak terbatas di hadapan penguasa absolut semesta. Pertarungan 3 fase untuk menghancurkan tongkat pena kosmis dan merebut kembali warna Aethelgard.
+* **Tujuan Misi (Objectives):**
+  1. Masuki singgasana primordial dan dengarkan firman terakhir The Grand Calligrapher.
+  2. Bertahan hidup dari Phase 1 (*Pilar Tinta Monolitik*) dan Phase 2 (*Badai Hujan Tinta*).
+  3. Picu *The Golden Anima Eruption* di Phase 3 dan hancurkan *The Primordial Stylus* dengan tebasan pamungkas!
+* **Hadiah Misi:** $+5.000\text{ EXP}$, $+2.500\text{ Pecahan Aethel}$, Gelar *Tower Conqueror*, Terbukanya Mode *Endless Spire* & *Story Codex Screen*.
+
+---
+
+## 📜 BAGIAN 17: RANGKAIAN MISI SAMPINGAN & WARISAN KUNO (THE HERITAGE SIDE QUESTS)
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                        TIGA SAGA MISI SAMPINGAN AETHELGARD                             │
+│                                                                                        │
+│  [SQ-1: FRAGMEN WARNA ARIA]     [SQ-2: SUMPAH LEGIUN VALERIUS]  [SQ-3: BIJIH VULCANUS] │
+│  Kumpulkan 4 Tetesan Spektrum   Cari 3 Lencana Ksatria Gugur    Kumpulkan 3 Batu Meteor│
+│  Hadiah: Evolusi Gema Aria      Hadiah: Jimat Pertahanan        Hadiah: Senjata Apex   │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 17.1 Misi Sampingan I: Fragmen Spektrum Terakhir (*Aria's Chromatic Remnants*)
+* **ID Misi:** `SQ_ARIA_COLORS` | **Pemicu:** Dialog Aria di Checkpoint Lantai 1
+* **Deskripsi:** Aria adalah sepercik jiwa yang kehilangan tubuh fisiknya. Agar suaranya tidak memudar menjadi keheningan tinta, pemain harus mencari 4 kristal pigmen warna murni yang disembunyikan di sudut terpencil menara:
+  1. *Pigmen Merah Fajar:* Tersembunyi di atas platform melayang tertinggi di Lantai 2 ($X=24.5, Y=11.2$).
+  2. *Pigmen Biru Samudra:* Di balik rak manuskrip rahasia di Lantai 4 ($X=18.0, Y=7.5$).
+  3. *Pigmen Hijau Zamrud:* Mengambang di pulau batu anomali gravitasi Lantai 7 ($X=15.0, Y=8.2$).
+  4. *Pigmen Emas Mentari:* Di belakang pilar altar gerhana Lantai 9 ($X=28.0, Y=3.5$).
+* **Hadiah Sastra & Mekanik:** Wujud visual Aria di layar HUD bertransformasi dari siluet cyan pucat menjadi bidadari spektrum warna bercahaya keemasan. Memberikan pasif regenerasi Mana/SP $+15\%$ secara permanen.
+
+### 17.2 Misi Sampingan II: Sumpah Seratus Prajurit Gugur (*Valerius's Fallen Cohort*)
+* **ID Misi:** `SQ_VALERIUS_VOW` | **Pemicu:** Membaca Tablet I di Lantai 1
+* **Deskripsi:** Seratus prajurit Legiun Pertama tewas di benteng bawah tanpa sempat dimakamkan. Tiga ajudan kepercayaan Kapten Valerius membawa lencana perak bertuliskan sumpah militer:
+  1. *Lencana Ajudan Marcus:* Dijatuhkan oleh Crimson Grunt bertubuh besar di Lantai 1.
+  2. *Lencana Letnan Sarah:* Tertusuk di ujung duri obsidian dasar jurang Lantai 2.
+  3. *Lencana Mayor Thorne:* Terkubur di depan singgasana Jenderal Oakhaven Lantai 3.
+* **Hadiah Sastra & Mekanik:** Dialog doa penghormatan di makam benteng bawah. Pemain dihadiahi *Legionnaire's Pendant* (Bonus Max HP $+50$ dan ketahanan terhadap duri $+25\%$).
+
+### 17.3 Misi Sampingan III: Api Penempa Bintang Kosmis (*Vulcanus's Celestial Ore*)
+* **ID Misi:** `SQ_VULCANUS_METEOR` | **Pemicu:** Berbicara dengan Vulcanus setelah menempa senjata ke Level 3
+* **Deskripsi:** Untuk mengangkat senjata pemain melampaui batas fana (*Apex Ascension*), api tungku biasa tidak lagi mencukupi. Vulcanus membutuhkan 3 bongkahan *Batu Meteorit Kosmis* yang jatuh menembus celah dinding astral Lantai 7.
+* **Tujuan Misi:**
+  1. Masuki zona anomali gravitasi Lantai 7.
+  2. Lakukan navigasi platforming akrobatik di tebing terluar menara untuk memungut 3 keping bijih meteorit bercahaya biru indigo.
+  3. Bawa kembali bijih tersebut ke bengkel Vulcanus di Lantai 6.
+* **Hadiah Sastra & Mekanik:** Membuka penempaan khusus *Weapon Ascension: Godsplitter*. Senjata pemain memperoleh efek visual aura api emas menyala dan bonus $+10\text{ Base ATK}$ permanen.
+
+---
+
+## ⚔️ BAGIAN 18: UJIAN KEHORMATAN KALIGRAFER & KONTRAK BURONAN (TRIALS & BOUNTIES)
+
+### 18.1 Ujian Kehormatan Para Kaligrafer (*The Scribe's Gauntlets*)
+Ritual tantangan purba yang diakses melalui Monolit Ujian di Suaka Vulcanus (Lantai 6):
+1. **Trial of Deflection (Ujian Tangkisan Suci):**
+   * *Aturan:* Bertahan hidup di arena tertutup melawan gelombang proyektil panah dan tebasan bertubi-tubi.
+   * *Kondisi Menang:* Lakukan 10 kali *Perfect Parry* berturut-turut tanpa menerima 1 hit pun.
+   * *Ganjaran:* Gelar kehormatan *Parry Master* dan Relik *Chronos Hourglass*.
+2. **Trial of the Pacewalker (Ujian Langkah Bayang):**
+   * *Aturan:* Selesaikan lintasan platforming berbahaya sepanjang 40 meter yang dipenuhi duri obsidian dalam kurun waktu 45 detik.
+   * *Kondisi Menang:* Menyentuh portal finish tanpa pernah menyentuh satu duri pun.
+   * *Ganjaran:* Relik *Wings of Hermes* dan $+500\text{ Pecahan Aethel}$.
+3. **Trial of the Iron Will (Ujian Kehendak Baja):**
+   * *Aturan:* Hadapi proyeksi ilusi Jenderal Oakhaven dan Amethyst Matron secara bersamaan dengan handicap HP terkunci pada 50%.
+   * *Ganjaran:* $+1.500\text{ EXP}$ dan 2 Talent Points instan.
+
+### 18.2 Papan Kontrak Buronan Elit (*The Spire Bounty Board*)
+Perburuan varian monster mutasi langka yang berkeliaran di lantai menara:
+* **Buronan I: "The Sanguine Berserker" (Lantai 2)** — Crimson Grunt raksasa dengan kecepatan serang ganda dan ketahanan stagger tinggi. Hadiah: $+250\text{ Pecahan Aethel}$.
+* **Buronan II: "Amethyst Void-Weaver" (Lantai 4)** — Sniper ungu elit yang mampu melakukan teleportasi instan saat didekati. Hadiah: Permata soket *Poison Ward*.
+* **Buronan III: "Obsidian Dreadnought" (Lantai 7)** — Ksatria perisai kembar berzirah duri hitam yang memantulkan proyektil. Hadiah: $+600\text{ Pecahan Aethel}$ dan Relik *Thunder Charm*.
+
+---
+
+*Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Quest Designer, Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+
 
 
