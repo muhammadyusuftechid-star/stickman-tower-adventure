@@ -655,7 +655,8 @@ class PlayScreen(
                 boss.update(updateDelta, player, currentFloor.platforms)
                 if (!wasPhase2 && boss.isPhase2) {
                     cameraManager.shake(0.35f, 0.25f)
-                    AudioManager.playDeath()
+                    AudioManager.playBossRoar()
+                    HapticManager.vibrateHeavy()
                     floatingTexts.add(
                         FloatingText("❖ ${boss.name}: \"${boss.enrageQuote}\"", boss.position.x + boss.width / 2f, boss.position.y + boss.height + 1.2f, Color.SCARLET, duration = 4.0f)
                     )

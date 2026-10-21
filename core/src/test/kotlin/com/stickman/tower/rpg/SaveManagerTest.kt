@@ -157,4 +157,38 @@ class SaveManagerTest {
         assertEquals(1, loadedAfterReset.playerLevel)
         assertEquals(0, loadedAfterReset.gold)
     }
+
+    @Test
+    fun testTalentPointsPersistenceAndRespec() {
+        val talentManager = com.stickman.tower.talent.TalentManager()
+        val saveData = SaveData(playerLevel = 10, unspentTalentPoints = 5)
+        talentManager.loadFromSave(saveData)
+        assertEquals(5, talentManager.talentPoints)
+
+        // Belanjakan 1 poin untuk membuka talent Tier 1 Berserker
+        val canUnlock = talentManager.unlockTalent("BS_BLOOD_RAGE")
+        assertTrue(canUnlock)
+        assertEquals(4, talentManager.talentPoints)
+        assertTrue(talentManager.isTalentUnlocked("BS_BLOOD_RAGE"))
+
+        // Sinkronisasi ke SaveData dan simpan secara atomik
+        talentManager.syncToSave(saveData)
+        assertEquals(4, saveData.unspentTalentPoints)
+        SaveManager.save(saveData)
+
+        // Muat kembali dari storage
+        val reloadedSave = SaveManager.load()
+        assertEquals(4, reloadedSave.unspentTalentPoints)
+        assertTrue(reloadedSave.isChecksumValid())
+
+        val newTalentManager = com.stickman.tower.talent.TalentManager()
+        newTalentManager.loadFromSave(reloadedSave)
+        assertEquals(4, newTalentManager.talentPoints)
+        assertTrue(newTalentManager.isTalentUnlocked("BS_BLOOD_RAGE"))
+
+        // Lakukan Respec dan verifikasi pengembalian poin
+        newTalentManager.respec()
+        assertEquals(5, newTalentManager.talentPoints)
+        assertFalse(newTalentManager.isTalentUnlocked("BS_BLOOD_RAGE"))
+    }
 }

@@ -212,6 +212,7 @@ object SaveManager {
             prefs.putInteger("weaponAtkLevel", data.weaponAtkLevel)
             prefs.putInteger("weaponCritLevel", data.weaponCritLevel)
             prefs.putInteger("weaponSpdLevel", data.weaponSpdLevel)
+            prefs.putInteger("unspentTalentPoints", data.unspentTalentPoints)
             prefs.putLong("checksum", data.checksum)
             prefs.flush()
         } catch (prefEx: Exception) {
@@ -240,6 +241,7 @@ object SaveManager {
                     weaponAtkLevel = prefs.getInteger("weaponAtkLevel", 0),
                     weaponCritLevel = prefs.getInteger("weaponCritLevel", 0),
                     weaponSpdLevel = prefs.getInteger("weaponSpdLevel", 0),
+                    unspentTalentPoints = prefs.getInteger("unspentTalentPoints", -1),
                     checksum = prefs.getLong("checksum", 0L)
                 )
             }

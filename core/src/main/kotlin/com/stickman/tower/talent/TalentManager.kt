@@ -32,12 +32,19 @@ class TalentManager(initialArchetype: CharacterArchetype = CharacterArchetype.BA
                 selectedSubClass = SubClass.fromString(fromList)
             }
         }
-        talentPoints = saveData.playerLevel.coerceAtLeast(1) / 2 + 2
         unlockedTalentIds.clear()
         for (id in saveData.unlockedCharacters) {
             if (id.startsWith("TALENT_")) {
                 unlockedTalentIds.add(id.removePrefix("TALENT_"))
             }
+        }
+        if (saveData.unspentTalentPoints >= 0) {
+            talentPoints = saveData.unspentTalentPoints
+        } else {
+            // Kompatibilitas mundur save legacy: total poin diperoleh dikurangi poin yang telah dibelanjakan
+            val totalEarned = saveData.playerLevel.coerceAtLeast(1) / 2 + 2
+            val spentPoints = unlockedTalentIds.sumOf { TalentCatalog.findById(it)?.cost ?: 1 }
+            talentPoints = (totalEarned - spentPoints).coerceAtLeast(0)
         }
     }
 
@@ -45,6 +52,7 @@ class TalentManager(initialArchetype: CharacterArchetype = CharacterArchetype.BA
 
     fun syncToSave(saveData: SaveData) {
         saveData.selectedSubClass = selectedSubClass.name
+        saveData.unspentTalentPoints = talentPoints
         saveData.unlockedCharacters.removeAll { it.startsWith("SUBCLASS_") || it.startsWith("TALENT_") }
         saveData.unlockedCharacters.add("SUBCLASS_${selectedSubClass.idName}")
         for (id in unlockedTalentIds) {

@@ -16,6 +16,7 @@ data class SaveData(
     var weaponAtkLevel: Int = 0,
     var weaponCritLevel: Int = 0,
     var weaponSpdLevel: Int = 0,
+    var unspentTalentPoints: Int = -1,
     var saveVersion: Int = 1,
     var checksum: Long = 0L
 ) {
@@ -32,6 +33,7 @@ data class SaveData(
         hash = 31L * hash + weaponAtkLevel
         hash = 31L * hash + weaponCritLevel
         hash = 31L * hash + weaponSpdLevel
+        hash = 31L * hash + unspentTalentPoints
         hash = 31L * hash + selectedArchetype.hashCode()
         hash = 31L * hash + selectedSubClass.hashCode()
         return hash and 0x7FFFFFFFFFFFFFFFL // Bilangan bulat positif 63-bit
@@ -50,6 +52,7 @@ data class SaveData(
         weaponAtkLevel = weaponAtkLevel.coerceIn(0, 10)
         weaponCritLevel = weaponCritLevel.coerceIn(0, 10)
         weaponSpdLevel = weaponSpdLevel.coerceIn(0, 10)
+        unspentTalentPoints = unspentTalentPoints.coerceAtLeast(-1)
         if (unlockedCharacters.isEmpty()) {
             unlockedCharacters.add("STICKMAN_SWORD")
         }
