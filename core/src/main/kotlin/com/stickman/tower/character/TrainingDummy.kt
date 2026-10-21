@@ -25,6 +25,11 @@ class TrainingDummy(val spawnX: Float = 6f, val spawnY: Float = 2f) {
     val health = Health(maxHp = 100f, invulnerableDuration = 0.25f)
     val hurtbox = Hurtbox(this)
 
+    // RPG Progression Reward
+    val expReward: Int = 10
+    val goldReward: Int = 3
+    var rewardClaimed: Boolean = false
+
     private var respawnTimer: Float = 0f
     var isGrounded: Boolean = false
         private set
@@ -101,6 +106,7 @@ class TrainingDummy(val spawnX: Float = 6f, val spawnY: Float = 2f) {
         velocity.set(0f, 0f)
         health.reset()
         respawnTimer = 0f
+        rewardClaimed = false
     }
 
     fun render(shapeRenderer: ShapeRenderer) {

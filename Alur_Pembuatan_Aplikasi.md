@@ -231,44 +231,44 @@ flowchart LR
 
 #### Modul 5.1: Model Statistik Karakter
 - **Task 5.1.1: Stat Container**
-  - [ ] Buat class `CharacterStats.kt`:
+  - [x] Buat class `CharacterStats.kt`:
     - `level: Int`
     - `maxHp: Float`
     - `attackPower: Float`
     - `defense: Float`
     - `critRate: Float`
 - **Task 5.1.2: Rumus Damage Calculation**
-  - [ ] Rumus: $\text{Final Damage} = \max(1f, \text{Attack} \times \text{Multiplier} - \text{Target Defense})$.
+  - [x] Rumus: $\text{Final Damage} = \max(1f, (\text{Raw Damage} - \text{Target Defense}) \times \text{Multiplier})$ dengan deteksi Critical Strike.
 
 #### Modul 5.2: Sistem EXP dan Level Up
 - **Task 5.2.1: Drop EXP & Kurva Level**
-  - [ ] Musuh yang mati menjatuhkan EXP point (misal: 15 EXP per musuh biasa).
-  - [ ] Rumus kurva level up: $\text{ReqEXP}(L) = 50 \times L^{1.5}$.
-  - [ ] Efek level up: kembalikan HP ke penuh, naikkan `maxHp` (+10%), `attackPower` (+5%), dan tampilkan animasi teks `LEVEL UP!`.
+  - [x] Musuh yang mati menjatuhkan EXP point (25 EXP) dan Koin Emas (10 G).
+  - [x] Rumus kurva level up: $\text{ReqEXP}(L) = \lfloor 50 \times L^{1.4} \rfloor$.
+  - [x] Efek level up: kembalikan HP ke penuh, naikkan `maxHp` (+10%), `attackPower` (+8%), `defense` (+0.5), dan tampilkan banner teks `LEVEL UP! Lv. X`.
 
 #### Modul 5.3: Sistem Penyimpanan Data Lokal (Save/Load)
 - **Task 5.3.1: Data Schema Progresi**
-  - [ ] Buat data class `SaveData.kt`:
+  - [x] Buat data class `SaveData.kt`:
     ```kotlin
     data class SaveData(
         var playerLevel: Int = 1,
         var currentExp: Int = 0,
         var highestTowerFloor: Int = 1,
         var gold: Int = 0,
-        var unlockedCharacters: List<String> = listOf("STICKMAN_SWORD")
+        var unlockedCharacters: ArrayList<String> = arrayListOf("STICKMAN_SWORD")
     )
     ```
 - **Task 5.3.2: Serialisasi JSON & LibGDX Preferences**
-  - [ ] Gunakan `com.badlogic.gdx.utils.Json` untuk convert `SaveData` ke string JSON.
-  - [ ] Simpan ke file lokal: `Gdx.files.local("save_data.json")` atau `Gdx.app.getPreferences("StickmanSave")`.
-  - [ ] Tambahkan fitur auto-save saat stage berhasil diselesaikan atau saat menyentuh checkpoint.
+  - [x] Gunakan `com.badlogic.gdx.utils.Json` untuk convert `SaveData` ke string JSON (`SaveManager.kt`).
+  - [x] Simpan ke file lokal: `Gdx.files.local("stickman_save.json")` dengan toleransi fallback ke `Gdx.app.getPreferences("StickmanSavePrefs")`.
+  - [x] Tambahkan fitur auto-save saat stage berhasil diselesaikan, naik level, atau saat menyentuh checkpoint.
 
 #### Modul 5.4: User Interface (In-Game HUD)
-- **Task 5.4.1: scene2d.ui HUD Layer**
-  - [ ] Tampilkan bar HP merah di pojok kiri atas.
-  - [ ] Tampilkan bar energi ultimate kuning di bawah bar HP.
-  - [ ] Tampilkan level karakter, bar EXP, dan koin yang dikumpulkan.
-  - [ ] Tampilkan icon tombol Pause di pojok kanan atas.
+- **Task 5.4.1: scene2d.ui / ShapeRenderer HUD Layer**
+  - [x] Tampilkan Player Status Card: Badge Level (`Lv. X`), Bar HP (berwarna dinamis hijau/kuning/merah dengan angka `HP: current/max`).
+  - [x] Tampilkan bar EXP cyan dengan progres persentase (`EXP: current/req (%)`).
+  - [x] Tampilkan bar energi ultimate emas di bawah bar EXP dengan indikator `READY [O]`.
+  - [x] Tampilkan counter koin emas (`[G] X Coins`), status combat (`ATK | DEF | CRIT`), status Skill & Dodge, dan notifikasi auto-save `[OK] Progress Tersimpan`.
 
 ---
 

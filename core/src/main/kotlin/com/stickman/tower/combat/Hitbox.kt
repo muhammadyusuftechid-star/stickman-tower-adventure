@@ -16,6 +16,7 @@ class Hitbox(
 ) {
     val bounds = Rectangle()
     var isActive: Boolean = false
+    var isCritical: Boolean = false
     val hitEntities = mutableSetOf<Any>()
 
     fun set(x: Float, y: Float, width: Float, height: Float, active: Boolean) {
@@ -25,6 +26,7 @@ class Hitbox(
 
     fun reset() {
         isActive = false
+        isCritical = false
         hitEntities.clear()
     }
 

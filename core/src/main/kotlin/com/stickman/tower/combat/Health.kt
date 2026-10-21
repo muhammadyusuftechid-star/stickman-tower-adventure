@@ -4,7 +4,7 @@ package com.stickman.tower.combat
  * Komponen nyawa, penanganan damage, dan durasi kebal (i-Frames).
  */
 class Health(
-    val maxHp: Float = 100f,
+    var maxHp: Float = 100f,
     private val invulnerableDuration: Float = 0.25f
 ) {
     var currentHp: Float = maxHp

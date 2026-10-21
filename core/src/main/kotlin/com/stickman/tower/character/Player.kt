@@ -15,16 +15,21 @@ import com.stickman.tower.combat.Skill
 import com.stickman.tower.combat.UltimateEnergy
 import com.stickman.tower.input.GameInput
 import com.stickman.tower.physics.Platform
+import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.world.GameConfig
 import kotlin.math.abs
 import kotlin.math.sin
 
 /**
- * Entitas Karakter Pemain Fase 4:
- * Dilengkapi 3-Hit Combo Chain, Dodge Roll (i-Frames & Afterimages),
- * Skill 1 Dash Strike (Cooldown), serta Ultimate Bladestorm 360° (Energy).
+ * Entitas Karakter Pemain Fase 5:
+ * Didukung model RPG CharacterStats (scaling level, HP, Attack, Defense, Critical),
+ * Combo 3-Hit Chain, Dodge Roll ber-i-frames, Skill 1 Dash Strike, dan Ultimate Bladestorm.
  */
-class Player(spawnX: Float = 0f, spawnY: Float = 2f) {
+class Player(
+    spawnX: Float = 0f,
+    spawnY: Float = 2f,
+    val stats: CharacterStats = CharacterStats()
+) {
     val position = Vector2(spawnX, spawnY)
     val velocity = Vector2(0f, 0f)
 
@@ -32,10 +37,10 @@ class Player(spawnX: Float = 0f, spawnY: Float = 2f) {
     val height = 1.8f
     val bounds = Rectangle(position.x, position.y, width, height)
 
-    // Komponen Pertarungan
-    val health = Health(maxHp = 100f, invulnerableDuration = 0.35f)
+    // Komponen Pertarungan & RPG
+    val health = Health(maxHp = stats.maxHp, invulnerableDuration = 0.35f)
     val hurtbox = Hurtbox(this)
-    val hitbox = Hitbox(this, damage = 12f, knockbackX = 4f, knockbackY = 2.5f)
+    val hitbox = Hitbox(this, damage = stats.calculateDamage(12f).first, knockbackX = 4f, knockbackY = 2.5f)
 
     val comboManager = ComboManager()
     val skill1 = Skill(name = "Dash Strike", cooldown = 4.5f)
@@ -175,7 +180,9 @@ class Player(spawnX: Float = 0f, spawnY: Float = 2f) {
                 isSkillStriking = true
                 skillTimer = 0f
                 attackPhase = AttackPhase.INACTIVE
-                hitbox.damage = 30f
+                val (dmg, isCrit) = stats.calculateDamage(30f)
+                hitbox.damage = dmg
+                hitbox.isCritical = isCrit
                 hitbox.knockbackX = 8.5f
                 hitbox.knockbackY = 4.0f
                 hitbox.reset()
@@ -190,7 +197,9 @@ class Player(spawnX: Float = 0f, spawnY: Float = 2f) {
                 ultTimer = 0f
                 attackPhase = AttackPhase.INACTIVE
                 velocity.set(0f, 0f)
-                hitbox.damage = 65f
+                val (dmg, isCrit) = stats.calculateDamage(65f)
+                hitbox.damage = dmg
+                hitbox.isCritical = isCrit
                 hitbox.knockbackX = 12.0f
                 hitbox.knockbackY = 6.0f
                 hitbox.reset()
@@ -204,7 +213,9 @@ class Player(spawnX: Float = 0f, spawnY: Float = 2f) {
                 val hitConfig = comboManager.startNextHit()
                 attackPhase = AttackPhase.STARTUP
                 attackTimer = 0f
-                hitbox.damage = hitConfig.damage
+                val (dmg, isCrit) = stats.calculateDamage(hitConfig.damage)
+                hitbox.damage = dmg
+                hitbox.isCritical = isCrit
                 hitbox.knockbackX = hitConfig.knockbackX
                 hitbox.knockbackY = hitConfig.knockbackY
                 hitbox.reset()
@@ -298,7 +309,9 @@ class Player(spawnX: Float = 0f, spawnY: Float = 2f) {
                         val nextCfg = comboManager.startNextHit()
                         attackPhase = AttackPhase.STARTUP
                         attackTimer = 0f
-                        hitbox.damage = nextCfg.damage
+                        val (dmg, isCrit) = stats.calculateDamage(nextCfg.damage)
+                        hitbox.damage = dmg
+                        hitbox.isCritical = isCrit
                         hitbox.knockbackX = nextCfg.knockbackX
                         hitbox.knockbackY = nextCfg.knockbackY
                         hitbox.reset()
@@ -364,12 +377,31 @@ class Player(spawnX: Float = 0f, spawnY: Float = 2f) {
         // Jika sedang dalam Dodge Roll, kebal dari serangan musuh!
         if (isDodging) return false
 
-        if (health.takeDamage(amount)) {
+        val mitigatedDmg = kotlin.math.max(1f, amount - stats.defense)
+        if (health.takeDamage(mitigatedDmg)) {
             velocity.x = knockDirX
             velocity.y = knockDirY
             return true
         }
         return false
+    }
+
+    /**
+     * Dipanggil saat pemain naik level:
+     * Menyesuaikan Max HP dengan stat baru dan memulihkan HP secara penuh.
+     */
+    fun onLevelUp(levelsGained: Int) {
+        health.maxHp = stats.maxHp
+        health.reset()
+    }
+
+    /**
+     * Mereset status HP dan energi sesuai statistik tersimpan.
+     */
+    fun resetToStats() {
+        health.maxHp = stats.maxHp
+        health.reset()
+        ultimate.reset()
     }
 
     fun render(shapeRenderer: ShapeRenderer) {

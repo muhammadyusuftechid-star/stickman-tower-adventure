@@ -32,6 +32,11 @@ class Enemy(spawnX: Float, spawnY: Float) {
     val hurtbox = Hurtbox(this)
     val hitbox = Hitbox(this, damage = 12f, knockbackX = 5.5f, knockbackY = 3.0f)
 
+    // RPG Progression Reward
+    val expReward: Int = 25
+    val goldReward: Int = 10
+    var rewardClaimed: Boolean = false
+
     // AI & Parameter Status
     var state = EnemyState.PATROL
         private set
