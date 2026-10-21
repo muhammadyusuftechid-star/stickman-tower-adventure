@@ -28,8 +28,8 @@ graph TD
 ## 2. Roadmap Visual Keseluruhan (Macro Pipeline)
 
 ```mermaid
-flowchart LR
-    subgraph Fondasi["Fase 0 - 8: Fondasi Inti Engine (Selesai)"]
+flowchart TD
+    subgraph Fondasi["Fase 0 - 8: Fondasi Inti Engine (Selesai 100%)"]
         Fase0["F0: Setup"] --> Fase1["F1: Platforming"]
         Fase1 --> Fase2["F2: Combat"]
         Fase2 --> Fase3["F3: MVP Loop"]
@@ -39,14 +39,20 @@ flowchart LR
         Fase6 --> Fase7["F7: Audio & Hero Classes"]
         Fase7 --> Fase8["F8: Android QA"]
     end
-    subgraph Ekspansi["Fase 9 - 15: Roadmap Naratif & Ekspansi Endgame"]
+    subgraph EkspansiInti["Fase 9 - 14: Fitur Lanjutan & Kampanye 10 Lantai (Selesai 100%)"]
         Fase8 --> Fase9["F9: Ranged & Haptic"]
         Fase9 --> Fase10["F10: Vulcanus Forge & Relics"]
         Fase10 --> Fase11["F11: Parry & Cinematic Boss"]
         Fase11 --> Fase12["F12: Gamepad & Arc Layout"]
         Fase12 --> Fase13["F13: Endless Spire & Talents"]
-        Fase13 --> Fase14["F14: The 10-Floor Story Odyssey"]
-        Fase14 --> Fase15["F15: Play Games & Publish"]
+        Fase13 --> Fase14["F14: 10-Floor Story Odyssey & Codex"]
+    end
+    subgraph NarasiDanEndgame["Fase 15 - 19: Ekosistem Quest, Ujian Scribe & Kesiapan Publikasi"]
+        Fase14 --> Fase15["F15: Google Play Services & Release Packaging"]
+        Fase14 --> Fase16["F16: Quest Engine & The Heritage Saga"]
+        Fase16 --> Fase17["F17: Scribe Trials & Spire Bounty Board"]
+        Fase17 --> Fase18["F18: Dynamic Screenplay & Voice Chirp Synthesis"]
+        Fase18 --> Fase19["F19: Environmental Storytelling & Inked Bestiary"]
     end
 ```
 
@@ -588,25 +594,136 @@ flowchart LR
 
 ---
 
+### FASE 16: Arsitektur Sistem Quest & The Heritage Saga (Misi Utama & Sampingan)
+> **Tujuan Terbesar:** Membangun sistem quest berstatus FSM modular yang terintegrasi dengan SaveData V2, menghadirkan 7 Main Quest kampanye dan 3 rangkaian Side Quest warisan kuno Aethelgard.
+
+#### Modul 16.1: Finite State Machine (FSM) Quest Engine & Model Data
+- **Task 16.1.1: Data Models & State Lifecycle**
+  - [x] Struktur data Kotlin: `QuestCategory`, `ObjectiveType`, `QuestObjective`, `QuestDefinition` terdaftar di [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md#L318-L355).
+  - [x] Siklus status: `LOCKED -> AVAILABLE -> ACTIVE -> OBJECTIVES_MET -> COMPLETED / FAILED`.
+  - [x] Integrasi pelacakan status quest di `SaveData.kt` V2 schema dengan salted 64-bit FNV-1a checksum.
+- **Task 16.1.2: Minimalist HUD Quest Compass Tracker**
+  - [x] Desain widget minimalis semi-transparan ($220 \times 60$ dp) di sudut kanan atas layar (di bawah bar HP/Mana).
+  - [x] Penampil ikon kategori (`◈` Main, `◇` Side, `⚔` Bounty), progres objektif bertingkat, dan efek kilau emas partikel saat selesai.
+
+#### Modul 16.2: Implementasi 7 Misi Utama Kampanye Cerita (Main Quest Odyssey)
+- **Task 16.2.1: Main Quest 1 s/d 4 (Act I & II)**
+  - [x] `MQ_1`: "Bangkitnya Siluet" (Ambil pedang di gerbang, tumbangkan 3 Grunts, baca Tablet I & II).
+  - [x] `MQ_2`: "Ujian Oakhaven" (Tumbangkan Jenderal Oakhaven dengan minimal 1x Perfect Parry).
+  - [x] `MQ_3`: "Benang Racun Amethyst" (Menembus arsip kaca, tumbangkan Matron, dan buka Sub-Class).
+  - [x] `MQ_4`: "Suaka Paron Logam" (Kunjungi bengkel Vulcanus, tempa senjata minimal Lv. 1, pulihkan Anima).
+- **Task 16.2.2: Main Quest 5 s/d 7 (Act III & IV)**
+  - [x] `MQ_5`: "Cermin Gema Bayang" (Kuasai Low Gravity Lantai 7, kalahkan Doppelgänger dengan 2x parry).
+  - [x] `MQ_6`: "Meredupkan Gerhana" (Kalahkan Crimson Sovereign di bawah bulan darah tanpa terkena lifesteal).
+  - [x] `MQ_7`: "Patahnya Pena Dewa" (Tumbangkan The Grand Calligrapher, hancurkan Stylus, buka Endless Spire).
+
+#### Modul 16.3: Rangkaian 3 Misi Sampingan Warisan Kuno (The Heritage Saga)
+- **Task 16.3.1: SQ_ARIA_COLORS — Fragmen Spektrum Terakhir**
+  - [x] Temukan 4 Pigmen Warna Murni (Merah di L2, Biru di L4, Hijau di L7, Emas di L9).
+  - [x] Hadiah: Pasif regenerasi Mana/SP $+15\%$ dan transformasi visual Aria menjadi bidadari spektrum emas.
+- **Task 16.3.2: SQ_VALERIUS_VOW — Sumpah Seratus Prajurit Gugur**
+  - [x] Kumpulkan 3 Lencana Perak Legiun Pertama di Benteng Bawah (Marcus di L1, Sarah di L2, Thorne di L3).
+  - [x] Hadiah: Relik *Legionnaire's Pendant* (Max HP $+50$, ketahanan duri $+25\%$).
+- **Task 16.3.3: SQ_VULCANUS_METEOR — Api Penempa Bintang Kosmis**
+  - [x] Kumpulkan 3 Bongkahan Batu Meteorit di tebing anomali gravitasi Lantai 7.
+  - [x] Hadiah: Membuka resep penempaan *Weapon Ascension: Godsplitter* ($+10\text{ Base ATK}$ permanen).
+
+---
+
+### FASE 17: Arena Ujian Para Kaligrafer & Papan Buronan Elit (Challenge Engine & Bounty Board)
+> **Tujuan Terbesar:** Menghadirkan fasilitas tantangan ketangkasan aksi berhadiah medali dan kontrak perburuan monster mutasi langka di Suaka Vulcanus (Lantai 6).
+
+#### Modul 17.1: Monolit Ujian Para Kaligrafer (The Scribe's Gauntlets)
+- **Task 17.1.1: Trial of Deflection (Ujian Tangkisan Suci)**
+  - [x] Mode bertahan hidup tanpa tombol serang; lakukan 10x Perfect Parry berturut-turut untuk meraih medali emas.
+  - [x] Hadiah: Relik [CHRONOS_HOURGLASS](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt) (perlambat proyektil musuh $30\%$).
+- **Task 17.1.2: Trial of the Pacewalker (Ujian Langkah Bayang)**
+  - [x] Speedrun lintasan platforming berbahaya 45 meter dalam waktu $< 40$ detik tanpa menyentuh satu duri pun.
+  - [x] Hadiah: Relik [WINGS_OF_HERMES](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/relic/RelicType.kt) (kecepatan gerak $+25\%$).
+- **Task 17.1.3: Trial of the Iron Will (Ujian Kehendak Baja)**
+  - [x] Hadapi proyeksi ilusi ganda Oakhaven + Matron secara simultan dengan handicap Max HP terkunci pada $50\%$.
+  - [x] Hadiah: $+1.500\text{ EXP}$ dan 2 Talent Points instan.
+
+#### Modul 17.2: Papan Kontrak Buronan Elit (The Spire Bounty Board)
+- **Task 17.2.1: Generator Monster Elit & Affix Mutator**
+  - [x] Penempatan papan pengumuman buronan obsidian di samping tungku tempa Vulcanus Lantai 6.
+  - [x] Sistem penanda visual aura merah menyala (*Elite Champion Glow*), HP $+50\%$, dan 1 affix khusus (*Thorns*, *Vampiric*, *Haste*).
+  - [x] Target buronan: *The Sanguine Berserker* (L2), *Amethyst Void-Weaver* (L4), dan *Obsidian Dreadnought* (L7).
+
+---
+
+### FASE 18: Engine Dialog Dinamis, Naskah Sinematik & Sintesis Suara Prosedural (Screenplay & Voice Chirp)
+> **Tujuan Terbesar:** Mewujudkan naskah lakon sinematik standar industri, pohon percabangan dialog dengan buff moril, dan efek vokal prosedural tanpa aset rekaman berat.
+
+#### Modul 18.1: Implementasi Skenario Sinematik Scene 01 s/d 05
+- **Task 18.1.1: Skenario Lakon Standar Industri**
+  - [x] Scene 01: Prolog Gerbang Bawah (Kaelen terbangun menatap tangan garisnya dan mencabut pedang bersama Aria).
+  - [x] Scene 02: Duel Kehormatan Jenderal Oakhaven (dialog pembuka, mid-fight bark HP 50%, dan adegan kematian).
+  - [x] Scene 03: Kawah Alkimia The Amethyst Matron (ejekan racun Miasma dan ratapan busur kristal yang patah).
+  - [x] Scene 04: Suaka Paron Vulcanus (denting palu godam dan doktrin penempaan baja penentang takdir).
+  - [x] Scene 05: Singgasana Kanvas Primordial (debat filosofis monokrom vs kebebasan warna, pematahan pena dewa).
+
+#### Modul 18.2: Protokol Sintesis Vokal Prosedural (Voice Chirp Engine)
+- **Task 18.2.1: Generator Gelombang Osilator Audio**
+  - [x] Sintesis vokal prosedural per karakter di [AudioManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/audio/AudioManager.kt) tanpa file audio WAV berat:
+    - *Aria:* Gelombang sinus murni nada tinggi ($880\text{ Hz} - 1046\text{ Hz}$).
+    - *Vulcanus:* Gelombang segitiga nada rendah menggelegar ($120\text{ Hz} - 180\text{ Hz}$).
+    - *The Grand Calligrapher:* Frekuensi ganda harmonik ($55\text{ Hz} + 440\text{ Hz}$).
+- **Task 18.2.2: Typewriter Render Text Effect**
+  - [x] Kecepatan rendisi $35\text{ karakter/detik}$ dengan auto-pause pada tanda baca (`.` = 350ms, `,` = 150ms).
+  - [x] Palet warna nama pembicara diegetik (Cyan, Gold, Purple, Amber, Lavender, Crimson, White).
+
+#### Modul 18.3: Pohon Percabangan Dialog Interaktif & Bisikan Menara
+- **Task 18.3.1: Branching Dialogue & Morale Surge Buffs**
+  - [x] Pilihan respon pemain saat berdialog dengan Vulcanus di Lantai 6:
+    - *Pembalasan Dendam:* Memberikan buff *Kinetic Surge* (ATK $+8\%$ di Lantai 7).
+    - *Restorasi Warna:* Memberikan buff *Spiritual Ward* (HP $+15\%$ dan Regen $+1\text{ HP/s}$ di Lantai 7).
+- **Task 18.3.2: Sistem Bisikan Menara (Tower Whispers)**
+  - [x] Monolog teks mengambang saat pemain idle $> 4.0\text{ detik}$ sesuai atmosfer babak yang sedang dijalani.
+
+---
+
+### FASE 19: Penceritaan Lingkungan, Bestiarium Lapangan & Kurasi Visual (Environmental Storytelling)
+> **Tujuan Terbesar:** Memperkaya atmosfer dunia Aethelgard dengan prop reruntuhan bersejarah, catatan lapangan bestiarium in-game, dan integrasi penuh glosarium diegetik.
+
+#### Modul 19.1: Kurasi Visual & Prop Arsitektur 4 Babak
+- **Task 19.1.1: Penempatan Prop Penceritaan Lingkungan**
+  - [x] *Act I (L1-3):* Rantai besi raksasa yang putus, patung ksatria terpenggal, noda tinta mati, duri obsidian tajam.
+  - [x] *Act II (L4-6):* Rak buku kaca retak, tabung alkimia bocor, paron meteorit raksasa, percikan bara emas.
+  - [x] *Act III (L7-9):* Dinding robek berlubang ke jurang kosmis bintang mati, altar gerhana darah.
+  - [x] *Act IV (L10):* Platform putih bersih tanpa retakan, kuas emas raksasa membeku di udara.
+
+#### Modul 19.2: Bestiarium Lapangan In-Game & Glosarium Diegetik
+- **Task 19.2.1: Catatan Lapangan Cendekiawan Aurelius & Valerius**
+  - [x] Catatan taktik tempur dan asal-usul mutasi untuk Crimson Grunts, Obsidian Knights, Amethyst Snipers, dan Shadow Phantoms.
+- **Task 19.2.2: Standarisasi Glosarium Diegetik Penuh di Seluruh UI/HUD**
+  - [x] Penegakan nomenklatur kanonikal: *Integritas Anima (HP)*, *Resonansi Tinta (SP)*, *Pecahan Aethel (Gold)*, *Rekoleksi Memori (EXP)*, *Pelarutan Jiwa (Game Over)*, *Dentang Penolakan Takdir (Parry)*.
+
+---
+
 ## 4. Matriks Ketergantungan & Prioritas Eksekusi
 
 | Prioritas | Fase | Fitur Kunci | Output Terukur |
 |:---:|:---:|:---|:---|
-| **P0 (Kritis)** | Fase 0 & 1 | Environment, Viewport, Platforming Kinematik | Karakter kotak bisa lari & lompat di platform di laptop (desktop) |
-| **P0 (Kritis)** | Fase 2 | Hitbox, Hurtbox, Basic Attack, HP | Karakter bisa mengayunkan serangan dengan area deteksi hit yang valid |
-| **P0 (Kritis)** | Fase 3 | Enemy AI FSM, Win/Lose, 1 Stage Playable | **MILESTONE MVP TERCAPAI:** Game utuh 1 level bisa dimainkan & ditamatkan |
-| **P1 (Tinggi)** | Fase 4 | Combo 3-Hit, Dodge, Arc Multi-Skills, Touch Controller | Combat seru dengan 3 skill aktif + 1 ulti per hero & kontrol sentuh busur |
-| **P1 (Tinggi)** | Fase 5 | Stats, EXP, Level Up, Local Save Data | Progres tersimpan di file lokal setelah aplikasi ditutup |
-| **P2 (Sedang)** | Fase 6 | Multi-Floor Tower Engine, Hazards, Boss | Level visual rapi, rintangan duri, dan pertarungan boss menantang |
-| **P2 (Sedang)** | Fase 7 | Visual Polish, Audio SFX, 3 Hero Archetypes | 3 karakter stickman dinamis dengan set skill unik & audio imersif |
-| **P3 (Rilis)** | Fase 8 | Profiling Android 60 FPS, Build Release APK | APK mandiri terpasang dan berjalan lancar di HP Android fisik |
-| **P4 (Ekspansi A)** | Fase 9 | Ranged Enemy Proyektil & Android Haptic | Variasi pertempuran jarak jauh & sensasi fisik kontrol |
-| **P4 (Ekspansi B)** | Fase 10 | Toko Vulcanus Forge Senjata & Relik Pasif | Pemanfaatan Gold & variasi build karakter per run |
-| **P5 (Lanjutan A)** | Fase 11 | Sistem Parry Deflect & Boss Presentation | Skill ceiling aksi tinggi & visual sinematik bos |
-| **P5 (Lanjutan B)** | Fase 12 | Dukungan Gamepad & Touch Layout Editor | Fleksibilitas kontrol controller & ergonomi sentuh |
-| **P6 (Endgame)** | Fase 13 | Endless Spire Mode & Talent Tree | Replayability tanpa batas & kedalaman RPG mendalam |
-| **P6 (Naratif)** | Fase 14 | Kampanye Cerita 10 Lantai, 5 Boss & Lore Odyssey | Alur cerita epik 4 Act, dialog NPC Aria/Vulcanus, & tablet prasasti |
+| **P0 (Kritis)** | Fase 0 & 1 | Environment, Viewport, Platforming Kinematik | Karakter kotak bisa lari & lompat di platform di laptop (desktop) [SELESAI] |
+| **P0 (Kritis)** | Fase 2 | Hitbox, Hurtbox, Basic Attack, HP | Karakter bisa mengayunkan serangan dengan area deteksi hit yang valid [SELESAI] |
+| **P0 (Kritis)** | Fase 3 | Enemy AI FSM, Win/Lose, 1 Stage Playable | **MILESTONE MVP TERCAPAI:** Game utuh 1 level bisa dimainkan & ditamatkan [SELESAI] |
+| **P1 (Tinggi)** | Fase 4 | Combo 3-Hit, Dodge, Arc Multi-Skills, Touch Controller | Combat seru dengan 3 skill aktif + 1 ulti per hero & kontrol sentuh busur [SELESAI] |
+| **P1 (Tinggi)** | Fase 5 | Stats, EXP, Level Up, Local Save Data | Progres tersimpan di file lokal setelah aplikasi ditutup [SELESAI] |
+| **P2 (Sedang)** | Fase 6 | Multi-Floor Tower Engine, Hazards, Boss | Level visual rapi, rintangan duri, dan pertarungan boss menantang [SELESAI] |
+| **P2 (Sedang)** | Fase 7 | Visual Polish, Audio SFX, 3 Hero Archetypes | 3 karakter stickman dinamis dengan set skill unik & audio imersif [SELESAI] |
+| **P3 (Rilis)** | Fase 8 | Profiling Android 60 FPS, Build Release APK | APK mandiri terpasang dan berjalan lancar di HP Android fisik [SELESAI] |
+| **P4 (Ekspansi A)** | Fase 9 | Ranged Enemy Proyektil & Android Haptic | Variasi pertempuran jarak jauh & sensasi fisik kontrol [SELESAI] |
+| **P4 (Ekspansi B)** | Fase 10 | Toko Vulcanus Forge Senjata & Relik Pasif | Pemanfaatan Gold & variasi build karakter per run [SELESAI] |
+| **P5 (Lanjutan A)** | Fase 11 | Sistem Parry Deflect & Boss Presentation | Skill ceiling aksi tinggi & visual sinematik bos [SELESAI] |
+| **P5 (Lanjutan B)** | Fase 12 | Dukungan Gamepad & Touch Layout Editor | Fleksibilitas kontrol controller & ergonomi sentuh [SELESAI] |
+| **P6 (Endgame)** | Fase 13 | Endless Spire Mode & Talent Tree | Replayability tanpa batas & kedalaman RPG mendalam [SELESAI] |
+| **P6 (Naratif)** | Fase 14 | Kampanye Cerita 10 Lantai, 5 Boss & Codex Odyssey | Alur cerita epik 4 Act, dialog NPC Aria/Vulcanus, & tablet prasasti [SELESAI] |
 | **P7 (Publikasi)**| Fase 15 | Google Play Services & Release Bundle (.aab) | Kesiapan peluncuran komersial di Google Play Store |
+| **P8 (Quest System)**| Fase 16 | Quest Engine FSM, 7 Main Quests & 3 Heritage Sagas| Aliran objektif terarah, HUD compass, dan hadiah relik unik |
+| **P8 (Tantangan)**| Fase 17 | Scribe's Gauntlets (Parry/Speedrun) & Papan Buronan | Mode tantangan handicap, medali emas, dan kontrak buronan harian |
+| **P9 (Sinematik)**| Fase 18 | Naskah Lakon Standar, Sintesis Voice Chirp & Whispers | Format naskah industri, vokal prosedural osilator & bisikan idle |
+| **P9 (Atmosfer)** | Fase 19 | Penceritaan Lingkungan 4 Babak & Bestiarium Lapangan| Prop reruntuhan visual, catatan lapangan musuh, & UI diegetik |
 
 
 ---
