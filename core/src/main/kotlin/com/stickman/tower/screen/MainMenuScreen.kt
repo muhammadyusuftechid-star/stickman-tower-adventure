@@ -73,15 +73,17 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "TALENT TREE",
         "BLACKSMITH FORGE",
         "SELECT CHARACTER",
+        "STORY CODEX",
         "CONTROL SETTINGS",
         "AUDIO: ON",
         "HAPTIC: ON",
         "RESET SAVE DATA",
+        "GAME CREDITS",
         "QUIT GAME"
     )
     private var selectedIndex = 0
     private var selectorX = 140f
-    private var selectorY = 505f
+    private var selectorY = 530f
     private var animTime = 0f
     private var feedbackNotice = ""
     private var feedbackTimer = 0f
@@ -97,10 +99,10 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         FontManager.init()
         currentSaveData = SaveManager.load()
         inputCooldown = 0.25f
-        val colX = if (selectedIndex < 5) 140f else 670f
-        val rowIdx = if (selectedIndex < 5) selectedIndex else selectedIndex - 5
+        val colX = if (selectedIndex < 6) 140f else 670f
+        val rowIdx = if (selectedIndex < 6) selectedIndex else selectedIndex - 6
         selectorX = colX
-        selectorY = 505f - (rowIdx * 64f)
+        selectorY = 530f - (rowIdx * 58f)
         particles.clear()
         for (i in 0 until 45) {
             val p = MenuParticle()
@@ -172,14 +174,14 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
         // Wadah Tombol-tombol Menu (Glassmorphism Cards 2 Kolom Responsif)
         val buttonWidth = 470f
-        val buttonHeight = 52f
-        val startY = 505f
-        val spacingY = 64f
+        val buttonHeight = 48f
+        val startY = 530f
+        val spacingY = 58f
 
         // Render Latar Belakang Kartu untuk Seluruh Tombol Menu
         for (i in menuItems.indices) {
-            val colX = if (i < 5) 140f else 670f
-            val rowIdx = if (i < 5) i else i - 5
+            val colX = if (i < 6) 140f else 670f
+            val rowIdx = if (i < 6) i else i - 6
             val itemY = startY - (rowIdx * spacingY)
 
             shapeRenderer.setColor(0.07f, 0.10f, 0.16f, 0.85f)
@@ -190,8 +192,8 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         }
 
         // Smooth Lerp Indikator Seleksi Tombol
-        val targetX = if (selectedIndex < 5) 140f else 670f
-        val targetRow = if (selectedIndex < 5) selectedIndex else selectedIndex - 5
+        val targetX = if (selectedIndex < 6) 140f else 670f
+        val targetRow = if (selectedIndex < 6) selectedIndex else selectedIndex - 6
         val targetY = startY - (targetRow * spacingY)
         selectorX += (targetX - selectorX) * (20f * delta).coerceAtMost(1f)
         selectorY += (targetY - selectorY) * (20f * delta).coerceAtMost(1f)
@@ -231,33 +233,46 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         // Judul Utama
         titleF.color = Color.WHITE
         glyphLayout.setText(titleF, "STICKMAN TOWER ADVENTURE")
-        titleF.draw(batch, "STICKMAN TOWER ADVENTURE", (1280f - glyphLayout.width) / 2f, 650f)
+        titleF.draw(batch, "STICKMAN TOWER ADVENTURE", (1280f - glyphLayout.width) / 2f, 655f)
 
         // Subtitle Emas
         regF.color = Color.GOLD
         val subtitle = "Ascend the Spire of Shadows • 2D Action RPG"
         glyphLayout.setText(regF, subtitle)
-        regF.draw(batch, subtitle, (1280f - glyphLayout.width) / 2f, 595f)
+        regF.draw(batch, subtitle, (1280f - glyphLayout.width) / 2f, 600f)
+
+        val isStoryUnlocked = currentSaveData.highestTowerFloor > 10 || currentSaveData.highestEndlessFloor > 0
 
         // Tombol-tombol Navigasi 2 Kolom
         for (i in menuItems.indices) {
             val itemText = when (i) {
-                6 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                7 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                5 -> if (isStoryUnlocked) "📖 STORY CODEX (UNLOCKED)" else "🔒 STORY CODEX (LOCKED)"
+                7 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                8 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> menuItems[i]
             }
 
-            val colX = if (i < 5) 140f else 670f
-            val rowIdx = if (i < 5) i else i - 5
-            val curY = startY - (rowIdx * spacingY) + 33f
+            val colX = if (i < 6) 140f else 670f
+            val rowIdx = if (i < 6) i else i - 6
+            val curY = startY - (rowIdx * spacingY) + 31f
 
             if (i == selectedIndex) {
-                headF.setColor(1f, 0.88f, 0.3f, 1f)
+                if (i == 5 && !isStoryUnlocked) {
+                    headF.setColor(1f, 0.65f, 0.35f, 1f)
+                } else {
+                    headF.setColor(1f, 0.88f, 0.3f, 1f)
+                }
                 val markedText = "⚔  $itemText  ⚔"
                 glyphLayout.setText(headF, markedText)
                 headF.draw(batch, markedText, colX + (buttonWidth - glyphLayout.width) / 2f, curY)
             } else {
-                headF.setColor(0.85f, 0.88f, 0.95f, 0.92f)
+                if (i == 5 && !isStoryUnlocked) {
+                    headF.setColor(0.55f, 0.58f, 0.65f, 0.65f)
+                } else if (i == 5 && isStoryUnlocked) {
+                    headF.setColor(1f, 0.85f, 0.3f, 0.95f)
+                } else {
+                    headF.setColor(0.85f, 0.88f, 0.95f, 0.92f)
+                }
                 glyphLayout.setText(headF, itemText)
                 headF.draw(batch, itemText, colX + (buttonWidth - glyphLayout.width) / 2f, curY)
             }
@@ -301,34 +316,34 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
     private fun handleInput() {
         if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
-            selectedIndex = if (selectedIndex in 1..4 || selectedIndex in 6..9) {
+            selectedIndex = if (selectedIndex in 1..5 || selectedIndex in 7..11) {
                 selectedIndex - 1
             } else if (selectedIndex == 0) {
-                4
+                5
             } else {
-                9
+                11
             }
             AudioManager.playJump()
         }
         if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
-            selectedIndex = if (selectedIndex in 0..3 || selectedIndex in 5..8) {
+            selectedIndex = if (selectedIndex in 0..4 || selectedIndex in 6..10) {
                 selectedIndex + 1
-            } else if (selectedIndex == 4) {
+            } else if (selectedIndex == 5) {
                 0
             } else {
-                5
+                6
             }
             AudioManager.playJump()
         }
         if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)) {
-            if (selectedIndex >= 5) {
-                selectedIndex -= 5
+            if (selectedIndex >= 6) {
+                selectedIndex -= 6
                 AudioManager.playJump()
             }
         }
         if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.D)) {
-            if (selectedIndex < 5) {
-                selectedIndex += 5
+            if (selectedIndex < 6) {
+                selectedIndex += 6
                 AudioManager.playJump()
             }
         }
@@ -338,13 +353,13 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             viewport.unproject(touchVec)
             val buttonWidth = 470f
-            val buttonHeight = 52f
-            val startY = 505f
-            val spacingY = 64f
+            val buttonHeight = 48f
+            val startY = 530f
+            val spacingY = 58f
 
             for (i in menuItems.indices) {
-                val colX = if (i < 5) 140f else 670f
-                val rowIdx = if (i < 5) i else i - 5
+                val colX = if (i < 6) 140f else 670f
+                val rowIdx = if (i < 6) i else i - 6
                 val btnY = startY - (rowIdx * spacingY)
 
                 if (touchVec.x in (colX - 25f)..(colX + buttonWidth + 25f) && touchVec.y in (btnY - 8f)..(btnY + buttonHeight + 8f)) {
@@ -402,25 +417,43 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
                 game.setScreen(CharacterSelectScreen(game))
             }
             5 -> {
+                val isStoryUnlocked = currentSaveData.highestTowerFloor > 10 || currentSaveData.highestEndlessFloor > 0
+                if (isStoryUnlocked) {
+                    AudioManager.playChest()
+                    (game as? StickmanGame)?.preserveScreen(this)
+                    game.setScreen(StoryCodexScreen(game, this))
+                } else {
+                    AudioManager.playDeath()
+                    HapticManager.vibrateHeavy()
+                    feedbackNotice = "Kisah Terkunci! Taklukkan Lantai 10 (Grand Calligrapher) untuk membuka Arsip Menara!"
+                    feedbackTimer = 3.5f
+                }
+            }
+            6 -> {
                 AudioManager.playSlashLight()
                 (game as? StickmanGame)?.preserveScreen(this)
                 game.setScreen(ControlSettingsScreen(game, this))
             }
-            6 -> {
+            7 -> {
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            7 -> {
+            8 -> {
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            8 -> {
+            9 -> {
                 currentSaveData = SaveManager.resetSave()
                 feedbackNotice = "Save Data Successfully Reset!"
                 feedbackTimer = 3.0f
                 AudioManager.playDeath()
             }
-            9 -> {
+            10 -> {
+                feedbackNotice = "Stickman Tower Adventure • Dibuat dengan LibGDX & Kotlin • Versi 1.0"
+                feedbackTimer = 3.5f
+                AudioManager.playSlashLight()
+            }
+            11 -> {
                 Gdx.app.exit()
             }
         }

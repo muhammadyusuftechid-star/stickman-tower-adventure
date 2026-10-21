@@ -564,6 +564,9 @@ flowchart LR
     - Membuka jendela pop-up gulungan perkamen yang berisi potongan sejarah dunia Aethelgard dan tips strategi bertarung.
 - **Task 14.3.3: Epilog & Transisi ke Endless Spire (The Endless Paradox)**
   - [x] Sinematik akhir saat pena Calligrapher patah: spektrum warna merebak ke dunia, realitas menara menjadi paradoks tanpa akhir yang membuka mode *Endless Spire* (Lantai 11 ke atas).
+- **Task 14.3.4: Fitur Baca Kisah & Worldbuilding (Story Codex / Tomes of Aethelgard)**
+  - [x] Sistem pembaca kisah interaktif [StoryCodexScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/StoryCodexScreen.kt) yang terkunci secara default dan terbuka otomatis setelah menamatkan Lantai 10 (The Grand Calligrapher) atau mencapai Endless Spire.
+  - [x] Menyajikan 9 bab lengkap yang dapat dinavigasi: Kosmologi & Kataklisme Tinta, Profil 3 Pendekar Siluet, Alur Babak I hingga IV, Epilog Endless Spire, Ensiklopedia Bestiary, dan Prasasti Batu Hitam.
 
 ---
 
