@@ -84,6 +84,14 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         const val BASE_SPEED = 3.2f
         const val ENRAGE_SPEED = 4.8f
         const val CLEAVE_RANGE = 2.4f
+
+        val COLOR_BOSS_DEAD = Color(0.25f, 0.25f, 0.25f, 1f)
+        val COLOR_BOSS_PHASE2 = Color(0.85f, 0.18f, 0.18f, 1f)
+        val COLOR_BOSS_NORMAL = Color(0.18f, 0.18f, 0.22f, 1f)
+        val COLOR_BOSS_EYE = Color(1f, 0.15f, 0.15f, 1f)
+        val COLOR_BOSS_HORN = Color(0.9f, 0.75f, 0.2f, 1f)
+        val COLOR_BLADE_PHASE2 = Color(1f, 0.35f, 0.2f, 1f)
+        val COLOR_BLADE_NORMAL = Color(0.85f, 0.85f, 0.9f, 1f)
     }
 
     fun update(delta: Float, player: Player, platforms: List<Platform>) {
@@ -369,16 +377,16 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         // 2. Aura Merah Membara di Fase 2 (Enrage Mode)
         if (isPhase2 && !health.isDead) {
             val pulse = (sin(animTime * 8f) * 0.15f) + 0.35f
-            shapeRenderer.color = Color(1f, 0.2f, 0.1f, pulse)
+            shapeRenderer.setColor(1f, 0.2f, 0.1f, pulse)
             shapeRenderer.circle(centerX, position.y + height / 2f, (height / 2f) + 0.3f, 20)
         }
 
         // 3. Warna Tubuh Boss (Hitam legam dengan armor merah marun)
         val bodyColor = when {
             health.isFlashing -> Color.WHITE
-            state == BossState.DEAD -> Color(0.25f, 0.25f, 0.25f, 1f)
-            isPhase2 -> Color(0.85f, 0.18f, 0.18f, 1f)
-            else -> Color(0.18f, 0.18f, 0.22f, 1f)
+            state == BossState.DEAD -> COLOR_BOSS_DEAD
+            isPhase2 -> COLOR_BOSS_PHASE2
+            else -> COLOR_BOSS_NORMAL
         }
 
         // Kepala Boss & Helm Tanduk
@@ -386,11 +394,11 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         shapeRenderer.circle(centerX, headCenterY, headRadius, 16)
 
         // Mata Merah Menyala
-        shapeRenderer.color = if (health.isDead) Color.GRAY else Color(1f, 0.15f, 0.15f, 1f)
+        shapeRenderer.color = if (health.isDead) Color.GRAY else COLOR_BOSS_EYE
         shapeRenderer.circle(centerX + lookDir * 0.16f, headCenterY + 0.05f, 0.08f, 10)
 
         // Tanduk Baja di Kepala
-        shapeRenderer.color = Color(0.9f, 0.75f, 0.2f, 1f)
+        shapeRenderer.color = COLOR_BOSS_HORN
         shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX + lookDir * 0.45f, headCenterY + headRadius + 0.35f, 0.09f)
 
         // Visual Guard Break / Stun Stars di atas kepala Bos
@@ -431,7 +439,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         val swordEndX = handX + MathUtils.cosDeg(bladeAngle) * bladeLen
         val swordEndY = handY + MathUtils.sinDeg(bladeAngle) * bladeLen
 
-        shapeRenderer.color = if (isPhase2) Color(1f, 0.35f, 0.2f, 1f) else Color(0.85f, 0.85f, 0.9f, 1f)
+        shapeRenderer.color = if (isPhase2) COLOR_BLADE_PHASE2 else COLOR_BLADE_NORMAL
         shapeRenderer.rectLine(handX, handY, swordEndX, swordEndY, 0.15f)
     }
 

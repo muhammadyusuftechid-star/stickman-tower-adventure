@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -129,15 +130,18 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
 
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         // 1. Gambar Arsitektur Spire & Partikel Latar Belakang
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Siluet Pilar Menara Kuno Sisi Kiri & Kanan (Spire Architecture)
-        shapeRenderer.color = Color(0.06f, 0.08f, 0.13f, 0.95f)
+        shapeRenderer.setColor(0.06f, 0.08f, 0.13f, 0.95f)
         shapeRenderer.rect(0f, 0f, 95f, 720f)
         shapeRenderer.rect(1185f, 0f, 95f, 720f)
 
-        shapeRenderer.color = Color(0.14f, 0.19f, 0.28f, 0.70f)
+        shapeRenderer.setColor(0.14f, 0.19f, 0.28f, 0.70f)
         shapeRenderer.rectLine(95f, 0f, 95f, 720f, 2f)
         shapeRenderer.rectLine(1185f, 0f, 1185f, 720f, 2f)
 
@@ -150,20 +154,20 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         // Partikel Ember Atmosferik (Dual-Core: Soft Halo + Bright Core)
         for (p in particles) {
             val alpha = (1f - (p.life / p.maxLife)).coerceIn(0f, 1f)
-            shapeRenderer.color = Color(p.color.r, p.color.g, p.color.b, p.color.a * alpha * 0.4f)
+            shapeRenderer.setColor(p.color.r, p.color.g, p.color.b, p.color.a * alpha * 0.4f)
             shapeRenderer.circle(p.pos.x, p.pos.y, p.size * 1.5f)
-            shapeRenderer.color = Color(1f, 1f, 1f, alpha * 0.85f)
+            shapeRenderer.setColor(1f, 1f, 1f, alpha * 0.85f)
             shapeRenderer.circle(p.pos.x, p.pos.y, p.size * 0.55f)
         }
 
         // Panel Judul & Kartu Status Pemain (Dark Slate Obsidian dengan Gold Line)
-        shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.92f)
+        shapeRenderer.setColor(0.06f, 0.09f, 0.15f, 0.92f)
         shapeRenderer.rect(140f, 38f, 1000f, 120f)
-        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
+        shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.85f)
         shapeRenderer.rectLine(140f, 158f, 1140f, 158f, 2.5f)
 
         // Badge Badge Box Penanda Archetype
-        shapeRenderer.color = Color(0.10f, 0.14f, 0.22f, 1f)
+        shapeRenderer.setColor(0.10f, 0.14f, 0.22f, 1f)
         shapeRenderer.rect(770f, 80f, 340f, 32f)
 
         // Wadah Tombol-tombol Menu (Glassmorphism Cards 2 Kolom Responsif)
@@ -178,9 +182,9 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             val rowIdx = if (i < 5) i else i - 5
             val itemY = startY - (rowIdx * spacingY)
 
-            shapeRenderer.color = Color(0.07f, 0.10f, 0.16f, 0.85f)
+            shapeRenderer.setColor(0.07f, 0.10f, 0.16f, 0.85f)
             shapeRenderer.rect(colX, itemY, buttonWidth, buttonHeight)
-            shapeRenderer.color = Color(0.16f, 0.22f, 0.32f, 0.65f)
+            shapeRenderer.setColor(0.16f, 0.22f, 0.32f, 0.65f)
             shapeRenderer.rectLine(colX, itemY, colX + buttonWidth, itemY, 1.5f)
             shapeRenderer.rectLine(colX, itemY + buttonHeight, colX + buttonWidth, itemY + buttonHeight, 1.5f)
         }
@@ -193,11 +197,11 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         selectorY += (targetY - selectorY) * (20f * delta).coerceAtMost(1f)
 
         val pulse = sin(animTime * 6f) * 0.08f
-        shapeRenderer.color = Color(0.12f, 0.18f, 0.28f, 0.94f)
+        shapeRenderer.setColor(0.12f, 0.18f, 0.28f, 0.94f)
         shapeRenderer.rect(selectorX - 6f, selectorY - 4f, buttonWidth + 12f, buttonHeight + 8f)
 
         // Frame Emas Menyala dengan Aksen Sudut
-        shapeRenderer.color = Color(0.95f, 0.78f, 0.25f, 0.88f + pulse)
+        shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.88f + pulse)
         shapeRenderer.rectLine(selectorX - 6f, selectorY - 4f, selectorX + buttonWidth + 6f, selectorY - 4f, 2f)
         shapeRenderer.rectLine(selectorX - 6f, selectorY + buttonHeight + 4f, selectorX + buttonWidth + 6f, selectorY + buttonHeight + 4f, 2f)
         shapeRenderer.rectLine(selectorX - 6f, selectorY - 4f, selectorX - 6f, selectorY + buttonHeight + 4f, 3f)
@@ -248,12 +252,12 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             val curY = startY - (rowIdx * spacingY) + 33f
 
             if (i == selectedIndex) {
-                headF.color = Color(1f, 0.88f, 0.3f, 1f)
+                headF.setColor(1f, 0.88f, 0.3f, 1f)
                 val markedText = "⚔  $itemText  ⚔"
                 glyphLayout.setText(headF, markedText)
                 headF.draw(batch, markedText, colX + (buttonWidth - glyphLayout.width) / 2f, curY)
             } else {
-                headF.color = Color(0.85f, 0.88f, 0.95f, 0.92f)
+                headF.setColor(0.85f, 0.88f, 0.95f, 0.92f)
                 glyphLayout.setText(headF, itemText)
                 headF.draw(batch, itemText, colX + (buttonWidth - glyphLayout.width) / 2f, curY)
             }
@@ -268,12 +272,11 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         regF.draw(batch, "❖ ${currentSaveData.gold} Coins", 360f, 95f)
         regF.draw(batch, "⚑ Highest Floor: ${currentSaveData.highestTowerFloor}", 550f, 95f)
 
-        val archColor = when (currentArchetype) {
-            CharacterArchetype.BALANCED -> Color(0.4f, 0.8f, 1f, 1f)
-            CharacterArchetype.AGILE -> Color(0.2f, 0.95f, 0.85f, 1f)
-            CharacterArchetype.HEAVY -> Color(1f, 0.55f, 0.2f, 1f)
+        when (currentArchetype) {
+            CharacterArchetype.BALANCED -> regF.setColor(0.4f, 0.8f, 1f, 1f)
+            CharacterArchetype.AGILE -> regF.setColor(0.2f, 0.95f, 0.85f, 1f)
+            CharacterArchetype.HEAVY -> regF.setColor(1f, 0.55f, 0.2f, 1f)
         }
-        regF.color = archColor
         regF.draw(batch, "Archetype: ${currentArchetype.displayName}", 780f, 95f)
 
         // Feedback / Notifikasi aksi
@@ -284,7 +287,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         }
 
         // Petunjuk Kontrol
-        regF.color = Color(0.6f, 0.65f, 0.75f, 0.8f)
+        regF.setColor(0.6f, 0.65f, 0.75f, 0.8f)
         glyphLayout.setText(regF, "[SENTUH TOMBOL / WASD] Pilih  |  [ENTER / SPACE] Konfirmasi")
         regF.draw(batch, "[SENTUH TOMBOL / WASD] Pilih  |  [ENTER / SPACE] Konfirmasi", (1280f - glyphLayout.width) / 2f, 25f)
 

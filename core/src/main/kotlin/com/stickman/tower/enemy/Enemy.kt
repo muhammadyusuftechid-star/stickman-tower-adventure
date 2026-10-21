@@ -84,6 +84,19 @@ class Enemy(
         const val ATTACK_ACTIVE = 0.12f  // Waktu hitbox aktif
         const val ATTACK_RECOVERY = 0.20f
         const val TOTAL_ATTACK_TIME = ATTACK_WINDUP + ATTACK_ACTIVE + ATTACK_RECOVERY
+
+        val COLOR_MELEE_BASE = Color(0.85f, 0.2f, 0.25f, 1f)
+        val COLOR_RANGED_BASE = Color(0.68f, 0.28f, 0.95f, 1f)
+        val COLOR_RANGED_EYE = Color(0.92f, 0.45f, 1f, 1f)
+        val COLOR_MELEE_EYE = Color(0.4f, 0f, 0f, 1f)
+        val COLOR_BOW_WOOD = Color(0.55f, 0.40f, 0.25f, 1f)
+        val COLOR_BOW_STRING = Color(0.85f, 0.85f, 0.85f, 0.8f)
+        val COLOR_BOW_ARROW = Color(0.85f, 0.35f, 1f, 1f)
+        val COLOR_ENEMY_SLASH = Color(1f, 0.15f, 0.15f, 0.8f)
+        val COLOR_ENEMY_DAGGER = Color(0.35f, 0.35f, 0.4f, 1f)
+        val COLOR_BAR_FRAME = Color(0.06f, 0.08f, 0.12f, 0.85f)
+        val COLOR_BAR_FILL = Color(0.85f, 0.18f, 0.22f, 0.95f)
+        val COLOR_PROJECTILE_HIT = Color(0.75f, 0.25f, 1f, 1f)
     }
 
     fun update(delta: Float, player: Player, platforms: List<Platform>) {
@@ -268,7 +281,7 @@ class Enemy(
                         width = 0.80f,
                         height = 0.35f,
                         maxLifetime = 2.5f,
-                        color = Color(0.75f, 0.25f, 1f, 1f)
+                        color = COLOR_PROJECTILE_HIT
                     )
                 )
                 AudioManager.playSlashLight()
@@ -427,7 +440,7 @@ class Enemy(
         val lookDir = if (facingRight) 1f else -1f
 
         // Warna Tubuh: Merah Crimson (Melee) / Amethyst Ungu (Ranged), Berkedip Putih saat hurt
-        val baseColor = if (type == EnemyType.RANGED) Color(0.68f, 0.28f, 0.95f, 1f) else Color(0.85f, 0.2f, 0.25f, 1f)
+        val baseColor = if (type == EnemyType.RANGED) COLOR_RANGED_BASE else COLOR_MELEE_BASE
         val bodyColor = if (health.isFlashing) Color.WHITE else baseColor
         shapeRenderer.color = bodyColor
 
@@ -449,8 +462,8 @@ class Enemy(
         val eyeColor = when {
             state == EnemyState.STUNNED -> Color.GOLD
             isTelegraphing -> Color.YELLOW
-            type == EnemyType.RANGED -> Color(0.92f, 0.45f, 1f, 1f)
-            else -> Color(0.4f, 0f, 0f, 1f)
+            type == EnemyType.RANGED -> COLOR_RANGED_EYE
+            else -> COLOR_MELEE_EYE
         }
         shapeRenderer.color = eyeColor
         val eyeX = centerX + (headRadius * 0.45f * lookDir)
@@ -499,11 +512,11 @@ class Enemy(
             val bowMidY = shoulderY
             val bowBotY = shoulderY - 0.35f
 
-            shapeRenderer.color = Color(0.55f, 0.40f, 0.25f, 1f) // Kayu busur
+            shapeRenderer.color = COLOR_BOW_WOOD
             shapeRenderer.rectLine(bowX, bowMidY, bowX + 0.15f * lookDir, bowTopY, 0.05f)
             shapeRenderer.rectLine(bowX, bowMidY, bowX + 0.15f * lookDir, bowBotY, 0.05f)
             // Tali busur
-            shapeRenderer.color = Color(0.85f, 0.85f, 0.85f, 0.8f)
+            shapeRenderer.color = COLOR_BOW_STRING
             shapeRenderer.rectLine(bowX + 0.15f * lookDir, bowTopY, bowX + 0.15f * lookDir, bowBotY, 0.03f)
 
             // Tangan memegang busur
@@ -514,7 +527,7 @@ class Enemy(
             if (isTelegraphing) {
                 val arrowTipX = bowX + 0.45f * lookDir
                 val arrowTailX = bowX - 0.20f * lookDir
-                shapeRenderer.color = Color(0.85f, 0.35f, 1f, 1f)
+                shapeRenderer.color = COLOR_BOW_ARROW
                 shapeRenderer.rectLine(arrowTailX, bowMidY, arrowTipX, bowMidY, 0.06f)
                 val pulse = (sin(animTime * 15f) + 1f) * 0.03f
                 shapeRenderer.circle(arrowTipX, bowMidY, 0.10f + pulse, 10)
@@ -533,7 +546,7 @@ class Enemy(
                 weaponTipY = armHandY - 0.25f
 
                 // Efek tebasan merah musuh
-                shapeRenderer.color = Color(1f, 0.15f, 0.15f, 0.8f)
+                shapeRenderer.color = COLOR_ENEMY_SLASH
                 shapeRenderer.rectLine(armHandX, armHandY + 0.2f, weaponTipX, weaponTipY - 0.1f, 0.08f)
             } else {
                 armHandX = centerX + 0.22f * lookDir
@@ -546,7 +559,7 @@ class Enemy(
             shapeRenderer.rectLine(centerX, shoulderY, armHandX, armHandY, 0.06f)
 
             // Bilah Belati Musuh (Dark Steel)
-            shapeRenderer.color = Color(0.35f, 0.35f, 0.4f, 1f)
+            shapeRenderer.color = COLOR_ENEMY_DAGGER
             shapeRenderer.rectLine(armHandX, armHandY, weaponTipX, weaponTipY, 0.07f)
         }
 
@@ -563,12 +576,12 @@ class Enemy(
         val barX = centerX - barW / 2f
 
         // Frame Obsidian Gelap
-        shapeRenderer.color = Color(0.06f, 0.08f, 0.12f, 0.85f)
+        shapeRenderer.color = COLOR_BAR_FRAME
         shapeRenderer.rect(barX - 0.02f, barY - 0.02f, barW + 0.04f, barH + 0.04f)
 
         // Fill Bar Darah Crimson
         val hpPercent = (health.currentHp / health.maxHp).coerceIn(0f, 1f)
-        shapeRenderer.color = Color(0.85f, 0.18f, 0.22f, 0.95f)
+        shapeRenderer.color = COLOR_BAR_FILL
         shapeRenderer.rect(barX, barY, barW * hpPercent, barH)
     }
 

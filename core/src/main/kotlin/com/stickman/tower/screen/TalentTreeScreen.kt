@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -34,6 +35,10 @@ class TalentTreeScreen(
     private val game: StickmanGame?,
     private val returnScreen: Screen
 ) : Screen {
+    companion object {
+        val COLOR_UNLOCKED_HDR = Color(0.4f, 1.0f, 0.5f, 1f)
+        val COLOR_LOCKED_HDR = Color(0.6f, 0.65f, 0.75f, 1f)
+    }
 
     private val camera = OrthographicCamera()
     private val viewport: Viewport = FitViewport(1280f, 720f, camera)
@@ -84,6 +89,9 @@ class TalentTreeScreen(
         camera.update()
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 
         renderVisualBackground()
         renderTalentColumns()
@@ -185,11 +193,11 @@ class TalentTreeScreen(
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Gradient Ornamen Latar
-        shapeRenderer.color = Color(0.06f, 0.09f, 0.16f, 0.85f)
+        shapeRenderer.setColor(0.06f, 0.09f, 0.16f, 0.85f)
         shapeRenderer.rect(0f, 0f, 1280f, 720f)
 
         // Garis Pembatas Menara & Sinar Mistis
-        shapeRenderer.color = Color(0.15f, 0.22f, 0.35f, 0.40f)
+        shapeRenderer.setColor(0.15f, 0.22f, 0.35f, 0.40f)
         shapeRenderer.rectLine(640f, 90f, 640f, 610f, 2f)
 
         shapeRenderer.end()
@@ -208,16 +216,28 @@ class TalentTreeScreen(
             val isSelected = talentManager.selectedSubClass == subClass
 
             // Background Card Sub-Class
-            shapeRenderer.color = if (isSelected) Color(0.10f, 0.16f, 0.26f, 0.95f) else Color(0.07f, 0.09f, 0.14f, 0.90f)
+            if (isSelected) {
+                shapeRenderer.setColor(0.10f, 0.16f, 0.26f, 0.95f)
+            } else {
+                shapeRenderer.setColor(0.07f, 0.09f, 0.14f, 0.90f)
+            }
             shapeRenderer.rect(colX, startY, colW, colH)
 
             // Accent Top Border
-            shapeRenderer.color = if (isSelected) subClass.themeColor else Color(0.25f, 0.32f, 0.45f, 0.8f)
+            if (isSelected) {
+                shapeRenderer.color = subClass.themeColor
+            } else {
+                shapeRenderer.setColor(0.25f, 0.32f, 0.45f, 0.8f)
+            }
             shapeRenderer.rectLine(colX, startY + colH, colX + colW, startY + colH, if (isSelected) 4f else 2f)
 
             // Button Select Sub-Class Background
             val selectBtnY = startY + colH - 80f
-            shapeRenderer.color = if (isSelected) subClass.themeColor else Color(0.18f, 0.24f, 0.36f, 0.8f)
+            if (isSelected) {
+                shapeRenderer.color = subClass.themeColor
+            } else {
+                shapeRenderer.setColor(0.18f, 0.24f, 0.36f, 0.8f)
+            }
             shapeRenderer.rect(colX + 20f, selectBtnY, colW - 40f, 36f)
 
             // Talent Nodes Cards
@@ -231,18 +251,18 @@ class TalentTreeScreen(
                 val isUnlocked = talentManager.isTalentUnlocked(talent.id)
                 val canUnlock = isSelected && talentManager.canUnlockTalent(talent)
 
-                shapeRenderer.color = when {
-                    isUnlocked -> Color(0.12f, 0.28f, 0.20f, 0.95f)
-                    canUnlock -> Color(0.16f, 0.22f, 0.36f, 0.90f)
-                    else -> Color(0.08f, 0.09f, 0.13f, 0.85f)
+                when {
+                    isUnlocked -> shapeRenderer.setColor(0.12f, 0.28f, 0.20f, 0.95f)
+                    canUnlock -> shapeRenderer.setColor(0.16f, 0.22f, 0.36f, 0.90f)
+                    else -> shapeRenderer.setColor(0.08f, 0.09f, 0.13f, 0.85f)
                 }
                 shapeRenderer.rect(colX + 20f, nodeY, nodeW, nodeH)
 
                 // Left Accent Strip
-                shapeRenderer.color = when {
-                    isUnlocked -> Color(0.25f, 0.95f, 0.45f, 1f)
-                    canUnlock -> Color.GOLD
-                    else -> Color(0.35f, 0.38f, 0.45f, 0.5f)
+                when {
+                    isUnlocked -> shapeRenderer.setColor(0.25f, 0.95f, 0.45f, 1f)
+                    canUnlock -> shapeRenderer.color = Color.GOLD
+                    else -> shapeRenderer.setColor(0.35f, 0.38f, 0.45f, 0.5f)
                 }
                 shapeRenderer.rect(colX + 20f, nodeY, 6f, nodeH)
             }
@@ -265,7 +285,7 @@ class TalentTreeScreen(
             headF.color = if (isSelected) subClass.themeColor else Color.WHITE
             headF.draw(batch, "${subClass.iconSymbol} ${subClass.displayName}", colX + 25f, startY + colH - 18f)
 
-            smallF.color = Color(0.75f, 0.85f, 0.95f, 0.85f)
+            smallF.setColor(0.75f, 0.85f, 0.95f, 0.85f)
             smallF.draw(batch, subClass.title, colX + 25f, startY + colH - 42f)
 
             // Select Button Text
@@ -286,9 +306,9 @@ class TalentTreeScreen(
 
                 // Talent Header
                 regF.color = when {
-                    isUnlocked -> Color(0.4f, 1.0f, 0.5f, 1f)
+                    isUnlocked -> COLOR_UNLOCKED_HDR
                     canUnlock -> Color.YELLOW
-                    else -> Color(0.6f, 0.65f, 0.75f, 1f)
+                    else -> COLOR_LOCKED_HDR
                 }
                 val tierBadge = "[T${talent.tier}]"
                 regF.draw(batch, "$tierBadge ${talent.name}", colX + 35f, nodeY + 70f)
@@ -308,7 +328,7 @@ class TalentTreeScreen(
                 smallF.draw(batch, statusText, colX + colW - 30f - glyphLayout.width, nodeY + 70f)
 
                 // Description
-                smallF.color = Color(0.85f, 0.88f, 0.92f, 0.90f)
+                smallF.setColor(0.85f, 0.88f, 0.92f, 0.90f)
                 smallF.draw(batch, talent.description, colX + 35f, nodeY + 45f)
             }
         }
@@ -320,21 +340,21 @@ class TalentTreeScreen(
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Top Banner Bar
-        shapeRenderer.color = Color(0.06f, 0.08f, 0.14f, 0.95f)
+        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.95f)
         shapeRenderer.rect(0f, 630f, 1280f, 90f)
         shapeRenderer.color = Color.GOLD
         shapeRenderer.rectLine(0f, 630f, 1280f, 630f, 2f)
 
         // Bottom Bar
-        shapeRenderer.color = Color(0.06f, 0.08f, 0.14f, 0.95f)
+        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.95f)
         shapeRenderer.rect(0f, 0f, 1280f, 80f)
-        shapeRenderer.color = Color(0.18f, 0.25f, 0.38f, 0.8f)
+        shapeRenderer.setColor(0.18f, 0.25f, 0.38f, 0.8f)
         shapeRenderer.rectLine(0f, 80f, 1280f, 80f, 2f)
 
         // Buttons: Return & Respec
-        shapeRenderer.color = Color(0.16f, 0.22f, 0.34f, 0.95f)
+        shapeRenderer.setColor(0.16f, 0.22f, 0.34f, 0.95f)
         shapeRenderer.rect(50f, 20f, 180f, 42f)
-        shapeRenderer.color = Color(0.35f, 0.18f, 0.22f, 0.95f)
+        shapeRenderer.setColor(0.35f, 0.18f, 0.22f, 0.95f)
         shapeRenderer.rect(1280f - 240f, 20f, 190f, 42f)
 
         shapeRenderer.end()
@@ -370,7 +390,7 @@ class TalentTreeScreen(
         glyphLayout.setText(regF, "◀ BACK (ESC)")
         regF.draw(batch, "◀ BACK (ESC)", 50f + (180f - glyphLayout.width) / 2f, 47f)
 
-        regF.color = Color(1.0f, 0.6f, 0.6f, 1f)
+        regF.setColor(1.0f, 0.6f, 0.6f, 1f)
         glyphLayout.setText(regF, "↺ RESET (R)")
         regF.draw(batch, "↺ RESET (R)", (1280f - 240f) + (190f - glyphLayout.width) / 2f, 47f)
 

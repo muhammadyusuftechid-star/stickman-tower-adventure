@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -34,6 +35,16 @@ class ControlSettingsScreen(
     private val game: StickmanGame? = null,
     private val previousScreen: Screen? = null
 ) : Screen {
+    companion object {
+        val COLOR_BTN_BG_CYAN = Color(0.15f, 0.2f, 0.3f, 0.9f)
+        val COLOR_BTN_BG_AUTOHIDE = Color(0.15f, 0.22f, 0.32f, 0.9f)
+        val COLOR_BTN_BG_RUMBLE = Color(0.2f, 0.16f, 0.32f, 0.9f)
+        val COLOR_BTN_BG_RESET = Color(0.25f, 0.15f, 0.15f, 0.9f)
+        val COLOR_BTN_BG_SAVE = Color(0.12f, 0.45f, 0.25f, 0.95f)
+        val COLOR_DPAD_GUIDE = Color(0.2f, 0.6f, 0.9f, 0.4f)
+        val COLOR_ACTION_GUIDE = Color(0.9f, 0.4f, 0.2f, 0.4f)
+        val COLOR_GAMEPAD_ONLINE = Color(0.2f, 0.95f, 0.4f, 1f)
+    }
 
     private val camera = OrthographicCamera()
     private val viewport = FitViewport(1280f, 720f, camera)
@@ -101,6 +112,9 @@ class ControlSettingsScreen(
         viewport.apply()
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 
         renderGridAndGuides()
         previewController.render(shapeRenderer, batch, FontManager.smallFont, dummySkill, dummyUltimate)
@@ -242,7 +256,7 @@ class ControlSettingsScreen(
 
     private fun renderGridAndGuides() {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.color = Color(0.12f, 0.16f, 0.24f, 0.5f)
+        shapeRenderer.setColor(0.12f, 0.16f, 0.24f, 0.5f)
 
         // Grid background halus untuk presisi penyelarasan
         for (gx in 0..1280 step 80) {
@@ -253,7 +267,7 @@ class ControlSettingsScreen(
         }
 
         // Bounding box area drag D-Pad (Biru Cyan)
-        shapeRenderer.color = if (currentDrag == DragTarget.DPAD) Color.CYAN else Color(0.2f, 0.6f, 0.9f, 0.4f)
+        shapeRenderer.color = if (currentDrag == DragTarget.DPAD) Color.CYAN else COLOR_DPAD_GUIDE
         val dpadBoxW = 260f * settings.scale
         val dpadBoxH = 150f * settings.scale
         val dpadBoxX = previewController.btnLeft.x - 60f * settings.scale
@@ -261,7 +275,7 @@ class ControlSettingsScreen(
         shapeRenderer.rect(dpadBoxX, dpadBoxY, dpadBoxW, dpadBoxH)
 
         // Bounding box area drag Action Cluster (Merah Emas)
-        shapeRenderer.color = if (currentDrag == DragTarget.ACTION) Color.GOLD else Color(0.9f, 0.4f, 0.2f, 0.4f)
+        shapeRenderer.color = if (currentDrag == DragTarget.ACTION) Color.GOLD else COLOR_ACTION_GUIDE
         val actionBoxW = 340f * settings.scale
         val actionBoxH = 340f * settings.scale
         val actionBoxX = previewController.btnAttack.x - 220f * settings.scale
@@ -280,23 +294,23 @@ class ControlSettingsScreen(
 
         // Header Panel Glassmorphism
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color(0.06f, 0.08f, 0.14f, 0.95f)
+        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.95f)
         shapeRenderer.rect(40f, 530f, w - 80f, 170f)
 
         // Gold border accent
-        shapeRenderer.color = Color(0.92f, 0.78f, 0.28f, 0.9f)
+        shapeRenderer.setColor(0.92f, 0.78f, 0.28f, 0.9f)
         shapeRenderer.rectLine(40f, 530f, w - 40f, 530f, 2.5f)
 
         // Tombol-tombol Panel Atas
-        drawButtonCard(btnScaleMinus, Color(0.15f, 0.2f, 0.3f, 0.9f), Color.CYAN)
-        drawButtonCard(btnScalePlus, Color(0.15f, 0.2f, 0.3f, 0.9f), Color.CYAN)
-        drawButtonCard(btnOpacityMinus, Color(0.15f, 0.2f, 0.3f, 0.9f), Color.CYAN)
-        drawButtonCard(btnOpacityPlus, Color(0.15f, 0.2f, 0.3f, 0.9f), Color.CYAN)
+        drawButtonCard(btnScaleMinus, COLOR_BTN_BG_CYAN, Color.CYAN)
+        drawButtonCard(btnScalePlus, COLOR_BTN_BG_CYAN, Color.CYAN)
+        drawButtonCard(btnOpacityMinus, COLOR_BTN_BG_CYAN, Color.CYAN)
+        drawButtonCard(btnOpacityPlus, COLOR_BTN_BG_CYAN, Color.CYAN)
 
-        drawButtonCard(btnToggleAutoHide, Color(0.15f, 0.22f, 0.32f, 0.9f), if (settings.autoHideOnGamepad) Color.GREEN else Color.LIGHT_GRAY)
-        drawButtonCard(btnTestRumble, Color(0.2f, 0.16f, 0.32f, 0.9f), if (rumbleFeedbackTimer > 0f) Color.GOLD else Color.MAGENTA)
-        drawButtonCard(btnResetDefaults, Color(0.25f, 0.15f, 0.15f, 0.9f), Color.ORANGE)
-        drawButtonCard(btnSaveExit, Color(0.12f, 0.45f, 0.25f, 0.95f), Color.GREEN)
+        drawButtonCard(btnToggleAutoHide, COLOR_BTN_BG_AUTOHIDE, if (settings.autoHideOnGamepad) Color.GREEN else Color.LIGHT_GRAY)
+        drawButtonCard(btnTestRumble, COLOR_BTN_BG_RUMBLE, if (rumbleFeedbackTimer > 0f) Color.GOLD else Color.MAGENTA)
+        drawButtonCard(btnResetDefaults, COLOR_BTN_BG_RESET, Color.ORANGE)
+        drawButtonCard(btnSaveExit, COLOR_BTN_BG_SAVE, Color.GREEN)
 
         shapeRenderer.end()
 
@@ -306,7 +320,7 @@ class ControlSettingsScreen(
         titleF.color = Color.GOLD
         titleF.draw(batch, "🎮 CONTROL SETTINGS & ERGONOMICS", 60f, 680f)
 
-        regF.color = Color(0.85f, 0.90f, 1f, 0.9f)
+        regF.setColor(0.85f, 0.90f, 1f, 0.9f)
         regF.draw(batch, "Drag the highlighted D-Pad and Action button clusters to customize your layout.", 60f, 642f)
 
         // Teks Pengaturan Skala
@@ -336,7 +350,7 @@ class ControlSettingsScreen(
         regF.draw(batch, rumbleText, btnTestRumble.x + (btnTestRumble.width - glyphLayout.width) / 2f, btnTestRumble.y + 23f)
 
         val resetText = "RESET DEFAULT"
-        regF.color = Color(1f, 0.8f, 0.8f, 1f)
+        regF.setColor(1f, 0.8f, 0.8f, 1f)
         glyphLayout.setText(regF, resetText)
         regF.draw(batch, resetText, btnResetDefaults.x + (btnResetDefaults.width - glyphLayout.width) / 2f, btnResetDefaults.y + 23f)
 
@@ -349,11 +363,11 @@ class ControlSettingsScreen(
         val hasGamepad = gamepadInput.hasActiveGamepad()
         val gamepadName = gamepadInput.activeController?.name ?: "Unknown Controller"
         val statusText = if (hasGamepad) "● GAMEPAD: CONNECTED ($gamepadName)" else "○ GAMEPAD: NOT DETECTED (Touch / Keyboard Ready)"
-        smallF.color = if (hasGamepad) Color(0.2f, 0.95f, 0.4f, 1f) else Color.LIGHT_GRAY
+        smallF.color = if (hasGamepad) COLOR_GAMEPAD_ONLINE else Color.LIGHT_GRAY
         smallF.draw(batch, statusText, 60f, 572f)
 
         // Hint Petunjuk di Bagian Bawah Layar
-        smallF.color = Color(0.7f, 0.75f, 0.85f, 0.7f)
+        smallF.setColor(0.7f, 0.75f, 0.85f, 0.7f)
         val dragHint = "DRAG D-PAD OR ACTION CLUSTER ANYWHERE ON SCREEN  •  [ESC / BACK] TO RETURN"
         glyphLayout.setText(smallF, dragHint)
         smallF.draw(batch, dragHint, (w - glyphLayout.width) / 2f, 25f)

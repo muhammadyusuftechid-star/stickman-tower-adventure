@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -57,6 +58,15 @@ class PlayScreen(
     val initialFloor: Int = 1,
     var gameMode: GameMode = GameMode.STORY
 ) : Screen {
+    companion object {
+        val COLOR_MIASMA = Color(0.7f, 0.2f, 0.9f, 1f)
+        val COLOR_SKILL_DMG = Color(0.9f, 0.4f, 1f, 1f)
+        val COLOR_ENEMY_DMG = Color(1f, 0.25f, 0.25f, 1f)
+        val COLOR_CRIT_DMG = Color(1f, 0.35f, 0.35f, 1f)
+        val COLOR_PURPLE_SPARK = Color(0.85f, 0.35f, 1f, 1f)
+        val COLOR_PURPLE_DMG = Color(0.9f, 0.3f, 1f, 1f)
+    }
+
     private val cameraManager = CameraManager()
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
@@ -522,7 +532,7 @@ class PlayScreen(
                     cameraManager.shake(0.2f, 0.15f)
                     particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color.PURPLE)
                     floatingTexts.add(
-                        FloatingText("-4 MIASMA", player.position.x + player.width / 2f, player.position.y + player.height + 0.4f, Color(0.7f, 0.2f, 0.9f, 1f))
+                        FloatingText("-4 MIASMA", player.position.x + player.width / 2f, player.position.y + player.height + 0.4f, COLOR_MIASMA)
                     )
                 }
             }
@@ -583,6 +593,9 @@ class PlayScreen(
         cameraManager.viewport.apply()
         shapeRenderer.projectionMatrix = cameraManager.camera.combined
 
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         for (platform in currentFloor.platforms) platform.render(shapeRenderer)
         for (spike in currentFloor.spikes) spike.render(shapeRenderer)
@@ -600,9 +613,9 @@ class PlayScreen(
         // Render Radial Shockwave Super Finish Boss (Fase 11)
         if (isBossShockwaveActive && shockwaveRadius > 0f) {
             val shockAlpha = (1f - shockwaveRadius / 22f).coerceIn(0f, 1f)
-            shapeRenderer.color = Color(1f, 1f, 1f, shockAlpha * 0.9f)
+            shapeRenderer.setColor(1f, 1f, 1f, shockAlpha * 0.9f)
             shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, shockwaveRadius, 36)
-            shapeRenderer.color = Color(0.9f, 0.7f, 0.2f, shockAlpha * 0.5f)
+            shapeRenderer.setColor(0.9f, 0.7f, 0.2f, shockAlpha * 0.5f)
             shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, (shockwaveRadius - 0.35f).coerceAtLeast(0f), 36)
         }
         shapeRenderer.end()
@@ -682,9 +695,9 @@ class PlayScreen(
                             val textColor = when {
                                 player.hitbox.isCritical -> Color.GOLD
                                 player.isUlting -> Color.GOLD
-                                player.isSkillStriking -> Color(0.9f, 0.4f, 1f, 1f)
+                                player.isSkillStriking -> COLOR_SKILL_DMG
                                 player.comboManager.currentStep == ComboStep.HIT_3 -> Color.ORANGE
-                                else -> Color(1f, 0.25f, 0.25f, 1f)
+                                else -> COLOR_ENEMY_DMG
                             }
 
                             floatingTexts.add(
@@ -820,7 +833,7 @@ class PlayScreen(
                                     "-${enemy.hitbox.damage.toInt()}",
                                     player.position.x + player.width / 2f,
                                     player.position.y + player.height + 0.35f,
-                                    Color(1f, 0.35f, 0.35f, 1f)
+                                    COLOR_CRIT_DMG
                                 )
                             )
                         }
@@ -875,7 +888,7 @@ class PlayScreen(
                                 "-${boss.hitbox.damage.toInt()}",
                                 player.position.x + player.width / 2f,
                                 player.position.y + player.height + 0.35f,
-                                Color(1f, 0.25f, 0.25f, 1f)
+                                COLOR_ENEMY_DMG
                             )
                         )
                     }
@@ -975,13 +988,13 @@ class PlayScreen(
                                 playerGhostDelay = 0.35f
                                 hitStopManager.trigger(0.05f)
                                 AudioManager.playHit()
-                                particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color(0.85f, 0.35f, 1f, 1f))
+                                particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = COLOR_PURPLE_SPARK)
                                 floatingTexts.add(
                                     FloatingText(
                                         "-${proj.damage.toInt()}",
                                         player.position.x + player.width / 2f,
                                         player.position.y + player.height + 0.35f,
-                                        Color(0.9f, 0.3f, 1f, 1f)
+                                        COLOR_PURPLE_DMG
                                     )
                                 )
                             }
@@ -1172,82 +1185,87 @@ class PlayScreen(
         val dangerThrob = if (isLowHp) ((Math.sin(hudAnimTime.toDouble() * 9.0).toFloat() + 1f) * 0.5f) else 0f
 
         // 1. Render Elemen Latar Bar & Kartu Karakter (ShapeRenderer pada Screen Space 1280x720)
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Panel Latar Player Status Card (Kiri Atas - Obsidian Glassmorphism)
-        shapeRenderer.color = Color(0.06f + 0.08f * dangerThrob, 0.09f * (1f - dangerThrob), 0.15f * (1f - dangerThrob), 0.94f)
+        shapeRenderer.setColor(0.06f + 0.08f * dangerThrob, 0.09f * (1f - dangerThrob), 0.15f * (1f - dangerThrob), 0.94f)
         shapeRenderer.rect(12f, h - 90f, 290f, 78f)
 
         // Top Accent Line (Red danger pulse or Sleek Blue/Gold)
-        shapeRenderer.color = if (isLowHp) Color(1f, 0.2f, 0.2f, 0.7f + 0.3f * dangerThrob) else Color(0.22f, 0.38f, 0.60f, 0.75f)
+        if (isLowHp) {
+            shapeRenderer.setColor(1f, 0.2f, 0.2f, 0.7f + 0.3f * dangerThrob)
+        } else {
+            shapeRenderer.setColor(0.22f, 0.38f, 0.60f, 0.75f)
+        }
         shapeRenderer.rectLine(12f, h - 12f, 302f, h - 12f, 2f)
 
         // Level Badge Box
-        shapeRenderer.color = Color(0.10f, 0.15f, 0.24f, 1f)
+        shapeRenderer.setColor(0.10f, 0.15f, 0.24f, 1f)
         shapeRenderer.rect(18f, h - 84f, 55f, 66f)
-        shapeRenderer.color = Color(0.85f, 0.70f, 0.25f, 0.85f)
+        shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 0.85f)
         shapeRenderer.rectLine(18f, h - 84f, 73f, h - 84f, 2f)
 
         // HP Bar Trough (Dark Obsidian)
-        shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 1f)
+        shapeRenderer.setColor(0.05f, 0.06f, 0.09f, 1f)
         shapeRenderer.rect(80f, h - 35f, 210f, 16f)
 
         // HP Amber Ghost Catch-Up Bar
         if (ghostHpPercent > hpPercent) {
-            shapeRenderer.color = Color(0.95f, 0.62f, 0.15f, 0.90f)
+            shapeRenderer.setColor(0.95f, 0.62f, 0.15f, 0.90f)
             shapeRenderer.rect(80f, h - 35f, 210f * ghostHpPercent, 16f)
         }
 
         // HP Main Bar Fill (Emerald -> Gold -> Pulsing Crimson Danger)
-        val hpBarColor = when {
-            hpPercent > 0.5f -> Color(0.18f, 0.85f, 0.38f, 1f)
-            hpPercent > 0.25f -> Color(0.95f, 0.75f, 0.15f, 1f)
-            else -> {
-                val throb = (Math.sin(hudAnimTime.toDouble() * 10.0).toFloat() + 1f) * 0.5f
-                Color(0.88f + 0.12f * throb, 0.15f * (1f - throb), 0.15f * (1f - throb), 1f)
-            }
+        if (hpPercent > 0.5f) {
+            shapeRenderer.setColor(0.18f, 0.85f, 0.38f, 1f)
+        } else if (hpPercent > 0.25f) {
+            shapeRenderer.setColor(0.95f, 0.75f, 0.15f, 1f)
+        } else {
+            val throb = (Math.sin(hudAnimTime.toDouble() * 10.0).toFloat() + 1f) * 0.5f
+            shapeRenderer.setColor(0.88f + 0.12f * throb, 0.15f * (1f - throb), 0.15f * (1f - throb), 1f)
         }
-        shapeRenderer.color = hpBarColor
         shapeRenderer.rect(80f, h - 35f, 210f * hpPercent, 16f)
 
         // HP Bar Highlight Rim
-        shapeRenderer.color = Color(1f, 1f, 1f, 0.22f)
+        shapeRenderer.setColor(1f, 1f, 1f, 0.22f)
         shapeRenderer.rectLine(80f, h - 20f, 290f, h - 20f, 1f)
 
         // EXP Bar Background & Fill
-        shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 1f)
+        shapeRenderer.setColor(0.05f, 0.06f, 0.09f, 1f)
         shapeRenderer.rect(80f, h - 53f, 210f, 12f)
 
         val expPercent = (player.stats.currentExp.toFloat() / player.stats.requiredExp.toFloat()).coerceIn(0f, 1f)
-        shapeRenderer.color = Color(0.15f, 0.75f, 0.95f, 1f)
+        shapeRenderer.setColor(0.15f, 0.75f, 0.95f, 1f)
         shapeRenderer.rect(80f, h - 53f, 210f * expPercent, 12f)
-        shapeRenderer.color = Color(1f, 1f, 1f, 0.20f)
+        shapeRenderer.setColor(1f, 1f, 1f, 0.20f)
         shapeRenderer.rectLine(80f, h - 42f, 290f, h - 42f, 1f)
 
         // Ultimate Energy Bar Background & Fill
-        shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 1f)
+        shapeRenderer.setColor(0.05f, 0.06f, 0.09f, 1f)
         shapeRenderer.rect(80f, h - 69f, 210f, 10f)
 
-        val ultColor = if (player.ultimate.isReady) {
+        if (player.ultimate.isReady) {
             val ultPulse = (Math.sin(hudAnimTime.toDouble() * 7.0).toFloat() + 1f) * 0.5f
-            Color(1f, 0.85f + 0.15f * ultPulse, 0.2f, 1f)
+            shapeRenderer.setColor(1f, 0.85f + 0.15f * ultPulse, 0.2f, 1f)
         } else {
-            Color(0.85f, 0.65f, 0.15f, 0.85f)
+            shapeRenderer.setColor(0.85f, 0.65f, 0.15f, 0.85f)
         }
-        shapeRenderer.color = ultColor
         shapeRenderer.rect(80f, h - 69f, 210f * player.ultimate.energyPercent, 10f)
 
         // Save Notification Pill (Jika Aktif)
         if (saveNotificationTimer > 0f) {
-            shapeRenderer.color = Color(0.12f, 0.55f, 0.28f, 0.90f)
+            shapeRenderer.setColor(0.12f, 0.55f, 0.28f, 0.90f)
             shapeRenderer.rect(w / 2f - 110f, h - 38f, 220f, 26f)
         }
 
         // Tombol Pause (Pojok Kanan Atas)
-        shapeRenderer.color = Color(0.12f, 0.16f, 0.25f, 0.85f)
+        shapeRenderer.setColor(0.12f, 0.16f, 0.25f, 0.85f)
         shapeRenderer.rect(w - 110f, h - 45f, 98f, 32f)
-        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
+        shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.85f)
         shapeRenderer.rectLine(w - 110f, h - 45f, w - 12f, h - 45f, 2f)
 
         // Bar HP Boss Raksasa dengan Amber Ghost Bar & Phase 2 Threshold Marker
@@ -1259,16 +1277,20 @@ class PlayScreen(
             val bossBarY = h - 36f
 
             // Frame Gelap Ornate
-            shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 0.96f)
+            shapeRenderer.setColor(0.05f, 0.06f, 0.09f, 0.96f)
             shapeRenderer.rect(bossBarX - 5f, bossBarY - 5f, bossBarW + 10f, bossBarH + 10f)
 
             // Outer border line
-            shapeRenderer.color = if (boss.isPhase2) Color(0.95f, 0.35f, 0.15f, 0.9f) else Color(0.80f, 0.68f, 0.30f, 0.85f)
+            if (boss.isPhase2) {
+                shapeRenderer.setColor(0.95f, 0.35f, 0.15f, 0.9f)
+            } else {
+                shapeRenderer.setColor(0.80f, 0.68f, 0.30f, 0.85f)
+            }
             shapeRenderer.rectLine(bossBarX - 5f, bossBarY + bossBarH + 5f, bossBarX + bossBarW + 5f, bossBarY + bossBarH + 5f, 2f)
             shapeRenderer.rectLine(bossBarX - 5f, bossBarY - 5f, bossBarX + bossBarW + 5f, bossBarY - 5f, 1.5f)
 
             // Trough
-            shapeRenderer.color = Color(0.08f, 0.08f, 0.12f, 1f)
+            shapeRenderer.setColor(0.08f, 0.08f, 0.12f, 1f)
             shapeRenderer.rect(bossBarX, bossBarY, bossBarW, bossBarH)
 
             // Boss Ghost Catch-Up Bar (Amber)
@@ -1276,27 +1298,26 @@ class PlayScreen(
             val bossHpPct = if (isBossIntroActive) bossHpBarAnimated else currentBossHpPct
             val bossGhostPct = (bossGhostHp / boss.health.maxHp).coerceIn(0f, 1f)
             if (!isBossIntroActive && bossGhostPct > bossHpPct) {
-                shapeRenderer.color = Color(0.95f, 0.62f, 0.15f, 0.90f)
+                shapeRenderer.setColor(0.95f, 0.62f, 0.15f, 0.90f)
                 shapeRenderer.rect(bossBarX, bossBarY, bossBarW * bossGhostPct, bossBarH)
             }
 
             // Boss Main Fill Bar (Crimson ke Api Fasa 2)
-            val bossFillColor = if (boss.isPhase2) {
+            if (boss.isPhase2) {
                 val flame = (Math.sin(hudAnimTime.toDouble() * 9.0).toFloat() + 1f) * 0.5f
-                Color(1f, 0.22f + 0.18f * flame, 0.1f, 1f)
+                shapeRenderer.setColor(1f, 0.22f + 0.18f * flame, 0.1f, 1f)
             } else {
-                Color(0.85f, 0.15f, 0.24f, 1f)
+                shapeRenderer.setColor(0.85f, 0.15f, 0.24f, 1f)
             }
-            shapeRenderer.color = bossFillColor
             shapeRenderer.rect(bossBarX, bossBarY, bossBarW * bossHpPct, bossBarH)
 
             // Top subtle highlight line
-            shapeRenderer.color = Color(1f, 1f, 1f, 0.25f)
+            shapeRenderer.setColor(1f, 1f, 1f, 0.25f)
             shapeRenderer.rectLine(bossBarX, bossBarY + bossBarH - 2f, bossBarX + bossBarW * bossHpPct, bossBarY + bossBarH - 2f, 1.5f)
 
             // Phase 2 Threshold Marker (50% HP Indicator Divider)
             val markerX = bossBarX + bossBarW * 0.5f
-            shapeRenderer.color = Color(1f, 0.88f, 0.35f, 0.95f)
+            shapeRenderer.setColor(1f, 0.88f, 0.35f, 0.95f)
             shapeRenderer.rectLine(markerX, bossBarY - 4f, markerX, bossBarY + bossBarH + 4f, 2.5f)
             shapeRenderer.triangle(
                 markerX - 4f, bossBarY + bossBarH + 5f,
@@ -1307,68 +1328,68 @@ class PlayScreen(
 
         // Mutator Badge Background
         if (gameMode == GameMode.ENDLESS && activeMutator != FloorMutator.NONE) {
-            shapeRenderer.color = Color(0.12f, 0.08f, 0.18f, 0.85f)
+            shapeRenderer.setColor(0.12f, 0.08f, 0.18f, 0.85f)
             shapeRenderer.rect(w / 2f - 240f, h - 110f, 480f, 38f)
-            shapeRenderer.color = Color(0.85f, 0.45f, 0.95f, 0.9f)
+            shapeRenderer.setColor(0.85f, 0.45f, 0.95f, 0.9f)
             shapeRenderer.rectLine(w / 2f - 240f, h - 72f, w / 2f + 240f, h - 72f, 2f)
         }
 
         // Overlays Game Over / Stage Clear Buttons (ShapeRenderer)
         if (gameStatus == GameStatus.GAME_OVER) {
-            shapeRenderer.color = Color(0f, 0f, 0f, 0.75f)
+            shapeRenderer.setColor(0f, 0f, 0f, 0.75f)
             shapeRenderer.rect(0f, 0f, w, h)
 
             val cardW = 560f
             val cardH = 220f
             val cardX = w / 2f - cardW / 2f
             val cardY = h / 2f - cardH / 2f
-            shapeRenderer.color = Color(0.08f, 0.10f, 0.16f, 0.95f)
+            shapeRenderer.setColor(0.08f, 0.10f, 0.16f, 0.95f)
             shapeRenderer.rect(cardX, cardY, cardW, cardH)
-            shapeRenderer.color = Color(0.9f, 0.2f, 0.25f, 0.92f)
+            shapeRenderer.setColor(0.9f, 0.2f, 0.25f, 0.92f)
             shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
             // Tombol 1: Respawn (Emerald)
-            shapeRenderer.color = Color(0.14f, 0.38f, 0.22f, 0.95f)
+            shapeRenderer.setColor(0.14f, 0.38f, 0.22f, 0.95f)
             shapeRenderer.rect(w / 2f - 250f, h / 2f - 75f, 230f, 50f)
-            shapeRenderer.color = Color(0.25f, 0.9f, 0.45f, 0.95f)
+            shapeRenderer.setColor(0.25f, 0.9f, 0.45f, 0.95f)
             shapeRenderer.rectLine(w / 2f - 250f, h / 2f - 25f, w / 2f - 20f, h / 2f - 25f, 2.5f)
 
             // Tombol 2: Menu Utama (Dark Slate)
-            shapeRenderer.color = Color(0.14f, 0.18f, 0.26f, 0.95f)
+            shapeRenderer.setColor(0.14f, 0.18f, 0.26f, 0.95f)
             shapeRenderer.rect(w / 2f + 20f, h / 2f - 75f, 230f, 50f)
-            shapeRenderer.color = Color(0.7f, 0.78f, 0.9f, 0.9f)
+            shapeRenderer.setColor(0.7f, 0.78f, 0.9f, 0.9f)
             shapeRenderer.rectLine(w / 2f + 20f, h / 2f - 25f, w / 2f + 250f, h / 2f - 25f, 2.5f)
         }
 
         if (gameStatus == GameStatus.STAGE_CLEAR) {
-            shapeRenderer.color = Color(0f, 0f, 0f, 0.70f)
+            shapeRenderer.setColor(0f, 0f, 0f, 0.70f)
             shapeRenderer.rect(0f, 0f, w, h)
 
             val cardW = 600f
             val cardH = 280f
             val cardX = w / 2f - cardW / 2f
             val cardY = h / 2f - cardH / 2f
-            shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.96f)
+            shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.96f)
             shapeRenderer.rect(cardX, cardY, cardW, cardH)
-            shapeRenderer.color = Color(0.95f, 0.75f, 0.25f, 0.95f)
+            shapeRenderer.setColor(0.95f, 0.75f, 0.25f, 0.95f)
             shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
             // Tombol 1: Lanjut Menara (Glowing Emerald / Gold)
-            shapeRenderer.color = Color(0.16f, 0.36f, 0.20f, 0.95f)
+            shapeRenderer.setColor(0.16f, 0.36f, 0.20f, 0.95f)
             shapeRenderer.rect(w / 2f - 270f, h / 2f - 70f, 250f, 48f)
-            shapeRenderer.color = Color(0.3f, 0.95f, 0.45f, 0.95f)
+            shapeRenderer.setColor(0.3f, 0.95f, 0.45f, 0.95f)
             shapeRenderer.rectLine(w / 2f - 270f, h / 2f - 22f, w / 2f - 20f, h / 2f - 22f, 2.5f)
 
             // Tombol 2: Main Ulang (Cyan Slate)
-            shapeRenderer.color = Color(0.14f, 0.20f, 0.30f, 0.95f)
+            shapeRenderer.setColor(0.14f, 0.20f, 0.30f, 0.95f)
             shapeRenderer.rect(w / 2f + 20f, h / 2f - 70f, 250f, 48f)
-            shapeRenderer.color = Color(0.35f, 0.85f, 1f, 0.9f)
+            shapeRenderer.setColor(0.35f, 0.85f, 1f, 0.9f)
             shapeRenderer.rectLine(w / 2f + 20f, h / 2f - 22f, w / 2f + 270f, h / 2f - 22f, 2.5f)
 
             // Tombol 3: Menu Utama (Dark Slate with Gold line)
-            shapeRenderer.color = Color(0.12f, 0.16f, 0.24f, 0.95f)
+            shapeRenderer.setColor(0.12f, 0.16f, 0.24f, 0.95f)
             shapeRenderer.rect(w / 2f - 140f, h / 2f - 128f, 280f, 44f)
-            shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.9f)
+            shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.9f)
             shapeRenderer.rectLine(w / 2f - 140f, h / 2f - 84f, w / 2f + 140f, h / 2f - 84f, 2.5f)
         }
 
@@ -1383,7 +1404,7 @@ class PlayScreen(
         val regF = FontManager.regularFont
         val headF = FontManager.headerFont
 
-        smallF.color = Color(0.7f, 0.85f, 1f, 1f)
+        smallF.setColor(0.7f, 0.85f, 1f, 1f)
         smallF.draw(batch, "LVL", 32f, h - 28f)
         headF.color = Color.WHITE
         headF.draw(batch, "${player.stats.level}", 34f, h - 50f)
@@ -1393,26 +1414,26 @@ class PlayScreen(
         smallF.draw(batch, "HP: ${player.health.currentHp.toInt()} / ${player.health.maxHp.toInt()}", 86f, h - 22f)
 
         // EXP Overlay Text
-        smallF.color = Color(0.85f, 0.95f, 1f, 1f)
+        smallF.setColor(0.85f, 0.95f, 1f, 1f)
         val expPctText = (expPercent * 100).toInt()
         smallF.draw(batch, "EXP: ${player.stats.currentExp}/${player.stats.requiredExp} ($expPctText%)", 86f, h - 42f)
 
         // Ultimate Text
-        smallF.color = if (player.ultimate.isReady) Color.GOLD else Color.WHITE
+        if (player.ultimate.isReady) smallF.color = Color.GOLD else smallF.color = Color.WHITE
         val ultStatus = if (player.ultimate.isReady) "READY [O]" else "${(player.ultimate.energyPercent * 100).toInt()}%"
         smallF.draw(batch, "ULT: $ultStatus", 86f, h - 58f)
 
         // Stats Bar & Coins (Di bawah Player Card)
         regF.color = Color.GOLD
         regF.draw(batch, "❖ ${player.stats.gold} Coins", 15f, h - 100f)
-        regF.color = Color(0.8f, 0.85f, 0.9f, 1f)
+        regF.setColor(0.8f, 0.85f, 0.9f, 1f)
         val atkBonusStr = if (player.stats.weaponAtkBonus > 0f) " (+${player.stats.weaponAtkBonus.toInt()})" else ""
         regF.draw(batch, "ATK: ${player.stats.attackPower.toInt()}$atkBonusStr | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 145f, h - 100f)
 
         // Active Relics Display
         if (relicManager.activeRelics.isNotEmpty()) {
             val relicStr = relicManager.activeRelics.joinToString("  ") { "${it.iconRune} ${it.title}" }
-            smallF.color = Color(0.3f, 0.85f, 1f, 1f)
+            smallF.setColor(0.3f, 0.85f, 1f, 1f)
             smallF.draw(batch, "RELICS: $relicStr", 15f, h - 122f)
         }
 
@@ -1426,10 +1447,10 @@ class PlayScreen(
             ComboStep.HIT_2 -> "COMBO: [HIT 2]"
             ComboStep.HIT_3 -> "COMBO: [HIT 3 FINISHER!]"
         }
-        regF.color = when (player.comboManager.currentStep) {
-            ComboStep.HIT_1 -> Color(1f, 0.92f, 0.2f, 1f)
-            ComboStep.HIT_2 -> Color(1f, 0.62f, 0.12f, 1f)
-            ComboStep.HIT_3 -> Color(1f, 0.25f, 0.25f, 1f)
+        when (player.comboManager.currentStep) {
+            ComboStep.HIT_1 -> regF.setColor(1f, 0.92f, 0.2f, 1f)
+            ComboStep.HIT_2 -> regF.setColor(1f, 0.62f, 0.12f, 1f)
+            ComboStep.HIT_3 -> regF.setColor(1f, 0.25f, 0.25f, 1f)
         }
         if (comboPopTimer > 0f) {
             val bounce = 1.0f + (comboPopTimer / 0.28f) * 0.25f
@@ -1441,14 +1462,14 @@ class PlayScreen(
         }
 
         // Skill & Dodge Status
-        regF.color = if (player.skill1.isReady) Color(0.85f, 0.45f, 1f, 1f) else Color.GRAY
+        if (player.skill1.isReady) regF.setColor(0.85f, 0.45f, 1f, 1f) else regF.color = Color.GRAY
         val skillStatus = if (player.skill1.isReady) "READY" else {
             val t = (player.skill1.remainingCooldown * 10).toInt().coerceAtLeast(0)
             "${t / 10}.${t % 10}s"
         }
         regF.draw(batch, "Skill [U]: $skillStatus", 320f, h - 45f)
 
-        regF.color = if (player.dodgeCooldown <= 0f) Color(0.3f, 0.8f, 1f, 1f) else Color.GRAY
+        if (player.dodgeCooldown <= 0f) regF.setColor(0.3f, 0.8f, 1f, 1f) else regF.color = Color.GRAY
         val dodgeStatus = if (player.dodgeCooldown <= 0f) "READY" else {
             val t = (player.dodgeCooldown * 10).toInt().coerceAtLeast(0)
             "${t / 10}.${t % 10}s"
@@ -1461,7 +1482,7 @@ class PlayScreen(
 
         // Teks Bar Boss
         if (boss != null && !boss.health.isDead) {
-            regF.color = if (boss.isPhase2) Color(1f, 0.65f, 0.35f, 1f) else Color.WHITE
+            if (boss.isPhase2) regF.setColor(1f, 0.65f, 0.35f, 1f) else regF.color = Color.WHITE
             val enrageTag = if (boss.isPhase2) " ❖ ENRAGED FASE 2 ❖" else ""
             val hpDisplay = if (isBossIntroActive) (bossHpBarAnimated * boss.health.maxHp).toInt() else boss.health.currentHp.toInt()
             regF.draw(batch, "☠ ${boss.name} [$hpDisplay/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 180f, h - 14f)
@@ -1478,21 +1499,21 @@ class PlayScreen(
             val mutatorBadge = "${activeMutator.iconRune} MUTATOR: ${activeMutator.displayName}"
             regF.color = Color.ORANGE
             regF.draw(batch, mutatorBadge, w / 2f - 130f, h - 76f)
-            smallF.color = Color(0.9f, 0.9f, 0.9f, 0.85f)
+            smallF.setColor(0.9f, 0.9f, 0.9f, 0.85f)
             smallF.draw(batch, activeMutator.description, w / 2f - 230f, h - 94f)
         }
 
         // Overlays Game Over / Victory
         if (gameStatus == GameStatus.GAME_OVER) {
-            headF.color = Color(1f, 0.25f, 0.25f, 1f)
+            headF.setColor(1f, 0.25f, 0.25f, 1f)
             headF.draw(batch, "=== GAME OVER ===", w / 2f - 110f, h / 2f + 65f)
-            regF.color = Color(0.9f, 0.9f, 0.95f, 1f)
+            regF.setColor(0.9f, 0.9f, 0.95f, 1f)
             regF.draw(batch, "Pahlawan gugur! Sentuh tombol di bawah atau ketuk layar:", w / 2f - 230f, h / 2f + 20f)
 
             // Tombol Teks
             headF.color = Color.WHITE
             headF.draw(batch, "RESPAWN (R)", w / 2f - 200f, h / 2f - 42f)
-            headF.color = Color(0.9f, 0.95f, 1f, 1f)
+            headF.setColor(0.9f, 0.95f, 1f, 1f)
             headF.draw(batch, "MENU UTAMA", w / 2f + 70f, h / 2f - 42f)
         }
 
@@ -1521,9 +1542,9 @@ class PlayScreen(
 
             headF.color = Color.WHITE
             headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 240f, h / 2f - 40f)
-            headF.color = Color(0.85f, 0.95f, 1f, 1f)
+            headF.setColor(0.85f, 0.95f, 1f, 1f)
             headF.draw(batch, "MAIN ULANG (R)", w / 2f + 55f, h / 2f - 40f)
-            headF.color = Color(0.9f, 0.75f, 0.25f, 1f)
+            headF.setColor(0.9f, 0.75f, 0.25f, 1f)
             headF.draw(batch, "MENU UTAMA (ESC)", w / 2f - 105f, h / 2f - 98f)
         }
 
@@ -1630,10 +1651,13 @@ class PlayScreen(
         val w = 1280f
         val h = 720f
 
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         // Dimmer background
         shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.color = Color(0f, 0f, 0f, 0.75f)
+        shapeRenderer.setColor(0f, 0f, 0f, 0.75f)
         shapeRenderer.rect(0f, 0f, w, h)
 
         // Pause Menu Card (Dark Obsidian with Gold Accent)
@@ -1641,16 +1665,16 @@ class PlayScreen(
         val cardH = 460f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
-        shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
+        shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.95f)
         shapeRenderer.rect(cardX, cardY, cardW, cardH)
-        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.9f)
+        shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.9f)
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
         val startY = h / 2f + 130f
         val itemH = 38f
         val btnY = startY - (pauseSelectedIndex * itemH)
-        shapeRenderer.color = Color(0.15f, 0.35f, 0.65f, 0.75f)
+        shapeRenderer.setColor(0.15f, 0.35f, 0.65f, 0.75f)
         shapeRenderer.rect(cardX + 25f, btnY - 8f, cardW - 50f, 32f)
 
         shapeRenderer.end()
@@ -1768,17 +1792,20 @@ class PlayScreen(
         val w = 1280f
         val h = 720f
 
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Dimmer background
-        shapeRenderer.color = Color(0f, 0f, 0f, 0.85f)
+        shapeRenderer.setColor(0f, 0f, 0f, 0.85f)
         shapeRenderer.rect(0f, 0f, w, h)
 
         // Sanctum Header Box
-        shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
+        shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.95f)
         shapeRenderer.rect(140f, 570f, 1000f, 90f)
-        shapeRenderer.color = Color(0.3f, 0.85f, 1f, 0.85f)
+        shapeRenderer.setColor(0.3f, 0.85f, 1f, 0.85f)
         shapeRenderer.rectLine(140f, 570f, 1140f, 570f, 2.5f)
 
         val total = relicOffer.size
@@ -1793,25 +1820,42 @@ class PlayScreen(
             val isSelected = i == relicSelectedIndex
 
             // Card body
-            shapeRenderer.color = if (isSelected) Color(0.12f, 0.18f, 0.28f, 0.95f) else Color(0.07f, 0.09f, 0.14f, 0.90f)
+            if (isSelected) {
+                shapeRenderer.setColor(0.12f, 0.18f, 0.28f, 0.95f)
+            } else {
+                shapeRenderer.setColor(0.07f, 0.09f, 0.14f, 0.90f)
+            }
             shapeRenderer.rect(cx, cardY, cardW, cardH)
 
             // Glowing border
             val pulse = if (isSelected) (sin(hudAnimTime * 6f) + 1f) * 0.15f else 0f
-            shapeRenderer.color = if (isSelected) Color(0.2f, 0.85f, 1f, 0.85f + pulse) else Color(0.3f, 0.35f, 0.45f, 0.6f)
-            shapeRenderer.rectLine(cx, cardY, cx + cardW, cardY, if (isSelected) 3f else 1.5f)
-            shapeRenderer.rectLine(cx, cardY + cardH, cx + cardW, cardY + cardH, if (isSelected) 3f else 1.5f)
-            shapeRenderer.rectLine(cx, cardY, cx, cardY + cardH, if (isSelected) 3f else 1.5f)
-            shapeRenderer.rectLine(cx + cardW, cardY, cx + cardW, cardY + cardH, if (isSelected) 3f else 1.5f)
+            if (isSelected) {
+                shapeRenderer.setColor(0.2f, 0.85f, 1f, 0.85f + pulse)
+            } else {
+                shapeRenderer.setColor(0.3f, 0.35f, 0.45f, 0.6f)
+            }
+            val borderThick = if (isSelected) 3f else 1.5f
+            shapeRenderer.rectLine(cx, cardY, cx + cardW, cardY, borderThick)
+            shapeRenderer.rectLine(cx, cardY + cardH, cx + cardW, cardY + cardH, borderThick)
+            shapeRenderer.rectLine(cx, cardY, cx, cardY + cardH, borderThick)
+            shapeRenderer.rectLine(cx + cardW, cardY, cx + cardW, cardY + cardH, borderThick)
 
             // Select button at card bottom
             val btnW = 200f
             val btnH = 42f
             val btnX = cx + (cardW - btnW) / 2f
             val btnY = cardY + 25f
-            shapeRenderer.color = if (isSelected) Color(0.15f, 0.6f, 0.85f, 0.95f) else Color(0.12f, 0.15f, 0.22f, 0.8f)
+            if (isSelected) {
+                shapeRenderer.setColor(0.15f, 0.6f, 0.85f, 0.95f)
+            } else {
+                shapeRenderer.setColor(0.12f, 0.15f, 0.22f, 0.8f)
+            }
             shapeRenderer.rect(btnX, btnY, btnW, btnH)
-            shapeRenderer.color = if (isSelected) Color.CYAN else Color(0.35f, 0.4f, 0.5f, 0.6f)
+            if (isSelected) {
+                shapeRenderer.color = Color.CYAN
+            } else {
+                shapeRenderer.setColor(0.35f, 0.4f, 0.5f, 0.6f)
+            }
             shapeRenderer.rectLine(btnX, btnY, btnX + btnW, btnY, 1.5f)
             shapeRenderer.rectLine(btnX, btnY + btnH, btnX + btnW, btnY + btnH, 1.5f)
         }
@@ -1826,7 +1870,7 @@ class PlayScreen(
 
         titleF.color = Color.CYAN
         titleF.draw(batch, "ANCIENT RELIC SANCTUARY", 180f, 638f)
-        regF.color = Color(0.85f, 0.9f, 1f, 0.9f)
+        regF.setColor(0.85f, 0.9f, 1f, 0.9f)
         regF.draw(batch, "Commune with the Spire: Select one passive relic to augment your ascension", 180f, 600f)
 
         for (i in relicOffer.indices) {
@@ -1839,7 +1883,7 @@ class PlayScreen(
             glyphLayout.setText(headF, runeTitle)
             headF.draw(batch, runeTitle, cx + (cardW - glyphLayout.width) / 2f, cardY + cardH - 35f)
 
-            regF.color = Color(0.80f, 0.85f, 0.95f, 0.9f)
+            regF.setColor(0.80f, 0.85f, 0.95f, 0.9f)
             glyphLayout.setText(regF, relic.description)
             regF.draw(batch, relic.description, cx + 25f, cardY + cardH - 95f, cardW - 50f, 1, true)
 
@@ -1852,7 +1896,7 @@ class PlayScreen(
             headF.draw(batch, btnText, cx + (cardW - glyphLayout.width) / 2f, btnY + 28f)
         }
 
-        regF.color = Color(0.6f, 0.65f, 0.75f, 0.8f)
+        regF.setColor(0.6f, 0.65f, 0.75f, 0.8f)
         glyphLayout.setText(regF, "[A / D / LEFT / RIGHT / TOUCH] Browse  |  [1 / 2 / 3 / SPACE / ENTER] Claim Relic")
         regF.draw(batch, "[A / D / LEFT / RIGHT / TOUCH] Browse  |  [1 / 2 / 3 / SPACE / ENTER] Claim Relic", (w - glyphLayout.width) / 2f, cardY - 20f)
 
@@ -1863,17 +1907,20 @@ class PlayScreen(
         val w = 1280f
         val h = 720f
 
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Letterbox Bars (Top & Bottom Sinematik)
         val barHeight = 85f
-        shapeRenderer.color = Color(0f, 0f, 0f, 0.95f)
+        shapeRenderer.setColor(0f, 0f, 0f, 0.95f)
         shapeRenderer.rect(0f, h - barHeight, w, barHeight)
         shapeRenderer.rect(0f, 0f, w, barHeight)
 
         // Gold Accent Lines on Letterbox Edge
-        shapeRenderer.color = Color(0.92f, 0.78f, 0.28f, 0.75f)
+        shapeRenderer.setColor(0.92f, 0.78f, 0.28f, 0.75f)
         shapeRenderer.rectLine(0f, h - barHeight, w, h - barHeight, 2f)
         shapeRenderer.rectLine(0f, barHeight, w, barHeight, 2f)
 
@@ -1882,11 +1929,11 @@ class PlayScreen(
         val cardH = 100f
         val cardX = (w - cardW) / 2f
         val cardY = 190f
-        shapeRenderer.color = Color(0.06f, 0.08f, 0.14f, 0.94f)
+        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.94f)
         shapeRenderer.rect(cardX, cardY, cardW, cardH)
 
         // Card Border Lines
-        shapeRenderer.color = Color(0.92f, 0.78f, 0.28f, 0.9f)
+        shapeRenderer.setColor(0.92f, 0.78f, 0.28f, 0.9f)
         shapeRenderer.rectLine(cardX, cardY, cardX + cardW, cardY, 2.5f)
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 2.5f)
         shapeRenderer.rectLine(cardX, cardY, cardX, cardY + cardH, 2f)
@@ -1901,20 +1948,20 @@ class PlayScreen(
         val smallF = FontManager.smallFont
 
         // Boss Title in Gold
-        titleF.color = Color(1f, 0.85f, 0.25f, 1f)
+        titleF.setColor(1f, 0.85f, 0.25f, 1f)
         val bossTitle = "⚔ GIGAS - THE ANCIENT GOLEM ⚔"
         glyphLayout.setText(titleF, bossTitle)
         titleF.draw(batch, bossTitle, (w - glyphLayout.width) / 2f, cardY + cardH - 24f)
 
         // Boss Subtitle / Lore
-        regF.color = Color(0.85f, 0.90f, 1f, 0.95f)
+        regF.setColor(0.85f, 0.90f, 1f, 0.95f)
         val bossSub = "Titan of the Obsidian Spire  •  Floor 3 Guardian"
         glyphLayout.setText(regF, bossSub)
         regF.draw(batch, bossSub, (w - glyphLayout.width) / 2f, cardY + 38f)
 
         // Skip prompt inside bottom letterbox
         val skipPulse = (sin(hudAnimTime * 6f) + 1f) * 0.5f
-        smallF.color = Color(0.85f + 0.15f * skipPulse, 0.85f + 0.15f * skipPulse, 0.85f, 0.85f)
+        smallF.setColor(0.85f + 0.15f * skipPulse, 0.85f + 0.15f * skipPulse, 0.85f, 0.85f)
         val skipText = "[TOUCH / SPACE / ENTER] Skip Intro"
         glyphLayout.setText(smallF, skipText)
         smallF.draw(batch, skipText, (w - glyphLayout.width) / 2f, barHeight / 2f + 6f)

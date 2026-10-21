@@ -69,15 +69,18 @@ class ParticleManager {
         return if (slashPool.isNotEmpty()) slashPool.removeLast() else SlashEffect()
     }
 
+    companion object {
+        private val DUST_COLOR = Color(0.6f, 0.65f, 0.7f, 0.6f)
+    }
+
     fun spawnDust(x: Float, y: Float, count: Int = 5) {
-        val dustColor = Color(0.6f, 0.65f, 0.7f, 0.6f)
         for (i in 0 until count) {
             val vx = MathUtils.random(-1.8f, 1.8f)
             val vy = MathUtils.random(0.3f, 1.4f)
             val size = MathUtils.random(0.06f, 0.12f)
             val life = MathUtils.random(0.2f, 0.4f)
             val p = obtainParticle()
-            p.reset(x, y, vx, vy, size, dustColor, life)
+            p.reset(x, y, vx, vy, size, DUST_COLOR, life)
             activeParticles.add(p)
         }
     }

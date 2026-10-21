@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -115,33 +116,36 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
 
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
         // 1. Gambar Background & Arsitektur Bengkel Tempa
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Pilar Bengkel
-        shapeRenderer.color = Color(0.08f, 0.10f, 0.15f, 0.95f)
+        shapeRenderer.setColor(0.08f, 0.10f, 0.15f, 0.95f)
         shapeRenderer.rect(0f, 0f, 80f, 720f)
         shapeRenderer.rect(1200f, 0f, 80f, 720f)
-        shapeRenderer.color = Color(0.95f, 0.55f, 0.15f, 0.4f)
+        shapeRenderer.setColor(0.95f, 0.55f, 0.15f, 0.4f)
         shapeRenderer.rectLine(80f, 0f, 80f, 720f, 2f)
         shapeRenderer.rectLine(1200f, 0f, 1200f, 720f, 2f)
 
         // Partikel Percikan Api
         for (s in sparks) {
             val alpha = (1f - (s.life / s.maxLife)).coerceIn(0f, 1f)
-            shapeRenderer.color = Color(s.color.r, s.color.g, s.color.b, s.color.a * alpha)
+            shapeRenderer.setColor(s.color.r, s.color.g, s.color.b, s.color.a * alpha)
             shapeRenderer.circle(s.pos.x, s.pos.y, s.size)
         }
 
         // Header Card (Tungku Tempa Emas)
-        shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
+        shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.95f)
         shapeRenderer.rect(120f, 600f, 1040f, 95f)
-        shapeRenderer.color = Color(0.95f, 0.65f, 0.2f, 0.85f)
+        shapeRenderer.setColor(0.95f, 0.65f, 0.2f, 0.85f)
         shapeRenderer.rectLine(120f, 600f, 1160f, 600f, 2.5f)
 
         // Flash Efek Palu Tempa (Hammer Impact)
         if (hammerImpactFlash > 0f) {
-            shapeRenderer.color = Color(1f, 0.85f, 0.3f, hammerImpactFlash * 0.45f)
+            shapeRenderer.setColor(1f, 0.85f, 0.3f, hammerImpactFlash * 0.45f)
             shapeRenderer.rect(120f, 140f, 1040f, 440f)
         }
 
@@ -157,14 +161,23 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
             val isSelected = i == selectedIndex
 
             // Latar Belakang Kartu
-            shapeRenderer.color = if (isSelected) Color(0.14f, 0.18f, 0.28f, 0.95f) else Color(0.08f, 0.10f, 0.16f, 0.85f)
+            if (isSelected) {
+                shapeRenderer.setColor(0.14f, 0.18f, 0.28f, 0.95f)
+            } else {
+                shapeRenderer.setColor(0.08f, 0.10f, 0.16f, 0.85f)
+            }
             shapeRenderer.rect(cardX, cardY, cardW, cardH)
 
             // Garis Tepi (Oranye Emas jika terpilih)
             val pulse = if (isSelected) (sin(animTime * 6f) + 1f) * 0.15f else 0f
-            shapeRenderer.color = if (isSelected) Color(1f, 0.72f, 0.2f, 0.8f + pulse) else Color(0.2f, 0.25f, 0.35f, 0.5f)
-            shapeRenderer.rectLine(cardX, cardY, cardX + cardW, cardY, if (isSelected) 2.5f else 1.5f)
-            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, if (isSelected) 2.5f else 1.5f)
+            if (isSelected) {
+                shapeRenderer.setColor(1f, 0.72f, 0.2f, 0.8f + pulse)
+            } else {
+                shapeRenderer.setColor(0.2f, 0.25f, 0.35f, 0.5f)
+            }
+            val borderThick = if (isSelected) 2.5f else 1.5f
+            shapeRenderer.rectLine(cardX, cardY, cardX + cardW, cardY, borderThick)
+            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, borderThick)
 
             // Indikator Pip Level 1..5
             val currentLevel = when (i) {
@@ -178,7 +191,11 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
             val pipH = 16f
             for (p in 0 until CharacterStats.MAX_WEAPON_LEVEL) {
                 val px = pipStartX + (p * (pipW + 10f))
-                shapeRenderer.color = if (p < currentLevel) Color(1f, 0.75f, 0.2f, 1f) else Color(0.18f, 0.22f, 0.30f, 1f)
+                if (p < currentLevel) {
+                    shapeRenderer.setColor(1f, 0.75f, 0.2f, 1f)
+                } else {
+                    shapeRenderer.setColor(0.18f, 0.22f, 0.30f, 1f)
+                }
                 shapeRenderer.rect(px, pipY, pipW, pipH)
             }
 
@@ -191,13 +208,17 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
             val cost = CharacterStats.getUpgradeCost(currentLevel)
             val canAfford = stats.gold >= cost
 
-            shapeRenderer.color = when {
-                isMax -> Color(0.22f, 0.26f, 0.32f, 0.8f)
-                canAfford -> if (isSelected) Color(0.85f, 0.45f, 0.10f, 0.95f) else Color(0.65f, 0.35f, 0.10f, 0.85f)
-                else -> Color(0.35f, 0.18f, 0.18f, 0.75f)
+            when {
+                isMax -> shapeRenderer.setColor(0.22f, 0.26f, 0.32f, 0.8f)
+                canAfford -> if (isSelected) shapeRenderer.setColor(0.85f, 0.45f, 0.10f, 0.95f) else shapeRenderer.setColor(0.65f, 0.35f, 0.10f, 0.85f)
+                else -> shapeRenderer.setColor(0.35f, 0.18f, 0.18f, 0.75f)
             }
             shapeRenderer.rect(btnX, btnY, btnW, btnH)
-            shapeRenderer.color = if (isSelected && !isMax && canAfford) Color.GOLD else Color(0.4f, 0.45f, 0.55f, 0.6f)
+            if (isSelected && !isMax && canAfford) {
+                shapeRenderer.color = Color.GOLD
+            } else {
+                shapeRenderer.setColor(0.4f, 0.45f, 0.55f, 0.6f)
+            }
             shapeRenderer.rectLine(btnX, btnY, btnX + btnW, btnY, 1.5f)
             shapeRenderer.rectLine(btnX, btnY + btnH, btnX + btnW, btnY + btnH, 1.5f)
         }
@@ -209,9 +230,17 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
         val returnX = (1280f - returnW) / 2f
         val isReturnSelected = selectedIndex == 3
 
-        shapeRenderer.color = if (isReturnSelected) Color(0.18f, 0.25f, 0.38f, 0.95f) else Color(0.08f, 0.11f, 0.18f, 0.85f)
+        if (isReturnSelected) {
+            shapeRenderer.setColor(0.18f, 0.25f, 0.38f, 0.95f)
+        } else {
+            shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.85f)
+        }
         shapeRenderer.rect(returnX, returnY, returnW, returnH)
-        shapeRenderer.color = if (isReturnSelected) Color.YELLOW else Color(0.4f, 0.45f, 0.55f, 0.7f)
+        if (isReturnSelected) {
+            shapeRenderer.color = Color.YELLOW
+        } else {
+            shapeRenderer.setColor(0.4f, 0.45f, 0.55f, 0.7f)
+        }
         shapeRenderer.rectLine(returnX, returnY, returnX + returnW, returnY, 2f)
         shapeRenderer.rectLine(returnX, returnY + returnH, returnX + returnW, returnY + returnH, 2f)
 
@@ -224,11 +253,11 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
         val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
 
         // Judul Utama
-        titleF.color = Color(1f, 0.85f, 0.35f, 1f)
+        titleF.setColor(1f, 0.85f, 0.35f, 1f)
         titleF.draw(batch, "BLACKSMITH WEAPON FORGE", 160f, 672f)
 
         // Subtitle & Gold Player
-        regF.color = Color(0.85f, 0.88f, 0.95f, 0.9f)
+        regF.setColor(0.85f, 0.88f, 0.95f, 0.9f)
         regF.draw(batch, "Forge your steel with ancient spire gold for permanent combat prowess", 160f, 630f)
 
         headF.color = Color.GOLD
@@ -258,13 +287,13 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
             }
 
             // Judul Kategori
-            headF.color = if (i == selectedIndex) Color(1f, 0.9f, 0.4f, 1f) else Color.WHITE
+            if (i == selectedIndex) headF.setColor(1f, 0.9f, 0.4f, 1f) else headF.color = Color.WHITE
             headF.draw(batch, "${i + 1}. ${upgradeTitles[i]}", cardX + 25f, cardY + 80f)
 
             // Deskripsi & Stat Saat Ini
-            regF.color = Color(0.75f, 0.8f, 0.9f, 0.9f)
+            regF.setColor(0.75f, 0.8f, 0.9f, 0.9f)
             regF.draw(batch, upgradeDescs[i], cardX + 25f, cardY + 52f)
-            regF.color = Color(0.4f, 0.9f, 1f, 1f)
+            regF.setColor(0.4f, 0.9f, 1f, 1f)
             regF.draw(batch, "Current: $currentStatBonus", cardX + 25f, cardY + 28f)
 
             // Teks Level & Tombol Upgrade

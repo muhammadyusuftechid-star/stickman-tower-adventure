@@ -151,13 +151,17 @@ class TrainingDummy(val spawnX: Float = 6f, val spawnY: Float = 2f) {
         renderHealthBar(shapeRenderer, centerX, position.y + height + 0.2f)
     }
 
+    companion object {
+        private val COLOR_BAR_BG = Color(0.1f, 0.1f, 0.15f, 0.8f)
+    }
+
     private fun renderHealthBar(shapeRenderer: ShapeRenderer, centerX: Float, barY: Float) {
         val barW = 1.0f
         val barH = 0.12f
         val barX = centerX - barW / 2f
 
         // Background Bar (Hitam / Gelap)
-        shapeRenderer.color = Color(0.1f, 0.1f, 0.15f, 0.8f)
+        shapeRenderer.color = COLOR_BAR_BG
         shapeRenderer.rect(barX, barY, barW, barH)
 
         // Fill Bar (Hijau / Kuning / Merah berdasarkan sisa HP)

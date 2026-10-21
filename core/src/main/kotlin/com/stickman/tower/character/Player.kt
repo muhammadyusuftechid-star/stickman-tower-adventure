@@ -107,6 +107,27 @@ class Player(
         const val SKILL_SPEED = 22.0f
 
         const val ULT_DURATION = 0.45f
+
+        val COLOR_PARRY_BODY = Color(1f, 0.95f, 0.4f, 1f)
+        val COLOR_DODGE_BODY = Color(0.4f, 0.8f, 1f, 1f)
+        val COLOR_SKILL_BODY = Color(0.85f, 0.45f, 1f, 1f)
+
+        val COLOR_DAGGER = Color(0.4f, 0.9f, 1f, 0.95f)
+        val COLOR_GREATSWORD_CORE = Color(0.3f, 0.3f, 0.35f, 1f)
+
+        val COLOR_HEAVY_RUNE_HIT1 = Color(1f, 0.55f, 0.1f, 1f)
+        val COLOR_HEAVY_RUNE_HIT2 = Color(1f, 0.25f, 0.1f, 1f)
+        val COLOR_HEAVY_RUNE_HIT3 = Color(1f, 0.85f, 0.2f, 1f)
+
+        val COLOR_SWORD_HIT1 = Color(0.9f, 0.95f, 1f, 1f)
+        val COLOR_SWORD_HIT2 = Color(1f, 0.85f, 0.4f, 1f)
+        val COLOR_SWORD_HIT3 = Color(1f, 0.45f, 0.2f, 1f)
+
+        val COLOR_SLASH_AGILE = Color(0.3f, 0.95f, 1f, 0.95f)
+        val COLOR_SLASH_HEAVY = Color(1f, 0.35f, 0.1f, 0.95f)
+        val COLOR_SLASH_HIT1 = Color(1f, 0.95f, 0.3f, 0.85f)
+        val COLOR_SLASH_HIT2 = Color(1f, 0.6f, 0.15f, 0.9f)
+        val COLOR_SLASH_HIT3 = Color(1f, 0.2f, 0.25f, 0.95f)
     }
 
     var state: CharacterState = CharacterState.IDLE
@@ -612,8 +633,10 @@ class Player(
             for (idx in 0 until afterimageCount) {
                 val ghost = afterimagePool[idx]
                 val alpha = (0.2f * (idx + 1)).coerceIn(0.1f, 0.6f)
-                val ghostColor = if (isParrying) Color(1f, 0.9f, 0.3f, alpha) else Color(0.3f, 0.7f, 1f, alpha)
-                shapeRenderer.color = ghostColor
+                val r = if (isParrying) 1f else 0.3f
+                val g = if (isParrying) 0.9f else 0.7f
+                val b = if (isParrying) 0.3f else 1f
+                shapeRenderer.setColor(r, g, b, alpha)
                 shapeRenderer.circle(ghost.x + width / 2f, ghost.y + height - headRadius - 0.05f, headRadius, 10)
                 shapeRenderer.rectLine(ghost.x + width / 2f, ghost.y + 0.75f, ghost.x + width / 2f, ghost.y, 0.06f)
             }
@@ -622,16 +645,16 @@ class Player(
         // Aura Emas Berkilau saat Parry Buff Aktif (+25% Damage Balasan)
         if (hasParryBuff && !isDodging && !isUlting) {
             val auraPulse = 0.35f + kotlin.math.sin(animTime * 12f) * 0.15f
-            shapeRenderer.color = Color(1f, 0.85f, 0.2f, auraPulse)
+            shapeRenderer.setColor(1f, 0.85f, 0.2f, auraPulse)
             shapeRenderer.circle(centerX, pelvisY + 0.15f, 0.68f, 16)
         }
 
         // 2. Warna Tubuh (Biru saat Dodge, Ungu saat Skill, Emas saat Ult/Parry, Merah saat Hurt, Putih normal)
         val bodyColor = when {
             health.isFlashing -> Color.RED
-            isParrying -> Color(1f, 0.95f, 0.4f, 1f)
-            isDodging -> Color(0.4f, 0.8f, 1f, 1f)
-            isSkillStriking -> Color(0.85f, 0.45f, 1f, 1f)
+            isParrying -> COLOR_PARRY_BODY
+            isDodging -> COLOR_DODGE_BODY
+            isSkillStriking -> COLOR_SKILL_BODY
             isUlting || hasParryBuff -> Color.GOLD
             else -> Color.WHITE
         }
@@ -696,7 +719,7 @@ class Player(
         if (archetype == CharacterArchetype.AGILE) {
             val daggerBackTipX = armBackHandX - 0.35f * lookDir
             val daggerBackTipY = armBackHandY + 0.30f
-            shapeRenderer.color = Color(0.4f, 0.9f, 1f, 0.95f)
+            shapeRenderer.color = COLOR_DAGGER
             shapeRenderer.rectLine(armBackHandX, armBackHandY, daggerBackTipX, daggerBackTipY, 0.05f)
         }
 
@@ -729,7 +752,7 @@ class Player(
         if (archetype == CharacterArchetype.AGILE) {
             val daggerFrontTipX = armFrontHandX + (if (attackPhase == AttackPhase.ACTIVE) 0.55f else 0.40f) * lookDir
             val daggerFrontTipY = armFrontHandY + (if (attackPhase == AttackPhase.ACTIVE) -0.1f else -0.25f)
-            shapeRenderer.color = Color(0.4f, 0.9f, 1f, 1f)
+            shapeRenderer.color = COLOR_DAGGER
             shapeRenderer.rectLine(armFrontHandX, armFrontHandY, daggerFrontTipX, daggerFrontTipY, 0.06f)
         } else if (archetype == CharacterArchetype.HEAVY) {
             // Colossal Greatsword: Broad slab with glowing runes and crossguard
@@ -737,14 +760,14 @@ class Player(
             val heavyTipY = armFrontHandY + (swordTipY - armFrontHandY) * 1.35f
 
             // Blade Core
-            shapeRenderer.color = Color(0.3f, 0.3f, 0.35f, 1f)
+            shapeRenderer.color = COLOR_GREATSWORD_CORE
             shapeRenderer.rectLine(armFrontHandX, armFrontHandY, heavyTipX, heavyTipY, 0.16f)
 
             // Glowing Rune Edge
             shapeRenderer.color = when (comboManager.currentStep) {
-                ComboStep.HIT_1 -> Color(1f, 0.55f, 0.1f, 1f)
-                ComboStep.HIT_2 -> Color(1f, 0.25f, 0.1f, 1f)
-                ComboStep.HIT_3 -> Color(1f, 0.85f, 0.2f, 1f)
+                ComboStep.HIT_1 -> COLOR_HEAVY_RUNE_HIT1
+                ComboStep.HIT_2 -> COLOR_HEAVY_RUNE_HIT2
+                ComboStep.HIT_3 -> COLOR_HEAVY_RUNE_HIT3
             }
             shapeRenderer.rectLine(armFrontHandX, armFrontHandY, heavyTipX, heavyTipY, 0.08f)
 
@@ -758,9 +781,9 @@ class Player(
         } else {
             // BALANCED: Standard Sword
             shapeRenderer.color = when (comboManager.currentStep) {
-                ComboStep.HIT_1 -> Color(0.9f, 0.95f, 1f, 1f)
-                ComboStep.HIT_2 -> Color(1f, 0.85f, 0.4f, 1f)
-                ComboStep.HIT_3 -> Color(1f, 0.45f, 0.2f, 1f)
+                ComboStep.HIT_1 -> COLOR_SWORD_HIT1
+                ComboStep.HIT_2 -> COLOR_SWORD_HIT2
+                ComboStep.HIT_3 -> COLOR_SWORD_HIT3
             }
             shapeRenderer.rectLine(armFrontHandX, armFrontHandY, swordTipX, swordTipY, 0.08f)
 
@@ -786,14 +809,14 @@ class Player(
 
     private fun renderComboSlashArc(shapeRenderer: ShapeRenderer, centerX: Float, centerY: Float, lookDir: Float) {
         val (arcRadiusMult, arcColorOverride) = when (archetype) {
-            CharacterArchetype.AGILE -> 0.85f to Color(0.3f, 0.95f, 1f, 0.95f) // Cyan rapid slash
-            CharacterArchetype.HEAVY -> 1.45f to Color(1f, 0.35f, 0.1f, 0.95f) // Colossal fiery orange slash
+            CharacterArchetype.AGILE -> 0.85f to COLOR_SLASH_AGILE // Cyan rapid slash
+            CharacterArchetype.HEAVY -> 1.45f to COLOR_SLASH_HEAVY // Colossal fiery orange slash
             CharacterArchetype.BALANCED -> 1.0f to null
         }
         val (baseRadius, defaultColor) = when (comboManager.currentStep) {
-            ComboStep.HIT_1 -> 1.15f to Color(1f, 0.95f, 0.3f, 0.85f)      // Hit 1: Kuning Emas
-            ComboStep.HIT_2 -> 1.35f to Color(1f, 0.6f, 0.15f, 0.9f)       // Hit 2: Oranye Api
-            ComboStep.HIT_3 -> 1.70f to Color(1f, 0.2f, 0.25f, 0.95f)      // Hit 3: Merah Raksasa (Finisher)
+            ComboStep.HIT_1 -> 1.15f to COLOR_SLASH_HIT1      // Hit 1: Kuning Emas
+            ComboStep.HIT_2 -> 1.35f to COLOR_SLASH_HIT2       // Hit 2: Oranye Api
+            ComboStep.HIT_3 -> 1.70f to COLOR_SLASH_HIT3      // Hit 3: Merah Raksasa (Finisher)
         }
         val arcRadius = baseRadius * arcRadiusMult
         val arcColor = arcColorOverride ?: defaultColor
@@ -826,7 +849,7 @@ class Player(
     private fun renderBladestorm(shapeRenderer: ShapeRenderer, centerX: Float, centerY: Float) {
         // Lingkaran Radial Badai Pedang
         val expand = (ultTimer / ULT_DURATION) * ultRadius
-        shapeRenderer.color = Color(1f, 0.85f, 0.2f, 0.5f)
+        shapeRenderer.setColor(1f, 0.85f, 0.2f, 0.5f)
         shapeRenderer.circle(centerX, centerY, expand, 24)
 
         // Cincin Luar Cahaya Emas

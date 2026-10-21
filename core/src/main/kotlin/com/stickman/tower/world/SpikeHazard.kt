@@ -17,6 +17,11 @@ class SpikeHazard(
 ) {
     val bounds = Rectangle(x, y, width, height)
 
+    companion object {
+        private val COLOR_SPIKE = Color(0.85f, 0.25f, 0.25f, 1f)
+        private val COLOR_BASE = Color(0.2f, 0.22f, 0.28f, 1f)
+    }
+
     fun checkCollision(playerBounds: Rectangle): Boolean {
         return bounds.overlaps(playerBounds)
     }
@@ -34,7 +39,7 @@ class SpikeHazard(
             val x3 = x1 + spikeWidth
             val y3 = y
 
-            shapeRenderer.color = Color(0.85f, 0.25f, 0.25f, 1f)
+            shapeRenderer.color = COLOR_SPIKE
             shapeRenderer.triangle(x1, y1, x2, y2, x3, y3)
 
             // Highlight puncak duri putih tajam
@@ -43,7 +48,7 @@ class SpikeHazard(
         }
 
         // Garis dasar logam penyangga duri
-        shapeRenderer.color = Color(0.2f, 0.22f, 0.28f, 1f)
+        shapeRenderer.color = COLOR_BASE
         shapeRenderer.rect(x, y, width, 0.08f)
     }
 }
