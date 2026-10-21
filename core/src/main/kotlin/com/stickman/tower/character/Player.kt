@@ -329,6 +329,9 @@ class Player(
         bounds.setPosition(position.x, position.y)
 
         for (platform in platforms) {
+            // Abaikan tabrakan horizontal pada One-Way Platform
+            if (platform.isOneWay) continue
+
             if (bounds.overlaps(platform.bounds)) {
                 if (velocity.x > 0f) {
                     position.x = platform.left - width
@@ -343,11 +346,25 @@ class Player(
     }
 
     private fun resolveCollisionY(delta: Float, platforms: List<Platform>) {
+        val previousY = position.y
         isGrounded = false
         position.y += velocity.y * delta
         bounds.setPosition(position.x, position.y)
 
         for (platform in platforms) {
+            if (platform.isOneWay) {
+                // One-Way Platform: Hanya mendarat jika sedang jatuh dari atas platform
+                if (velocity.y <= 0f && previousY >= platform.top - 0.20f) {
+                    if (bounds.overlaps(platform.bounds)) {
+                        position.y = platform.top
+                        velocity.y = 0f
+                        isGrounded = true
+                        bounds.setPosition(position.x, position.y)
+                    }
+                }
+                continue
+            }
+
             if (bounds.overlaps(platform.bounds)) {
                 if (velocity.y <= 0f) {
                     position.y = platform.top

@@ -275,34 +275,31 @@ flowchart LR
 ### FASE 6: Stage Design, Tiled Map & Multi-Floor Tower
 > **Tujuan Terbesar:** Mengganti platform kotak primitif dengan map visual dari Tiled Map Editor, serta membangun arsitektur tower bertingkat dengan boss sederhana.
 
-#### Modul 6.1: Integrasi Tiled Map Editor (`.tmx`)
-- **Task 6.1.1: Pembuatan Tilemap Tiled**
-  - [ ] Buat tileset platform stickman sederhana (misal ukuran tile 16x16 atau 32x32 piksel).
-  - [ ] Buat layer Tiled:
-    - `Background Layer` (visual gedung/menara).
-    - `Ground / Terrain Layer` (lantai platform yang diinjak).
-    - `Object Layer` (persegi panjang untuk spawn point, enemies, traps, checkpoint, exit).
-- **Task 6.1.2: Loader Tiled di libGDX**
-  - [ ] Gunakan `TmxMapLoader` dan `OrthogonalTiledMapRenderer`.
-  - [ ] Ekstrak object rectangle dari `MapObjects` dan konversikan secara otomatis menjadi list `Platform` dan trigger zone.
+#### Modul 6.1: Integrasi Arsitektur Level & Multi-Floor Tower
+- **Task 6.1.1: Pemodelan Data & Level Builder Menara**
+  - [x] Buat arsitektur data lantai menara `TowerFloor.kt` & builder level `TowerLevelBuilder.kt`.
+  - [x] Definisikan boundary map, platform, spawn point, hazard, chest, dan exit portal per lantai.
+- **Task 6.1.2: Multi-Floor Loader & Stage Transition**
+  - [x] Sistem pergantian lantai otomatis (Lantai 1 $\rightarrow$ Lantai 2 $\rightarrow$ Lantai 3 Apex Arena).
+  - [x] Kamera boundary clamping dinamis yang menyesuaikan batas vertikal/horizontal setiap lantai.
 
 #### Modul 6.2: Rintangan & Objek Interaktif Lingkungan
 - **Task 6.2.1: Jebakan (Hazard)**
-  - [ ] Duri lantai (*Spikes*): memberikan damage instan dan melempar pemain mundur saat diinjak.
-  - [ ] Platform tembus dari bawah (*One-Way Platform*): pemain bisa melompat dari bawah menembus ke atas, tapi berdiri kokoh di atasnya.
+  - [x] Duri lantai (*SpikeHazard.kt*): memberikan damage instan (18 dmg) dan melentingkan pemain ke atas saat terinjak.
+  - [x] Platform tembus dari bawah (*One-Way Platform*): pemain bisa melompat dari bawah menembus ke atas, tapi mendarat kokoh di atasnya.
 - **Task 6.2.2: Peti Reward (Chest)**
-  - [ ] Objek peti yang bisa dipukul atau disentuh dengan tombol aksi untuk menjatuhkan koin atau item pemulih HP.
+  - [x] Objek peti harta (*TreasureChest.kt*) yang bisa ditebas/disentuh untuk menjatuhkan +50 G koin dan memulihkan +35 HP pemain.
 
-#### Modul 6.3: Multi-Lantai Tower Loop
+#### Modul 6.3: Multi-Lantai Tower Loop & Boss AI (Tower Guardian)
 - **Task 6.3.1: State Mesin Stage Tower**
-  - [ ] Lantai 1: Pengenalan rintangan dan musuh dasar.
-  - [ ] Lantai 2: Platform bertingkat, jebakan duri, dan gelombang musuh lebih banyak.
-  - [ ] Lantai 3 (Boss Floor): Arena tertutup tanpa jalan keluar sampai boss dikalahkan.
-- **Task 6.3.2: Boss AI Dasar**
-  - [ ] Bar HP Boss besar di bagian atas layar.
-  - [ ] Memiliki 2 fase serangan:
-    - *Fase 1 (HP > 50%):* Serangan tebasan jarak dekat dan lompat menghantam tanah (*Ground Slam*).
-    - *Fase 2 (HP <= 50% - Enrage):* Gerakan lebih cepat dan meluncurkan proyektil tebasan angin (*Wind Slash*).
+  - [x] Lantai 1: Pengenalan rintangan duri, platform bertingkat, dan musuh patroli dasar.
+  - [x] Lantai 2: Panjatan vertikal tinggi, duri mematikan di lantai bawah, one-way platform, dan peti harta karun puncak.
+  - [x] Lantai 3 (Boss Floor): Arena tertutup megah di puncak menara di mana gerbang portal keluar terkunci sampai Boss ditumpas.
+- **Task 6.3.2: Boss AI 2-Fase (Tower Guardian)**
+  - [x] Boss berukuran raksasa (`width = 1.4f, height = 2.8f`, HP 350f) dengan Bar HP epik di bagian atas layar.
+  - [x] Memiliki 2 fase serangan:
+    - *Fase 1 (HP > 50%):* Serangan tebasan jarak dekat (*Heavy Cleave*) dan lompat menghantam tanah (*Ground Slam Shockwave*).
+    - *Fase 2 (HP <= 50% - Enrage Mode):* Aura merah membara, pergerakan lebih cepat (+50%), dan meluncurkan proyektil tebasan angin (*Wind Slash* via `Projectile.kt`).
 
 ---
 

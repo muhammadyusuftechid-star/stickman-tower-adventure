@@ -23,12 +23,22 @@ class Platform(
     val top: Float get() = bounds.y + bounds.height
 
     fun render(shapeRenderer: ShapeRenderer) {
-        shapeRenderer.color = color
-        shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height)
+        if (isOneWay) {
+            // Platform Tembus Bawah: Visual balok kayu/baja dengan garis penyangga
+            shapeRenderer.color = Color(0.35f, 0.42f, 0.50f, 0.85f)
+            shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height)
 
-        // Render garis tepi atas (top highlight) untuk visual lebih jelas
-        shapeRenderer.color = Color(color.r + 0.15f, color.g + 0.15f, color.b + 0.15f, 1f)
-        val highlightHeight = 0.08f.coerceAtMost(bounds.height * 0.2f)
-        shapeRenderer.rect(bounds.x, top - highlightHeight, bounds.width, highlightHeight)
+            // Garis tepi atas menyala cerah (menandakan lantai pijakan)
+            shapeRenderer.color = Color(0.6f, 0.85f, 1.0f, 1f)
+            shapeRenderer.rect(bounds.x, top - 0.08f, bounds.width, 0.08f)
+        } else {
+            shapeRenderer.color = color
+            shapeRenderer.rect(bounds.x, bounds.y, bounds.width, bounds.height)
+
+            // Render garis tepi atas (top highlight) untuk visual lebih jelas
+            shapeRenderer.color = Color(color.r + 0.15f, color.g + 0.15f, color.b + 0.15f, 1f)
+            val highlightHeight = 0.08f.coerceAtMost(bounds.height * 0.2f)
+            shapeRenderer.rect(bounds.x, top - highlightHeight, bounds.width, highlightHeight)
+        }
     }
 }

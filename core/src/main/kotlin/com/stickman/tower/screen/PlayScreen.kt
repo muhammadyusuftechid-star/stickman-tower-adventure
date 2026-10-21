@@ -13,23 +13,23 @@ import com.stickman.tower.character.Player
 import com.stickman.tower.combat.ComboStep
 import com.stickman.tower.combat.FloatingText
 import com.stickman.tower.combat.HitStopManager
+import com.stickman.tower.enemy.BossEnemy
 import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.input.CompositeInput
 import com.stickman.tower.input.KeyboardInput
 import com.stickman.tower.input.VirtualController
-import com.stickman.tower.physics.Platform
 import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.rpg.SaveManager
 import com.stickman.tower.world.CameraManager
-import com.stickman.tower.world.Checkpoint
-import com.stickman.tower.world.StageExit
+import com.stickman.tower.world.TowerFloor
+import com.stickman.tower.world.TowerLevelBuilder
 
 /**
- * Screen gameplay utama Fase 5:
- * Mengintegrasikan Progresi RPG (Level, EXP, Stat Scaling, Koin, Level-Up Event),
- * Penyimpanan Data Lokal (Save & Load JSON/Preferences),
- * Combat Lanjutan (Combo 3-Hit, Dodge, Skills, Ultimate),
- * serta Enhanced In-Game RPG HUD.
+ * Screen gameplay utama Fase 6:
+ * Mengintegrasikan Arsitektur Menara Bertingkat (Lantai 1, Lantai 2, Lantai 3 Boss Arena),
+ * Rintangan Dinamis (Spike Hazards, One-Way Platforms, Peti Harta Karun),
+ * Boss Fight Epik 2-Fase ("Tower Guardian" Cleave, Slam & Wind Slash),
+ * serta Transisi Multi-Floor & Progresi RPG Tersimpan.
  */
 class PlayScreen : Screen {
     private val cameraManager = CameraManager()
@@ -47,14 +47,13 @@ class PlayScreen : Screen {
     private val stats = CharacterStats().apply { loadFromSaveData(saveData) }
     private val player = Player(spawnX = -1f, spawnY = 1.5f, stats = stats)
 
-    private val platforms = mutableListOf<Platform>()
-    private val enemies = mutableListOf<Enemy>()
+    // Data Lantai Menara Aktif
+    var currentFloorNumber: Int = 1
+        private set
+    private lateinit var currentFloor: TowerFloor
+
     private val floatingTexts = mutableListOf<FloatingText>()
     private val hitStopManager = HitStopManager()
-
-    // Elemen Stage Interaktif
-    private val checkpoint = Checkpoint(x = 12f, y = 1f)
-    private val stageExit = StageExit(x = 28f, y = 1f)
     private val activeCheckpointPos = Vector2(-1f, 1.5f)
 
     // Status Game Loop & Notifikasi Save
@@ -67,34 +66,40 @@ class PlayScreen : Screen {
     private var showDebugBounds = false
 
     override fun show() {
-        cameraManager.setBounds(left = -12f, bottom = -1f, right = 33f, top = 14f)
         virtualController.resize(Gdx.graphics.width, Gdx.graphics.height)
-        setupStage()
+        loadFloor(1)
     }
 
-    private fun setupStage() {
-        platforms.clear()
-        platforms.add(Platform(x = -12f, y = 0f, width = 45f, height = 1f, color = Color(0.18f, 0.24f, 0.32f, 1f)))
-        platforms.add(Platform(x = -12f, y = 1f, width = 1f, height = 12f, color = Color(0.14f, 0.18f, 0.24f, 1f)))
-        platforms.add(Platform(x = 32f, y = 1f, width = 1f, height = 12f, color = Color(0.14f, 0.18f, 0.24f, 1f)))
+    /**
+     * Memuat layout lantai menara tertentu (1, 2, atau 3).
+     */
+    fun loadFloor(floorNumber: Int) {
+        currentFloorNumber = floorNumber.coerceIn(1, 3)
+        currentFloor = TowerLevelBuilder.buildFloor(currentFloorNumber)
 
-        platforms.add(Platform(x = 2.5f, y = 2.4f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
-        platforms.add(Platform(x = 8.5f, y = 4.3f, width = 3.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
-        platforms.add(Platform(x = 13.5f, y = 6.2f, width = 5.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
-        platforms.add(Platform(x = 21f, y = 3.5f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
+        cameraManager.setBounds(
+            left = currentFloor.mapBounds.x,
+            bottom = currentFloor.mapBounds.y,
+            right = currentFloor.mapBounds.x + currentFloor.mapBounds.width,
+            top = currentFloor.mapBounds.height
+        )
 
-        enemies.clear()
-        enemies.add(Enemy(spawnX = 5.0f, spawnY = 1.2f))
-        enemies.add(Enemy(spawnX = 15.0f, spawnY = 7.0f))
-        enemies.add(Enemy(spawnX = 23.5f, spawnY = 1.2f))
+        player.position.set(currentFloor.spawnX, currentFloor.spawnY)
+        player.velocity.set(0f, 0f)
+        activeCheckpointPos.set(currentFloor.spawnX, currentFloor.spawnY)
 
         hasSavedStageClear = false
         gameStatus = GameStatus.PLAYING
+
+        floatingTexts.clear()
+        floatingTexts.add(
+            FloatingText("=== ${currentFloor.floorName} ===", player.position.x, player.position.y + 2.5f, Color.GOLD, duration = 2.8f)
+        )
     }
 
-    private fun triggerSave(reason: String) {
-        val floor = if (gameStatus == GameStatus.STAGE_CLEAR) 2 else 1
-        SaveManager.save(player.stats.toSaveData(highestFloor = floor))
+    private fun triggerSave(reason: String, highestFloor: Int = currentFloorNumber) {
+        val saveFloor = kotlin.math.max(saveData.highestTowerFloor, highestFloor)
+        SaveManager.save(player.stats.toSaveData(highestFloor = saveFloor))
         saveNotificationText = "Progress Tersimpan ($reason)"
         saveNotificationTimer = 2.5f
     }
@@ -135,28 +140,69 @@ class PlayScreen : Screen {
 
         if (!isFrozen && gameStatus == GameStatus.PLAYING) {
             // Pembaruan Pemain
-            player.update(safeDelta, input, platforms)
+            player.update(safeDelta, input, currentFloor.platforms)
 
-            // Cek Trigger Checkpoint
-            if (checkpoint.checkTrigger(player.bounds)) {
-                activeCheckpointPos.set(checkpoint.x, checkpoint.y + 0.2f)
-                floatingTexts.add(
-                    FloatingText("CHECKPOINT!", checkpoint.x, checkpoint.y + 2.2f, Color.CYAN, duration = 1.5f)
-                )
-                triggerSave("Checkpoint")
+            // Cek Rintangan Duri Lantai (Spikes)
+            for (spike in currentFloor.spikes) {
+                if (spike.checkCollision(player.bounds) && !player.health.isInvulnerable && !player.isDodging) {
+                    if (player.takeHit(spike.damage, 0f, 8.0f)) {
+                        hitStopManager.trigger(0.06f)
+                        floatingTexts.add(
+                            FloatingText("-${spike.damage.toInt()}", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.RED)
+                        )
+                    }
+                }
             }
 
-            // Pembaruan Seluruh Musuh
-            for (enemy in enemies) {
-                enemy.update(safeDelta, player, platforms)
-                // Cek reward musuh yang berhasil dieliminasi
+            // Cek Interaksi Peti Harta (Chests)
+            for (chest in currentFloor.chests) {
+                if (!chest.isOpened) {
+                    val isSwordHit = player.hitbox.isActive && player.hitbox.bounds.overlaps(chest.bounds)
+                    val isBodyTouch = player.bounds.overlaps(chest.bounds)
+                    if (isSwordHit || isBodyTouch) {
+                        if (chest.open()) {
+                            player.stats.addGold(chest.goldReward)
+                            player.health.heal(chest.healReward)
+                            floatingTexts.add(FloatingText("+${chest.goldReward} G", chest.x + 0.2f, chest.y + 1.2f, Color.YELLOW, duration = 1.4f))
+                            floatingTexts.add(FloatingText("+${chest.healReward.toInt()} HP", chest.x + 0.2f, chest.y + 1.7f, Color.GREEN, duration = 1.4f))
+                            triggerSave("Peti Terbuka")
+                        }
+                    }
+                }
+            }
+
+            // Cek Trigger Checkpoint
+            if (currentFloor.checkpoint != null && currentFloor.checkpoint!!.checkTrigger(player.bounds)) {
+                activeCheckpointPos.set(currentFloor.checkpoint!!.x, currentFloor.checkpoint!!.y + 0.2f)
+                floatingTexts.add(
+                    FloatingText("CHECKPOINT!", currentFloor.checkpoint!!.x, currentFloor.checkpoint!!.y + 2.2f, Color.CYAN, duration = 1.5f)
+                )
+                triggerSave("Checkpoint Lantai $currentFloorNumber")
+            }
+
+            // Pembaruan Musuh Biasa
+            for (enemy in currentFloor.enemies) {
+                enemy.update(safeDelta, player, currentFloor.platforms)
                 if (enemy.health.isDead && !enemy.rewardClaimed) {
                     enemy.rewardClaimed = true
                     grantRewards(enemy.expReward, enemy.goldReward, enemy.position.x + enemy.width / 2f, enemy.position.y + 1f)
                 }
             }
 
-            // 2. Deteksi Pertarungan Dua Arah (Pemain <-> Musuh)
+            // Pembaruan Boss (Jika Ada)
+            val boss = currentFloor.boss
+            if (boss != null) {
+                boss.update(safeDelta, player, currentFloor.platforms)
+                if (boss.health.isDead && !boss.rewardClaimed) {
+                    boss.rewardClaimed = true
+                    grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
+                    floatingTexts.add(
+                        FloatingText("★ BOSS DEFEATED! ★", boss.position.x, boss.position.y + 3.2f, Color.GOLD, duration = 3.5f)
+                    )
+                }
+            }
+
+            // 2. Deteksi Pertarungan Dua Arah (Pemain <-> Musuh / Boss)
             handleTwoWayCombat()
 
             // 3. Evaluasi Kondisi Menang & Kalah
@@ -177,18 +223,24 @@ class PlayScreen : Screen {
         cameraManager.update(playerCenterX, playerCenterY, safeDelta)
 
         // 6. Bersihkan Layar
-        ScreenUtils.clear(0.08f, 0.09f, 0.13f, 1f)
+        val clearR = if (currentFloor.isBossFloor) 0.12f else 0.08f
+        val clearG = if (currentFloor.isBossFloor) 0.08f else 0.09f
+        val clearB = if (currentFloor.isBossFloor) 0.12f else 0.13f
+        ScreenUtils.clear(clearR, clearG, clearB, 1f)
 
         // 7. Render Objek Dunia 2D
         cameraManager.viewport.apply()
         shapeRenderer.projectionMatrix = cameraManager.camera.combined
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        for (platform in platforms) platform.render(shapeRenderer)
-        checkpoint.render(shapeRenderer)
-        stageExit.render(shapeRenderer)
+        for (platform in currentFloor.platforms) platform.render(shapeRenderer)
+        for (spike in currentFloor.spikes) spike.render(shapeRenderer)
+        for (chest in currentFloor.chests) chest.render(shapeRenderer)
+        currentFloor.checkpoint?.render(shapeRenderer)
+        currentFloor.exitPortal.render(shapeRenderer)
 
-        for (enemy in enemies) enemy.render(shapeRenderer)
+        for (enemy in currentFloor.enemies) enemy.render(shapeRenderer)
+        currentFloor.boss?.render(shapeRenderer)
         player.render(shapeRenderer)
         shapeRenderer.end()
 
@@ -196,9 +248,10 @@ class PlayScreen : Screen {
         if (showDebugBounds) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             player.renderDebug(shapeRenderer)
-            for (enemy in enemies) enemy.renderDebug(shapeRenderer)
-            for (platform in platforms) {
-                shapeRenderer.color = Color.YELLOW
+            for (enemy in currentFloor.enemies) enemy.renderDebug(shapeRenderer)
+            currentFloor.boss?.renderDebug(shapeRenderer)
+            for (platform in currentFloor.platforms) {
+                shapeRenderer.color = if (platform.isOneWay) Color.CYAN else Color.YELLOW
                 shapeRenderer.rect(platform.bounds.x, platform.bounds.y, platform.bounds.width, platform.bounds.height)
             }
             shapeRenderer.end()
@@ -219,9 +272,11 @@ class PlayScreen : Screen {
     }
 
     private fun handleTwoWayCombat() {
-        // A. Serangan Pemain Mengenai Musuh
+        val boss = currentFloor.boss
+
+        // A. Serangan Pemain Mengenai Musuh Biasa
         if (player.hitbox.isActive) {
-            for (enemy in enemies) {
+            for (enemy in currentFloor.enemies) {
                 if (!enemy.health.isDead && !player.hitbox.hitEntities.contains(enemy)) {
                     if (player.hitbox.bounds.overlaps(enemy.hurtbox.bounds)) {
                         player.hitbox.hitEntities.add(enemy)
@@ -232,7 +287,6 @@ class PlayScreen : Screen {
                         if (enemy.takeHit(player.hitbox.damage, knockX, knockY)) {
                             hitStopManager.trigger(0.06f)
 
-                            // Akumulasi Energi Ultimate
                             val energyGain = when {
                                 player.isUlting -> 0f
                                 player.comboManager.currentStep == ComboStep.HIT_3 -> 15f
@@ -241,7 +295,6 @@ class PlayScreen : Screen {
                             }
                             player.ultimate.addEnergy(energyGain)
 
-                            // Floating Damage & Critical Text
                             val critPrefix = if (player.hitbox.isCritical) "CRIT " else "-"
                             val textColor = when {
                                 player.hitbox.isCritical -> Color.GOLD
@@ -263,10 +316,43 @@ class PlayScreen : Screen {
                     }
                 }
             }
+
+            // Serangan Pemain Mengenai Boss
+            if (boss != null && !boss.health.isDead && !player.hitbox.hitEntities.contains(boss)) {
+                if (player.hitbox.bounds.overlaps(boss.hurtbox.bounds)) {
+                    player.hitbox.hitEntities.add(boss)
+
+                    val knockX = if (player.facingRight) player.hitbox.knockbackX else -player.hitbox.knockbackX
+                    val knockY = player.hitbox.knockbackY
+
+                    if (boss.takeHit(player.hitbox.damage, knockX, knockY)) {
+                        hitStopManager.trigger(0.06f)
+
+                        val energyGain = when {
+                            player.isUlting -> 0f
+                            player.comboManager.currentStep == ComboStep.HIT_3 -> 18f
+                            player.isSkillStriking -> 15f
+                            else -> 10f
+                        }
+                        player.ultimate.addEnergy(energyGain)
+
+                        val critPrefix = if (player.hitbox.isCritical) "CRIT " else "-"
+                        val textColor = if (player.hitbox.isCritical) Color.GOLD else Color.RED
+                        floatingTexts.add(
+                            FloatingText(
+                                "$critPrefix${player.hitbox.damage.toInt()}",
+                                boss.position.x + boss.width / 2f,
+                                boss.position.y + boss.height + 0.45f,
+                                textColor
+                            )
+                        )
+                    }
+                }
+            }
         }
 
-        // B. Serangan Musuh Mengenai Pemain (Dodge memberikan invulnerability!)
-        for (enemy in enemies) {
+        // B. Serangan Musuh Biasa Mengenai Pemain
+        for (enemy in currentFloor.enemies) {
             if (enemy.hitbox.isActive && !enemy.hitbox.hitEntities.contains(player) && !player.health.isDead) {
                 if (enemy.hitbox.bounds.overlaps(player.hurtbox.bounds)) {
                     enemy.hitbox.hitEntities.add(player)
@@ -288,6 +374,49 @@ class PlayScreen : Screen {
                 }
             }
         }
+
+        // C. Serangan Melee Boss Mengenai Pemain
+        if (boss != null && boss.hitbox.isActive && !boss.hitbox.hitEntities.contains(player) && !player.health.isDead) {
+            if (boss.hitbox.bounds.overlaps(player.hurtbox.bounds)) {
+                boss.hitbox.hitEntities.add(player)
+
+                val knockX = if (boss.facingRight) boss.hitbox.knockbackX else -boss.hitbox.knockbackX
+                val knockY = boss.hitbox.knockbackY
+
+                if (player.takeHit(boss.hitbox.damage, knockX, knockY)) {
+                    hitStopManager.trigger(0.09f)
+                    floatingTexts.add(
+                        FloatingText(
+                            "-${boss.hitbox.damage.toInt()}",
+                            player.position.x + player.width / 2f,
+                            player.position.y + player.height + 0.35f,
+                            Color(1f, 0.25f, 0.25f, 1f)
+                        )
+                    )
+                }
+            }
+        }
+
+        // D. Proyektil Wind Slash Boss Mengenai Pemain
+        if (boss != null) {
+            for (proj in boss.projectiles) {
+                if (!proj.isDestroyed && proj.bounds.overlaps(player.hurtbox.bounds) && !player.health.isDead) {
+                    proj.isDestroyed = true
+                    val knockX = if (proj.velocityX > 0f) 6.5f else -6.5f
+                    if (player.takeHit(proj.damage, knockX, 3.5f)) {
+                        hitStopManager.trigger(0.06f)
+                        floatingTexts.add(
+                            FloatingText(
+                                "-${proj.damage.toInt()}",
+                                player.position.x + player.width / 2f,
+                                player.position.y + player.height + 0.35f,
+                                Color.RED
+                            )
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun evaluateGameConditions() {
@@ -298,16 +427,24 @@ class PlayScreen : Screen {
             )
         }
 
-        val aliveEnemies = enemies.count { !it.health.isDead }
-        if (aliveEnemies == 0 && stageExit.bounds.overlaps(player.bounds) && gameStatus == GameStatus.PLAYING) {
+        val isFloorCleared = if (currentFloor.isBossFloor) {
+            currentFloor.boss?.health?.isDead == true
+        } else {
+            currentFloor.enemies.all { it.health.isDead }
+        }
+
+        if (isFloorCleared && currentFloor.exitPortal.bounds.overlaps(player.bounds) && gameStatus == GameStatus.PLAYING) {
             gameStatus = GameStatus.STAGE_CLEAR
             floatingTexts.add(
-                FloatingText("VICTORY!", stageExit.x + 0.8f, stageExit.y + 3.2f, Color.GOLD, duration = 2.5f)
+                FloatingText("VICTORY!", currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 3.2f, Color.GOLD, duration = 2.5f)
             )
             if (!hasSavedStageClear) {
                 hasSavedStageClear = true
-                grantRewards(100, 50, stageExit.x + 0.8f, stageExit.y + 1.5f)
-                triggerSave("Stage Clear Floor 1")
+                val nextFloorNum = (currentFloorNumber + 1).coerceAtMost(3)
+                val expReward = if (currentFloor.isBossFloor) 250 else 100
+                val goldReward = if (currentFloor.isBossFloor) 150 else 60
+                grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
+                triggerSave("Lantai $currentFloorNumber Selesai", highestFloor = nextFloorNum)
             }
         }
     }
@@ -321,12 +458,19 @@ class PlayScreen : Screen {
                 gameStatus = GameStatus.PLAYING
             }
         } else if (gameStatus == GameStatus.STAGE_CLEAR) {
-            if (Gdx.input.isKeyJustPressed(Keys.R) || Gdx.input.isKeyJustPressed(Keys.SPACE)) {
-                player.position.set(-1f, 1.5f)
-                player.velocity.set(0f, 0f)
-                player.resetToStats()
-                activeCheckpointPos.set(-1f, 1.5f)
-                setupStage()
+            if (currentFloorNumber < 3) {
+                // Maju ke Lantai Selanjutnya
+                if (Gdx.input.isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ENTER)) {
+                    loadFloor(currentFloorNumber + 1)
+                } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+                    // Main Ulang Lantai Ini
+                    loadFloor(currentFloorNumber)
+                }
+            } else {
+                // Lantai 3 Selesai (Menara Ditaklukkan) -> Replay dari Lantai 1
+                if (Gdx.input.isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.R)) {
+                    loadFloor(1)
+                }
             }
         }
     }
@@ -383,6 +527,24 @@ class PlayScreen : Screen {
             shapeRenderer.rect(w / 2f - 110f, h - 38f, 220f, 26f)
         }
 
+        // Bar HP Boss Raksasa (Jika Berada di Boss Floor dan Boss Masih Hidup)
+        val boss = currentFloor.boss
+        if (boss != null && !boss.health.isDead) {
+            val bossBarW = 380f
+            val bossBarH = 20f
+            val bossBarX = w / 2f - bossBarW / 2f
+            val bossBarY = h - 32f
+
+            // Frame Gelap
+            shapeRenderer.color = Color(0.1f, 0.1f, 0.14f, 0.92f)
+            shapeRenderer.rect(bossBarX - 4f, bossBarY - 4f, bossBarW + 8f, bossBarH + 8f)
+
+            // Fill Bar Boss (Merah Crimson ke Oranye)
+            val bossHpPct = (boss.health.currentHp / boss.health.maxHp).coerceIn(0f, 1f)
+            shapeRenderer.color = if (boss.isPhase2) Color(1f, 0.2f, 0.1f, 1f) else Color(0.85f, 0.15f, 0.25f, 1f)
+            shapeRenderer.rect(bossBarX, bossBarY, bossBarW * bossHpPct, bossBarH)
+        }
+
         shapeRenderer.end()
 
         // 2. Render Teks HUD Informasi
@@ -414,6 +576,10 @@ class PlayScreen : Screen {
         font.color = Color(0.8f, 0.85f, 0.9f, 1f)
         font.draw(batch, "ATK: ${player.stats.attackPower.toInt()} | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 125f, h - 100f)
 
+        // Floor Name Banner
+        font.color = Color.CYAN
+        font.draw(batch, currentFloor.floorName, 320f, h - 70f)
+
         // Combo Step Indicator
         val comboText = when (player.comboManager.currentStep) {
             ComboStep.HIT_1 -> "COMBO: [HIT 1]"
@@ -436,10 +602,12 @@ class PlayScreen : Screen {
         val dodgeStatus = if (player.dodgeCooldown <= 0f) "READY" else String.format("%.1fs", player.dodgeCooldown)
         font.draw(batch, "Dodge [L/Shift]: $dodgeStatus", 450f, h - 45f)
 
-        // Musuh Tersisa
-        val remaining = enemies.count { !it.health.isDead }
-        font.color = if (remaining == 0) Color.GREEN else Color.ORANGE
-        font.draw(batch, "Sisa Musuh: $remaining / ${enemies.size}", 320f, h - 70f)
+        // Teks Bar Boss
+        if (boss != null && !boss.health.isDead) {
+            font.color = Color.WHITE
+            val enrageTag = if (boss.isPhase2) " (ENRAGED FASE 2)" else ""
+            font.draw(batch, "${boss.name} [${boss.health.currentHp.toInt()}/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 120f, h - 18f)
+        }
 
         // Notifikasi Auto-Save
         if (saveNotificationTimer > 0f) {
@@ -456,12 +624,21 @@ class PlayScreen : Screen {
         }
 
         if (gameStatus == GameStatus.STAGE_CLEAR) {
-            font.color = Color.GOLD
-            font.draw(batch, "★ STAGE CLEAR! PHASE 5 RPG PROGRESSION COMPLETED! ★", w / 2f - 210f, h / 2f + 40f)
-            font.color = Color.WHITE
-            font.draw(batch, "Player Lv.${player.stats.level} | Total Gold: ${player.stats.gold} G", w / 2f - 110f, h / 2f + 12f)
-            font.color = Color.CYAN
-            font.draw(batch, "Tekan [SPACE] atau [R] untuk Main Ulang & Naik Level", w / 2f - 170f, h / 2f - 18f)
+            if (currentFloorNumber < 3) {
+                font.color = Color.GOLD
+                font.draw(batch, "★ ${currentFloor.floorName.uppercase()} SELESAI! ★", w / 2f - 170f, h / 2f + 40f)
+                font.color = Color.WHITE
+                font.draw(batch, "Tekan [SPACE] untuk Naik ke Lantai ${currentFloorNumber + 1}", w / 2f - 160f, h / 2f + 12f)
+                font.color = Color.CYAN
+                font.draw(batch, "Tekan [R] untuk Main Ulang Lantai Ini", w / 2f - 130f, h / 2f - 18f)
+            } else {
+                font.color = Color.GOLD
+                font.draw(batch, "★ CONGRATULATIONS! SELURUH MENARA TELAH DITAKLUKKAN! ★", w / 2f - 240f, h / 2f + 40f)
+                font.color = Color.WHITE
+                font.draw(batch, "Tower Guardian Berhasil Ditumbangkan! Player Lv.${player.stats.level} | Gold: ${player.stats.gold} G", w / 2f - 220f, h / 2f + 12f)
+                font.color = Color.CYAN
+                font.draw(batch, "Tekan [SPACE] atau [R] untuk Mengulang Menara dari Lantai 1", w / 2f - 200f, h / 2f - 18f)
+            }
         }
 
         batch.end()
