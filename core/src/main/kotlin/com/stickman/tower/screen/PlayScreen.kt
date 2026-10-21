@@ -158,6 +158,7 @@ class PlayScreen(
     var bossIntroTimer: Float = 0f
     var bossHpBarAnimated: Float = 0f
     var hasPlayedBossIntro: Boolean = false
+    var lastBossIntroFloor: Int = -1
 
     // Slow Motion Super Finish & Shockwave (Fase 11)
     var bossSlowMoTimer: Float = 0f
@@ -290,11 +291,12 @@ class PlayScreen(
         nearbyTabletPrompt = null
         nearbyDialoguePrompt = null
 
-        if (currentFloor.isBossFloor && !hasPlayedBossIntro) {
+        if (currentFloor.isBossFloor && lastBossIntroFloor != currentFloorNumber) {
             isBossIntroActive = true
             bossIntroTimer = 2.8f
             bossHpBarAnimated = 0f
             hasPlayedBossIntro = true
+            lastBossIntroFloor = currentFloorNumber
             AudioManager.playBossRoar()
             HapticManager.vibrateHeavy()
             cameraManager.shake(0.8f, 0.6f)
@@ -848,7 +850,7 @@ class PlayScreen(
                             val energyGain = when {
                                 player.isUlting -> 0f
                                 player.comboManager.currentStep == ComboStep.HIT_3 -> 15f
-                                player.isSkillStriking -> 12f
+                                player.isSkillStriking || player.isSkill2Active || player.isSkill3Active -> 12f
                                 else -> 8f
                             }
                             player.ultimate.addEnergy(energyGain)
@@ -857,7 +859,7 @@ class PlayScreen(
                             val textColor = when {
                                 player.hitbox.isCritical -> Color.GOLD
                                 player.isUlting -> Color.GOLD
-                                player.isSkillStriking -> COLOR_SKILL_DMG
+                                player.isSkillStriking || player.isSkill2Active || player.isSkill3Active -> COLOR_SKILL_DMG
                                 player.comboManager.currentStep == ComboStep.HIT_3 -> Color.ORANGE
                                 else -> COLOR_ENEMY_DMG
                             }
@@ -925,7 +927,7 @@ class PlayScreen(
                         val energyGain = when {
                             player.isUlting -> 0f
                             player.comboManager.currentStep == ComboStep.HIT_3 -> 18f
-                            player.isSkillStriking -> 15f
+                            player.isSkillStriking || player.isSkill2Active || player.isSkill3Active -> 15f
                             else -> 10f
                         }
                         player.ultimate.addEnergy(energyGain)

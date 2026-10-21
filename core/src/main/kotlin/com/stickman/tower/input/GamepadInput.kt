@@ -110,12 +110,16 @@ class GamepadInput : GameInput, ControllerListener {
                 attackPressed = false
                 dodgePressed = false
                 skillPressed = false
+                skill2Pressed = false
+                skill3Pressed = false
                 ultimatePressed = false
                 pausePressed = false
                 justPressedJump = false
                 justPressedAttack = false
                 justPressedDodge = false
                 justPressedSkill = false
+                justPressedSkill2 = false
+                justPressedSkill3 = false
                 justPressedUltimate = false
                 justPressedPause = false
                 justPressedUp = false
@@ -127,6 +131,8 @@ class GamepadInput : GameInput, ControllerListener {
                 justPressedAttack = attackPressed && !wasAttack
                 justPressedDodge = dodgePressed && !wasDodge
                 justPressedSkill = skillPressed && !wasSkill
+                justPressedSkill2 = skill2Pressed && !wasSkill2
+                justPressedSkill3 = skill3Pressed && !wasSkill3
                 justPressedUltimate = ultimatePressed && !wasUltimate
                 justPressedPause = pausePressed && !wasPause
                 justPressedUp = upPressed && !wasUp
@@ -136,6 +142,8 @@ class GamepadInput : GameInput, ControllerListener {
                 wasAttack = attackPressed
                 wasDodge = dodgePressed
                 wasSkill = skillPressed
+                wasSkill2 = skill2Pressed
+                wasSkill3 = skill3Pressed
                 wasUltimate = ultimatePressed
                 wasPause = pausePressed
                 wasUp = upPressed
@@ -269,13 +277,17 @@ class GamepadInput : GameInput, ControllerListener {
                 dodgePressed = pressed
                 justPressedDodge = pressed
             }
+            BTN_Y -> {
+                skill2Pressed = pressed
+                justPressedSkill2 = pressed
+            }
             BTN_L1 -> {
                 skillPressed = pressed
                 justPressedSkill = pressed
             }
             BTN_R1 -> {
-                ultimatePressed = pressed
-                justPressedUltimate = pressed
+                skill3Pressed = pressed
+                justPressedSkill3 = pressed
             }
             BTN_START -> {
                 pausePressed = pressed

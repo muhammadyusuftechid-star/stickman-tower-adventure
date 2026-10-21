@@ -131,6 +131,23 @@ class GamepadAndTouchSettingsTest {
         assertFalse(gamepad.isDownJustPressed())
         gamepad.setButtonPressedForTesting(GamepadInput.BTN_DOWN, false)
         gamepad.update()
+
+        // Test Multi-Skill: BTN_Y (Skill 2) dan BTN_R1 (Skill 3)
+        gamepad.setButtonPressedForTesting(GamepadInput.BTN_Y, true)
+        gamepad.update()
+        assertTrue(gamepad.isSkill2JustPressed())
+        gamepad.update()
+        assertFalse(gamepad.isSkill2JustPressed())
+        gamepad.setButtonPressedForTesting(GamepadInput.BTN_Y, false)
+        gamepad.update()
+
+        gamepad.setButtonPressedForTesting(GamepadInput.BTN_R1, true)
+        gamepad.update()
+        assertTrue(gamepad.isSkill3JustPressed())
+        gamepad.update()
+        assertFalse(gamepad.isSkill3JustPressed())
+        gamepad.setButtonPressedForTesting(GamepadInput.BTN_R1, false)
+        gamepad.update()
     }
 
     @Test

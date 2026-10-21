@@ -150,7 +150,7 @@ class Player(
     var isGrounded: Boolean = false
         private set
     var facingRight: Boolean = true
-        private set
+        internal set
 
     private var coyoteTimer: Float = 0f
     private var jumpBufferTimer: Float = 0f
@@ -198,7 +198,7 @@ class Player(
 
         if (!health.isDead) {
             // 1. Cek Pemicu Aksi Khusus
-            handleActionTriggers(input)
+            handleActionTriggers(input, platforms)
         }
 
         // 2. Pembaruan State Khusus (Dodge, Skill, Ultimate, Combo)
@@ -278,7 +278,7 @@ class Player(
         return true
     }
 
-    private fun handleActionTriggers(input: GameInput) {
+    private fun handleActionTriggers(input: GameInput, platforms: List<Platform>) {
         // Pemicu Dodge Roll
         if (input.isDodgeJustPressed() && !isDodging && !isSkillStriking && !isSkill2Active && !isSkill3Active && !isUlting && dodgeCooldown <= 0f) {
             isDodging = true
@@ -447,7 +447,21 @@ class Player(
                         AudioManager.playSlashHeavy()
                     }
                     CharacterArchetype.AGILE -> {
-                        position.x += dir * 4.5f
+                        var targetX = position.x + dir * 4.5f
+                        // Cek tabrakan terhadap platform solid (non one-way) di sepanjang lintasan teleportasi agar tidak tembus dinding
+                        for (platform in platforms) {
+                            if (platform.isOneWay) continue
+                            val yOverlap = (position.y < platform.top) && (position.y + height > platform.bottom)
+                            if (yOverlap) {
+                                if (dir > 0f && position.x + width <= platform.left && targetX + width > platform.left) {
+                                    targetX = platform.left - width - 0.05f
+                                } else if (dir < 0f && position.x >= platform.right && targetX < platform.right) {
+                                    targetX = platform.right + 0.05f
+                                }
+                            }
+                        }
+                        position.x = targetX
+                        velocity.x = dir * 1.5f
                         bounds.setPosition(position.x, position.y)
                         val (baseDmg, _) = stats.calculateDamage(44f)
                         hitbox.damage = baseDmg * archetype.baseDamageMultiplier * parryBonus
@@ -772,7 +786,7 @@ class Player(
 
     private fun updateState() {
         state = when {
-            isUlting || isSkillStriking || attackPhase != AttackPhase.INACTIVE -> CharacterState.ATTACK
+            isUlting || isSkillStriking || isSkill2Active || isSkill3Active || attackPhase != AttackPhase.INACTIVE -> CharacterState.ATTACK
             health.isFlashing -> CharacterState.HURT
             !isGrounded && velocity.y > 0.5f -> CharacterState.JUMP
             !isGrounded && velocity.y <= 0.5f -> CharacterState.FALL
@@ -904,7 +918,7 @@ class Player(
             health.isFlashing -> Color.RED
             isParrying -> COLOR_PARRY_BODY
             isDodging -> COLOR_DODGE_BODY
-            isSkillStriking -> COLOR_SKILL_BODY
+            isSkillStriking || isSkill2Active || isSkill3Active -> COLOR_SKILL_BODY
             isUlting || hasParryBuff -> Color.GOLD
             else -> Color.WHITE
         }
@@ -984,7 +998,7 @@ class Player(
             armFrontHandY = shoulderY + 0.2f
             swordTipX = armFrontHandX - 0.8f * lookDir
             swordTipY = armFrontHandY + 0.6f
-        } else if (attackPhase == AttackPhase.ACTIVE || isSkillStriking) {
+        } else if (attackPhase == AttackPhase.ACTIVE || isSkillStriking || isSkill2Active || isSkill3Active) {
             armFrontHandX = centerX + 0.45f * lookDir
             armFrontHandY = shoulderY - 0.05f
             swordTipX = armFrontHandX + 1.0f * lookDir
