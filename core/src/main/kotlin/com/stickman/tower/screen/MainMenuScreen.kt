@@ -40,16 +40,31 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     }
     private val glyphLayout = GlyphLayout()
 
-    // Partikel Latar Belakang
+    // Partikel Latar Belakang (Recycled in-place, zero GC allocation)
     private class MenuParticle(
-        val pos: Vector2,
-        val vel: Vector2,
-        val size: Float,
-        val color: Color,
-        val maxLife: Float
+        val pos: Vector2 = Vector2(),
+        val vel: Vector2 = Vector2(),
+        var size: Float = 0f,
+        var color: Color = Color.WHITE,
+        var maxLife: Float = 1f
     ) {
         var life: Float = 0f
         val isExpired: Boolean get() = life >= maxLife
+
+        fun reset(initial: Boolean = false) {
+            val x = MathUtils.random(0f, 1280f)
+            val y = if (initial) MathUtils.random(0f, 720f) else -10f
+            pos.set(x, y)
+            val vy = MathUtils.random(25f, 75f)
+            val vx = MathUtils.random(-15f, 15f)
+            vel.set(vx, vy)
+            size = MathUtils.random(2f, 5f)
+            val isCyan = MathUtils.randomBoolean(0.6f)
+            color = if (isCyan) Color(0.2f, 0.8f, 1f, MathUtils.random(0.3f, 0.7f))
+                    else Color(1f, 0.75f, 0.2f, MathUtils.random(0.3f, 0.7f))
+            maxLife = MathUtils.random(8f, 16f)
+            life = 0f
+        }
     }
     private val particles = mutableListOf<MenuParticle>()
 
@@ -73,21 +88,10 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         currentSaveData = SaveManager.load()
         particles.clear()
         for (i in 0 until 45) {
-            spawnParticle(initial = true)
+            val p = MenuParticle()
+            p.reset(initial = true)
+            particles.add(p)
         }
-    }
-
-    private fun spawnParticle(initial: Boolean = false) {
-        val x = MathUtils.random(0f, 1280f)
-        val y = if (initial) MathUtils.random(0f, 720f) else -10f
-        val vy = MathUtils.random(25f, 75f)
-        val vx = MathUtils.random(-15f, 15f)
-        val size = MathUtils.random(2f, 5f)
-        val isCyan = MathUtils.randomBoolean(0.6f)
-        val col = if (isCyan) Color(0.2f, 0.8f, 1f, MathUtils.random(0.3f, 0.7f))
-                  else Color(1f, 0.75f, 0.2f, MathUtils.random(0.3f, 0.7f))
-        val life = MathUtils.random(8f, 16f)
-        particles.add(MenuParticle(Vector2(x, y), Vector2(vx, vy), size, col, life))
     }
 
     override fun render(delta: Float) {
@@ -260,15 +264,12 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     }
 
     private fun updateParticles(delta: Float) {
-        val it = particles.iterator()
-        while (it.hasNext()) {
-            val p = it.next()
+        for (p in particles) {
             p.life += delta
             p.pos.x += p.vel.x * delta
             p.pos.y += p.vel.y * delta
             if (p.isExpired || p.pos.y > 730f) {
-                it.remove()
-                spawnParticle(initial = false)
+                p.reset(initial = false)
             }
         }
     }
