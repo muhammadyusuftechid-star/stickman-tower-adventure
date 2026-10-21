@@ -45,6 +45,7 @@ import com.stickman.tower.world.StoryDialogue
 import com.stickman.tower.world.TowerFloor
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
+import com.stickman.tower.world.ProceduralBackgroundRenderer
 import kotlin.math.sin
 
 enum class GameMode {
@@ -73,6 +74,7 @@ class PlayScreen(
     }
 
     private val cameraManager = CameraManager()
+    private val backgroundRenderer = ProceduralBackgroundRenderer()
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
 
@@ -726,12 +728,13 @@ class PlayScreen(
             evaluateGameConditions()
         }
 
-        // 4. Perbarui Teks Floating Damage
-        val iterator = floatingTexts.iterator()
-        while (iterator.hasNext()) {
-            val ft = iterator.next()
+        // 4. Perbarui Teks Floating Damage (Zero-Allocation Reverse Indexed Loop)
+        for (i in floatingTexts.indices.reversed()) {
+            val ft = floatingTexts[i]
             ft.update(updateDelta)
-            if (ft.isExpired) iterator.remove()
+            if (ft.isExpired) {
+                floatingTexts.removeAt(i)
+            }
         }
 
         // 5. Render Objek Dunia 2D & Partikel (World Space: Meters)
@@ -742,9 +745,22 @@ class PlayScreen(
         shapeRenderer.projectionMatrix = uiCamera.combined
         batch.projectionMatrix = uiCamera.combined
 
-        // 7. Render Virtual Controller (On-Screen Touch Buttons untuk Android/Desktop)
-        virtualController.render(
+        // 7. Pass UI Geometri (Consolidated ShapeRenderer Pass: Virtual Controller + HUD)
+        virtualController.renderShapes(
             shapeRenderer,
+            player.skill1,
+            player.skill2,
+            player.skill3,
+            player.ultimate
+        )
+        renderHUDShapes()
+        if (isBossIntroActive) {
+            renderBossIntroShapes()
+        }
+
+        // 8. Pass UI Teks & Ikon (Consolidated Single Continuous SpriteBatch Pass)
+        batch.begin()
+        virtualController.renderText(
             batch,
             FontManager.smallFont,
             player.skill1,
@@ -752,16 +768,13 @@ class PlayScreen(
             player.skill3,
             player.ultimate
         )
-
-        // 8. Render Enhanced In-Game RPG HUD
-        renderHUD()
-
-        // 9. Render Boss Cinematic Presentation Overlay (Fase 11)
+        renderHUDText()
         if (isBossIntroActive) {
-            renderBossIntroOverlay()
+            renderBossIntroText()
         }
+        batch.end()
 
-        // 10. Developer Tools & Profiler Overlay (Senior Tools Architecture)
+        // 9. Developer Tools & Profiler Overlay (Senior Tools Architecture)
         devTools.render(shapeRenderer, batch, uiCamera, player, currentFloor, particleManager.activeParticleCount)
     }
 
@@ -771,14 +784,18 @@ class PlayScreen(
         val targetCamY = if (isBossIntroActive && currentFloor.boss != null) currentFloor.boss!!.position.y + 1.2f else player.position.y + player.height / 2f + 0.5f
         cameraManager.update(targetCamX, targetCamY, delta)
 
-        val (clearR, clearG, clearB) = when {
-            currentFloor.isSafeZone -> Triple(0.14f, 0.08f, 0.04f)
-            currentFloor.floorNumber == 9 -> Triple(0.16f, 0.03f, 0.05f)
-            currentFloor.floorNumber in 4..5 -> Triple(0.10f, 0.05f, 0.15f)
-            currentFloor.floorNumber in 7..8 -> Triple(0.04f, 0.05f, 0.12f)
-            currentFloor.floorNumber == 10 -> Triple(0.02f, 0.02f, 0.05f)
-            currentFloor.isBossFloor -> Triple(0.12f, 0.08f, 0.12f)
-            else -> Triple(0.08f, 0.09f, 0.13f)
+        // Zero-Allocation Clear Color Selection
+        val clearR: Float
+        val clearG: Float
+        val clearB: Float
+        when {
+            currentFloor.isSafeZone -> { clearR = 0.14f; clearG = 0.08f; clearB = 0.04f }
+            currentFloor.floorNumber == 9 -> { clearR = 0.16f; clearG = 0.03f; clearB = 0.05f }
+            currentFloor.floorNumber in 4..5 -> { clearR = 0.10f; clearG = 0.05f; clearB = 0.15f }
+            currentFloor.floorNumber in 7..8 -> { clearR = 0.04f; clearG = 0.05f; clearB = 0.12f }
+            currentFloor.floorNumber == 10 -> { clearR = 0.02f; clearG = 0.02f; clearB = 0.05f }
+            currentFloor.isBossFloor -> { clearR = 0.12f; clearG = 0.08f; clearB = 0.12f }
+            else -> { clearR = 0.08f; clearG = 0.09f; clearB = 0.13f }
         }
         ScreenUtils.clear(clearR, clearG, clearB, 1f)
 
@@ -789,6 +806,16 @@ class PlayScreen(
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // 1. Render Atmospheric Parallax Background (Zero-Allocation Layered Depth)
+        backgroundRenderer.render(
+            shapeRenderer,
+            cameraManager.camera,
+            currentFloor.floorNumber,
+            hudAnimTime,
+            currentFloor.mapBounds.width
+        )
+
         for (platform in currentFloor.platforms) platform.render(shapeRenderer)
         for (spike in currentFloor.spikes) spike.render(shapeRenderer)
         for (chest in currentFloor.chests) chest.render(shapeRenderer)
@@ -1441,6 +1468,14 @@ class PlayScreen(
     }
 
     private fun renderHUD() {
+        renderHUDShapes()
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+        renderHUDText()
+        batch.end()
+    }
+
+    private fun renderHUDShapes() {
         val w = 1280f
         val h = 720f
 
@@ -1658,11 +1693,29 @@ class PlayScreen(
             shapeRenderer.rectLine(w / 2f - 140f, h / 2f - 84f, w / 2f + 140f, h / 2f - 84f, 2.5f)
         }
 
-        shapeRenderer.end()
+        // Kotak Prompt Prasasti (Dipindahkan ke Shape Pass agar tidak menginterupsi Batch Pass)
+        if (gameStatus == GameStatus.PLAYING && nearbyTabletPrompt != null) {
+            val pw = 360f
+            val ph = 36f
+            val px = (w - pw) / 2f
+            val py = 135f
+            shapeRenderer.setColor(0.08f, 0.12f, 0.18f, 0.90f)
+            shapeRenderer.rect(px, py, pw, ph)
+            shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 0.90f)
+            shapeRenderer.rectLine(px, py + ph, px + pw, py + ph, 2f)
+        }
 
-        // 2. Render Teks HUD Informasi
-        batch.projectionMatrix = uiCamera.combined
-        batch.begin()
+        renderActBannerShapes()
+        renderAchievementBannerShapes()
+
+        shapeRenderer.end()
+    }
+
+    private fun renderHUDText() {
+        val w = 1280f
+        val h = 720f
+        val expPercent = (player.stats.currentExp.toFloat() / player.stats.requiredExp.toFloat()).coerceIn(0f, 1f)
+        val boss = currentFloor.boss
 
         // Level Badge Text
         val smallF = FontManager.smallFont
@@ -1824,18 +1877,8 @@ class PlayScreen(
                 val px = (w - pw) / 2f
                 val py = 135f
 
-                batch.end()
-                shapeRenderer.projectionMatrix = uiCamera.combined
-                shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-                shapeRenderer.setColor(0.08f, 0.12f, 0.18f, 0.90f)
-                shapeRenderer.rect(px, py, pw, ph)
-                shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 0.90f)
-                shapeRenderer.rectLine(px, py + ph, px + pw, py + ph, 2f)
-                shapeRenderer.end()
-
-                batch.begin()
                 regF.color = Color.GOLD
-                regF.draw(batch, promptText, px + 15f, py + 25f)
+                regF.draw(batch, promptText, px + (pw - glyphLayout.width) / 2f, py + 25f)
 
                 if (Gdx.input.justTouched()) {
                     uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
@@ -1849,10 +1892,8 @@ class PlayScreen(
             }
         }
 
-        renderAchievementBanner()
-        renderActBannerOverlay()
-
-        batch.end()
+        renderAchievementBannerText()
+        renderActBannerText()
     }
 
     private fun handlePauseInput() {
@@ -2213,6 +2254,14 @@ class PlayScreen(
     }
 
     private fun renderBossIntroOverlay() {
+        renderBossIntroShapes()
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+        renderBossIntroText()
+        batch.end()
+    }
+
+    private fun renderBossIntroShapes() {
         val w = 1280f
         val h = 720f
 
@@ -2249,9 +2298,14 @@ class PlayScreen(
         shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW, cardY + cardH, 2f)
 
         shapeRenderer.end()
+    }
 
-        batch.projectionMatrix = uiCamera.combined
-        batch.begin()
+    private fun renderBossIntroText() {
+        val w = 1280f
+        val barHeight = 85f
+        val cardH = 100f
+        val cardY = 190f
+
         val titleF = FontManager.titleFont
         val regF = FontManager.regularFont
         val smallF = FontManager.smallFont
@@ -2275,8 +2329,6 @@ class PlayScreen(
         val skipText = "[TOUCH / SPACE / ENTER] Skip Intro"
         glyphLayout.setText(smallF, skipText)
         smallF.draw(batch, skipText, (w - glyphLayout.width) / 2f, barHeight / 2f + 6f)
-
-        batch.end()
     }
 
     private fun handleLoreTabletInput() {
@@ -2456,7 +2508,7 @@ class PlayScreen(
         batch.end()
     }
 
-    private fun renderActBannerOverlay() {
+    private fun renderActBannerShapes() {
         if (actBannerTimer <= 0f) return
         val w = 1280f
 
@@ -2470,14 +2522,6 @@ class PlayScreen(
 
         if (alpha <= 0.01f) return
 
-        batch.end()
-
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-
-        shapeRenderer.projectionMatrix = uiCamera.combined
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-
         // Background banner strip
         val bannerY = 590f
         val bannerH = 85f
@@ -2488,10 +2532,24 @@ class PlayScreen(
         shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 0.85f * alpha)
         shapeRenderer.rectLine(0f, bannerY, w, bannerY, 1.5f)
         shapeRenderer.rectLine(0f, bannerY + bannerH, w, bannerY + bannerH, 1.5f)
+    }
 
-        shapeRenderer.end()
+    private fun renderActBannerText() {
+        if (actBannerTimer <= 0f) return
+        val w = 1280f
 
-        batch.begin()
+        val alpha = if (actBannerTimer > 2.8f) {
+            (3.5f - actBannerTimer) / 0.7f
+        } else if (actBannerTimer < 0.7f) {
+            actBannerTimer / 0.7f
+        } else {
+            1.0f
+        }.coerceIn(0f, 1f)
+
+        if (alpha <= 0.01f) return
+
+        val bannerY = 590f
+        val bannerH = 85f
         val titleF = FontManager.titleFont
         val regF = FontManager.regularFont
 
@@ -2562,24 +2620,13 @@ class PlayScreen(
         shapeRenderer.circle(ariaX, hoverY, 0.10f, 10)
     }
 
-    private fun renderAchievementBanner() {
+    private fun renderAchievementBannerShapes() {
         val banner = activeAchievementBanner ?: return
         val w = 1280f
         val bw = 460f
         val bh = 56f
         val bx = (w - bw) / 2f
         val by = 645f
-
-        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
-        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
-
-        batch.end()
-
-        Gdx.gl.glEnable(GL20.GL_BLEND)
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
-
-        shapeRenderer.projectionMatrix = uiCamera.combined
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Pill Latar Belakang Glassmorphism
         shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.95f)
@@ -2596,10 +2643,17 @@ class PlayScreen(
         // Badge Kotak Trofi
         shapeRenderer.setColor(0.85f, 0.65f, 0.15f, 0.35f)
         shapeRenderer.rect(bx + 8f, by + 8f, 40f, 40f)
+    }
 
-        shapeRenderer.end()
+    private fun renderAchievementBannerText() {
+        val banner = activeAchievementBanner ?: return
+        val w = 1280f
+        val bw = 460f
+        val bx = (w - bw) / 2f
+        val by = 645f
 
-        batch.begin()
+        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
+        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
 
         headF.setColor(1f, 0.88f, 0.25f, 1f)
         headF.draw(batch, "★", bx + 19f, by + 36f)
@@ -2623,6 +2677,7 @@ class PlayScreen(
     override fun hide() {}
 
     override fun dispose() {
+        particleManager.clear()
         shapeRenderer.dispose()
         batch.dispose()
     }

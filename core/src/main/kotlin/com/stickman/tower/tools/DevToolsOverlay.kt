@@ -217,28 +217,32 @@ class DevToolsOverlay {
         regF.setColor(1f, 1f, 1f, 1f)
         regF.draw(batch, "X", btnClose.x + 13f, btnClose.y + 25f)
 
-        // Metrik Realtime
+        // Metrik Realtime & Profiler Engine
         val fps = Gdx.graphics.framesPerSecond
         val deltaMs = (Gdx.graphics.deltaTime * 1000f).toInt()
-        val memUsedMB = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024)
+        val javaHeapMB = (Gdx.app?.javaHeap ?: (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory())) / (1024 * 1024)
+        val nativeHeapMB = (Gdx.app?.nativeHeap ?: 0L) / (1024 * 1024)
         val memMaxMB = Runtime.getRuntime().maxMemory() / (1024 * 1024)
+        val drawCalls = batch.renderCalls
+        val screenRes = if (Gdx.graphics != null) "${Gdx.graphics.width}x${Gdx.graphics.height}" else "1280x720"
+        val refreshHz = try { Gdx.graphics.displayMode?.refreshRate ?: 60 } catch (_: Throwable) { 60 }
+        val gpuRenderer = try { Gdx.gl?.glGetString(GL20.GL_RENDERER) ?: "GLES" } catch (_: Throwable) { "GLES" }
 
         regF.color = if (fps >= 55) Color.GREEN else if (fps >= 30) Color.YELLOW else Color.RED
-        regF.draw(batch, "FPS: $fps (${deltaMs}ms)", 250f, 565f)
+        regF.draw(batch, "FPS: $fps (${deltaMs}ms) | Disp: ${screenRes}@${refreshHz}Hz | Batch Calls: $drawCalls", 250f, 570f)
 
         regF.color = Color.WHITE
-        regF.draw(batch, "Heap: ${memUsedMB}MB / ${memMaxMB}MB", 450f, 565f)
-        regF.draw(batch, "Floor: ${currentFloor.floorName}", 720f, 565f)
+        regF.draw(batch, "Mem: Java ${javaHeapMB}MB / Nat ${nativeHeapMB}MB (Max ${memMaxMB}MB) | GPU: ${gpuRenderer.take(24)}", 250f, 545f)
 
         regF.setColor(0.85f, 0.85f, 0.85f, 1f)
         val enemyCount = currentFloor.enemies.count { !it.health.isDead }
         val projCount = currentFloor.enemies.sumOf { it.projectiles.size } + (currentFloor.boss?.projectiles?.size ?: 0)
-        regF.draw(batch, "Entities: Mobs: $enemyCount | Proj: $projCount | Particles: $particleCount", 250f, 530f)
+        regF.draw(batch, "World: Floor ${currentFloor.floorNumber} (${currentFloor.floorName}) | Mobs: $enemyCount | Proj: $projCount | VFX: $particleCount", 250f, 520f)
 
         val playerGrounded = if (player.isGrounded) "GROUNDED" else "AIRBORNE"
         val pX = "%.1f".format(player.position.x)
         val pY = "%.1f".format(player.position.y)
-        regF.draw(batch, "Player: Pos($pX, $pY) | $playerGrounded | HP:${player.health.currentHp.toInt()}/${player.health.maxHp.toInt()}", 250f, 500f)
+        regF.draw(batch, "Player: Pos($pX, $pY) | $playerGrounded | HP:${player.health.currentHp.toInt()}/${player.health.maxHp.toInt()}", 250f, 495f)
 
         // Label Tombol
         renderButtonText(batch, regF, btnGodMode, if (isGodMode) "GOD MODE: ON" else "GOD MODE: OFF")

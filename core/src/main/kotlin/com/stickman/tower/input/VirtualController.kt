@@ -254,6 +254,24 @@ class VirtualController : GameInput {
         ultimate: UltimateEnergy
     ) {
         if (!isVisible) return
+        renderShapes(shapeRenderer, skill1, skill2, skill3, ultimate)
+        val needBatch = !batch.isDrawing
+        if (needBatch) batch.begin()
+        renderText(batch, font, skill1, skill2, skill3, ultimate)
+        if (needBatch) batch.end()
+    }
+
+    /**
+     * Pass 1 & 2: Merender semua geometri dan outline tombol virtual controller.
+     */
+    fun renderShapes(
+        shapeRenderer: ShapeRenderer,
+        skill1: Skill,
+        skill2: Skill,
+        skill3: Skill,
+        ultimate: UltimateEnergy
+    ) {
+        if (!isVisible) return
 
         val op = settings.opacity
         val sc = settings.scale
@@ -455,9 +473,25 @@ class VirtualController : GameInput {
         }
 
         shapeRenderer.end()
+    }
 
-        // 3. Render Teks Label & Countdown Waktu Cooldown (Batch Pass)
-        batch.begin()
+    /**
+     * Pass 3: Merender semua label teks dan counter cooldown tombol virtual controller.
+     * Dapat dipanggil di dalam active SpriteBatch pass tanpa memicu shader/texture swaps tambahan.
+     */
+    fun renderText(
+        batch: SpriteBatch,
+        font: BitmapFont,
+        skill1: Skill,
+        skill2: Skill,
+        skill3: Skill,
+        ultimate: UltimateEnergy
+    ) {
+        if (!isVisible) return
+
+        val op = settings.opacity
+        val sc = settings.scale
+
         font.setColor(0.92f, 0.92f, 0.96f, 0.88f * op)
 
         font.draw(batch, "ATK", btnAttack.x - 14f * sc, btnAttack.y - 24f * sc)
@@ -502,7 +536,5 @@ class VirtualController : GameInput {
             font.setColor(0.95f, 0.88f, 0.70f, 0.85f * op)
             font.draw(batch, "${(ultimate.energyPercent * 100).toInt()}%", btnUltimate.x - 14f * sc, btnUltimate.y + 4f * sc)
         }
-
-        batch.end()
     }
 }
