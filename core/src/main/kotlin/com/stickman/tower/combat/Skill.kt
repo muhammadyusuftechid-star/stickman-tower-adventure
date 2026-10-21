@@ -20,11 +20,11 @@ class Skill(
     }
 
     /**
-     * Mengaktifkan skill jika cooldown telah selesai.
+     * Mengaktifkan skill jika cooldown telah selesai, dengan dukungan cooldown reduction multiplier.
      */
-    fun use(): Boolean {
+    fun use(multiplier: Float = 1.0f): Boolean {
         if (isReady) {
-            remainingCooldown = cooldown
+            remainingCooldown = cooldown * multiplier.coerceIn(0.2f, 1.0f)
             return true
         }
         return false

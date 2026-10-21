@@ -51,12 +51,12 @@ Dokumen ini memuat panduan, rekomendasi teknis, dan peta jalan fitur (*strategic
 
 ## 💎 2. Progresi RPG & Replayability (*Meta-Progression & Roguelite*)
 
-### 2.1 Toko Blacksmith & Relic Merchant (Lobby Spire)
+### 2.1 Toko Blacksmith & Relic Merchant (Lobby Spire) — ✅ Selesai (Fase 10)
 Mengoptimalkan perolehan **Gold** yang saat ini didapat dari membunuh musuh dan membuka peti:
-* **Upgrade Senjata Permanen:**
-  * *Sharpening Stone:* Meningkatkan Flat ATK (+5 per tingkat).
-  * *Hollow Edge:* Meningkatkan Critical Chance (+2% per tingkat).
-  * *Lightweight Hilt:* Meningkatkan kecepatan tebasan (*Attack Speed* +4%).
+* **Upgrade Senjata Permanen (Blacksmith Forge):**
+  * *Sharpening Stone:* Meningkatkan Flat ATK (+4 per tingkat, max tier 5).
+  * *Hollow Edge:* Meningkatkan Critical Chance (+2.5% per tingkat, max tier 5).
+  * *Lightweight Hilt:* Meningkatkan kecepatan tebasan & gerak (*Attack & Movement Speed* +3.5% per tingkat).
 * **Relik Pasif Acak (Dapat Dikoleksi Tiap Run):**
   * 🩸 *Vampiric Fang:* Memulihkan 4% Max HP setiap kali menumbangkan musuh.
   * ⚡ *Thunder Charm:* Menyambar musuh terdekat dengan kilat setiap kali kombo menyentuh 10x.
@@ -130,7 +130,7 @@ Mengoptimalkan perolehan **Gold** yang saat ini didapat dari membunuh musuh dan 
 | Tahap | Prioritas | Fitur Utama | Estimasi Dampak |
 | :--- | :--- | :--- | :--- |
 | **Fase 9** | ✅ Selesai | Varian Musuh Ranged & Haptic Feedback Android | Menambah variasi pertarungan & rasa kontrol fisik yang nyata |
-| **Fase 10** | 🔥 Tinggi | Toko Blacksmith (Senjata) & Relik Pasif | Memberikan nilai guna nyata pada perolehan Gold |
+| **Fase 10** | ✅ Selesai | Toko Blacksmith (Senjata) & Relik Pasif | Memberikan nilai guna nyata pada perolehan Gold |
 | **Fase 11** | ⚡ Menengah | Sistem Parry / Counter-Attack & Intro Animasi Bos | Meningkatkan kepuasan aksi (*skill ceiling*) & dramatisasi visual |
 | **Fase 12** | ⚡ Menengah | Dukungan Gamepad (PC/Android) & Kustomisasi Tombol Sentuh | Kenyamanan ergonomis bermain di berbagai tipe perangkat |
 | **Fase 13** | 🌟 Lanjutan | Mode Menara Tanpa Batas (*Endless Ascent*) & Talent Tree | Replay value tak terbatas dan kedalaman pembangunan karakter (*builds*) |

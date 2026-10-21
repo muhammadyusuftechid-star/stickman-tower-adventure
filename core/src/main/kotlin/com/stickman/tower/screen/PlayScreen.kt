@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
@@ -25,6 +26,8 @@ import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.input.CompositeInput
 import com.stickman.tower.input.KeyboardInput
 import com.stickman.tower.input.VirtualController
+import com.stickman.tower.relic.RelicManager
+import com.stickman.tower.relic.RelicType
 import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.rpg.SaveManager
 import com.stickman.tower.ui.FontManager
@@ -48,6 +51,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private val uiCamera = OrthographicCamera()
     private val uiViewport = FitViewport(1280f, 720f, uiCamera)
     private val uiTouchVec = Vector3()
+    private val glyphLayout = GlyphLayout()
 
     // Dual Input Layer: Keyboard Desktop + Virtual Controller Mobile Touch
     private val keyboardInput = KeyboardInput()
@@ -63,10 +67,16 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     // Manajer Partikel VFX
     val particleManager = ParticleManager()
 
+    // Manajer Relik Pasif (Fase 10)
+    val relicManager = RelicManager()
+    var isChoosingRelic: Boolean = false
+    var relicOffer: List<RelicType> = emptyList()
+    var relicSelectedIndex: Int = 0
+
     // Sistem Pause Menu
     var isPaused: Boolean = false
     private var pauseSelectedIndex: Int = 0
-    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -102,6 +112,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         AudioManager.init()
         HapticManager.init()
         FontManager.init()
+        val freshSave = SaveManager.load()
+        stats.loadFromSaveData(freshSave)
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
             uiViewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
         }
@@ -131,6 +143,9 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         player.position.set(currentFloor.spawnX, currentFloor.spawnY)
         player.velocity.set(0f, 0f)
+        player.maxAirJumps = relicManager.getMaxAirJumps()
+        player.airJumpsRemaining = player.maxAirJumps
+        player.cooldownMultiplier = relicManager.getCooldownMultiplier()
         activeCheckpointPos.set(currentFloor.spawnX, currentFloor.spawnY)
 
         hasSavedStageClear = false
@@ -216,6 +231,17 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             return
         }
 
+        if (isChoosingRelic) {
+            handleRelicChoiceInput()
+            renderWorld(0f)
+            uiViewport.apply()
+            shapeRenderer.projectionMatrix = uiCamera.combined
+            batch.projectionMatrix = uiCamera.combined
+            renderHUD()
+            renderRelicChoiceOverlay()
+            return
+        }
+
         // Perbarui Input Virtual Controller dengan uiViewport
         input.update(uiViewport)
         handleStatusInput()
@@ -297,6 +323,9 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                             particleManager.spawnHitSparks(chest.x + chest.width / 2f, chest.y + chest.height / 2f, count = 22, color = Color.GOLD)
                             floatingTexts.add(FloatingText("+${chest.goldReward} G", chest.x + 0.2f, chest.y + 1.2f, Color.YELLOW, duration = 1.4f))
                             floatingTexts.add(FloatingText("+${chest.healReward.toInt()} HP", chest.x + 0.2f, chest.y + 1.7f, Color.GREEN, duration = 1.4f))
+                            if (currentFloorNumber == 2 && chest.x > 20f && relicManager.activeRelics.size < 2) {
+                                triggerRelicChoice()
+                            }
                             triggerSave("Peti Terbuka")
                         }
                     }
@@ -320,6 +349,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     AudioManager.playDeath()
                     particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 16, color = Color.RED)
                     grantRewards(enemy.expReward, enemy.goldReward, enemy.position.x + enemy.width / 2f, enemy.position.y + 1f)
+                    relicManager.onEnemyDefeated(player, floatingTexts, particleManager)
                 }
             }
 
@@ -441,9 +471,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                         val knockY = player.hitbox.knockbackY
 
                         if (enemy.takeHit(player.hitbox.damage, knockX, knockY)) {
+                            val combo = player.comboManager.registerHit()
                             hitStopManager.trigger(0.06f)
                             AudioManager.playHit()
                             particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 10, color = if (player.hitbox.isCritical) Color.GOLD else Color.WHITE)
+                            relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
 
                             val energyGain = when {
                                 player.isUlting -> 0f
@@ -485,10 +517,12 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     val knockY = player.hitbox.knockbackY
 
                     if (boss.takeHit(player.hitbox.damage, knockX, knockY)) {
+                        val combo = player.comboManager.registerHit()
                         bossGhostDelay = 0.35f
                         hitStopManager.trigger(0.06f)
                         AudioManager.playHit()
                         particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 14, color = Color.ORANGE)
+                        relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
 
                         val energyGain = when {
                             player.isUlting -> 0f
@@ -643,6 +677,10 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 val goldReward = if (currentFloor.isBossFloor) 150 else 60
                 grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
                 triggerSave("Lantai $currentFloorNumber Selesai", highestFloor = nextFloorNum)
+
+                if (currentFloorNumber == 1 && relicManager.activeRelics.isEmpty()) {
+                    triggerRelicChoice()
+                }
             }
         }
     }
@@ -849,7 +887,15 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         regF.color = Color.GOLD
         regF.draw(batch, "❖ ${player.stats.gold} Coins", 15f, h - 100f)
         regF.color = Color(0.8f, 0.85f, 0.9f, 1f)
-        regF.draw(batch, "ATK: ${player.stats.attackPower.toInt()} | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 145f, h - 100f)
+        val atkBonusStr = if (player.stats.weaponAtkBonus > 0f) " (+${player.stats.weaponAtkBonus.toInt()})" else ""
+        regF.draw(batch, "ATK: ${player.stats.attackPower.toInt()}$atkBonusStr | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 145f, h - 100f)
+
+        // Active Relics Display
+        if (relicManager.activeRelics.isNotEmpty()) {
+            val relicStr = relicManager.activeRelics.joinToString("  ") { "${it.iconRune} ${it.title}" }
+            smallF.color = Color(0.3f, 0.85f, 1f, 1f)
+            smallF.draw(batch, "RELICS: $relicStr", 15f, h - 122f)
+        }
 
         // Floor Name Banner
         headF.color = Color.CYAN
@@ -962,9 +1008,9 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             val touchY = uiTouchVec.y
             val w = 1280f
             val h = 720f
-            val menuW = 280f
-            val startY = h / 2f + 55f
-            val itemH = 44f
+            val menuW = 300f
+            val startY = h / 2f + 85f
+            val itemH = 42f
             val menuX = w / 2f - menuW / 2f
 
             for (i in pauseMenuItems.indices) {
@@ -989,15 +1035,22 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 loadFloor(currentFloorNumber)
                 AudioManager.playSlashLight()
             }
-            2 -> { // Toggle Audio
+            2 -> { // Blacksmith Forge
+                isPaused = false
+                AudioManager.playSlashLight()
+                if (game != null) {
+                    game.setScreen(BlacksmithScreen(game))
+                }
+            }
+            3 -> { // Toggle Audio
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            3 -> { // Toggle Haptic
+            4 -> { // Toggle Haptic
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            4 -> { // Main Menu
+            5 -> { // Main Menu
                 isPaused = false
                 AudioManager.playDodge()
                 if (game != null) {
@@ -1018,8 +1071,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.rect(0f, 0f, w, h)
 
         // Pause Menu Card (Dark Obsidian with Gold Accent)
-        val cardW = 340f
-        val cardH = 330f
+        val cardW = 360f
+        val cardH = 380f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
         shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
@@ -1028,11 +1081,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
-        val startY = h / 2f + 55f
-        val itemH = 44f
+        val startY = h / 2f + 85f
+        val itemH = 42f
         val btnY = startY - (pauseSelectedIndex * itemH)
         shapeRenderer.color = Color(0.15f, 0.35f, 0.65f, 0.75f)
-        shapeRenderer.rect(cardX + 25f, btnY - 5f, cardW - 50f, 36f)
+        shapeRenderer.rect(cardX + 25f, btnY - 5f, cardW - 50f, 34f)
 
         shapeRenderer.end()
 
@@ -1046,19 +1099,197 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         for (i in pauseMenuItems.indices) {
             val itemText = when (i) {
-                2 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                3 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                3 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                4 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> pauseMenuItems[i]
             }
-            val curY = startY - (i * itemH) + 20f
+            val curY = startY - (i * itemH) + 18f
             if (i == pauseSelectedIndex) {
                 regF.color = Color.YELLOW
-                regF.draw(batch, "> $itemText <", w / 2f - 70f, curY)
+                regF.draw(batch, "> $itemText <", w / 2f - 75f, curY)
             } else {
                 regF.color = Color.WHITE
-                regF.draw(batch, itemText, w / 2f - 55f, curY)
+                regF.draw(batch, itemText, w / 2f - 60f, curY)
             }
         }
+        batch.end()
+    }
+
+    fun triggerRelicChoice() {
+        val available = RelicType.getRandomRelics(3, relicManager.activeRelics)
+        if (available.isNotEmpty()) {
+            relicOffer = available
+            relicSelectedIndex = 0
+            isChoosingRelic = true
+            AudioManager.playChest()
+            HapticManager.vibrateMedium()
+        }
+    }
+
+    private fun handleRelicChoiceInput() {
+        if (relicOffer.isEmpty()) {
+            isChoosingRelic = false
+            return
+        }
+
+        if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)) {
+            relicSelectedIndex = (relicSelectedIndex - 1 + relicOffer.size) % relicOffer.size
+            AudioManager.playJump()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.D)) {
+            relicSelectedIndex = (relicSelectedIndex + 1) % relicOffer.size
+            AudioManager.playJump()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.NUM_1) && relicOffer.size >= 1) {
+            relicSelectedIndex = 0
+            confirmRelicChoice()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.NUM_2) && relicOffer.size >= 2) {
+            relicSelectedIndex = 1
+            confirmRelicChoice()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.NUM_3) && relicOffer.size >= 3) {
+            relicSelectedIndex = 2
+            confirmRelicChoice()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)) {
+            confirmRelicChoice()
+        }
+
+        if (Gdx.input.justTouched()) {
+            uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+            uiViewport.unproject(uiTouchVec)
+
+            val total = relicOffer.size
+            val cardW = 320f
+            val cardH = 340f
+            val gap = 40f
+            val startX = (1280f - (total * cardW + (total - 1) * gap)) / 2f
+            val cardY = (720f - cardH) / 2f - 20f
+
+            for (i in relicOffer.indices) {
+                val cx = startX + i * (cardW + gap)
+                if (uiTouchVec.x in cx..(cx + cardW) && uiTouchVec.y in cardY..(cardY + cardH)) {
+                    relicSelectedIndex = i
+                    confirmRelicChoice()
+                    break
+                }
+            }
+        }
+    }
+
+    private fun confirmRelicChoice() {
+        if (relicSelectedIndex in relicOffer.indices) {
+            val chosen = relicOffer[relicSelectedIndex]
+            relicManager.add(chosen)
+            player.maxAirJumps = relicManager.getMaxAirJumps()
+            player.airJumpsRemaining = player.maxAirJumps
+            player.cooldownMultiplier = relicManager.getCooldownMultiplier()
+            floatingTexts.add(
+                FloatingText(
+                    text = "RELIC ACQUIRED: ${chosen.title}!",
+                    worldX = player.position.x,
+                    worldY = player.position.y + player.height + 1.2f,
+                    color = Color.GOLD,
+                    duration = 2.5f
+                )
+            )
+            isChoosingRelic = false
+        }
+    }
+
+    private fun renderRelicChoiceOverlay() {
+        val w = 1280f
+        val h = 720f
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Dimmer background
+        shapeRenderer.color = Color(0f, 0f, 0f, 0.85f)
+        shapeRenderer.rect(0f, 0f, w, h)
+
+        // Sanctum Header Box
+        shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
+        shapeRenderer.rect(140f, 570f, 1000f, 90f)
+        shapeRenderer.color = Color(0.3f, 0.85f, 1f, 0.85f)
+        shapeRenderer.rectLine(140f, 570f, 1140f, 570f, 2.5f)
+
+        val total = relicOffer.size
+        val cardW = 320f
+        val cardH = 340f
+        val gap = 40f
+        val startX = (w - (total * cardW + (total - 1) * gap)) / 2f
+        val cardY = (h - cardH) / 2f - 30f
+
+        for (i in relicOffer.indices) {
+            val cx = startX + i * (cardW + gap)
+            val isSelected = i == relicSelectedIndex
+
+            // Card body
+            shapeRenderer.color = if (isSelected) Color(0.12f, 0.18f, 0.28f, 0.95f) else Color(0.07f, 0.09f, 0.14f, 0.90f)
+            shapeRenderer.rect(cx, cardY, cardW, cardH)
+
+            // Glowing border
+            val pulse = if (isSelected) (sin(hudAnimTime * 6f) + 1f) * 0.15f else 0f
+            shapeRenderer.color = if (isSelected) Color(0.2f, 0.85f, 1f, 0.85f + pulse) else Color(0.3f, 0.35f, 0.45f, 0.6f)
+            shapeRenderer.rectLine(cx, cardY, cx + cardW, cardY, if (isSelected) 3f else 1.5f)
+            shapeRenderer.rectLine(cx, cardY + cardH, cx + cardW, cardY + cardH, if (isSelected) 3f else 1.5f)
+            shapeRenderer.rectLine(cx, cardY, cx, cardY + cardH, if (isSelected) 3f else 1.5f)
+            shapeRenderer.rectLine(cx + cardW, cardY, cx + cardW, cardY + cardH, if (isSelected) 3f else 1.5f)
+
+            // Select button at card bottom
+            val btnW = 200f
+            val btnH = 42f
+            val btnX = cx + (cardW - btnW) / 2f
+            val btnY = cardY + 25f
+            shapeRenderer.color = if (isSelected) Color(0.15f, 0.6f, 0.85f, 0.95f) else Color(0.12f, 0.15f, 0.22f, 0.8f)
+            shapeRenderer.rect(btnX, btnY, btnW, btnH)
+            shapeRenderer.color = if (isSelected) Color.CYAN else Color(0.35f, 0.4f, 0.5f, 0.6f)
+            shapeRenderer.rectLine(btnX, btnY, btnX + btnW, btnY, 1.5f)
+            shapeRenderer.rectLine(btnX, btnY + btnH, btnX + btnW, btnY + btnH, 1.5f)
+        }
+
+        shapeRenderer.end()
+
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+        val titleF = FontManager.titleFont
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
+
+        titleF.color = Color.CYAN
+        titleF.draw(batch, "ANCIENT RELIC SANCTUARY", 180f, 638f)
+        regF.color = Color(0.85f, 0.9f, 1f, 0.9f)
+        regF.draw(batch, "Commune with the Spire: Select one passive relic to augment your ascension", 180f, 600f)
+
+        for (i in relicOffer.indices) {
+            val relic = relicOffer[i]
+            val cx = startX + i * (cardW + gap)
+            val isSelected = i == relicSelectedIndex
+
+            headF.color = if (isSelected) Color.GOLD else Color.WHITE
+            val runeTitle = "${relic.iconRune} ${relic.title}"
+            glyphLayout.setText(headF, runeTitle)
+            headF.draw(batch, runeTitle, cx + (cardW - glyphLayout.width) / 2f, cardY + cardH - 35f)
+
+            regF.color = Color(0.80f, 0.85f, 0.95f, 0.9f)
+            glyphLayout.setText(regF, relic.description)
+            regF.draw(batch, relic.description, cx + 25f, cardY + cardH - 95f, cardW - 50f, 1, true)
+
+            // Tombol pilih
+            val btnW = 200f
+            val btnY = cardY + 25f
+            val btnText = if (isSelected) "⚔  SELECT  ⚔" else "SELECT"
+            headF.color = if (isSelected) Color.WHITE else Color.LIGHT_GRAY
+            glyphLayout.setText(headF, btnText)
+            headF.draw(batch, btnText, cx + (cardW - glyphLayout.width) / 2f, btnY + 28f)
+        }
+
+        regF.color = Color(0.6f, 0.65f, 0.75f, 0.8f)
+        glyphLayout.setText(regF, "[A / D / LEFT / RIGHT / TOUCH] Browse  |  [1 / 2 / 3 / SPACE / ENTER] Claim Relic")
+        regF.draw(batch, "[A / D / LEFT / RIGHT / TOUCH] Browse  |  [1 / 2 / 3 / SPACE / ENTER] Claim Relic", (w - glyphLayout.width) / 2f, cardY - 20f)
+
         batch.end()
     }
 

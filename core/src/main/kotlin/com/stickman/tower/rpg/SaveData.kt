@@ -9,5 +9,8 @@ data class SaveData(
     var gold: Int = 0,
     var highestTowerFloor: Int = 1,
     var unlockedCharacters: ArrayList<String> = arrayListOf("STICKMAN_SWORD"),
-    var selectedArchetype: String = "BALANCED"
+    var selectedArchetype: String = "BALANCED",
+    var weaponAtkLevel: Int = 0,
+    var weaponCritLevel: Int = 0,
+    var weaponSpdLevel: Int = 0
 )

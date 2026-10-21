@@ -423,20 +423,20 @@ flowchart LR
 
 #### Modul 10.1: Blacksmith Weapon Forge (Upgrade Senjata Permanen)
 - **Task 10.1.1: Model & Data Upgrade Senjata**
-  - [ ] Tambahkan field upgrade level pada `SaveData.kt`: `weaponAtkLevel: Int`, `weaponCritLevel: Int`, `weaponSpdLevel: Int`.
-  - [ ] Biaya upgrade berbasis formula progresif: `Cost = 150 * (level + 1)`.
+  - [x] Tambahkan field upgrade level pada `SaveData.kt`: `weaponAtkLevel: Int`, `weaponCritLevel: Int`, `weaponSpdLevel: Int`.
+  - [x] Biaya upgrade berbasis formula progresif: `Cost = 120 * (level + 1)`.
 - **Task 10.1.2: Antarmuka Blacksmith UI**
-  - [ ] Buat menu atau overlay Blacksmith di Lobby/Lantai Antara: tombol tempa senjata, pratinjau perbandingan statistik sebelum vs sesudah, dan konfirmasi transaksi Gold.
+  - [x] Buat menu atau overlay Blacksmith di Lobby/Lantai Antara: tombol tempa senjata, pratinjau perbandingan statistik sebelum vs sesudah, dan konfirmasi transaksi Gold (`BlacksmithScreen.kt`).
 
 #### Modul 10.2: Relic Merchant (Item Pasif Acak Setiap Run)
 - **Task 10.2.1: Model Arsitektur Relik**
-  - [ ] Buat `enum class RelicType` dan container `RelicManager.kt`:
-    - 🩸 *Vampiric Fang:* Memulihkan 4% Max HP setiap kali menumbangkan musuh.
+  - [x] Buat `enum class RelicType` dan container `RelicManager.kt`:
+    - 🩸 *Vampiric Fang:* Memulihkan 5% Max HP setiap kali menumbangkan musuh.
     - ⚡ *Thunder Charm:* Menyambar musuh terdekat dengan petir setiap kali combo menyentuh 10x.
     - 🪶 *Wings of Hermes:* Mengizinkan Triple Jump.
     - ⏳ *Hourglass of Chronos:* Mengurangi cooldown skill sebesar 25%.
 - **Task 10.2.2: Drop & Pembelian Relik**
-  - [ ] Munculkan peti emas khusus bos atau NPC Merchant di Lantai 2 yang menawarkan pilihan 1 dari 3 relik pasif acak.
+  - [x] Munculkan peti emas khusus bos atau Relic Sanctuary di Lantai 1 & Lantai 2 yang menawarkan pilihan 1 dari 3 relik pasif acak.
 
 ---
 

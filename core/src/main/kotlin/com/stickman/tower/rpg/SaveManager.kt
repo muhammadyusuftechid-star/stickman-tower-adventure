@@ -27,6 +27,9 @@ object SaveManager {
                 prefs.putInteger("gold", data.gold)
                 prefs.putInteger("highestTowerFloor", data.highestTowerFloor)
                 prefs.putString("selectedArchetype", data.selectedArchetype)
+                prefs.putInteger("weaponAtkLevel", data.weaponAtkLevel)
+                prefs.putInteger("weaponCritLevel", data.weaponCritLevel)
+                prefs.putInteger("weaponSpdLevel", data.weaponSpdLevel)
                 prefs.flush()
             } catch (prefEx: Exception) {
                 Gdx.app.error("SaveManager", "Failed to save to Preferences: ${prefEx.message}")
@@ -58,7 +61,10 @@ object SaveManager {
                     currentExp = prefs.getInteger("currentExp", 0),
                     gold = prefs.getInteger("gold", 0),
                     highestTowerFloor = prefs.getInteger("highestTowerFloor", 1),
-                    selectedArchetype = prefs.getString("selectedArchetype", "BALANCED")
+                    selectedArchetype = prefs.getString("selectedArchetype", "BALANCED"),
+                    weaponAtkLevel = prefs.getInteger("weaponAtkLevel", 0),
+                    weaponCritLevel = prefs.getInteger("weaponCritLevel", 0),
+                    weaponSpdLevel = prefs.getInteger("weaponSpdLevel", 0)
                 )
                 Gdx.app.log("SaveManager", "Loaded save from Preferences: Lv.${data.playerLevel}, Archetype=${data.selectedArchetype}")
                 return data

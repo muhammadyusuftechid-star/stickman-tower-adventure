@@ -63,7 +63,15 @@ class ComboManager {
     var comboWindowTimer: Float = 0f
         private set
 
+    var comboCount: Int = 0
+        private set
+
     var hasBufferedInput: Boolean = false
+
+    fun registerHit(): Int {
+        comboCount++
+        return comboCount
+    }
 
     fun update(delta: Float, isAttacking: Boolean) {
         if (!isAttacking) {
@@ -106,6 +114,7 @@ class ComboManager {
         currentStep = ComboStep.HIT_1
         currentConfig = HIT_1
         comboWindowTimer = 0f
+        comboCount = 0
         hasBufferedInput = false
     }
 }

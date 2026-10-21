@@ -109,6 +109,10 @@ class Player(
     private var jumpBufferTimer: Float = 0f
     private var animTime: Float = 0f
 
+    var maxAirJumps: Int = 1
+    var airJumpsRemaining: Int = 1
+    var cooldownMultiplier: Float = 1.0f
+
     fun update(delta: Float, input: GameInput, platforms: List<Platform>) {
         animTime += delta
         health.update(delta)
@@ -142,7 +146,7 @@ class Player(
         if (canControlMove) {
             if (moveDir != 0f) {
                 facingRight = moveDir > 0
-                val targetVx = moveDir * archetype.moveSpeed
+                val targetVx = moveDir * archetype.moveSpeed * (1f + stats.weaponSpdBonus)
                 velocity.x = MathUtils.lerp(velocity.x, targetVx, (GameConfig.ACCELERATION * delta).coerceAtMost(1f))
             } else {
                 velocity.x = MathUtils.lerp(velocity.x, 0f, (GameConfig.DECELERATION * delta).coerceAtMost(1f))
@@ -157,13 +161,22 @@ class Player(
         if (input.isJumpJustPressed() && canControlMove) jumpBufferTimer = GameConfig.JUMP_BUFFER_TIME
         else jumpBufferTimer = (jumpBufferTimer - delta).coerceAtLeast(0f)
 
-        if (jumpBufferTimer > 0f && coyoteTimer > 0f) {
-            velocity.y = archetype.jumpVelocity
-            jumpBufferTimer = 0f
-            coyoteTimer = 0f
-            isGrounded = false
-            AudioManager.playJump()
-            onJump?.invoke(position.x + width / 2f, position.y)
+        if (jumpBufferTimer > 0f) {
+            if (coyoteTimer > 0f) {
+                velocity.y = archetype.jumpVelocity
+                jumpBufferTimer = 0f
+                coyoteTimer = 0f
+                isGrounded = false
+                AudioManager.playJump()
+                onJump?.invoke(position.x + width / 2f, position.y)
+            } else if (airJumpsRemaining > 0 && canControlMove) {
+                velocity.y = archetype.jumpVelocity * 0.95f
+                airJumpsRemaining--
+                jumpBufferTimer = 0f
+                isGrounded = false
+                AudioManager.playJump()
+                onJump?.invoke(position.x + width / 2f, position.y)
+            }
         }
 
         // 5. Gravitasi
@@ -184,7 +197,7 @@ class Player(
         if (input.isDodgeJustPressed() && !isDodging && !isSkillStriking && !isUlting && dodgeCooldown <= 0f) {
             isDodging = true
             dodgeTimer = 0f
-            dodgeCooldown = DODGE_COOLDOWN
+            dodgeCooldown = DODGE_COOLDOWN * cooldownMultiplier
             attackPhase = AttackPhase.INACTIVE
             hitbox.reset()
             afterimages.clear()
@@ -198,7 +211,7 @@ class Player(
 
         // Pemicu Skill 1 (Dash Strike / Shadow Dash / Ground Breaker)
         if (input.isSkillJustPressed() && skill1.isReady && !isDodging && !isSkillStriking && !isUlting) {
-            if (skill1.use()) {
+            if (skill1.use(cooldownMultiplier)) {
                 isSkillStriking = true
                 skillTimer = 0f
                 attackPhase = AttackPhase.INACTIVE
@@ -421,6 +434,10 @@ class Player(
                 }
                 bounds.setPosition(position.x, position.y)
             }
+        }
+
+        if (isGrounded) {
+            airJumpsRemaining = maxAirJumps
         }
 
         if (!wasGrounded && isGrounded) {

@@ -68,6 +68,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     // Tombol Menu
     private val menuItems = listOf(
         "START TOWER",
+        "BLACKSMITH FORGE",
         "SELECT CHARACTER",
         "AUDIO: ON",
         "HAPTIC: ON",
@@ -75,7 +76,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "QUIT GAME"
     )
     private var selectedIndex = 0
-    private var selectorY = 485f
+    private var selectorY = 505f
     private var animTime = 0f
     private var feedbackNotice = ""
     private var feedbackTimer = 0f
@@ -88,7 +89,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         HapticManager.init()
         FontManager.init()
         currentSaveData = SaveManager.load()
-        selectorY = 485f - (selectedIndex * 54f)
+        selectorY = 505f - (selectedIndex * 48f)
         particles.clear()
         for (i in 0 until 45) {
             val p = MenuParticle()
@@ -155,9 +156,9 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
         // Wadah Tombol-tombol Menu (Glassmorphism Cards)
         val buttonWidth = 440f
-        val buttonHeight = 42f
-        val startY = 485f
-        val spacingY = 54f
+        val buttonHeight = 38f
+        val startY = 505f
+        val spacingY = 48f
         val btnX = (1280f - buttonWidth) / 2f
 
         // Render Latar Belakang Kartu untuk Seluruh Tombol Menu
@@ -220,12 +221,12 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         // Tombol-tombol Navigasi
         for (i in menuItems.indices) {
             val itemText = when (i) {
-                2 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                3 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                3 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                4 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> menuItems[i]
             }
 
-            val curY = startY - (i * spacingY) + 30f
+            val curY = startY - (i * spacingY) + 27f
             if (i == selectedIndex) {
                 headF.color = Color(1f, 0.88f, 0.3f, 1f)
                 val markedText = "⚔  $itemText  ⚔"
@@ -285,9 +286,9 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             viewport.unproject(touchVec)
             val buttonWidth = 440f
-            val buttonHeight = 42f
-            val startY = 485f
-            val spacingY = 54f
+            val buttonHeight = 38f
+            val startY = 505f
+            val spacingY = 48f
             val btnX = (1280f - buttonWidth) / 2f
 
             for (i in menuItems.indices) {
@@ -319,24 +320,28 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             }
             1 -> {
                 AudioManager.playSlashLight()
-                game.setScreen(CharacterSelectScreen(game))
+                game.setScreen(BlacksmithScreen(game))
             }
             2 -> {
+                AudioManager.playSlashLight()
+                game.setScreen(CharacterSelectScreen(game))
+            }
+            3 -> {
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            3 -> {
+            4 -> {
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            4 -> {
+            5 -> {
                 SaveManager.save(SaveData())
                 currentSaveData = SaveManager.load()
                 feedbackNotice = "Save Data Successfully Reset!"
                 feedbackTimer = 3.0f
                 AudioManager.playDeath()
             }
-            5 -> {
+            6 -> {
                 Gdx.app.exit()
             }
         }
