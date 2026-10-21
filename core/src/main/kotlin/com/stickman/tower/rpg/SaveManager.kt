@@ -325,6 +325,10 @@ object SaveManager {
             prefs.putString("unlockedLoreTablets", data.unlockedLoreTablets.joinToString(","))
             prefs.putString("activeQuestId", data.activeQuestId)
             prefs.putString("completedQuests", data.completedQuests.joinToString(","))
+            prefs.putString("challengeMedals", data.challengeMedals.entries.joinToString(";") { "${it.key}:${it.value}" })
+            prefs.putString("acceptedBounties", data.acceptedBounties.joinToString(","))
+            prefs.putString("completedBounties", data.completedBounties.joinToString(","))
+            prefs.putString("claimedBounties", data.claimedBounties.joinToString(","))
             prefs.putInteger("weaponAtkLevel", data.weaponAtkLevel)
             prefs.putInteger("weaponCritLevel", data.weaponCritLevel)
             prefs.putInteger("weaponSpdLevel", data.weaponSpdLevel)
@@ -361,6 +365,19 @@ object SaveManager {
                 val questStr = prefs.getString("completedQuests", "")
                 val completedList = ArrayList(questStr.split(",").filter { it.isNotBlank() })
 
+                val medalsStr = prefs.getString("challengeMedals", "")
+                val medalsMap = HashMap<String, String>()
+                if (medalsStr.isNotBlank()) {
+                    medalsStr.split(";").filter { it.contains(":") }.forEach {
+                        val parts = it.split(":")
+                        if (parts.size == 2) medalsMap[parts[0]] = parts[1]
+                    }
+                }
+
+                val accBounties = ArrayList(prefs.getString("acceptedBounties", "").split(",").filter { it.isNotBlank() })
+                val compBounties = ArrayList(prefs.getString("completedBounties", "").split(",").filter { it.isNotBlank() })
+                val claimBounties = ArrayList(prefs.getString("claimedBounties", "").split(",").filter { it.isNotBlank() })
+
                 return SaveData(
                     playerLevel = prefs.getInteger("playerLevel", 1),
                     currentExp = prefs.getInteger("currentExp", 0),
@@ -374,6 +391,10 @@ object SaveManager {
                     unlockedLoreTablets = loreList,
                     activeQuestId = prefs.getString("activeQuestId", "MQ_1"),
                     completedQuests = completedList,
+                    challengeMedals = medalsMap,
+                    acceptedBounties = accBounties,
+                    completedBounties = compBounties,
+                    claimedBounties = claimBounties,
                     selectedArchetype = prefs.getString("selectedArchetype", "BALANCED"),
                     selectedSubClass = prefs.getString("selectedSubClass", "BERSERKER"),
                     weaponAtkLevel = prefs.getInteger("weaponAtkLevel", 0),
@@ -607,6 +628,26 @@ object SaveManager {
             combinedProgress[k] = maxOf(curr, v)
         }
         merged.questProgressMap = combinedProgress
+
+        val accBountySet = (local.acceptedBounties + remote.acceptedBounties).distinct()
+        merged.acceptedBounties = ArrayList(accBountySet)
+
+        val compBountySet = (local.completedBounties + remote.completedBounties).distinct()
+        merged.completedBounties = ArrayList(compBountySet)
+
+        val claimBountySet = (local.claimedBounties + remote.claimedBounties).distinct()
+        merged.claimedBounties = ArrayList(claimBountySet)
+
+        val mergedMedals = HashMap<String, String>()
+        val allMedalKeys = (local.challengeMedals.keys + remote.challengeMedals.keys).distinct()
+        for (k in allMedalKeys) {
+            val localMedal = local.challengeMedals[k] ?: "NONE"
+            val remoteMedal = remote.challengeMedals[k] ?: "NONE"
+            val localOrd = try { com.stickman.tower.challenge.ChallengeMedal.valueOf(localMedal).ordinal } catch (_: Exception) { 0 }
+            val remoteOrd = try { com.stickman.tower.challenge.ChallengeMedal.valueOf(remoteMedal).ordinal } catch (_: Exception) { 0 }
+            mergedMedals[k] = if (localOrd >= remoteOrd) localMedal else remoteMedal
+        }
+        merged.challengeMedals = mergedMedals
 
         merged.sanitize()
         merged.updateChecksum()

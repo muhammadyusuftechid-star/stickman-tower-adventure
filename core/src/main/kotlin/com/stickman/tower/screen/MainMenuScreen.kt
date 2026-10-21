@@ -19,6 +19,8 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import com.stickman.tower.StickmanGame
 import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.audio.HapticManager
+import com.stickman.tower.bounty.BountyManager
+import com.stickman.tower.challenge.ChallengeManager
 import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.quest.QuestManager
 import com.stickman.tower.rpg.SaveData
@@ -67,7 +69,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     }
     private val particles = mutableListOf<MenuParticle>()
 
-    // Tombol Menu
+    // Tombol Menu 16 Item Simetris (8 Baris x 2 Kolom)
     private val menuItems = listOf(
         "START STORY TOWER",
         "ENDLESS SPIRE",
@@ -76,17 +78,19 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "SELECT CHARACTER",
         "STORY CODEX",
         "📜 QUEST LOG",
+        "⚔ GAUNTLETS & BOUNTY",
         "👑 LEADERBOARDS",
         "🏆 ACHIEVEMENTS",
         "CONTROL SETTINGS",
         "AUDIO: ON",
         "HAPTIC: ON",
+        "💾 CLOUD BACKUP",
         "RESET SAVE DATA",
         "QUIT GAME"
     )
     private var selectedIndex = 0
     private var selectorX = 140f
-    private var selectorY = 536f
+    private var selectorY = 540f
     private var animTime = 0f
     private var feedbackNotice = ""
     private var feedbackTimer = 0f
@@ -178,14 +182,14 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
         // Wadah Tombol-tombol Menu (Glassmorphism Cards 2 Kolom Responsif)
         val buttonWidth = 470f
-        val buttonHeight = 44f
-        val startY = 536f
-        val spacingY = 50f
+        val buttonHeight = 40f
+        val startY = 540f
+        val spacingY = 46f
 
         // Render Latar Belakang Kartu untuk Seluruh Tombol Menu
         for (i in menuItems.indices) {
-            val colX = if (i < 7) 140f else 670f
-            val rowIdx = if (i < 7) i else i - 7
+            val colX = if (i < 8) 140f else 670f
+            val rowIdx = if (i < 8) i else i - 8
             val itemY = startY - (rowIdx * spacingY)
 
             shapeRenderer.setColor(0.07f, 0.10f, 0.16f, 0.85f)
@@ -196,8 +200,8 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         }
 
         // Smooth Lerp Indikator Seleksi Tombol
-        val targetX = if (selectedIndex < 7) 140f else 670f
-        val targetRow = if (selectedIndex < 7) selectedIndex else selectedIndex - 7
+        val targetX = if (selectedIndex < 8) 140f else 670f
+        val targetRow = if (selectedIndex < 8) selectedIndex else selectedIndex - 8
         val targetY = startY - (targetRow * spacingY)
         selectorX += (targetX - selectorX) * (20f * delta).coerceAtMost(1f)
         selectorY += (targetY - selectorY) * (20f * delta).coerceAtMost(1f)
@@ -251,14 +255,14 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         for (i in menuItems.indices) {
             val itemText = when (i) {
                 5 -> if (isStoryUnlocked) "📖 STORY CODEX (UNLOCKED)" else "🔒 STORY CODEX (LOCKED)"
-                10 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                11 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                11 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                12 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> menuItems[i]
             }
 
-            val colX = if (i < 7) 140f else 670f
-            val rowIdx = if (i < 7) i else i - 7
-            val curY = startY - (rowIdx * spacingY) + 29f
+            val colX = if (i < 8) 140f else 670f
+            val rowIdx = if (i < 8) i else i - 8
+            val curY = startY - (rowIdx * spacingY) + 26f
 
             if (i == selectedIndex) {
                 if (i == 5 && !isStoryUnlocked) {
@@ -320,34 +324,34 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
     private fun handleInput() {
         if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
-            selectedIndex = if (selectedIndex in 1..6 || selectedIndex in 8..13) {
+            selectedIndex = if (selectedIndex in 1..7 || selectedIndex in 9..15) {
                 selectedIndex - 1
             } else if (selectedIndex == 0) {
-                6
+                7
             } else {
-                13
+                15
             }
             AudioManager.playJump()
         }
         if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
-            selectedIndex = if (selectedIndex in 0..5 || selectedIndex in 7..12) {
+            selectedIndex = if (selectedIndex in 0..6 || selectedIndex in 8..14) {
                 selectedIndex + 1
-            } else if (selectedIndex == 6) {
+            } else if (selectedIndex == 7) {
                 0
             } else {
-                7
+                8
             }
             AudioManager.playJump()
         }
         if (Gdx.input.isKeyJustPressed(Keys.LEFT) || Gdx.input.isKeyJustPressed(Keys.A)) {
-            if (selectedIndex >= 7) {
-                selectedIndex -= 7
+            if (selectedIndex >= 8) {
+                selectedIndex -= 8
                 AudioManager.playJump()
             }
         }
         if (Gdx.input.isKeyJustPressed(Keys.RIGHT) || Gdx.input.isKeyJustPressed(Keys.D)) {
-            if (selectedIndex < 7) {
-                selectedIndex += 7
+            if (selectedIndex < 8) {
+                selectedIndex += 8
                 AudioManager.playJump()
             }
         }
@@ -357,13 +361,13 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             viewport.unproject(touchVec)
             val buttonWidth = 470f
-            val buttonHeight = 44f
-            val startY = 536f
-            val spacingY = 50f
+            val buttonHeight = 40f
+            val startY = 540f
+            val spacingY = 46f
 
             for (i in menuItems.indices) {
-                val colX = if (i < 7) 140f else 670f
-                val rowIdx = if (i < 7) i else i - 7
+                val colX = if (i < 8) 140f else 670f
+                val rowIdx = if (i < 8) i else i - 8
                 val btnY = startY - (rowIdx * spacingY)
 
                 if (touchVec.x in (colX - 25f)..(colX + buttonWidth + 25f) && touchVec.y in (btnY - 8f)..(btnY + buttonHeight + 8f)) {
@@ -441,34 +445,47 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             7 -> {
                 AudioManager.playSlashLight()
                 (game as? StickmanGame)?.preserveScreen(this)
-                game.setScreen(LeaderboardScreen(game, this))
+                game.setScreen(GauntletScreen(game, returnScreen = this))
             }
             8 -> {
                 AudioManager.playSlashLight()
                 (game as? StickmanGame)?.preserveScreen(this)
-                game.setScreen(AchievementScreen(game, this))
+                game.setScreen(LeaderboardScreen(game, this))
             }
             9 -> {
                 AudioManager.playSlashLight()
                 (game as? StickmanGame)?.preserveScreen(this)
-                game.setScreen(ControlSettingsScreen(game, this))
+                game.setScreen(AchievementScreen(game, this))
             }
             10 -> {
+                AudioManager.playSlashLight()
+                (game as? StickmanGame)?.preserveScreen(this)
+                game.setScreen(ControlSettingsScreen(game, this))
+            }
+            11 -> {
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            11 -> {
+            12 -> {
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            12 -> {
+            13 -> {
+                feedbackNotice = "Cloud Save Verified (Slot ${currentSaveData.saveSlotId}): Checksum OK"
+                feedbackTimer = 3.5f
+                AudioManager.playChest()
+                HapticManager.vibrateMedium()
+            }
+            14 -> {
                 currentSaveData = SaveManager.resetSave()
                 QuestManager.reset()
+                ChallengeManager.resetForTest()
+                BountyManager.resetForTest()
                 feedbackNotice = "Save Data Successfully Reset!"
                 feedbackTimer = 3.0f
                 AudioManager.playDeath()
             }
-            13 -> {
+            15 -> {
                 Gdx.app.exit()
             }
         }

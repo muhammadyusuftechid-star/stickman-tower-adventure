@@ -17,6 +17,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.stickman.tower.StickmanGame
 import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.audio.HapticManager
+import com.stickman.tower.bounty.BountyAffix
+import com.stickman.tower.bounty.BountyManager
+import com.stickman.tower.challenge.ChallengeManager
 import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.character.Player
 import com.stickman.tower.combat.ComboStep
@@ -473,6 +476,14 @@ class PlayScreen(
                 AudioManager.playSlashLight()
                 (game as? StickmanGame)?.preserveScreen(this)
                 game?.setScreen(QuestLogScreen(game, player.stats, this))
+                return
+            }
+
+            // Pintasan Keyboard [G] untuk membuka Monolit Ujian & Papan Buronan
+            if (Gdx.input.isKeyJustPressed(Keys.G) && gameStatus == GameStatus.PLAYING && !isPaused) {
+                AudioManager.playSlashLight()
+                (game as? StickmanGame)?.preserveScreen(this)
+                game?.setScreen(GauntletScreen(game, player.stats, this))
                 return
             }
         }
@@ -996,6 +1007,18 @@ class PlayScreen(
                                 particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 5, color = Color.GREEN)
                             }
 
+                            // Thorns Mutator dari Kontrak Buronan Elit (Fase 17)
+                            val bountyAffixes = BountyManager.getActiveAffixesForFloor(currentFloorNumber)
+                            if (bountyAffixes.contains(BountyAffix.THORNS)) {
+                                val reflect = player.hitbox.damage * 0.15f
+                                if (reflect >= 1f) {
+                                    player.takeHit(reflect, -knockX * 0.2f, 0.5f)
+                                    floatingTexts.add(
+                                        FloatingText("-${reflect.toInt()} 🦔", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.PURPLE)
+                                    )
+                                }
+                            }
+
                             val energyGain = when {
                                 player.isUlting -> 0f
                                 player.comboManager.currentStep == ComboStep.HIT_3 -> 15f
@@ -1060,6 +1083,18 @@ class PlayScreen(
                         if (talentManager.hasToxicBlade()) {
                             boss.applyPoison(3.5f, player.baseAttackPower * 0.35f)
                             particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 6, color = Color.GREEN)
+                        }
+
+                        // Thorns Mutator dari Kontrak Buronan Elit (Fase 17)
+                        val bountyAffixes = BountyManager.getActiveAffixesForFloor(currentFloorNumber)
+                        if (bountyAffixes.contains(BountyAffix.THORNS)) {
+                            val reflect = player.hitbox.damage * 0.15f
+                            if (reflect >= 1f) {
+                                player.takeHit(reflect, -knockX * 0.2f, 0.5f)
+                                floatingTexts.add(
+                                    FloatingText("-${reflect.toInt()} 🦔", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.PURPLE)
+                                )
+                            }
                         }
 
                         // Super Finish Slow-Motion & Radial Shockwave jika Boss Mati (Fase 11)
@@ -1175,6 +1210,10 @@ class PlayScreen(
                         AudioManager.playParry()
                         com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                         QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
+                        if (currentFloorNumber == 2) {
+                            ChallengeManager.recordAttempt("GAUNTLET_DEFLECTION", player.comboManager.comboCount)
+                            ChallengeManager.syncToSaveData(saveData)
+                        }
                         HapticManager.vibrateHeavy()
                         input.gamepad.vibrate(200, 1.0f)
                         cameraManager.shake(0.5f, 0.25f)
@@ -1208,6 +1247,16 @@ class PlayScreen(
                                     COLOR_CRIT_DMG
                                 )
                             )
+
+                            // Vampiric Mutator dari Kontrak Buronan Elit (Fase 17)
+                            val bAffixes = BountyManager.getActiveAffixesForFloor(currentFloorNumber)
+                            if (bAffixes.contains(BountyAffix.VAMPIRIC)) {
+                                val heal = enemy.health.maxHp * 0.10f
+                                enemy.health.heal(heal)
+                                floatingTexts.add(
+                                    FloatingText("+${heal.toInt()} 🩸", enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height + 0.3f, Color.GREEN)
+                                )
+                            }
                         }
                     }
                 }
@@ -1267,6 +1316,16 @@ class PlayScreen(
                                 COLOR_ENEMY_DMG
                             )
                         )
+
+                        // Vampiric Mutator dari Kontrak Buronan Elit (Fase 17)
+                        val bAffixes = BountyManager.getActiveAffixesForFloor(currentFloorNumber)
+                        if (bAffixes.contains(BountyAffix.VAMPIRIC)) {
+                            val heal = boss.health.maxHp * 0.10f
+                            boss.health.heal(heal)
+                            floatingTexts.add(
+                                FloatingText("+${heal.toInt()} 🩸", boss.position.x + boss.width / 2f, boss.position.y + boss.height + 0.3f, Color.GREEN)
+                            )
+                        }
                     }
                 }
             }
@@ -1422,6 +1481,26 @@ class PlayScreen(
                     grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
 
                     QuestManager.notifyEvent(ObjectiveType.CLEAR_FLOOR, "FLOOR_$currentFloorNumber")
+
+                    // Kontrak Buronan Elit & Ujian Kaligrafer (Fase 17)
+                    val clearedBounty = BountyManager.onFloorCleared(currentFloorNumber)
+                    if (clearedBounty != null) {
+                        BountyManager.syncToSaveData(saveData)
+                        SaveManager.save(saveData)
+                        floatingTexts.add(
+                            FloatingText("BURONAN TERTUMBANGKAN! ☠", currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 4.0f, Color.RED, duration = 3.5f)
+                        )
+                    }
+
+                    if (currentFloorNumber == 4) {
+                        val pacewalkerScore = (100 - hudAnimTime.toInt()).coerceAtLeast(0)
+                        ChallengeManager.recordAttempt("GAUNTLET_PACEWALKER", pacewalkerScore)
+                        ChallengeManager.syncToSaveData(saveData)
+                    } else if (currentFloorNumber == 6) {
+                        val ironWillScore = (player.health.currentHp * 15f).toInt()
+                        ChallengeManager.recordAttempt("GAUNTLET_IRON_WILL", ironWillScore)
+                        ChallengeManager.syncToSaveData(saveData)
+                    }
 
                     if (currentFloorNumber == 10) {
                         triggerSave("Puncak Menara Ditaklukkan! (Story Selesai)", highestFloor = 11)

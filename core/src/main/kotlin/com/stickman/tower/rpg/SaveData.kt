@@ -21,6 +21,10 @@ data class SaveData(
     var activeQuestId: String = "MQ_1",
     var completedQuests: ArrayList<String> = arrayListOf(),
     var questProgressMap: HashMap<String, Int> = hashMapOf(),
+    var challengeMedals: HashMap<String, String> = hashMapOf(),
+    var acceptedBounties: ArrayList<String> = arrayListOf(),
+    var completedBounties: ArrayList<String> = arrayListOf(),
+    var claimedBounties: ArrayList<String> = arrayListOf(),
     var selectedArchetype: String = "BALANCED",
     var selectedSubClass: String = "BERSERKER",
     var weaponAtkLevel: Int = 0,
@@ -84,6 +88,14 @@ data class SaveData(
             mixString(key)
             mix(questProgressMap[key]?.toLong() ?: 0L)
         }
+
+        challengeMedals.keys.sorted().forEach { key ->
+            mixString(key)
+            mixString(challengeMedals[key] ?: "")
+        }
+        acceptedBounties.sorted().forEach { mixString(it) }
+        completedBounties.sorted().forEach { mixString(it) }
+        claimedBounties.sorted().forEach { mixString(it) }
 
         return hash and 0x7FFFFFFFFFFFFFFFL // Bilangan bulat positif 63-bit
     }

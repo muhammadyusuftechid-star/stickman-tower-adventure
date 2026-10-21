@@ -59,6 +59,7 @@ class QuestLogScreen(
     private val btnTabMain = Rectangle(100f, 600f, 220f, 48f)
     private val btnTabSide = Rectangle(335f, 600f, 220f, 48f)
     private val btnTabCompleted = Rectangle(570f, 600f, 220f, 48f)
+    private val btnTabGauntlet = Rectangle(805f, 600f, 260f, 48f)
 
     private val btnBack = Rectangle(40f, 35f, 180f, 50f)
     private val btnClaim = Rectangle(840f, 50f, 340f, 55f)
@@ -121,6 +122,12 @@ class QuestLogScreen(
         drawTabButton(btnTabSide, LogTab.SIDE)
         drawTabButton(btnTabCompleted, LogTab.COMPLETED)
 
+        // Tab Pintasan Gauntlet / Bounty
+        shapeRenderer.setColor(0.18f, 0.22f, 0.32f, 0.85f)
+        shapeRenderer.rect(btnTabGauntlet.x, btnTabGauntlet.y, btnTabGauntlet.width, btnTabGauntlet.height)
+        shapeRenderer.setColor(0.95f, 0.80f, 0.30f, 0.9f)
+        shapeRenderer.rect(btnTabGauntlet.x, btnTabGauntlet.y, btnTabGauntlet.width, 2f)
+
         // Tombol Kembali
         shapeRenderer.setColor(0.20f, 0.25f, 0.35f, 0.9f)
         shapeRenderer.rect(btnBack.x, btnBack.y, btnBack.width, btnBack.height)
@@ -165,6 +172,9 @@ class QuestLogScreen(
         drawTabText(btnTabMain, "◈ Cerita Utama", activeTab == LogTab.MAIN)
         drawTabText(btnTabSide, "◇ Warisan Kuno", activeTab == LogTab.SIDE)
         drawTabText(btnTabCompleted, "✓ Selesai (${QuestManager.completedQuestIds.size})", activeTab == LogTab.COMPLETED)
+
+        regularFont.setColor(0.95f, 0.85f, 0.40f, 1f)
+        regularFont.draw(batch, "⚔ Ujian & Buronan ▶", btnTabGauntlet.x + 20f, btnTabGauntlet.y + 32f)
 
         // Teks Tombol Kembali
         regularFont.color = Color.WHITE
@@ -363,6 +373,12 @@ class QuestLogScreen(
                     AudioManager.playSlashLight()
                     HapticManager.vibrateLight()
                 }
+            } else if (btnTabGauntlet.contains(touchVec.x, touchVec.y)) {
+                AudioManager.playSlashLight()
+                HapticManager.vibrateLight()
+                (game as? StickmanGame)?.preserveScreen(this)
+                game?.setScreen(GauntletScreen(game, stats, this))
+                return
             } else if (btnBack.contains(touchVec.x, touchVec.y)) {
                 AudioManager.playSlashLight()
                 HapticManager.vibrateMedium()
