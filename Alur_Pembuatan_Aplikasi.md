@@ -154,34 +154,34 @@ flowchart LR
 
 #### Modul 3.1: Enemy Entity & AI State Machine
 - **Task 3.1.1: Model Musuh Dasar**
-  - [ ] Buat class `Enemy.kt` yang mengimplementasikan `Health`, `Hurtbox`, `Hitbox`, dan `PlatformerPhysics`.
+  - [x] Buat class `Enemy.kt` yang mengimplementasikan `Health`, `Hurtbox`, `Hitbox`, platformer physics, dan mini HP bar.
 - **Task 3.1.2: Logika FSM Enemy AI**
-  - [ ] `IDLE / PATROL`: Bergerak bolak-balik dalam jarak tertentu atau berhenti jika sampai di ujung jurang platform.
-  - [ ] `DETECT PLAYER`: Cek jarak ($distance < detectionRange$) dan garis pandang (*line of sight*).
-  - [ ] `CHASE`: Bergerak mendekati posisi X pemain jika berada dalam jangkauan.
-  - [ ] `ATTACK`: Saat berada dalam jangkauan pukul ($distance \le attackRange$), jalankan animasi/telegraphed attack.
-  - [ ] `HURT & DEAD`: Animasi terpental ketika HP habis, nonaktifkan hitbox/hurtbox, lalu hilangkan entitas dari memory (*despawn*).
+  - [x] `PATROL`: Bergerak bolak-balik dengan cliff avoidance (deteksi jurang agar tidak jatuh dari platform).
+  - [x] `DETECT PLAYER`: Deteksi pemain dalam radius 6.5 meter secara horizontal & vertikal.
+  - [x] `CHASE`: Kecepatan lari meningkat (+40%), mengejar pemain secara agresif.
+  - [x] `ATTACK`: Serangan telegraphed (mata kuning/merah menyala tanda bahaya 0.25s), disusul tebasan hitbox yang melukai pemain.
+  - [x] `HURT & DEAD`: Terkena knockback, berkedip putih, animasi roboh di tanah saat HP habis, lalu despawn otomatis.
 
 #### Modul 3.2: Stage MVP Sederhana (Level 1 Prototype)
 - **Task 3.2.1: Layout Stage Sederhana**
-  - [ ] Buat arena statis: 1 lantai dasar panjang, 3 platform bertingkat, dan 1 pintu/objek keluar (*Goal Exit*).
-  - [ ] Tentukan koordinat titik spawn pemain dan spawn 2-3 musuh stickman.
+  - [x] Buat arena statis: platform bertingkat, 3 musuh di posisi strategis, lentera Checkpoint, dan portal Exit.
+  - [x] Tentukan spawn point pemain dan batas kamera map.
 
 #### Modul 3.3: Game Loop: Kondisi Menang, Kalah & Checkpoint
 - **Task 3.3.1: Trigger Menang & Kalah**
-  - [ ] Kondisi Kalah: HP Pemain == 0 $\rightarrow$ Tampilkan teks `Game Over`, tombol `Restart / Checkpoint`.
-  - [ ] Kondisi Menang: Pemain berhasil mengalahkan semua musuh dan menyentuh area `Exit` $\rightarrow$ Tampilkan `Stage Clear!`.
+  - [x] Kondisi Kalah: HP Pemain == 0 $\rightarrow$ Banner `GAME OVER`, layar redup, tombol `[R]` untuk respawn di Checkpoint.
+  - [x] Kondisi Menang: Mengalahkan semua musuh dan menyentuh portal $\rightarrow$ Banner `STAGE CLEAR! MVP VALIDATED!`, tombol `[SPACE]` atau `[R]` untuk main ulang.
 - **Task 3.3.2: Checkpoint Manager**
-  - [ ] Buat objek `Checkpoint.kt` yang menyimpan koordinat terakhir pemain saat disentuh.
-  - [ ] Reset posisi pemain ke checkpoint saat memilih `Restart`.
+  - [x] Buat objek `Checkpoint.kt` dengan api lentera yang menyala biru (Cyan) saat diaktifkan pemain.
+  - [x] Reset posisi dan HP pemain ke checkpoint aktif terakhir saat respawn.
 
-#### Modul 3.4: Milestone Check: Validasi MVP
-- [ ] **Kriteria Verifikasi MVP:**
-  1. Karakter bisa jalan, lompat, mendarat mulus di platform.
-  2. Kamera mengikuti karakter tanpa jitter.
-  3. Serangan mengenai musuh, musuh berkedip & HP berkurang.
-  4. Musuh membalas menyerang jika pemain mendekat.
-  5. Pemain bisa kalah jika HP habis, dan bisa menang jika mencapai target.
+#### Modul 3.4: Milestone Check: Validasi MVP (TERCAPAI)
+- [x] **Kriteria Verifikasi MVP:**
+  1. Karakter bisa jalan, lompat variabel, coyote time, dan mendarat mulus di platform.
+  2. Kamera 2D lerp mengikuti karakter tanpa jitter dengan boundary clamping.
+  3. Serangan tebasan pedang mengenai musuh, memicu hit stop, knockback, dan floating damage text.
+  4. Musuh berpatroli, mengejar pemain, dan membalas menyerang dengan telegraphed windup.
+  5. Pemain bisa kalah jika HP habis, dan menang jika membersihkan musuh dan mencapai portal exit.
   6. Game berjalan stabil 60 FPS di desktop.
 
 ---
