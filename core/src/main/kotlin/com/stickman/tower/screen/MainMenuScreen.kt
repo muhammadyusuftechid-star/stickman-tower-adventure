@@ -86,6 +86,8 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     private var feedbackTimer = 0f
 
     private var currentSaveData: SaveData = SaveManager.load()
+    private var inputCooldown = 0.25f
+    private var lastBackPressTime = 0L
 
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
@@ -93,6 +95,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         HapticManager.init()
         FontManager.init()
         currentSaveData = SaveManager.load()
+        inputCooldown = 0.25f
         val colX = if (selectedIndex < 5) 140f else 670f
         val rowIdx = if (selectedIndex < 5) selectedIndex else selectedIndex - 5
         selectorX = colX
@@ -112,7 +115,11 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             if (feedbackTimer <= 0f) feedbackNotice = ""
         }
 
-        handleInput()
+        if (inputCooldown > 0f) {
+            inputCooldown -= delta
+        } else {
+            handleInput()
+        }
         if (game.screen !== this) return
 
         updateParticles(delta)
@@ -347,7 +354,16 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         }
 
         if (Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
-            Gdx.app.exit()
+            val now = System.currentTimeMillis()
+            if (now - lastBackPressTime < 2000L) {
+                Gdx.app.exit()
+            } else {
+                lastBackPressTime = now
+                feedbackNotice = "Tekan KEMBALI sekali lagi untuk keluar game"
+                feedbackTimer = 2.5f
+                AudioManager.playJump()
+                HapticManager.vibrateLight()
+            }
         }
     }
 
@@ -363,18 +379,22 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             }
             2 -> {
                 AudioManager.playSlashLight()
+                (game as? StickmanGame)?.preserveScreen(this)
                 game.setScreen(TalentTreeScreen(game, this))
             }
             3 -> {
                 AudioManager.playSlashLight()
-                game.setScreen(BlacksmithScreen(game))
+                (game as? StickmanGame)?.preserveScreen(this)
+                game.setScreen(BlacksmithScreen(game, this))
             }
             4 -> {
                 AudioManager.playSlashLight()
+                (game as? StickmanGame)?.preserveScreen(this)
                 game.setScreen(CharacterSelectScreen(game))
             }
             5 -> {
                 AudioManager.playSlashLight()
+                (game as? StickmanGame)?.preserveScreen(this)
                 game.setScreen(ControlSettingsScreen(game, this))
             }
             6 -> {

@@ -151,12 +151,15 @@ class PlayScreen(
     var shockwaveCenterX: Float = 0f
     var shockwaveCenterY: Float = 0f
     private var bossSlowMoTriggered: Boolean = false
+    private var isFirstShow = true
+    private var inputCooldown = 0.25f
 
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
         HapticManager.init()
         FontManager.init()
+        inputCooldown = 0.25f
         val freshSave = SaveManager.load()
         stats.loadFromSaveData(freshSave)
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
@@ -169,7 +172,10 @@ class PlayScreen(
         player.onJump = { x, y -> particleManager.spawnDust(x, y, count = 5) }
         player.onDodge = { x, y -> particleManager.spawnDust(x, y, count = 8) }
 
-        loadFloor(initialFloor)
+        if (isFirstShow) {
+            isFirstShow = false
+            loadFloor(initialFloor)
+        }
     }
 
     /**
@@ -266,34 +272,57 @@ class PlayScreen(
     }
 
     override fun render(delta: Float) {
+        // 1. Polling input controller di awal frame
+        input.update(uiViewport)
+
         if (Gdx.input.isKeyJustPressed(Keys.F1) || Gdx.input.isKeyJustPressed(Keys.TAB)) {
             showDebugBounds = !showDebugBounds
         }
 
-        // Toggle Pause dengan ESC, P, Tombol Android BACK, atau Gamepad START (Hanya saat status PLAYING atau sudah PAUSED)
+        val safeDelta = delta.coerceAtMost(1f / 30f)
+        if (inputCooldown > 0f) {
+            inputCooldown = (inputCooldown - safeDelta).coerceAtLeast(0f)
+        }
+
+        // Toggle Pause dengan ESC, P, Tombol Android BACK, atau Gamepad START
         val isBackTriggered = Gdx.input.isKeyJustPressed(Keys.ESCAPE) ||
                               Gdx.input.isKeyJustPressed(Keys.P) ||
                               Gdx.input.isKeyJustPressed(Keys.BACK) ||
                               input.isPauseJustPressed()
 
-        if (isBackTriggered && (gameStatus == GameStatus.PLAYING || isPaused)) {
-            isPaused = !isPaused
-            pauseSelectedIndex = 0
-            if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
-        }
+        if (inputCooldown <= 0f) {
+            if (isBackTriggered) {
+                if (gameStatus == GameStatus.PLAYING && !isPaused) {
+                    isPaused = true
+                    pauseSelectedIndex = 0
+                    AudioManager.playDodge()
+                    inputCooldown = 0.20f
+                } else if (isPaused) {
+                    isPaused = false
+                    AudioManager.playSlashLight()
+                    inputCooldown = 0.20f
+                } else if (gameStatus == GameStatus.GAME_OVER || gameStatus == GameStatus.STAGE_CLEAR) {
+                    AudioManager.playDodge()
+                    if (game != null) {
+                        (game as? StickmanGame)?.releasePreservedScreen(this)
+                        game.setScreen(MainMenuScreen(game))
+                    }
+                    return
+                }
+            }
 
-        // Cek klik tombol Pause di pojok kanan atas HUD (Toleransi area sentuh luas & aman dari notch layar HP)
-        if (Gdx.input.justTouched() && (gameStatus == GameStatus.PLAYING || isPaused)) {
-            uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
-            uiViewport.unproject(uiTouchVec)
-            if (uiTouchVec.x in (1280f - 180f)..1280f && uiTouchVec.y in (720f - 75f)..720f) {
-                isPaused = !isPaused
-                pauseSelectedIndex = 0
-                if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
+            // Cek klik tombol Pause di pojok kanan atas HUD (Toleransi area sentuh luas & aman dari notch layar HP)
+            if (Gdx.input.justTouched() && (gameStatus == GameStatus.PLAYING || isPaused)) {
+                uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                uiViewport.unproject(uiTouchVec)
+                if (uiTouchVec.x in (1280f - 180f)..1280f && uiTouchVec.y in (720f - 75f)..720f) {
+                    isPaused = !isPaused
+                    pauseSelectedIndex = 0
+                    if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
+                    inputCooldown = 0.20f
+                }
             }
         }
-
-        val safeDelta = delta.coerceAtMost(1f / 30f)
 
         if (isPaused) {
             handlePauseInput()
@@ -349,8 +378,6 @@ class PlayScreen(
             safeDelta
         }
 
-        // Perbarui Input Virtual Controller dengan uiViewport
-        input.update(uiViewport)
         handleStatusInput()
 
         hudAnimTime += safeDelta
@@ -1027,6 +1054,7 @@ class PlayScreen(
                              Gdx.input.isKeyJustPressed(Keys.ENTER) ||
                              input.isJumpJustPressed() ||
                              input.isAttackJustPressed()
+            val keyMenu = Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
             var touchRespawn = false
             var touchMenu = false
 
@@ -1036,18 +1064,21 @@ class PlayScreen(
                 val tx = uiTouchVec.x
                 val ty = uiTouchVec.y
 
-                // Tombol Menu Utama di Layar Game Over: [w/2 + 20 .. w/2 + 260, h/2 - 85 .. h/2 - 25]
-                if (tx in (w / 2f + 20f)..(w / 2f + 260f) && ty in (h / 2f - 85f)..(h / 2f - 25f)) {
+                // Tombol Menu Utama di Layar Game Over: [w/2 + 20 .. w/2 + 260, h/2 - 85 .. h/2 - 15]
+                // Tombol Respawn di Layar Game Over: [w/2 - 260 .. w/2 - 10, h/2 - 85 .. h/2 - 15]
+                if (tx in (w / 2f + 15f)..(w / 2f + 265f) && ty in (h / 2f - 85f)..(h / 2f - 15f)) {
                     touchMenu = true
-                } else {
-                    // Sentuhan di tombol Respawn atau di mana saja pada layar HP akan membangkitkan pemain
+                } else if (tx in (w / 2f - 265f)..(w / 2f - 15f) && ty in (h / 2f - 85f)..(h / 2f - 15f)) {
                     touchRespawn = true
                 }
             }
 
-            if (touchMenu) {
+            if (touchMenu || keyMenu) {
                 AudioManager.playDodge()
-                if (game != null) game.setScreen(MainMenuScreen(game))
+                if (game != null) {
+                    (game as? StickmanGame)?.releasePreservedScreen(this)
+                    game.setScreen(MainMenuScreen(game))
+                }
                 return
             }
 
@@ -1067,6 +1098,7 @@ class PlayScreen(
                              input.isJumpJustPressed() ||
                              input.isAttackJustPressed()
             val keyRestart = Gdx.input.isKeyJustPressed(Keys.R)
+            val keyMenu = Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)
             var touchProceed = false
             var touchRetry = false
             var touchMenu = false
@@ -1077,23 +1109,26 @@ class PlayScreen(
                 val tx = uiTouchVec.x
                 val ty = uiTouchVec.y
 
-                val btnYMin = h / 2f - 95f
-                val btnYMax = h / 2f - 35f
+                val btnYMin = h / 2f - 75f
+                val btnYMax = h / 2f - 15f
+                val menu3YMin = h / 2f - 135f
+                val menu3YMax = h / 2f - 80f
 
-                if (tx in (w / 2f - 270f)..(w / 2f - 10f) && ty in btnYMin..btnYMax) {
+                if (tx in (w / 2f - 275f)..(w / 2f - 10f) && ty in btnYMin..btnYMax) {
                     touchProceed = true
-                } else if (tx in (w / 2f + 10f)..(w / 2f + 270f) && ty in btnYMin..btnYMax) {
+                } else if (tx in (w / 2f + 10f)..(w / 2f + 275f) && ty in btnYMin..btnYMax) {
                     touchRetry = true
-                } else if (ty < h / 2f - 105f) {
+                } else if (tx in (w / 2f - 150f)..(w / 2f + 150f) && ty in menu3YMin..menu3YMax) {
                     touchMenu = true
-                } else {
-                    touchProceed = true
                 }
             }
 
-            if (touchMenu) {
+            if (touchMenu || keyMenu) {
                 AudioManager.playDodge()
-                if (game != null) game.setScreen(MainMenuScreen(game))
+                if (game != null) {
+                    (game as? StickmanGame)?.releasePreservedScreen(this)
+                    game.setScreen(MainMenuScreen(game))
+                }
                 return
             }
 
@@ -1310,7 +1345,7 @@ class PlayScreen(
             shapeRenderer.rect(0f, 0f, w, h)
 
             val cardW = 600f
-            val cardH = 240f
+            val cardH = 280f
             val cardX = w / 2f - cardW / 2f
             val cardY = h / 2f - cardH / 2f
             shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.96f)
@@ -1320,15 +1355,21 @@ class PlayScreen(
 
             // Tombol 1: Lanjut Menara (Glowing Emerald / Gold)
             shapeRenderer.color = Color(0.16f, 0.36f, 0.20f, 0.95f)
-            shapeRenderer.rect(w / 2f - 270f, h / 2f - 85f, 250f, 52f)
+            shapeRenderer.rect(w / 2f - 270f, h / 2f - 70f, 250f, 48f)
             shapeRenderer.color = Color(0.3f, 0.95f, 0.45f, 0.95f)
-            shapeRenderer.rectLine(w / 2f - 270f, h / 2f - 33f, w / 2f - 20f, h / 2f - 33f, 2.5f)
+            shapeRenderer.rectLine(w / 2f - 270f, h / 2f - 22f, w / 2f - 20f, h / 2f - 22f, 2.5f)
 
             // Tombol 2: Main Ulang (Cyan Slate)
             shapeRenderer.color = Color(0.14f, 0.20f, 0.30f, 0.95f)
-            shapeRenderer.rect(w / 2f + 20f, h / 2f - 85f, 250f, 52f)
+            shapeRenderer.rect(w / 2f + 20f, h / 2f - 70f, 250f, 48f)
             shapeRenderer.color = Color(0.35f, 0.85f, 1f, 0.9f)
-            shapeRenderer.rectLine(w / 2f + 20f, h / 2f - 33f, w / 2f + 270f, h / 2f - 33f, 2.5f)
+            shapeRenderer.rectLine(w / 2f + 20f, h / 2f - 22f, w / 2f + 270f, h / 2f - 22f, 2.5f)
+
+            // Tombol 3: Menu Utama (Dark Slate with Gold line)
+            shapeRenderer.color = Color(0.12f, 0.16f, 0.24f, 0.95f)
+            shapeRenderer.rect(w / 2f - 140f, h / 2f - 128f, 280f, 44f)
+            shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.9f)
+            shapeRenderer.rectLine(w / 2f - 140f, h / 2f - 84f, w / 2f + 140f, h / 2f - 84f, 2.5f)
         }
 
         shapeRenderer.end()
@@ -1479,18 +1520,23 @@ class PlayScreen(
             val nextFloorLabel = if (isStory && currentFloorNumber >= 3) "ENDLESS SPIRE" else "LANTAI $nextFloorNumber"
 
             headF.color = Color.WHITE
-            headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 240f, h / 2f - 52f)
+            headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 240f, h / 2f - 40f)
             headF.color = Color(0.85f, 0.95f, 1f, 1f)
-            headF.draw(batch, "MAIN ULANG (R)", w / 2f + 55f, h / 2f - 52f)
+            headF.draw(batch, "MAIN ULANG (R)", w / 2f + 55f, h / 2f - 40f)
+            headF.color = Color(0.9f, 0.75f, 0.25f, 1f)
+            headF.draw(batch, "MENU UTAMA (ESC)", w / 2f - 105f, h / 2f - 98f)
         }
 
         batch.end()
     }
 
     private fun handlePauseInput() {
+        if (inputCooldown > 0f) return
+
         if (Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE) || input.isPauseJustPressed()) {
             isPaused = false
             AudioManager.playSlashLight()
+            inputCooldown = 0.20f
             return
         }
 
@@ -1541,21 +1587,23 @@ class PlayScreen(
                 AudioManager.playSlashLight()
             }
             2 -> { // Blacksmith Forge
-                isPaused = false
                 AudioManager.playSlashLight()
                 if (game != null) {
-                    game.setScreen(BlacksmithScreen(game))
+                    (game as? StickmanGame)?.preserveScreen(this)
+                    game.setScreen(BlacksmithScreen(game, this))
                 }
             }
             3 -> { // Talent Tree (Fase 13)
                 AudioManager.playSlashLight()
                 if (game != null) {
+                    (game as? StickmanGame)?.preserveScreen(this)
                     game.setScreen(TalentTreeScreen(game, this))
                 }
             }
             4 -> { // Control Settings (Fase 12)
                 AudioManager.playSlashLight()
                 if (game != null) {
+                    (game as? StickmanGame)?.preserveScreen(this)
                     game.setScreen(ControlSettingsScreen(game, this))
                 }
             }
@@ -1571,6 +1619,7 @@ class PlayScreen(
                 isPaused = false
                 AudioManager.playDodge()
                 if (game != null) {
+                    (game as? StickmanGame)?.releasePreservedScreen(this)
                     game.setScreen(MainMenuScreen(game))
                 }
             }

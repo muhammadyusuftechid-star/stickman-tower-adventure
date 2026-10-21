@@ -71,12 +71,14 @@ class ControlSettingsScreen(
     private val btnSaveExit = Rectangle(770f, 550f, 180f, 34f)
 
     private var rumbleFeedbackTimer = 0f
+    private var inputCooldown = 0.25f
 
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         FontManager.init()
         AudioManager.init()
         HapticManager.init()
+        inputCooldown = 0.25f
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
             viewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
         }
@@ -89,7 +91,11 @@ class ControlSettingsScreen(
             rumbleFeedbackTimer = (rumbleFeedbackTimer - safeDelta).coerceAtLeast(0f)
         }
 
-        handleInput()
+        if (inputCooldown > 0f) {
+            inputCooldown -= safeDelta
+        } else {
+            handleInput()
+        }
 
         ScreenUtils.clear(0.06f, 0.08f, 0.12f, 1f)
         viewport.apply()

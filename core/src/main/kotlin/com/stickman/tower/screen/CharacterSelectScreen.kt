@@ -38,10 +38,12 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     private val archetypes = CharacterArchetype.entries.toTypedArray()
     private var selectedIndex = 0
     private var animTime = 0f
+    private var inputCooldown = 0.25f
 
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         FontManager.init()
+        inputCooldown = 0.25f
         val currentSave = SaveManager.load()
         selectedIndex = archetypes.indexOfFirst { it.name.equals(currentSave.selectedArchetype, ignoreCase = true) }
             .coerceAtLeast(0)
@@ -49,7 +51,11 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
 
     override fun render(delta: Float) {
         animTime += delta
-        handleInput()
+        if (inputCooldown > 0f) {
+            inputCooldown -= delta
+        } else {
+            handleInput()
+        }
         if (game.screen !== this) return
 
         ScreenUtils.clear(0.06f, 0.08f, 0.14f, 1f)
@@ -412,8 +418,10 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
             confirmSelection()
         }
         if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.BACK)) {
+            saveSelection()
             AudioManager.playDodge()
             game.setScreen(MainMenuScreen(game))
+            return
         }
 
         // Klik Mouse & Layar Sentuh Mobile
@@ -452,6 +460,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
             }
             // Tombol Back (Area sentuh ekstra luas)
             if (touchVec.x in 240f..580f && touchVec.y in 25f..115f) {
+                saveSelection()
                 AudioManager.playDodge()
                 game.setScreen(MainMenuScreen(game))
                 return
@@ -459,14 +468,17 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         }
     }
 
-    private fun confirmSelection() {
+    private fun saveSelection() {
         val selected = archetypes[selectedIndex]
         val save = SaveManager.load()
         save.selectedArchetype = selected.name
         SaveManager.save(save)
+    }
 
+    private fun confirmSelection() {
+        saveSelection()
         AudioManager.playLevelUp()
-        game.setScreen(PlayScreen(game))
+        game.setScreen(PlayScreen(game, 1, GameMode.STORY))
     }
 
     override fun resize(width: Int, height: Int) {

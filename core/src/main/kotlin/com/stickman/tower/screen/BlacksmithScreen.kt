@@ -29,7 +29,7 @@ import kotlin.math.sin
  * Mengizinkan pemain membelanjakan Gold yang diperoleh dari menara untuk meningkatkan
  * statistik senjata permanen (Sharpening Stone, Hollow Edge, Lightweight Hilt).
  */
-class BlacksmithScreen(private val game: StickmanGame) : Screen {
+class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen? = null) : Screen {
 
     private val camera = OrthographicCamera()
     private val viewport: Viewport = FitViewport(1280f, 720f, camera)
@@ -47,6 +47,7 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
     private var noticeText = ""
     private var noticeTimer = 0f
     private var hammerImpactFlash = 0f
+    private var inputCooldown = 0.25f
 
     // Partikel Ember Percikan Api Tempa
     private class ForgeSpark(
@@ -77,6 +78,7 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
         AudioManager.init()
         HapticManager.init()
         FontManager.init()
+        inputCooldown = 0.25f
         saveData = SaveManager.load()
         stats.loadFromSaveData(saveData)
 
@@ -101,7 +103,11 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
         }
 
         updateSparks(delta)
-        handleInput()
+        if (inputCooldown > 0f) {
+            inputCooldown -= delta
+        } else {
+            handleInput()
+        }
 
         ScreenUtils.clear(0.05f, 0.06f, 0.09f, 1f)
         viewport.apply()
@@ -397,7 +403,11 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
 
     private fun returnToMenu() {
         AudioManager.playSlashLight()
-        game.setScreen(MainMenuScreen(game))
+        if (returnScreen != null) {
+            game.setScreen(returnScreen)
+        } else {
+            game.setScreen(MainMenuScreen(game))
+        }
     }
 
     private fun updateSparks(delta: Float) {

@@ -50,12 +50,14 @@ class TalentTreeScreen(
     private var feedbackText = ""
     private var feedbackTimer = 0f
     private var animTime = 0f
+    private var inputCooldown = 0.25f
 
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
         HapticManager.init()
         FontManager.init()
+        inputCooldown = 0.25f
         talentManager.loadFromSave(saveData)
         // Otomatis sinkronkan sub-class agar selalu sesuai dengan archetype aktif
         if (talentManager.selectedSubClass == SubClass.NONE || talentManager.selectedSubClass.archetype != currentArchetype) {
@@ -72,7 +74,11 @@ class TalentTreeScreen(
             if (feedbackTimer <= 0f) feedbackText = ""
         }
 
-        handleInput()
+        if (inputCooldown > 0f) {
+            inputCooldown -= delta
+        } else {
+            handleInput()
+        }
 
         ScreenUtils.clear(0.04f, 0.06f, 0.10f, 1f)
         camera.update()
@@ -376,7 +382,11 @@ class TalentTreeScreen(
         SaveManager.save(saveData)
         AudioManager.playDodge()
         if (game != null) {
-            game.setScreen(returnScreen)
+            if (returnScreen != null) {
+                game.setScreen(returnScreen)
+            } else {
+                game.setScreen(MainMenuScreen(game))
+            }
         }
     }
 
