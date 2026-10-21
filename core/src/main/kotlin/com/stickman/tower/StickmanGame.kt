@@ -1,24 +1,20 @@
 package com.stickman.tower
 
-import com.badlogic.gdx.ApplicationAdapter
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.utils.ScreenUtils
+import com.badlogic.gdx.Game
+import com.stickman.tower.screen.PlayScreen
 
-/** [com.badlogic.gdx.ApplicationListener] implementation shared by all platforms. */
-class StickmanGame : ApplicationAdapter() {
-    private val batch by lazy { SpriteBatch() }
-    private val image by lazy { Texture("libgdx.png") }
-
-    override fun render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f)
-        batch.begin()
-        batch.draw(image, 140f, 210f)
-        batch.end()
+/**
+ * Game root controller untuk Stickman Tower Adventure.
+ * Mengelola transisi antar screen menggunakan libGDX Game framework.
+ */
+class StickmanGame : Game() {
+    override fun create() {
+        // Luncurkan langsung ke PlayScreen untuk pengujian platformer
+        setScreen(PlayScreen())
     }
 
     override fun dispose() {
-        batch.dispose()
-        image.dispose()
+        super.dispose()
+        screen?.dispose()
     }
 }

@@ -78,38 +78,35 @@ flowchart LR
 
 #### Modul 1.1: World, Viewport & Sistem Kamera 2D
 - **Task 1.1.1: Konfigurasi Virtual Resolution**
-  - [ ] Tentukan target resolusi dunia logika (misal: World Units 16:9, misal lebar `16f` meter, tinggi `9f` meter atau skala piksel `800x450`).
-  - [ ] Implementasikan `FitViewport` atau `ExtendViewport` pada `OrthographicCamera` untuk mencegah distorsi aspek rasio di berbagai layar HP Android.
+  - [x] Tentukan target resolusi dunia logika (`GameConfig.kt`: World Units 16:9, `16f x 9f` meter logis).
+  - [x] Implementasikan `FitViewport` pada `OrthographicCamera` untuk mencegah distorsi aspek rasio di layar berbeda.
 - **Task 1.1.2: Camera Follow System**
-  - [ ] Buat class `CameraManager.kt` dengan algoritma *linear interpolation (lerp)* agar kamera mengikuti posisi pemain secara mulus.
-  - [ ] Tambahkan batasan batas map (*clamping*) agar kamera tidak menampilkan ruang kosong di luar level.
+  - [x] Buat class `CameraManager.kt` dengan algoritma *linear interpolation (lerp)* mengikuti pemain secara mulus.
+  - [x] Tambahkan batasan batas map (*clamping*) agar kamera tidak menampilkan ruang kosong di luar level.
 
 #### Modul 1.2: Player Entity & Controller Kinematik Custom
 - **Task 1.2.1: Model Karakter dan Vektor Gerak**
-  - [ ] Buat class `Player.kt` yang memiliki properti: `position (Vector2)`, `velocity (Vector2)`, `size (width, height)`, `facingRight (Boolean)`.
-  - [ ] Buat kotak placeholder karakter stickman menggunakan `ShapeRenderer` atau sprite kotak 2D sederhana.
+  - [x] Buat class `Player.kt` (`position`, `velocity`, `width = 0.8f`, `height = 1.8f`, `facingRight`).
+  - [x] Buat stickman visual dinamis (persendian beranimasi saat lari/lompat/jatuh) menggunakan `ShapeRenderer`.
 - **Task 1.2.2: Sistem Input Abstraksi**
-  - [ ] Buat antarmuka `GameInput` (`isMoveLeft()`, `isMoveRight()`, `isJumpJustPressed()`, dll.).
-  - [ ] Buat implementasi desktop `DesktopKeyboardInput.kt` membaca tombol `A`, `D`, `Space` / `K`.
+  - [x] Buat antarmuka `GameInput` (`isMoveLeft()`, `isMoveRight()`, `isJumpJustPressed()`, `isJumpPressed()`).
+  - [x] Buat implementasi desktop `KeyboardInput.kt` membaca tombol `A`, `D`, `Space` / `W` / `K`.
 - **Task 1.2.3: Platformer Physics (Gravitasi & Lompatan)**
-  - [ ] Definisikan konstanta fisika: `GRAVITY = -25f`, `MOVE_SPEED = 7f`, `JUMP_VELOCITY = 12f`.
-  - [ ] Terapkan kalkulasi Euler integration: `velocity.y += GRAVITY * delta`, `position.add(velocity * delta)`.
-  - [ ] Tambahkan toleransi *coyote time* (100ms setelah meninggalkan platform masih bisa lompat) dan *jump buffering* agar kontrol terasa sangat responsif dan tidak kaku.
+  - [x] Definisikan konstanta fisika: `GRAVITY = -28f`, `MOVE_SPEED = 7.5f`, `JUMP_VELOCITY = 11.5f`.
+  - [x] Terapkan kalkulasi Euler integration dengan lompatan variabel (lepas tombol = lompat lebih pendek).
+  - [x] Tambahkan toleransi *coyote time* (120ms) dan *jump buffering* (120ms) untuk kontrol responsif.
 
 #### Modul 1.3: Collision Platform Sederhana
 - **Task 1.3.1: Deteksi Lantai & Rintangan**
-  - [ ] Buat class `Platform.kt` (bounding box `Rectangle`).
-  - [ ] Implementasikan collision resolver: deteksi tumpang tindih sumbu Y saat karakter sedang jatuh (`velocity.y <= 0`) untuk mendarat tepat di atas platform (`isGrounded = true`).
-  - [ ] Deteksi tabrakan horizontal sumbu X agar pemain tidak menembus dinding samping platform.
+  - [x] Buat class `Platform.kt` (bounding box `Rectangle` dan rendering highlight).
+  - [x] Implementasikan collision resolver terpisah sumbu X dan Y: deteksi mendarat, langit-langit, dan dinding samping.
+  - [x] Buat arena platform bertingkat di `PlayScreen.kt` untuk validasi gerak dan lompatan.
 
 #### Modul 1.4: Karakter State Machine (FSM Dasar)
 - **Task 1.4.1: Enumerasi dan Alur State Gerak**
-  - [ ] Buat `enum class CharacterState { IDLE, RUN, JUMP, FALL }`.
-  - [ ] Implementasikan fungsi `updateState()`:
-    - Jika `velocity.y > 0` dan tidak di tanah $\rightarrow$ `JUMP`.
-    - Jika `velocity.y < 0` dan tidak di tanah $\rightarrow$ `FALL`.
-    - Jika di tanah dan `abs(velocity.x) > 0.1f` $\rightarrow$ `RUN`.
-    - Jika di tanah dan `abs(velocity.x) <= 0.1f` $\rightarrow$ `IDLE`.
+  - [x] Buat `enum class CharacterState { IDLE, RUN, JUMP, FALL }`.
+  - [x] Implementasikan fungsi `updateState()` dengan transisi otomatis berdasarkan velocity dan status grounded.
+  - [x] Tambahkan overlay HUD debug (menampilkan FPS, State, Koordinat, Velocity, dan petunjuk kontrol).
 
 ---
 
