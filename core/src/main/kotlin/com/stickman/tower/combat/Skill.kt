@@ -4,8 +4,8 @@ package com.stickman.tower.combat
  * Komponen Skill biasa berbasis waktu cooldown.
  */
 class Skill(
-    val name: String = "Dash Strike",
-    val cooldown: Float = 4.5f
+    var name: String = "Dash Strike",
+    var cooldown: Float = 4.5f
 ) {
     var remainingCooldown: Float = 0f
         private set

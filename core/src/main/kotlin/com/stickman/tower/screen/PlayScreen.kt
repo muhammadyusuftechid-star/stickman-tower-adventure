@@ -228,7 +228,7 @@ class PlayScreen(
             )
         }
         devTools.onKillAllEnemies = {
-            for (enemy in currentFloor.enemies) {
+            for (enemy in currentFloor.allEnemies) {
                 if (!enemy.health.isDead) {
                     enemy.health.takeDamage(enemy.health.currentHp)
                 }
@@ -241,6 +241,23 @@ class PlayScreen(
                 FloatingText("ALL MOBS ELIMINATED [DEV]", player.position.x, player.position.y + 2.5f, Color.RED)
             )
         }
+        devTools.onSwitchArchetype = { arch ->
+            player.switchArchetype(arch)
+            floatingTexts.add(
+                FloatingText("HERO SWAPPED: ${arch.name} [DEV]", player.position.x, player.position.y + 2.5f, Color.MAGENTA)
+            )
+        }
+        devTools.onSpawnEnemy = { enemyType ->
+            val spawnX = player.position.x + if (player.facingRight) 3.5f else -3.5f
+            val spawnY = player.position.y
+            val newEnemy = com.stickman.tower.enemy.Enemy(spawnX, spawnY, enemyType)
+            currentFloor.dynamicEnemies.add(newEnemy)
+            particleManager.spawnHitSparks(spawnX, spawnY + 1f, count = 15, color = Color.PURPLE)
+            floatingTexts.add(
+                FloatingText("+ SPAWNED ${enemyType.name} [DEV]", spawnX, spawnY + 2.0f, Color.ORANGE)
+            )
+        }
+        devTools.dispatcher.getCurrentFloor = { currentFloor }
 
         if (isFirstShow) {
             isFirstShow = false
@@ -381,15 +398,20 @@ class PlayScreen(
 
         // Konsumsi sentuhan panel Developer Tools jika sedang terbuka
         if (devTools.isVisible && Gdx.input.justTouched()) {
-            val handled = devTools.handleTouchDown(Gdx.input.x, Gdx.input.y, uiViewport, currentFloor)
+            val handled = devTools.handleTouchDown(Gdx.input.x, Gdx.input.y, uiViewport, currentFloor, player)
             if (handled) {
                 inputCooldown = 0.15f
             }
         }
 
-        val safeDelta = delta.coerceAtMost(1f / 30f)
+        val baseDelta = delta.coerceAtMost(1f / 30f)
+        val safeDelta = if (devTools.isPaused) {
+            if (devTools.consumeStep()) 1f / 60f else 0f
+        } else {
+            (baseDelta * devTools.timeScale).coerceAtMost(0.2f)
+        }
         if (inputCooldown > 0f) {
-            inputCooldown = (inputCooldown - safeDelta).coerceAtLeast(0f)
+            inputCooldown = (inputCooldown - (if (safeDelta > 0f) safeDelta else baseDelta)).coerceAtLeast(0f)
         }
 
         // Toggle Pause dengan ESC, P, Tombol Android BACK, atau Gamepad START
@@ -673,7 +695,7 @@ class PlayScreen(
 
             // Pembaruan Sistem AI Combat Director & Musuh Biasa
             CombatDirector.update(updateDelta)
-            for (enemy in currentFloor.enemies) {
+            for (enemy in currentFloor.allEnemies) {
                 enemy.update(updateDelta, player, currentFloor.platforms)
                 if (enemy.health.isDead && !enemy.rewardClaimed) {
                     enemy.rewardClaimed = true
@@ -843,7 +865,7 @@ class PlayScreen(
             renderAriaNPC(shapeRenderer)
         }
 
-        for (enemy in currentFloor.enemies) enemy.render(shapeRenderer)
+        for (enemy in currentFloor.allEnemies) enemy.render(shapeRenderer)
         currentFloor.boss?.render(shapeRenderer)
         player.render(shapeRenderer)
         player.renderProjectiles(shapeRenderer)
@@ -865,7 +887,7 @@ class PlayScreen(
         if (showDebugBounds || devTools.showHitboxes) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             player.renderDebug(shapeRenderer)
-            for (enemy in currentFloor.enemies) enemy.renderDebug(shapeRenderer)
+            for (enemy in currentFloor.allEnemies) enemy.renderDebug(shapeRenderer)
             currentFloor.boss?.renderDebug(shapeRenderer)
             for (platform in currentFloor.platforms) {
                 shapeRenderer.color = if (platform.isOneWay) Color.CYAN else Color.YELLOW
@@ -891,7 +913,7 @@ class PlayScreen(
 
         // A. Serangan Pemain Mengenai Musuh Biasa
         if (player.hitbox.isActive) {
-            for (enemy in currentFloor.enemies) {
+            for (enemy in currentFloor.allEnemies) {
                 if (!enemy.health.isDead && !player.hitbox.hitEntities.contains(enemy)) {
                     if (player.hitbox.bounds.overlaps(enemy.hurtbox.bounds)) {
                         player.hitbox.hitEntities.add(enemy)
@@ -928,7 +950,7 @@ class PlayScreen(
                             hitStopManager.trigger(0.06f)
                             AudioManager.playHit()
                             particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 10, color = if (player.hitbox.isCritical) Color.GOLD else Color.WHITE)
-                            relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
+                            relicManager.onComboHit(combo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                             com.stickman.tower.achievement.AchievementManager.onComboHit(combo, saveData)
 
                             // Lifesteal Mutator & Talents (Fase 13)
@@ -994,7 +1016,7 @@ class PlayScreen(
                         hitStopManager.trigger(0.06f)
                         AudioManager.playHit()
                         particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 14, color = Color.ORANGE)
-                        relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
+                        relicManager.onComboHit(combo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                         com.stickman.tower.achievement.AchievementManager.onComboHit(combo, saveData)
 
                         // Lifesteal Mutator & Talents (Fase 13)
@@ -1056,7 +1078,7 @@ class PlayScreen(
             val proj = player.projectiles[i]
             if (proj.isDestroyed) continue
 
-            for (enemy in currentFloor.enemies) {
+            for (enemy in currentFloor.allEnemies) {
                 if (!enemy.health.isDead && proj.bounds.overlaps(enemy.hurtbox.bounds)) {
                     if (enemy.canBlockHitFrom(proj.position.x)) {
                         AudioManager.playParry()
@@ -1106,7 +1128,7 @@ class PlayScreen(
         }
 
         // B. Serangan Musuh Biasa Mengenai Pemain (Dapat di-Parry / Guard Break)
-        for (enemy in currentFloor.enemies) {
+        for (enemy in currentFloor.allEnemies) {
             if (enemy.hitbox.isActive && !enemy.hitbox.hitEntities.contains(player) && !player.health.isDead) {
                 if (enemy.hitbox.bounds.overlaps(player.hurtbox.bounds)) {
                     enemy.hitbox.hitEntities.add(player)
@@ -1116,7 +1138,7 @@ class PlayScreen(
                         enemy.stun(1.5f)
                         player.triggerParry()
                         val parryCombo = player.comboManager.registerHit()
-                        relicManager.onComboHit(parryCombo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
+                        relicManager.onComboHit(parryCombo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                         if (talentManager.hasParryHeal()) {
                             val parryHeal = player.health.maxHp * 0.15f
                             player.health.heal(parryHeal)
@@ -1176,7 +1198,7 @@ class PlayScreen(
                     boss.stun(1.5f)
                     player.triggerParry()
                     val parryCombo = player.comboManager.registerHit()
-                    relicManager.onComboHit(parryCombo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
+                    relicManager.onComboHit(parryCombo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                     if (talentManager.hasParryHeal()) {
                         val parryHeal = player.health.maxHp * 0.15f
                         player.health.heal(parryHeal)
@@ -1278,7 +1300,7 @@ class PlayScreen(
         }
 
         // E. Proyektil Ranged Enemy Mengenai Pemain (Dapat di-Deflect)
-        for (enemy in currentFloor.enemies) {
+        for (enemy in currentFloor.allEnemies) {
             if (enemy.projectiles.isNotEmpty()) {
                 for (proj in enemy.projectiles) {
                     if (!proj.isDestroyed && proj.bounds.overlaps(player.hurtbox.bounds) && !player.health.isDead) {
@@ -1345,7 +1367,7 @@ class PlayScreen(
         } else if (currentFloor.isBossFloor) {
             currentFloor.boss?.health?.isDead == true
         } else {
-            currentFloor.enemies.all { it.health.isDead }
+            currentFloor.allEnemies.all { it.health.isDead }
         }
 
         if (isFloorCleared && currentFloor.exitPortal.bounds.overlaps(player.bounds) && gameStatus == GameStatus.PLAYING) {

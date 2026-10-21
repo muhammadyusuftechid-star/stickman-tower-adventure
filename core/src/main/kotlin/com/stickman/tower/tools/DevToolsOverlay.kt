@@ -10,27 +10,48 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.character.Player
+import com.stickman.tower.enemy.EnemyType
 import com.stickman.tower.ui.FontManager
 import com.stickman.tower.world.TowerFloor
 
 /**
- * In-Game Developer Console, Profiler & QA Testing Overlay:
+ * Tab navigasi pada Developer Console & Profiler Overlay.
+ */
+enum class DevTab {
+    CHEATS,
+    WARP_SPAWN,
+    PROFILER_AUDIT,
+    CLI_CONSOLE
+}
+
+/**
+ * In-Game Developer Console, Profiler & QA Testing Overlay (10/10 Tools Architecture):
  * Menyediakan alat pemantau performa realtime, pengubah state permainan (God Mode, Infinite SP),
- * stage warper, dan validator level interaktif yang dapat diakses melalui keyboard (F1/F3/~)
- * maupun tombol sentuh pada Android.
+ * pengatur kecepatan waktu (Timescale 0.1x - 2.0x, Pause & 1-Frame Step), Hot-Swap Arketipe Karakter,
+ * Live Enemy Spawner, Level Reachability Validator, Headless Combat Simulator, dan CLI Command Runner.
  */
 class DevToolsOverlay {
 
     var isVisible: Boolean = false
+    var currentTab: DevTab = DevTab.CHEATS
 
     // QA & Cheat Toggles
     var isGodMode: Boolean = false
     var isInfiniteEnergy: Boolean = false
     var showHitboxes: Boolean = false
 
-    // Status Audit Level Terakhir
-    var lastAuditSummary: String = "Audit belum dijalankan. Tekan [RUN AUDIT]."
+    // Kontrol Kecepatan Waktu (Timescale & Frame-Step)
+    var timeScale: Float = 1.0f
+    var isPaused: Boolean = false
+    var pendingStepFrame: Boolean = false
+
+    // Status Audit & Output Log Terakhir
+    var lastAuditSummary: String = "Audit belum dijalankan. Pilih tombol audit di bawah."
+
+    // Command Dispatcher CLI
+    val dispatcher = DevCommandDispatcher()
 
     // Callback Aksi yang Dihubungkan ke PlayScreen
     var onWarpFloor: ((Int) -> Unit)? = null
@@ -38,35 +59,103 @@ class DevToolsOverlay {
     var onGrantLevel: (() -> Unit)? = null
     var onHealFull: (() -> Unit)? = null
     var onKillAllEnemies: (() -> Unit)? = null
+    var onSwitchArchetype: ((CharacterArchetype) -> Unit)? = null
+    var onSpawnEnemy: ((EnemyType) -> Unit)? = null
 
-    // Tombol Interaktif (Bounding Boxes untuk Touch & Mouse Click)
+    // Tombol Navigasi Umum
     private val btnClose = Rectangle(1000f, 580f, 40f, 35f)
-    private val btnGodMode = Rectangle(260f, 440f, 175f, 38f)
-    private val btnInfEnergy = Rectangle(450f, 440f, 175f, 38f)
-    private val btnHitboxes = Rectangle(640f, 440f, 175f, 38f)
-    private val btnRunAudit = Rectangle(830f, 440f, 175f, 38f)
+    private val tabBtnCheats = Rectangle(250f, 445f, 185f, 32f)
+    private val tabBtnWarp = Rectangle(445f, 445f, 185f, 32f)
+    private val tabBtnAudit = Rectangle(640f, 445f, 195f, 32f)
+    private val tabBtnCli = Rectangle(845f, 445f, 185f, 32f)
 
-    private val btnHeal = Rectangle(260f, 380f, 175f, 38f)
-    private val btnGrantGold = Rectangle(450f, 380f, 175f, 38f)
-    private val btnGrantLevel = Rectangle(640f, 380f, 175f, 38f)
-    private val btnKillEnemies = Rectangle(830f, 380f, 175f, 38f)
+    // Tombol TAB 1: CHEATS & SPEED
+    private val btnGodMode = Rectangle(250f, 390f, 180f, 38f)
+    private val btnInfEnergy = Rectangle(450f, 390f, 180f, 38f)
+    private val btnHitboxes = Rectangle(650f, 390f, 180f, 38f)
+    private val btnHeal = Rectangle(850f, 390f, 180f, 38f)
 
-    private val btnWarpF1 = Rectangle(260f, 320f, 135f, 38f)
-    private val btnWarpF2 = Rectangle(410f, 320f, 135f, 38f)
-    private val btnWarpF3 = Rectangle(560f, 320f, 135f, 38f)
-    private val btnWarpEndless5 = Rectangle(710f, 320f, 135f, 38f)
-    private val btnWarpEndless10 = Rectangle(860f, 320f, 145f, 38f)
+    private val btnGrantGold = Rectangle(250f, 335f, 180f, 38f)
+    private val btnGrantLevel = Rectangle(450f, 335f, 180f, 38f)
+    private val btnKillEnemies = Rectangle(650f, 335f, 180f, 38f)
+    private val btnCycleHero = Rectangle(850f, 335f, 180f, 38f)
+
+    private val btnSpeed01 = Rectangle(250f, 235f, 115f, 34f)
+    private val btnSpeed05 = Rectangle(375f, 235f, 115f, 34f)
+    private val btnSpeed10 = Rectangle(500f, 235f, 115f, 34f)
+    private val btnSpeed20 = Rectangle(625f, 235f, 115f, 34f)
+    private val btnPauseToggle = Rectangle(750f, 235f, 135f, 34f)
+    private val btnStepFrame = Rectangle(895f, 235f, 135f, 34f)
+
+    // Tombol TAB 2: WARP & SPAWN
+    private val btnWarpF1 = Rectangle(250f, 390f, 140f, 34f)
+    private val btnWarpF2 = Rectangle(400f, 390f, 140f, 34f)
+    private val btnWarpF3 = Rectangle(550f, 390f, 140f, 34f)
+    private val btnWarpF5 = Rectangle(700f, 390f, 140f, 34f)
+    private val btnWarpF10 = Rectangle(850f, 390f, 180f, 34f)
+
+    private val btnWarpEndless5 = Rectangle(250f, 340f, 180f, 34f)
+    private val btnWarpEndless10 = Rectangle(445f, 340f, 180f, 34f)
+    private val btnWarpEndless20 = Rectangle(640f, 340f, 180f, 34f)
+    private val btnWarpEndless50 = Rectangle(835f, 340f, 195f, 34f)
+
+    private val btnSpawnMelee = Rectangle(250f, 235f, 180f, 36f)
+    private val btnSpawnRanged = Rectangle(445f, 235f, 180f, 36f)
+    private val btnSpawnFlying = Rectangle(640f, 235f, 180f, 36f)
+    private val btnSpawnShield = Rectangle(835f, 235f, 195f, 36f)
+
+    // Tombol TAB 3: PROFILER & AUDIT
+    private val btnRunSanity = Rectangle(250f, 390f, 180f, 36f)
+    private val btnRunReachability = Rectangle(445f, 390f, 195f, 36f)
+    private val btnRunBalance = Rectangle(655f, 390f, 185f, 36f)
+    private val btnRunAssets = Rectangle(855f, 390f, 175f, 36f)
+
+    // Tombol TAB 4: CONSOLE CLI QUICK ACTIONS
+    private val btnCliHelp = Rectangle(250f, 390f, 120f, 34f)
+    private val btnCliGod = Rectangle(380f, 390f, 120f, 34f)
+    private val btnCliHeal = Rectangle(510f, 390f, 120f, 34f)
+    private val btnCliGold = Rectangle(640f, 390f, 130f, 34f)
+    private val btnCliSim = Rectangle(780f, 390f, 125f, 34f)
+    private val btnCliReach = Rectangle(915f, 390f, 115f, 34f)
 
     private val touchPoint = Vector3()
+
+    init {
+        // Hubungkan callback default ke dispatcher internal
+        dispatcher.onSetGodMode = { isGodMode = it }
+        dispatcher.onSetInfiniteEnergy = { isInfiniteEnergy = it }
+        dispatcher.onSetTimeScale = { timeScale = it; isPaused = it <= 0f }
+        dispatcher.onStepFrame = { step() }
+        dispatcher.onWarpFloor = { onWarpFloor?.invoke(it) }
+        dispatcher.onHealFull = { onHealFull?.invoke() }
+        dispatcher.onGrantGold = { onGrantGold?.invoke(it) }
+        dispatcher.onGrantLevel = { onGrantLevel?.invoke() }
+        dispatcher.onKillAllEnemies = { onKillAllEnemies?.invoke() }
+        dispatcher.onSwitchArchetype = { onSwitchArchetype?.invoke(it) }
+        dispatcher.onSpawnEnemy = { onSpawnEnemy?.invoke(it) }
+        dispatcher.onToggleHitboxes = { if (it != null) showHitboxes = it else showHitboxes = !showHitboxes }
+    }
 
     fun toggle() {
         isVisible = !isVisible
     }
 
+    fun step() {
+        pendingStepFrame = true
+    }
+
+    fun consumeStep(): Boolean {
+        if (pendingStepFrame) {
+            pendingStepFrame = false
+            return true
+        }
+        return false
+    }
+
     /**
      * Memproses input klik / sentuhan pada panel Developer Tools.
      */
-    fun handleTouchDown(screenX: Int, screenY: Int, viewport: Viewport, currentFloor: TowerFloor): Boolean {
+    fun handleTouchDown(screenX: Int, screenY: Int, viewport: Viewport, currentFloor: TowerFloor, player: Player? = null): Boolean {
         if (!isVisible) return false
 
         touchPoint.set(screenX.toFloat(), screenY.toFloat(), 0f)
@@ -79,66 +168,88 @@ class DevToolsOverlay {
             return true
         }
 
-        if (btnGodMode.contains(tx, ty)) {
-            isGodMode = !isGodMode
-            return true
-        }
+        // Navigasi Tab
+        if (tabBtnCheats.contains(tx, ty)) { currentTab = DevTab.CHEATS; return true }
+        if (tabBtnWarp.contains(tx, ty)) { currentTab = DevTab.WARP_SPAWN; return true }
+        if (tabBtnAudit.contains(tx, ty)) { currentTab = DevTab.PROFILER_AUDIT; return true }
+        if (tabBtnCli.contains(tx, ty)) { currentTab = DevTab.CLI_CONSOLE; return true }
 
-        if (btnInfEnergy.contains(tx, ty)) {
-            isInfiniteEnergy = !isInfiniteEnergy
-            return true
-        }
+        when (currentTab) {
+            DevTab.CHEATS -> {
+                if (btnGodMode.contains(tx, ty)) { isGodMode = !isGodMode; return true }
+                if (btnInfEnergy.contains(tx, ty)) { isInfiniteEnergy = !isInfiniteEnergy; return true }
+                if (btnHitboxes.contains(tx, ty)) { showHitboxes = !showHitboxes; return true }
+                if (btnHeal.contains(tx, ty)) { onHealFull?.invoke(); return true }
+                if (btnGrantGold.contains(tx, ty)) { onGrantGold?.invoke(1000); return true }
+                if (btnGrantLevel.contains(tx, ty)) { onGrantLevel?.invoke(); return true }
+                if (btnKillEnemies.contains(tx, ty)) { onKillAllEnemies?.invoke(); return true }
 
-        if (btnHitboxes.contains(tx, ty)) {
-            showHitboxes = !showHitboxes
-            return true
-        }
+                if (btnCycleHero.contains(tx, ty) && player != null) {
+                    val current = player.archetype
+                    val next = when (current) {
+                        CharacterArchetype.BALANCED -> CharacterArchetype.AGILE
+                        CharacterArchetype.AGILE -> CharacterArchetype.HEAVY
+                        CharacterArchetype.HEAVY -> CharacterArchetype.BALANCED
+                    }
+                    player.switchArchetype(next)
+                    onSwitchArchetype?.invoke(next)
+                    return true
+                }
 
-        if (btnRunAudit.contains(tx, ty)) {
-            val report = LevelSanityValidator.validateFloor(currentFloor)
-            lastAuditSummary = report.summary()
-            return true
-        }
+                // Timescale controls
+                if (btnSpeed01.contains(tx, ty)) { timeScale = 0.1f; isPaused = false; return true }
+                if (btnSpeed05.contains(tx, ty)) { timeScale = 0.5f; isPaused = false; return true }
+                if (btnSpeed10.contains(tx, ty)) { timeScale = 1.0f; isPaused = false; return true }
+                if (btnSpeed20.contains(tx, ty)) { timeScale = 2.0f; isPaused = false; return true }
+                if (btnPauseToggle.contains(tx, ty)) { isPaused = !isPaused; return true }
+                if (btnStepFrame.contains(tx, ty)) { isPaused = true; step(); return true }
+            }
+            DevTab.WARP_SPAWN -> {
+                if (btnWarpF1.contains(tx, ty)) { onWarpFloor?.invoke(1); return true }
+                if (btnWarpF2.contains(tx, ty)) { onWarpFloor?.invoke(2); return true }
+                if (btnWarpF3.contains(tx, ty)) { onWarpFloor?.invoke(3); return true }
+                if (btnWarpF5.contains(tx, ty)) { onWarpFloor?.invoke(5); return true }
+                if (btnWarpF10.contains(tx, ty)) { onWarpFloor?.invoke(10); return true }
+                if (btnWarpEndless5.contains(tx, ty)) { onWarpFloor?.invoke(5); return true }
+                if (btnWarpEndless10.contains(tx, ty)) { onWarpFloor?.invoke(10); return true }
+                if (btnWarpEndless20.contains(tx, ty)) { onWarpFloor?.invoke(20); return true }
+                if (btnWarpEndless50.contains(tx, ty)) { onWarpFloor?.invoke(50); return true }
 
-        if (btnHeal.contains(tx, ty)) {
-            onHealFull?.invoke()
-            return true
-        }
-
-        if (btnGrantGold.contains(tx, ty)) {
-            onGrantGold?.invoke(1000)
-            return true
-        }
-
-        if (btnGrantLevel.contains(tx, ty)) {
-            onGrantLevel?.invoke()
-            return true
-        }
-
-        if (btnKillEnemies.contains(tx, ty)) {
-            onKillAllEnemies?.invoke()
-            return true
-        }
-
-        if (btnWarpF1.contains(tx, ty)) {
-            onWarpFloor?.invoke(1)
-            return true
-        }
-        if (btnWarpF2.contains(tx, ty)) {
-            onWarpFloor?.invoke(2)
-            return true
-        }
-        if (btnWarpF3.contains(tx, ty)) {
-            onWarpFloor?.invoke(3)
-            return true
-        }
-        if (btnWarpEndless5.contains(tx, ty)) {
-            onWarpFloor?.invoke(5)
-            return true
-        }
-        if (btnWarpEndless10.contains(tx, ty)) {
-            onWarpFloor?.invoke(10)
-            return true
+                if (btnSpawnMelee.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.MELEE); return true }
+                if (btnSpawnRanged.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.RANGED); return true }
+                if (btnSpawnFlying.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.FLYING); return true }
+                if (btnSpawnShield.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.SHIELDED); return true }
+            }
+            DevTab.PROFILER_AUDIT -> {
+                if (btnRunSanity.contains(tx, ty)) {
+                    val report = LevelSanityValidator.validateFloor(currentFloor)
+                    lastAuditSummary = report.summary()
+                    return true
+                }
+                if (btnRunReachability.contains(tx, ty)) {
+                    val report = LevelReachabilityGraph.analyzeFloor(currentFloor)
+                    lastAuditSummary = report.summary()
+                    return true
+                }
+                if (btnRunBalance.contains(tx, ty)) {
+                    val report = CombatBalanceSimulator.runFullAudit(roundsPerArchetype = 30)
+                    lastAuditSummary = "SIMULATION DONE: OverallBalanced=${report.overallBalanced}, WinRate=${"%.1f".format(report.globalWinRate * 100)}%"
+                    return true
+                }
+                if (btnRunAssets.contains(tx, ty)) {
+                    val report = AssetPipelineValidator.validateAll()
+                    lastAuditSummary = report.summary()
+                    return true
+                }
+            }
+            DevTab.CLI_CONSOLE -> {
+                if (btnCliHelp.contains(tx, ty)) { dispatcher.dispatch("help"); return true }
+                if (btnCliGod.contains(tx, ty)) { dispatcher.dispatch("god"); return true }
+                if (btnCliHeal.contains(tx, ty)) { dispatcher.dispatch("heal"); return true }
+                if (btnCliGold.contains(tx, ty)) { dispatcher.dispatch("gold 5000"); return true }
+                if (btnCliSim.contains(tx, ty)) { dispatcher.dispatch("simulate 20"); return true }
+                if (btnCliReach.contains(tx, ty)) { dispatcher.dispatch("reachability"); return true }
+            }
         }
 
         // Konsumsi sentuhan jika berada di dalam area panel modal
@@ -173,11 +284,11 @@ class DevToolsOverlay {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Backdrop Dimmer
-        shapeRenderer.setColor(0f, 0f, 0f, 0.70f)
+        shapeRenderer.setColor(0f, 0f, 0f, 0.75f)
         shapeRenderer.rect(0f, 0f, 1280f, 720f)
 
         // Panel Utama
-        shapeRenderer.setColor(0.06f, 0.08f, 0.12f, 0.95f)
+        shapeRenderer.setColor(0.05f, 0.07f, 0.11f, 0.96f)
         shapeRenderer.rect(220f, 90f, 840f, 540f)
 
         // Header Bar Neon Cyan
@@ -188,22 +299,64 @@ class DevToolsOverlay {
         shapeRenderer.setColor(0.85f, 0.20f, 0.25f, 0.9f)
         shapeRenderer.rect(btnClose.x, btnClose.y, btnClose.width, btnClose.height)
 
-        // Render Tombol-Tombol Aksi
-        renderButtonShape(shapeRenderer, btnGodMode, if (isGodMode) Color.GREEN else Color.DARK_GRAY)
-        renderButtonShape(shapeRenderer, btnInfEnergy, if (isInfiniteEnergy) Color.CYAN else Color.DARK_GRAY)
-        renderButtonShape(shapeRenderer, btnHitboxes, if (showHitboxes) Color.ORANGE else Color.DARK_GRAY)
-        renderButtonShape(shapeRenderer, btnRunAudit, Color.ROYAL)
+        // Render Baris Tab Navigasi
+        renderTabHeader(shapeRenderer, tabBtnCheats, currentTab == DevTab.CHEATS, Color.CYAN)
+        renderTabHeader(shapeRenderer, tabBtnWarp, currentTab == DevTab.WARP_SPAWN, Color.CORAL)
+        renderTabHeader(shapeRenderer, tabBtnAudit, currentTab == DevTab.PROFILER_AUDIT, Color.CHARTREUSE)
+        renderTabHeader(shapeRenderer, tabBtnCli, currentTab == DevTab.CLI_CONSOLE, Color.GOLD)
 
-        renderButtonShape(shapeRenderer, btnHeal, Color(0.2f, 0.6f, 0.3f, 1f))
-        renderButtonShape(shapeRenderer, btnGrantGold, Color(0.7f, 0.55f, 0.1f, 1f))
-        renderButtonShape(shapeRenderer, btnGrantLevel, Color(0.3f, 0.4f, 0.8f, 1f))
-        renderButtonShape(shapeRenderer, btnKillEnemies, Color(0.7f, 0.2f, 0.2f, 1f))
+        // Render Konten Sesuai Tab Aktif
+        when (currentTab) {
+            DevTab.CHEATS -> {
+                renderButtonShape(shapeRenderer, btnGodMode, if (isGodMode) Color.GREEN else Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnInfEnergy, if (isInfiniteEnergy) Color.CYAN else Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnHitboxes, if (showHitboxes) Color.ORANGE else Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnHeal, Color(0.2f, 0.6f, 0.3f, 1f))
 
-        renderButtonShape(shapeRenderer, btnWarpF1, Color(0.2f, 0.3f, 0.4f, 1f))
-        renderButtonShape(shapeRenderer, btnWarpF2, Color(0.2f, 0.3f, 0.4f, 1f))
-        renderButtonShape(shapeRenderer, btnWarpF3, Color(0.6f, 0.2f, 0.2f, 1f))
-        renderButtonShape(shapeRenderer, btnWarpEndless5, Color(0.4f, 0.2f, 0.5f, 1f))
-        renderButtonShape(shapeRenderer, btnWarpEndless10, Color(0.5f, 0.1f, 0.6f, 1f))
+                renderButtonShape(shapeRenderer, btnGrantGold, Color(0.7f, 0.55f, 0.1f, 1f))
+                renderButtonShape(shapeRenderer, btnGrantLevel, Color(0.3f, 0.4f, 0.8f, 1f))
+                renderButtonShape(shapeRenderer, btnKillEnemies, Color(0.7f, 0.2f, 0.2f, 1f))
+                renderButtonShape(shapeRenderer, btnCycleHero, Color(0.5f, 0.2f, 0.7f, 1f))
+
+                renderButtonShape(shapeRenderer, btnSpeed01, if (timeScale == 0.1f && !isPaused) Color.MAGENTA else Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnSpeed05, if (timeScale == 0.5f && !isPaused) Color.MAGENTA else Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnSpeed10, if (timeScale == 1.0f && !isPaused) Color.ROYAL else Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnSpeed20, if (timeScale == 2.0f && !isPaused) Color.GOLD else Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnPauseToggle, if (isPaused) Color.RED else Color(0.3f, 0.3f, 0.3f, 1f))
+                renderButtonShape(shapeRenderer, btnStepFrame, Color(0.2f, 0.5f, 0.6f, 1f))
+            }
+            DevTab.WARP_SPAWN -> {
+                renderButtonShape(shapeRenderer, btnWarpF1, Color(0.2f, 0.3f, 0.4f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF2, Color(0.2f, 0.3f, 0.4f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF3, Color(0.6f, 0.2f, 0.2f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF5, Color(0.6f, 0.2f, 0.2f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF10, Color(0.7f, 0.1f, 0.1f, 1f))
+
+                renderButtonShape(shapeRenderer, btnWarpEndless5, Color(0.4f, 0.2f, 0.5f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpEndless10, Color(0.5f, 0.1f, 0.6f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpEndless20, Color(0.6f, 0.1f, 0.7f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpEndless50, Color(0.7f, 0.1f, 0.8f, 1f))
+
+                renderButtonShape(shapeRenderer, btnSpawnMelee, Color(0.6f, 0.25f, 0.25f, 1f))
+                renderButtonShape(shapeRenderer, btnSpawnRanged, Color(0.3f, 0.25f, 0.6f, 1f))
+                renderButtonShape(shapeRenderer, btnSpawnFlying, Color(0.25f, 0.5f, 0.6f, 1f))
+                renderButtonShape(shapeRenderer, btnSpawnShield, Color(0.3f, 0.5f, 0.3f, 1f))
+            }
+            DevTab.PROFILER_AUDIT -> {
+                renderButtonShape(shapeRenderer, btnRunSanity, Color.ROYAL)
+                renderButtonShape(shapeRenderer, btnRunReachability, Color(0.2f, 0.55f, 0.4f, 1f))
+                renderButtonShape(shapeRenderer, btnRunBalance, Color(0.6f, 0.45f, 0.1f, 1f))
+                renderButtonShape(shapeRenderer, btnRunAssets, Color(0.5f, 0.25f, 0.55f, 1f))
+            }
+            DevTab.CLI_CONSOLE -> {
+                renderButtonShape(shapeRenderer, btnCliHelp, Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnCliGod, Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnCliHeal, Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnCliGold, Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnCliSim, Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnCliReach, Color.DARK_GRAY)
+            }
+        }
 
         shapeRenderer.end()
 
@@ -212,7 +365,7 @@ class DevToolsOverlay {
         batch.begin()
 
         headF.setColor(0.2f, 0.85f, 1.0f, 1f)
-        headF.draw(batch, "⚙ DEVELOPER CONSOLE & PROFILER", 250f, 615f)
+        headF.draw(batch, "⚙ DEVELOPER CONSOLE & TOOLS SUITE (10/10)", 250f, 615f)
 
         regF.setColor(1f, 1f, 1f, 1f)
         regF.draw(batch, "X", btnClose.x + 13f, btnClose.y + 25f)
@@ -225,63 +378,142 @@ class DevToolsOverlay {
         val memMaxMB = Runtime.getRuntime().maxMemory() / (1024 * 1024)
         val drawCalls = batch.renderCalls
         val screenRes = if (Gdx.graphics != null) "${Gdx.graphics.width}x${Gdx.graphics.height}" else "1280x720"
-        val refreshHz = try { Gdx.graphics.displayMode?.refreshRate ?: 60 } catch (_: Throwable) { 60 }
-        val gpuRenderer = try { Gdx.gl?.glGetString(GL20.GL_RENDERER) ?: "GLES" } catch (_: Throwable) { "GLES" }
 
         regF.color = if (fps >= 55) Color.GREEN else if (fps >= 30) Color.YELLOW else Color.RED
-        regF.draw(batch, "FPS: $fps (${deltaMs}ms) | Disp: ${screenRes}@${refreshHz}Hz | Batch Calls: $drawCalls", 250f, 570f)
+        regF.draw(batch, "FPS: $fps (${deltaMs}ms) | Disp: $screenRes | Batch Calls: $drawCalls", 250f, 570f)
 
         regF.color = Color.WHITE
-        regF.draw(batch, "Mem: Java ${javaHeapMB}MB / Nat ${nativeHeapMB}MB (Max ${memMaxMB}MB) | GPU: ${gpuRenderer.take(24)}", 250f, 545f)
+        regF.draw(batch, "Mem: Java ${javaHeapMB}MB / Nat ${nativeHeapMB}MB (Max ${memMaxMB}MB) | Speed: ${timeScale}x ${if (isPaused) "[PAUSED]" else ""}", 250f, 545f)
 
-        regF.setColor(0.85f, 0.85f, 0.85f, 1f)
         val enemyCount = currentFloor.enemies.count { !it.health.isDead }
         val projCount = currentFloor.enemies.sumOf { it.projectiles.size } + (currentFloor.boss?.projectiles?.size ?: 0)
-        regF.draw(batch, "World: Floor ${currentFloor.floorNumber} (${currentFloor.floorName}) | Mobs: $enemyCount | Proj: $projCount | VFX: $particleCount", 250f, 520f)
+        regF.setColor(0.85f, 0.85f, 0.85f, 1f)
+        regF.draw(batch, "World: F${currentFloor.floorNumber} (${currentFloor.floorName}) | Mobs: $enemyCount | Proj: $projCount | Hero: ${player.archetype.name} (Lv.${player.stats.level})", 250f, 520f)
 
-        val playerGrounded = if (player.isGrounded) "GROUNDED" else "AIRBORNE"
-        val pX = "%.1f".format(player.position.x)
-        val pY = "%.1f".format(player.position.y)
-        regF.draw(batch, "Player: Pos($pX, $pY) | $playerGrounded | HP:${player.health.currentHp.toInt()}/${player.health.maxHp.toInt()}", 250f, 495f)
+        // Teks Tab Header
+        renderButtonText(batch, regF, tabBtnCheats, "[1] CHEATS & SPEED", if (currentTab == DevTab.CHEATS) Color.CYAN else Color.LIGHT_GRAY)
+        renderButtonText(batch, regF, tabBtnWarp, "[2] WARP & SPAWN", if (currentTab == DevTab.WARP_SPAWN) Color.CORAL else Color.LIGHT_GRAY)
+        renderButtonText(batch, regF, tabBtnAudit, "[3] PROFILER & AUDIT", if (currentTab == DevTab.PROFILER_AUDIT) Color.CHARTREUSE else Color.LIGHT_GRAY)
+        renderButtonText(batch, regF, tabBtnCli, "[4] CONSOLE CLI", if (currentTab == DevTab.CLI_CONSOLE) Color.GOLD else Color.LIGHT_GRAY)
 
-        // Label Tombol
-        renderButtonText(batch, regF, btnGodMode, if (isGodMode) "GOD MODE: ON" else "GOD MODE: OFF")
-        renderButtonText(batch, regF, btnInfEnergy, if (isInfiniteEnergy) "INF ENERGY: ON" else "INF ENERGY: OFF")
-        renderButtonText(batch, regF, btnHitboxes, if (showHitboxes) "HITBOXES: ON" else "HITBOXES: OFF")
-        renderButtonText(batch, regF, btnRunAudit, "RUN LEVEL AUDIT")
+        // Teks Sesuai Tab Aktif
+        when (currentTab) {
+            DevTab.CHEATS -> {
+                renderButtonText(batch, regF, btnGodMode, if (isGodMode) "GOD MODE: ON" else "GOD MODE: OFF")
+                renderButtonText(batch, regF, btnInfEnergy, if (isInfiniteEnergy) "INF ENERGY: ON" else "INF ENERGY: OFF")
+                renderButtonText(batch, regF, btnHitboxes, if (showHitboxes) "HITBOXES: ON" else "HITBOXES: OFF")
+                renderButtonText(batch, regF, btnHeal, "+ HEAL FULL HP")
 
-        renderButtonText(batch, regF, btnHeal, "+ HEAL FULL HP")
-        renderButtonText(batch, regF, btnGrantGold, "+ 1000 GOLD")
-        renderButtonText(batch, regF, btnGrantLevel, "+ 1 LEVEL UP")
-        renderButtonText(batch, regF, btnKillEnemies, "KILL ALL MOBS")
+                renderButtonText(batch, regF, btnGrantGold, "+ 1000 GOLD")
+                renderButtonText(batch, regF, btnGrantLevel, "+ 1 LEVEL UP")
+                renderButtonText(batch, regF, btnKillEnemies, "KILL ALL MOBS")
+                renderButtonText(batch, regF, btnCycleHero, "HERO: ${player.archetype.name}")
 
-        renderButtonText(batch, regF, btnWarpF1, "WARP F1")
-        renderButtonText(batch, regF, btnWarpF2, "WARP F2")
-        renderButtonText(batch, regF, btnWarpF3, "WARP BOSS")
-        renderButtonText(batch, regF, btnWarpEndless5, "WARP ENDLESS 5")
-        renderButtonText(batch, regF, btnWarpEndless10, "WARP ENDLESS 10")
+                regF.setColor(0.3f, 0.8f, 1.0f, 1f)
+                regF.draw(batch, "Physics Timescale & Frame-Step Simulator:", 250f, 290f)
 
-        // Hasil Audit Terakhir
-        regF.setColor(0.4f, 0.95f, 0.4f, 1f)
-        regF.draw(batch, "Level Audit Status:", 250f, 250f)
-        regF.setColor(0.9f, 0.9f, 0.9f, 1f)
-        regF.draw(batch, lastAuditSummary, 250f, 220f)
+                renderButtonText(batch, regF, btnSpeed01, "0.1x SLOW")
+                renderButtonText(batch, regF, btnSpeed05, "0.5x HALF")
+                renderButtonText(batch, regF, btnSpeed10, "1.0x NORMAL")
+                renderButtonText(batch, regF, btnSpeed20, "2.0x FAST")
+                renderButtonText(batch, regF, btnPauseToggle, if (isPaused) "▶ RESUME" else "⏸ PAUSE")
+                renderButtonText(batch, regF, btnStepFrame, "⏭ STEP 1F")
 
-        regF.setColor(0.6f, 0.6f, 0.6f, 1f)
-        regF.draw(batch, "Tip: Tekan F1/F3/~ pada keyboard atau tombol DevTools di menu pause untuk buka/tutup.", 250f, 140f)
+                regF.setColor(0.6f, 0.6f, 0.6f, 1f)
+                regF.draw(batch, "Status: Timescale=${timeScale}x | Paused=$isPaused | Hero: ${player.archetype.characterName}", 250f, 180f)
+            }
+            DevTab.WARP_SPAWN -> {
+                regF.setColor(0.9f, 0.7f, 0.3f, 1f)
+                regF.draw(batch, "Story Campaign Floor Warper:", 250f, 430f)
+
+                renderButtonText(batch, regF, btnWarpF1, "WARP F1")
+                renderButtonText(batch, regF, btnWarpF2, "WARP F2")
+                renderButtonText(batch, regF, btnWarpF3, "WARP BOSS 3")
+                renderButtonText(batch, regF, btnWarpF5, "WARP BOSS 5")
+                renderButtonText(batch, regF, btnWarpF10, "WARP FINAL BOSS 10")
+
+                renderButtonText(batch, regF, btnWarpEndless5, "WARP ENDLESS 5")
+                renderButtonText(batch, regF, btnWarpEndless10, "WARP ENDLESS 10")
+                renderButtonText(batch, regF, btnWarpEndless20, "WARP ENDLESS 20")
+                renderButtonText(batch, regF, btnWarpEndless50, "WARP ENDLESS 50")
+
+                regF.setColor(0.4f, 0.8f, 1.0f, 1f)
+                regF.draw(batch, "Live Enemy Spawner (Spawns at Player Position):", 250f, 290f)
+
+                renderButtonText(batch, regF, btnSpawnMelee, "+ MELEE GRUNT")
+                renderButtonText(batch, regF, btnSpawnRanged, "+ RANGED ARCHER")
+                renderButtonText(batch, regF, btnSpawnFlying, "+ FLYING GARGOYLE")
+                renderButtonText(batch, regF, btnSpawnShield, "+ SHIELD KNIGHT")
+            }
+            DevTab.PROFILER_AUDIT -> {
+                renderButtonText(batch, regF, btnRunSanity, "RUN SANITY")
+                renderButtonText(batch, regF, btnRunReachability, "RUN BFS REACH")
+                renderButtonText(batch, regF, btnRunBalance, "SIM BALANCE")
+                renderButtonText(batch, regF, btnRunAssets, "VALIDATE ASSETS")
+
+                regF.setColor(0.3f, 0.9f, 0.4f, 1f)
+                regF.draw(batch, "Audit & Diagnostic Report Output:", 250f, 340f)
+
+                regF.setColor(0.95f, 0.95f, 0.95f, 1f)
+                // Split long output to prevent screen overflow
+                val lines = lastAuditSummary.split("\n").take(6)
+                var lineY = 300f
+                for (line in lines) {
+                    regF.draw(batch, line.take(90), 250f, lineY)
+                    lineY -= 24f
+                }
+            }
+            DevTab.CLI_CONSOLE -> {
+                regF.setColor(1.0f, 0.8f, 0.2f, 1f)
+                regF.draw(batch, "Quick Action Commands:", 250f, 430f)
+
+                renderButtonText(batch, regF, btnCliHelp, "help")
+                renderButtonText(batch, regF, btnCliGod, "god")
+                renderButtonText(batch, regF, btnCliHeal, "heal")
+                renderButtonText(batch, regF, btnCliGold, "gold 5k")
+                renderButtonText(batch, regF, btnCliSim, "sim 20")
+                renderButtonText(batch, regF, btnCliReach, "reach")
+
+                regF.setColor(0.3f, 0.8f, 1.0f, 1f)
+                regF.draw(batch, "Recent Console Log:", 250f, 340f)
+
+                regF.setColor(0.85f, 0.85f, 0.85f, 1f)
+                val logs = dispatcher.consoleLog.takeLast(7)
+                var yPos = 310f
+                for (l in logs) {
+                    regF.draw(batch, l.take(85), 250f, yPos)
+                    yPos -= 22f
+                }
+            }
+        }
+
+        regF.setColor(0.5f, 0.5f, 0.5f, 1f)
+        regF.draw(batch, "Tip: Tekan F1/F3/~ pada keyboard untuk buka/tutup console. Sentuh tab untuk navigasi.", 250f, 120f)
 
         batch.end()
+    }
+
+    private fun renderTabHeader(shapeRenderer: ShapeRenderer, tab: Rectangle, isActive: Boolean, activeColor: Color) {
+        if (isActive) {
+            shapeRenderer.color = activeColor
+            shapeRenderer.rect(tab.x, tab.y, tab.width, tab.height)
+        } else {
+            shapeRenderer.setColor(0.12f, 0.16f, 0.22f, 0.9f)
+            shapeRenderer.rect(tab.x, tab.y, tab.width, tab.height)
+        }
+        shapeRenderer.setColor(0.3f, 0.4f, 0.5f, 0.5f)
+        shapeRenderer.rectLine(tab.x, tab.y, tab.x + tab.width, tab.y, 1f)
     }
 
     private fun renderButtonShape(shapeRenderer: ShapeRenderer, btn: Rectangle, color: Color) {
         shapeRenderer.color = color
         shapeRenderer.rect(btn.x, btn.y, btn.width, btn.height)
-        shapeRenderer.setColor(0.9f, 0.9f, 0.9f, 0.6f)
+        shapeRenderer.setColor(0.9f, 0.9f, 0.9f, 0.5f)
         shapeRenderer.rectLine(btn.x, btn.y, btn.x + btn.width, btn.y, 1f)
     }
 
-    private fun renderButtonText(batch: SpriteBatch, font: BitmapFont, btn: Rectangle, text: String) {
-        font.color = Color.WHITE
-        font.draw(batch, text, btn.x + 10f, btn.y + btn.height / 2f + 6f)
+    private fun renderButtonText(batch: SpriteBatch, font: BitmapFont, btn: Rectangle, text: String, color: Color = Color.WHITE) {
+        font.color = color
+        font.draw(batch, text, btn.x + 8f, btn.y + btn.height / 2f + 5f)
     }
 }

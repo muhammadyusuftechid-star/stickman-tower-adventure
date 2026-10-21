@@ -28,4 +28,7 @@ data class TowerFloor(
     val storyDialogues: List<StoryDialogue> = emptyList(),
     val isSafeZone: Boolean = false,
     val gravityScale: Float = 1.0f
-)
+) {
+    val dynamicEnemies = mutableListOf<Enemy>()
+    val allEnemies: List<Enemy> get() = if (dynamicEnemies.isEmpty()) enemies else enemies + dynamicEnemies
+}

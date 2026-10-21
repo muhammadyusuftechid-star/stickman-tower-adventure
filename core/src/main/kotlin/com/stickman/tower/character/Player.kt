@@ -34,7 +34,7 @@ class Player(
     spawnX: Float = 0f,
     spawnY: Float = 2f,
     val stats: CharacterStats = CharacterStats(),
-    val archetype: CharacterArchetype = CharacterArchetype.BALANCED
+    var archetype: CharacterArchetype = CharacterArchetype.BALANCED
 ) {
     val position = Vector2(spawnX, spawnY)
     val velocity = Vector2(0f, 0f)
@@ -111,6 +111,25 @@ class Player(
 
     // God Mode Toggle untuk QA & Testing Tooling
     var isGodMode: Boolean = false
+
+    /**
+     * Hot-swap arketipe karakter secara real-time untuk developer & QA tooling.
+     */
+    fun switchArchetype(newArchetype: CharacterArchetype) {
+        this.archetype = newArchetype
+        skill1.name = newArchetype.skill1Name
+        skill1.cooldown = newArchetype.skill1Cooldown
+        skill2.name = newArchetype.skill2Name
+        skill2.cooldown = newArchetype.skill2Cooldown
+        skill3.name = newArchetype.skill3Name
+        skill3.cooldown = newArchetype.skill3Cooldown
+        ultimate.maxEnergy = newArchetype.ultEnergyCost
+        attackPhase = AttackPhase.INACTIVE
+        isSkillStriking = false
+        isSkill2Active = false
+        isSkill3Active = false
+        isUlting = false
+    }
 
     companion object {
         const val DODGE_DURATION = 0.22f

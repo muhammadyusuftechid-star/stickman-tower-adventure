@@ -5,7 +5,7 @@ package com.stickman.tower.combat
  * Energi diperoleh setiap kali serangan pemain mengenai musuh.
  */
 class UltimateEnergy(
-    val maxEnergy: Float = 100f
+    var maxEnergy: Float = 100f
 ) {
     var currentEnergy: Float = 0f
         private set

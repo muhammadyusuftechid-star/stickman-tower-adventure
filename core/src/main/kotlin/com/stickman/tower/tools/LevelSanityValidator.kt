@@ -15,11 +15,13 @@ data class LevelValidationReport(
     val platformCount: Int,
     val spikeCount: Int,
     val enemyCount: Int,
-    val hasBoss: Boolean
+    val hasBoss: Boolean,
+    val reachability: ReachabilityAuditResult? = null
 ) {
     fun summary(): String {
         return if (isValid) {
-            "✓ [PASSED] $floorName (P:$platformCount, S:$spikeCount, E:$enemyCount, Boss:$hasBoss)"
+            val reachStr = if (reachability != null) " Plats:${reachability.reachablePlatformsCount}/$platformCount" else ""
+            "✓ [PASSED] $floorName (P:$platformCount, S:$spikeCount, E:$enemyCount, Boss:$hasBoss$reachStr)"
         } else {
             "✗ [FAILED] $floorName - ${errors.size} Errors: ${errors.joinToString("; ")}"
         }
@@ -112,6 +114,18 @@ object LevelSanityValidator {
             errors.add("Lantai berstatus isBossFloor=true namun entitas Boss null!")
         }
 
+        // 7. Validasi Keterjangkauan Graph (Reachability BFS)
+        val reachability = LevelReachabilityGraph.analyzeFloor(floor)
+        if (!reachability.isExitReachable) {
+            errors.add("FATAL SOFTLOCK: Portal keluar tidak dapat dicapai dari titik spawn melalui lintasan platform!")
+        }
+        if (!reachability.areCheckpointsReachable) {
+            warnings.add("Checkpoint tidak dapat dicapai dari titik spawn")
+        }
+        if (reachability.unreachableChestsCount > 0) {
+            warnings.add("${reachability.unreachableChestsCount} peti harta karun tidak dapat dicapai")
+        }
+
         return LevelValidationReport(
             floorNumber = floor.floorNumber,
             floorName = floor.floorName,
@@ -121,7 +135,8 @@ object LevelSanityValidator {
             platformCount = floor.platforms.size,
             spikeCount = floor.spikes.size,
             enemyCount = floor.enemies.size,
-            hasBoss = floor.boss != null
+            hasBoss = floor.boss != null,
+            reachability = reachability
         )
     }
 
