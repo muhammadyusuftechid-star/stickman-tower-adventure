@@ -1,16 +1,18 @@
 # ⚔️ Stickman Tower Adventure
 
 <p align="center">
-  <img src="assets/logo.png" alt="Stickman Tower Adventure Logo" width="220" style="border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+  <img src="assets/banner.png" alt="Stickman Tower Adventure Banner" width="100%" style="border-radius: 14px; max-width: 880px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);" />
 </p>
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
-[![libGDX](https://img.shields.io/badge/libGDX-1.13.1-EA2027.svg?logo=libgdx&logoColor=white)](https://libgdx.com/)
-[![Architecture](https://img.shields.io/badge/Architecture-Clean%20%7C%20Zero--GC-brightgreen.svg)](#-arsitektur--prinsip-rekayasa-perangkat-lunak)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Desktop%20(LWJGL3)-48bb78.svg)](#-skema-kontrol-cross-platform)
-[![Tests](https://img.shields.io/badge/Tests-47%20Passed%20(Headless)-success.svg?logo=checkmarx&logoColor=white)](#-automated-testing--qa-pipeline)
-[![APK Size](https://img.shields.io/badge/APK%20Size-10.6%20MB-blue.svg?logo=android&logoColor=white)](https://github.com/muhammadyusuftechid-star/stickman-tower-adventure/releases)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+<p align="center">
+  <a href="https://kotlinlang.org/"><img src="https://img.shields.io/badge/Kotlin-1.9.24-7F52FF.svg?logo=kotlin&logoColor=white" alt="Kotlin" /></a>
+  <a href="https://libgdx.com/"><img src="https://img.shields.io/badge/libGDX-1.13.1-EA2027.svg?logo=libgdx&logoColor=white" alt="libGDX" /></a>
+  <a href="#-arsitektur--prinsip-rekayasa-perangkat-lunak"><img src="https://img.shields.io/badge/Architecture-Clean%20%7C%20Zero--GC-brightgreen.svg" alt="Architecture" /></a>
+  <a href="#-skema-kontrol-cross-platform"><img src="https://img.shields.io/badge/Platform-Android%20%7C%20Desktop%20(LWJGL3)-48bb78.svg" alt="Platform" /></a>
+  <a href="#-automated-testing--qa-pipeline"><img src="https://img.shields.io/badge/Tests-47%20Passed%20(Headless)-success.svg?logo=checkmarx&logoColor=white" alt="Tests" /></a>
+  <a href="https://github.com/muhammadyusuftechid-star/stickman-tower-adventure/releases"><img src="https://img.shields.io/badge/APK%20Size-10.6%20MB-blue.svg?logo=android&logoColor=white" alt="APK Size" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License" /></a>
+</p>
 
 > **Stickman Tower Adventure** adalah game **2D Action Roguelite RPG** performa tinggi yang dibangun dari nol menggunakan bahasa pemrograman **Kotlin** dan framework **libGDX** untuk platform **Android** dan **Desktop (PC)**.  
 > Dirancang dengan standar rekayasa perangkat lunak kelas industri: modularitas tinggi, **zero-allocation rendering** untuk garansi 60 FPS mulus di perangkat mobile, sistem fisika kinematika terkalibrasi presisi, abstraksi multi-input terpadu (*Keyboard, Gamepad, Touch*), serta 47 automated unit tests yang siap diintegrasikan pada CI/CD pipeline.
