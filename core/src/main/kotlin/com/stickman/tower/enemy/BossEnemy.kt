@@ -82,11 +82,11 @@ class BossEnemy(
     }
 
     val enrageQuote: String = when (type) {
-        BossType.TOWER_GUARDIAN -> "Cukup bermain-main! Segel ini tidak kubuat untuk kalian... TAPI UNTUK MELINDUNGI KALIAN DARI PUNCAK MENARA!"
-        BossType.AMETHYST_MATRON -> "Kalian takkan pernah lolos dari badai panah kristal amethyst kami!"
-        BossType.SHADOW_DOPPELGANGER -> "Keras kepala! Aku adalah bayanganmu yang tak terkalahkan!"
-        BossType.CRIMSON_SOVEREIGN -> "Gerhana Darah menyala! Jiwamu akan menjadi santapan abadi belatiku!"
-        BossType.GRAND_CALLIGRAPHER -> "Kehendak bebasmu berakhir di sini! Kanvas takdir ini akan kuhapus!"
+        BossType.TOWER_GUARDIAN -> "Segel ini tidak kubuat untuk melindungi menara dari kalian... TAPI UNTUK MELINDUNGI KALIAN DARI KEBIADABAN PUNCAK MENARA! TERIMALAH TEBASAN INI!"
+        BossType.AMETHYST_MATRON -> "Hirup racun ini sampai paru-paru siluetmu membusuk! Tak ada seorang pun yang berhak melangkahi makam arsipku!"
+        BossType.SHADOW_DOPPELGANGER -> "Aku adalah keputusasaanmu... Aku adalah setiap langkah ragu yang kau ambil. Kau takkan pernah bisa membunuh bayanganmu sendiri!"
+        BossType.CRIMSON_SOVEREIGN -> "Darah kalian begitu manis... Menara ini membutuhkan persembahan segar agar gerhana darah tidak pernah berakhir!"
+        BossType.GRAND_CALLIGRAPHER -> "KAU HANYALAH TINTA KOTOR DI ATAS KERTASKU! LENYAPLAH KEMBALI KE DALAM KETIADAAN ABADI!"
     }
 
     val deathQuote: String = when (type) {

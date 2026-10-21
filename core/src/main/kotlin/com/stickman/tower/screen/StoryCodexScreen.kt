@@ -277,15 +277,19 @@ class StoryCodexScreen(
                     paragraphs = listOf(
                         "📜 Tablet I (Lantai 1): 'Hari ke-47. Kami tiba di gerbang bawah dengan 100 prajurit terbaik. Tubuh kami telah menghitam, jari menyatu menjadi garis padat. Pedang terasa seratus kali lebih ringan. Jangan pernah berhenti bergerak saat berada di atas platform.'",
                         "📜 Tablet II (Lantai 2): 'Kutukan gravitasi ini bukan dari bumi, melainkan dari langit. Para dewa memasang duri obsidian ini agar darah kita kembali menyuburkan tanah.'",
-                        "📜 Tablet IV (Lantai 4): 'Kami menyegel diri dalam ruang arsip ini untuk mencari penawar racun tinta... namun tinta itu sendiri telah menjadi darah kami.'"
+                        "📜 Tablet III (Lantai 3): 'Jenderal Oakhaven berdiri di sini bukan untuk menghalangi kita mencari kebenaran, melainkan menguji apakah jiwa kita cukup tegar menanggung kepedihan di lantai atas. Hormatilah bilah pedangnya.'",
+                        "📜 Tablet IV (Lantai 4): 'Kami menyegel diri dalam ruang arsip ini untuk mencari penawar racun tinta... namun tinta itu sendiri telah menjadi darah kami.'",
+                        "📜 Tablet V (Lantai 5): 'Racun Miasma ini tidak membunuh tubuh, melainkan melarutkan tekad. Jika kau menghirupnya terlalu lama, kau akan melupakan untuk apa kau mendaki menara ini.'"
                     )
                 ),
                 CodexPage(
                     subtitle = "Prasasti Kuno: Lantai 6 s/d Lantai 10",
                     paragraphs = listOf(
                         "📜 Tablet VI (Lantai 6): 'Besi meteorit Vulcanus adalah satu-satunya benda yang tidak mempan terhadap Tinta Primordial. Selama apinya menyala, harapan manusia takkan pernah padam.'",
-                        "📜 Tablet VIII (Lantai 8): 'Musuh paling berbahaya di menara ini bukanlah dewa, melainkan dirimu sendiri yang menyerah. Ketika bayanganmu mengayunkan pedang yang sama, lakukan parry saat kilatan matanya menyala!'",
-                        "📜 Tablet X (Lantai 10): 'Pena para dewa memang menuliskan takdir kita di masa lalu, tapi pedang kita yang akan menentukan masa depan!'"
+                        "📜 Tablet VII (Lantai 7): 'Di luar dinding ini tidak ada langit biru. Hanya ada jurang kosmis tanpa batas. Kita tidak sedang mendaki menara di atas tanah... kita sedang memanjat keluar dari penjara dimensi para dewa!'",
+                        "📜 Tablet VIII (Lantai 8): 'Musuh paling berbahaya di puncak menara bukanlah dewa, melainkan dirimu sendiri yang menyerah pada keputusasaan. Ketika bayanganmu mengayunkan pedang yang sama, lakukan parry tepat saat kilatan matanya menyala!'",
+                        "📜 Tablet IX (Lantai 9): 'Pangeran kami telah meminum tinta darah. Ia abadi, namun jiwanya telah membusuk. Kematian di ujung pedangmu adalah anugerah terindah yang bisa kau berikan padanya.'",
+                        "📜 Tablet X (Lantai 10): 'Jika kau membaca tulisan ini, berarti kau telah tiba di hadapan Sang Penulis Takdir. Ingatlah satu hal: pena mereka memang menuliskan takdir kita di masa lalu, tapi pedang kita yang akan menentukan masa depan!'"
                     )
                 )
             )

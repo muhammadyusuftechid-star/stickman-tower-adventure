@@ -128,50 +128,46 @@ class StoryCampaignTest {
 
     @Test
     fun testLoreTabletsPlacementAndContent() {
-        // Tablet I di Lantai 1
-        val floor1 = TowerLevelBuilder.buildFloor(1)
-        assertEquals(1, floor1.loreTablets.size)
-        val tablet1 = floor1.loreTablets.first()
-        assertEquals("TABLET_1", tablet1.tabletId)
-        assertTrue(tablet1.title.contains("Tablet I"))
-        assertTrue(tablet1.text.contains("Hari ke-47"))
+        // Pastikan setiap lantai 1 s/d 10 memiliki tepat 1 prasasti kuno
+        for (fNum in 1..10) {
+            val floor = TowerLevelBuilder.buildFloor(fNum)
+            assertEquals(1, floor.loreTablets.size, "Lantai $fNum harus memiliki 1 prasasti kuno!")
+            val tablet = floor.loreTablets.first()
+            assertEquals("TABLET_$fNum", tablet.tabletId)
+            assertTrue(tablet.title.isNotEmpty())
+            assertTrue(tablet.text.isNotEmpty())
+        }
 
-        // Tablet II di Lantai 2
-        val floor2 = TowerLevelBuilder.buildFloor(2)
-        assertEquals(1, floor2.loreTablets.size)
-        val tablet2 = floor2.loreTablets.first()
-        assertEquals("TABLET_2", tablet2.tabletId)
-        assertTrue(tablet2.title.contains("Tablet II"))
+        // Verifikasi konten spesifik kanon lore
+        val f1 = TowerLevelBuilder.buildFloor(1).loreTablets.first()
+        assertTrue(f1.text.contains("Hari ke-47"))
 
-        // Tablet IV di Lantai 4
-        val floor4 = TowerLevelBuilder.buildFloor(4)
-        assertEquals(1, floor4.loreTablets.size)
-        val tablet4 = floor4.loreTablets.first()
-        assertEquals("TABLET_4", tablet4.tabletId)
-        assertTrue(tablet4.title.contains("Tablet IV"))
-        assertTrue(tablet4.text.contains("panah amethyst"))
+        val f2 = TowerLevelBuilder.buildFloor(2).loreTablets.first()
+        assertTrue(f2.text.contains("Kutukan gravitasi"))
 
-        // Tablet VI di Lantai 6
-        val floor6 = TowerLevelBuilder.buildFloor(6)
-        assertEquals(1, floor6.loreTablets.size)
-        val tablet6 = floor6.loreTablets.first()
-        assertEquals("TABLET_6", tablet6.tabletId)
-        assertTrue(tablet6.title.contains("Tablet VI"))
+        val f3 = TowerLevelBuilder.buildFloor(3).loreTablets.first()
+        assertTrue(f3.text.contains("Oakhaven"))
 
-        // Tablet VIII di Lantai 8
-        val floor8 = TowerLevelBuilder.buildFloor(8)
-        assertEquals(1, floor8.loreTablets.size)
-        val tablet8 = floor8.loreTablets.first()
-        assertEquals("TABLET_8", tablet8.tabletId)
-        assertTrue(tablet8.title.contains("Tablet VIII"))
-        assertTrue(tablet8.text.contains("parry"))
+        val f4 = TowerLevelBuilder.buildFloor(4).loreTablets.first()
+        assertTrue(f4.text.contains("panah amethyst"))
 
-        // Tablet X di Lantai 10
-        val floor10 = TowerLevelBuilder.buildFloor(10)
-        assertEquals(1, floor10.loreTablets.size)
-        val tablet10 = floor10.loreTablets.first()
-        assertEquals("TABLET_10", tablet10.tabletId)
-        assertTrue(tablet10.title.contains("Tablet X"))
+        val f5 = TowerLevelBuilder.buildFloor(5).loreTablets.first()
+        assertTrue(f5.text.contains("Miasma"))
+
+        val f6 = TowerLevelBuilder.buildFloor(6).loreTablets.first()
+        assertTrue(f6.text.contains("Besi meteorit"))
+
+        val f7 = TowerLevelBuilder.buildFloor(7).loreTablets.first()
+        assertTrue(f7.text.contains("jurang kosmis"))
+
+        val f8 = TowerLevelBuilder.buildFloor(8).loreTablets.first()
+        assertTrue(f8.text.contains("parry"))
+
+        val f9 = TowerLevelBuilder.buildFloor(9).loreTablets.first()
+        assertTrue(f9.text.contains("tinta darah"))
+
+        val f10 = TowerLevelBuilder.buildFloor(10).loreTablets.first()
+        assertTrue(f10.text.contains("Sang Penulis Takdir"))
     }
 
     @Test

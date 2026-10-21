@@ -159,7 +159,7 @@ object TowerLevelBuilder {
                 y = 5.6f,
                 tabletId = "TABLET_2",
                 title = "Tablet II: Catatan Para Pendaki",
-                text = "Tebing obsidian ini telah menelan puluhan prajurit. Jangan pernah ragu saat melangkah di tangga goyah. Hanya mereka yang bergerak cepat yang sampai ke puncak."
+                text = "Kutukan gravitasi ini bukan dari bumi, melainkan dari langit. Para dewa tidak ingin kita terbang. Mereka memasang duri-duri obsidian ini agar darah kita kembali menyuburkan tanah. Jangan pernah ragu saat melangkah: hanya mereka yang terus bergerak yang sampai ke puncak."
             )
         )
 
@@ -216,6 +216,16 @@ object TowerLevelBuilder {
             TreasureChest(x = 0.5f, y = 1.2f) // Peti Potion Darurat
         )
 
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 1.8f,
+                y = 1.2f,
+                tabletId = "TABLET_3",
+                title = "Tablet III: Gerbang Hakim Oakhaven",
+                text = "Jenderal Oakhaven berdiri di sini bukan untuk menghalangi kita mencari kebenaran, melainkan menguji apakah jiwa kita cukup tegar menanggung kepedihan di lantai atas. Hormatilah bilah pedangnya."
+            )
+        )
+
         val boss = BossEnemy(spawnX = 17.0f, spawnY = 1.5f, type = BossType.TOWER_GUARDIAN)
 
         val storyDialogues = listOf(
@@ -256,6 +266,7 @@ object TowerLevelBuilder {
             isBossFloor = true,
             actTitle = "ACT I: THE INITIATION",
             actSubtitle = "APEX BOSS ARENA",
+            loreTablets = loreTablets,
             storyDialogues = storyDialogues
         )
     }
@@ -369,6 +380,16 @@ object TowerLevelBuilder {
             TreasureChest(x = 1.0f, y = 1.2f)
         )
 
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 1.8f,
+                y = 1.2f,
+                tabletId = "TABLET_5",
+                title = "Tablet V: Dinding Kawah Alkimia",
+                text = "Racun Miasma ini tidak membunuh tubuh, melainkan melarutkan tekad. Jika kau menghirupnya terlalu lama, kau akan melupakan untuk apa kau mendaki menara ini."
+            )
+        )
+
         val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.AMETHYST_MATRON)
 
         val storyDialogues = listOf(
@@ -409,6 +430,7 @@ object TowerLevelBuilder {
             isBossFloor = true,
             actTitle = "ACT II: SECRETS OF THE INK",
             actSubtitle = "CRUCIBLE OF MUTATIONS",
+            loreTablets = loreTablets,
             storyDialogues = storyDialogues
         )
     }
@@ -441,7 +463,7 @@ object TowerLevelBuilder {
                 y = 2.0f,
                 tabletId = "TABLET_6",
                 title = "Tablet VI: Wasiat Sang Penempa",
-                text = "Setiap koin emas yang kau kumpulkan adalah tetesan matahari para pendaki yang gugur. Kan kutempa senjatamu agar sanggup menembus tirai kegelapan para Penulis Takdir."
+                text = "Besi meteorit ini adalah satu-satunya benda di semesta yang tidak mempan terhadap Tinta Primordial. Setiap koin emas adalah tetesan matahari para pendaki masa lalu. Selama apinya menyala, harapan manusia untuk merebut kembali warna takkan pernah padam!"
             )
         )
 
@@ -517,6 +539,16 @@ object TowerLevelBuilder {
             TreasureChest(x = 12.5f, y = 6.0f)
         )
 
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 5.0f,
+                y = 3.2f,
+                tabletId = "TABLET_7",
+                title = "Tablet VII: Tebing Angkasa Retak",
+                text = "Di luar dinding ini tidak ada langit biru. Hanya ada jurang kosmis tanpa batas. Kita tidak sedang mendaki menara di atas tanah... kita sedang memanjat keluar dari penjara dimensi para dewa!"
+            )
+        )
+
         val enemies = listOf(
             Enemy(spawnX = 6.0f, spawnY = 3.7f, type = EnemyType.MELEE),
             Enemy(spawnX = 13.0f, spawnY = 6.0f, type = EnemyType.RANGED),
@@ -556,6 +588,7 @@ object TowerLevelBuilder {
             isBossFloor = false,
             actTitle = "ACT III: THE ASTRAL CLIMB",
             actSubtitle = "THE FRACTURED PRECIPICE",
+            loreTablets = loreTablets,
             storyDialogues = storyDialogues,
             gravityScale = 0.65f // Gravitasi Rendah (-35%) untuk Akrobatik Udara
         )
@@ -652,6 +685,16 @@ object TowerLevelBuilder {
             TreasureChest(x = 1.0f, y = 1.2f)
         )
 
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 1.8f,
+                y = 1.2f,
+                tabletId = "TABLET_9",
+                title = "Tablet IX: Altar Kuil Gerhana",
+                text = "Pangeran kami telah meminum tinta darah. Ia abadi, namun jiwanya telah membusuk. Kematian di ujung pedangmu adalah anugerah terindah yang bisa kau berikan padanya."
+            )
+        )
+
         val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.CRIMSON_SOVEREIGN)
 
         val storyDialogues = listOf(
@@ -692,6 +735,7 @@ object TowerLevelBuilder {
             isBossFloor = true,
             actTitle = "ACT III: THE ASTRAL CLIMB",
             actSubtitle = "THE BLOOD MOON SANCTUM",
+            loreTablets = loreTablets,
             storyDialogues = storyDialogues
         )
     }
@@ -724,8 +768,8 @@ object TowerLevelBuilder {
                 x = 2.0f,
                 y = 1.3f,
                 tabletId = "TABLET_10",
-                title = "Tablet X: Kanvas Primordial",
-                text = "Di sinilah takdir seluruh semesta digariskan. Siapa pun yang menantang Sang Penulis Takdir akan memikul nasib dunia dalam setiap ayunan pedangnya."
+                title = "Tablet X: Ambang Kanvas Takdir",
+                text = "Jika kau membaca tulisan ini, berarti kau telah tiba di hadapan Sang Penulis Takdir. Ingatlah satu hal: pena mereka memang menuliskan takdir kita di masa lalu, tapi pedang kita yang akan menentukan masa depan!"
             )
         )
 
