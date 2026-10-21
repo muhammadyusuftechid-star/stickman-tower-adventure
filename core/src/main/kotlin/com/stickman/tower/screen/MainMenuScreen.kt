@@ -72,6 +72,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "QUIT GAME"
     )
     private var selectedIndex = 0
+    private var selectorY = 460f
     private var animTime = 0f
     private var feedbackNotice = ""
     private var feedbackTimer = 0f
@@ -82,6 +83,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         AudioManager.init()
         FontManager.init()
         currentSaveData = SaveManager.load()
+        selectorY = 460f - (selectedIndex * 62f)
         particles.clear()
         for (i in 0 until 45) {
             val p = MenuParticle()
@@ -100,41 +102,93 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         handleInput()
         updateParticles(delta)
 
-        ScreenUtils.clear(0.05f, 0.07f, 0.12f, 1f)
+        ScreenUtils.clear(0.04f, 0.05f, 0.09f, 1f)
         camera.update()
         shapeRenderer.projectionMatrix = camera.combined
         batch.projectionMatrix = camera.combined
 
-        // 1. Gambar Partikel Latar Belakang
+        // 1. Gambar Arsitektur Spire & Partikel Latar Belakang
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Siluet Pilar Menara Kuno Sisi Kiri & Kanan (Spire Architecture)
+        shapeRenderer.color = Color(0.06f, 0.08f, 0.13f, 0.95f)
+        shapeRenderer.rect(0f, 0f, 95f, 720f)
+        shapeRenderer.rect(1185f, 0f, 95f, 720f)
+
+        shapeRenderer.color = Color(0.14f, 0.19f, 0.28f, 0.70f)
+        shapeRenderer.rectLine(95f, 0f, 95f, 720f, 2f)
+        shapeRenderer.rectLine(1185f, 0f, 1185f, 720f, 2f)
+
+        // Ornamen Garis Mortar Batu Menara
+        for (mortarY in 60..700 step 85) {
+            shapeRenderer.rectLine(10f, mortarY.toFloat(), 95f, mortarY.toFloat(), 1.5f)
+            shapeRenderer.rectLine(1185f, mortarY.toFloat(), 1270f, mortarY.toFloat(), 1.5f)
+        }
+
+        // Partikel Ember Atmosferik (Dual-Core: Soft Halo + Bright Core)
         for (p in particles) {
             val alpha = (1f - (p.life / p.maxLife)).coerceIn(0f, 1f)
-            shapeRenderer.color = Color(p.color.r, p.color.g, p.color.b, p.color.a * alpha)
-            shapeRenderer.circle(p.pos.x, p.pos.y, p.size)
+            // Outer Halo
+            shapeRenderer.color = Color(p.color.r, p.color.g, p.color.b, p.color.a * alpha * 0.4f)
+            shapeRenderer.circle(p.pos.x, p.pos.y, p.size * 1.5f)
+            // Bright Core
+            shapeRenderer.color = Color(1f, 1f, 1f, alpha * 0.85f)
+            shapeRenderer.circle(p.pos.x, p.pos.y, p.size * 0.55f)
         }
 
         // Panel Judul & Kartu Status Pemain (Dark Slate Obsidian dengan Gold Line)
-        shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.90f)
-        shapeRenderer.rect(140f, 40f, 1000f, 120f)
-        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.7f)
-        shapeRenderer.rectLine(140f, 158f, 1140f, 158f, 2f)
+        shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.92f)
+        shapeRenderer.rect(140f, 40f, 1000f, 118f)
+        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
+        shapeRenderer.rectLine(140f, 158f, 1140f, 158f, 2.5f)
 
-        // Highlight Tombol Terpilih (Sleek Obsidian dengan Trim Emas)
-        val buttonWidth = 420f
+        // Badge Badge Box Penanda Archetype
+        shapeRenderer.color = Color(0.10f, 0.14f, 0.22f, 1f)
+        shapeRenderer.rect(770f, 80f, 340f, 32f)
+
+        // Wadah Tombol-tombol Menu (Glassmorphism Cards)
+        val buttonWidth = 440f
         val buttonHeight = 48f
         val startY = 460f
         val spacingY = 62f
         val btnX = (1280f - buttonWidth) / 2f
-        val btnY = startY - (selectedIndex * spacingY)
+
+        // Render Latar Belakang Kartu untuk Seluruh Tombol Menu
+        for (i in menuItems.indices) {
+            val itemY = startY - (i * spacingY)
+            shapeRenderer.color = Color(0.07f, 0.10f, 0.16f, 0.75f)
+            shapeRenderer.rect(btnX, itemY, buttonWidth, buttonHeight)
+            shapeRenderer.color = Color(0.16f, 0.22f, 0.32f, 0.60f)
+            shapeRenderer.rectLine(btnX, itemY, btnX + buttonWidth, itemY, 1.5f)
+            shapeRenderer.rectLine(btnX, itemY + buttonHeight, btnX + buttonWidth, itemY + buttonHeight, 1.5f)
+        }
+
+        // Smooth Lerp Indikator Seleksi Tombol
+        val targetY = startY - (selectedIndex * spacingY)
+        selectorY += (targetY - selectorY) * (18f * delta).coerceAtMost(1f)
 
         val pulse = sin(animTime * 6f) * 0.08f
-        shapeRenderer.color = Color(0.12f, 0.16f, 0.25f, 0.90f)
-        shapeRenderer.rect(btnX - 10f, btnY - 6f, buttonWidth + 20f, buttonHeight + 12f)
-        shapeRenderer.color = Color(0.95f, 0.75f, 0.2f, 0.85f + pulse)
-        shapeRenderer.rectLine(btnX - 10f, btnY - 6f, btnX + buttonWidth + 10f, btnY - 6f, 2f)
-        shapeRenderer.rectLine(btnX - 10f, btnY + buttonHeight + 6f, btnX + buttonWidth + 10f, btnY + buttonHeight + 6f, 2f)
-        shapeRenderer.rectLine(btnX - 10f, btnY - 6f, btnX - 10f, btnY + buttonHeight + 6f, 3f)
-        shapeRenderer.rectLine(btnX + buttonWidth + 10f, btnY - 6f, btnX + buttonWidth + 10f, btnY + buttonHeight + 6f, 3f)
+        shapeRenderer.color = Color(0.12f, 0.18f, 0.28f, 0.94f)
+        shapeRenderer.rect(btnX - 8f, selectorY - 5f, buttonWidth + 16f, buttonHeight + 10f)
+
+        // Frame Emas Menyala dengan Aksen Sudut
+        shapeRenderer.color = Color(0.95f, 0.78f, 0.25f, 0.88f + pulse)
+        shapeRenderer.rectLine(btnX - 8f, selectorY - 5f, btnX + buttonWidth + 8f, selectorY - 5f, 2f)
+        shapeRenderer.rectLine(btnX - 8f, selectorY + buttonHeight + 5f, btnX + buttonWidth + 8f, selectorY + buttonHeight + 5f, 2f)
+        shapeRenderer.rectLine(btnX - 8f, selectorY - 5f, btnX - 8f, selectorY + buttonHeight + 5f, 3f)
+        shapeRenderer.rectLine(btnX + buttonWidth + 8f, selectorY - 5f, btnX + buttonWidth + 8f, selectorY + buttonHeight + 5f, 3f)
+
+        // Notch Vektor Segitiga Kursor Samping
+        shapeRenderer.triangle(
+            btnX - 16f, selectorY + buttonHeight / 2f,
+            btnX - 7f, selectorY + buttonHeight / 2f + 7f,
+            btnX - 7f, selectorY + buttonHeight / 2f - 7f
+        )
+        shapeRenderer.triangle(
+            btnX + buttonWidth + 16f, selectorY + buttonHeight / 2f,
+            btnX + buttonWidth + 7f, selectorY + buttonHeight / 2f + 7f,
+            btnX + buttonWidth + 7f, selectorY + buttonHeight / 2f - 7f
+        )
 
         shapeRenderer.end()
 
@@ -164,9 +218,9 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
                 menuItems[i]
             }
 
-            val curY = startY - (i * spacingY) + 32f
+            val curY = startY - (i * spacingY) + 33f
             if (i == selectedIndex) {
-                headF.color = Color(1f, 0.85f, 0.25f, 1f)
+                headF.color = Color(1f, 0.88f, 0.3f, 1f)
                 val markedText = "⚔  $itemText  ⚔"
                 glyphLayout.setText(headF, markedText)
                 headF.draw(batch, markedText, (1280f - glyphLayout.width) / 2f, curY)
@@ -183,9 +237,15 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         regF.draw(batch, "HERO STATUS:", 170f, 135f)
         regF.color = Color.WHITE
         regF.draw(batch, "Level: ${currentSaveData.playerLevel}", 170f, 95f)
-        regF.draw(batch, "Gold: ${currentSaveData.gold} G", 360f, 95f)
-        regF.draw(batch, "Highest Floor: Floor ${currentSaveData.highestTowerFloor}", 540f, 95f)
-        regF.color = Color.GOLD
+        regF.draw(batch, "❖ ${currentSaveData.gold} Coins", 360f, 95f)
+        regF.draw(batch, "⚑ Highest Floor: ${currentSaveData.highestTowerFloor}", 550f, 95f)
+
+        val archColor = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> Color(0.4f, 0.8f, 1f, 1f)
+            CharacterArchetype.AGILE -> Color(0.2f, 0.95f, 0.85f, 1f)
+            CharacterArchetype.HEAVY -> Color(1f, 0.55f, 0.2f, 1f)
+        }
+        regF.color = archColor
         regF.draw(batch, "Archetype: ${currentArchetype.displayName}", 780f, 95f)
 
         // Feedback / Notifikasi aksi

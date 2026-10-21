@@ -65,32 +65,60 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
         shapeRenderer.rect(620f, 596f, 560f, 3f)
 
+        // Skill Showcase Card Containers (Kanan Bawah)
+        shapeRenderer.color = Color(0.08f, 0.12f, 0.18f, 0.85f)
+        shapeRenderer.rect(645f, 225f, 510f, 44f)
+        shapeRenderer.color = Color(0.2f, 0.85f, 1f, 0.9f)
+        shapeRenderer.rect(645f, 225f, 4f, 44f)
+
+        shapeRenderer.color = Color(0.08f, 0.12f, 0.18f, 0.85f)
+        shapeRenderer.rect(645f, 168f, 510f, 44f)
+        shapeRenderer.color = Color(1f, 0.8f, 0.2f, 0.9f)
+        shapeRenderer.rect(645f, 168f, 4f, 44f)
+
         // Podium Karakter di Kiri (Runic Slate Altar)
         val podiumCenterX = 350f
         val podiumBaseY = 170f
-        shapeRenderer.color = Color(0.1f, 0.14f, 0.22f, 0.95f)
+        shapeRenderer.color = Color(0.09f, 0.13f, 0.20f, 0.95f)
         shapeRenderer.rect(podiumCenterX - 180f, podiumBaseY - 24f, 360f, 34f)
-        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.8f)
+        shapeRenderer.color = Color(0.85f, 0.70f, 0.25f, 0.85f)
         shapeRenderer.rectLine(podiumCenterX - 180f, podiumBaseY + 10f, podiumCenterX + 180f, podiumBaseY + 10f, 3f)
 
-        // Cincin Cahaya Aura Halus
-        val pulse = sin(animTime * 3f) * 0.08f
-        shapeRenderer.color = Color(0.15f, 0.45f, 0.8f, 0.22f + pulse)
-        shapeRenderer.circle(podiumCenterX, podiumBaseY + 10f, 85f, 24)
+        // Cincin Cahaya Aura Berbasis Kelas Karakter
+        val (auraR, auraG, auraB) = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> Triple(0.35f, 0.70f, 1f)
+            CharacterArchetype.AGILE -> Triple(0.15f, 0.95f, 0.85f)
+            CharacterArchetype.HEAVY -> Triple(1f, 0.45f, 0.15f)
+        }
+        val auraPulse = sin(animTime * 3.5f) * 0.08f
+        shapeRenderer.color = Color(auraR, auraG, auraB, 0.22f + auraPulse)
+        shapeRenderer.circle(podiumCenterX, podiumBaseY + 10f, 95f, 30)
+        shapeRenderer.color = Color(auraR, auraG, auraB, 0.45f + auraPulse)
+        shapeRenderer.circle(podiumCenterX, podiumBaseY + 10f, 65f, 24)
+
+        // Mote Orbital Runik Berputar di Sekitar Cincin Altar
+        for (angleIdx in 0 until 4) {
+            val ang = animTime * 1.6f + angleIdx * (Math.PI.toFloat() / 2f)
+            val rx = podiumCenterX + kotlin.math.cos(ang.toDouble()).toFloat() * 95f
+            val ry = (podiumBaseY + 10f) + kotlin.math.sin(ang.toDouble()).toFloat() * 22f
+            shapeRenderer.color = Color(1f, 1f, 1f, 0.75f)
+            shapeRenderer.circle(rx, ry, 3.5f, 8)
+        }
 
         // Gambar Karakter Stickman Preview di Podium
         renderStickmanPreview(shapeRenderer, podiumCenterX, podiumBaseY + 10f, currentArchetype)
 
-        // Stat Bar Visual di Kartu Kanan
+        // Stat Segmented Pip Bars & Tier Badges di Kartu Kanan
         renderStatBars(shapeRenderer, currentArchetype)
 
         // Tombol Navigasi Bawah
-        // Tombol Select & Play (Gilded Obsidian)
+        // Tombol Select & Play (Gilded Obsidian dengan Pulsing Emerald Accent)
         val btnPlayX = 720f
         val btnPlayY = 45f
+        val btnPulse = (sin(animTime * 5f) + 1f) * 0.5f
         shapeRenderer.color = Color(0.10f, 0.18f, 0.14f, 0.95f)
         shapeRenderer.rect(btnPlayX, btnPlayY, 260f, 52f)
-        shapeRenderer.color = Color(0.25f, 0.85f, 0.45f, 0.9f)
+        shapeRenderer.color = Color(0.2f + 0.15f * btnPulse, 0.85f + 0.15f * btnPulse, 0.45f, 0.92f)
         shapeRenderer.rectLine(btnPlayX, btnPlayY + 52f, btnPlayX + 260f, btnPlayY + 52f, 3f)
 
         // Tombol Back (Muted Obsidian)
@@ -127,6 +155,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         val titleF = if (FontManager.isInitialized) FontManager.titleFont else BitmapFont()
         val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
         val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
+        val smallF = if (FontManager.isInitialized) FontManager.smallFont else BitmapFont()
 
         // Judul Atas
         titleF.color = Color.WHITE
@@ -134,7 +163,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         titleF.draw(batch, "CHOOSE YOUR HERO", (1280f - glyphLayout.width) / 2f, 675f)
 
         // Nama & Gelar Karakter Terpilih (Kiri Atas Podium)
-        headF.color = Color.CYAN
+        headF.color = Color(auraR, auraG, auraB, 1f)
         glyphLayout.setText(headF, currentArchetype.displayName)
         headF.draw(batch, currentArchetype.displayName, podiumCenterX - glyphLayout.width / 2f, 595f)
 
@@ -151,15 +180,57 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
 
         regF.color = Color.WHITE
         regF.draw(batch, "Movement Speed:", 650f, 435f)
-        regF.draw(batch, "Base Attack Multiplier:", 650f, 395f)
-        regF.draw(batch, "Defense Bonus:", 650f, 355f)
-        regF.draw(batch, "Critical Rate Bonus:", 650f, 315f)
+        regF.draw(batch, "Attack Multiplier:", 650f, 395f)
+        regF.draw(batch, "Defense Power:", 650f, 355f)
+        regF.draw(batch, "Critical Chance:", 650f, 315f)
 
-        // Info Kemampuan Unik (Skill & Ult)
-        regF.color = Color.CYAN
-        regF.draw(batch, "Special Skill: ${currentArchetype.skillName}", 650f, 255f)
-        regF.color = Color.GOLD
-        regF.draw(batch, "Ultimate: ${currentArchetype.ultName}", 650f, 215f)
+        // Huruf Tier Badges S / A / B / C
+        val (spdRank, spdColor) = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> Pair("B", Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair("S", Color(1f, 0.85f, 0.25f, 1f))
+            CharacterArchetype.HEAVY -> Pair("C", Color(0.65f, 0.72f, 0.82f, 1f))
+        }
+        val (atkRank, atkColor) = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> Pair("B", Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair("A", Color(0.85f, 0.50f, 1f, 1f))
+            CharacterArchetype.HEAVY -> Pair("S", Color(1f, 0.85f, 0.25f, 1f))
+        }
+        val (defRank, defColor) = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> Pair("B", Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair("C", Color(0.65f, 0.72f, 0.82f, 1f))
+            CharacterArchetype.HEAVY -> Pair("S", Color(1f, 0.85f, 0.25f, 1f))
+        }
+        val (critRank, critColor) = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> Pair("B", Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair("S", Color(1f, 0.85f, 0.25f, 1f))
+            CharacterArchetype.HEAVY -> Pair("C", Color(0.65f, 0.72f, 0.82f, 1f))
+        }
+
+        regF.color = spdColor
+        regF.draw(batch, spdRank, 1104f, 435f)
+        regF.color = atkColor
+        regF.draw(batch, atkRank, 1104f, 395f)
+        regF.color = defColor
+        regF.draw(batch, defRank, 1104f, 355f)
+        regF.color = critColor
+        regF.draw(batch, critRank, 1104f, 315f)
+
+        // Info Kemampuan Unik (Skill & Ult Showcase)
+        val (skillDesc, ultDesc) = when (currentArchetype) {
+            CharacterArchetype.BALANCED -> Pair("Piercing dash thrust that stuns foes", "Rapid 360° spinning cyclone sword storm")
+            CharacterArchetype.AGILE -> Pair("Teleport strike through enemy defense", "Torrent of multi-target shadowblade strikes")
+            CharacterArchetype.HEAVY -> Pair("Earth-slam that creates heavy shockwaves", "Cataclysmic overhead ground-shattering strike")
+        }
+
+        smallF.color = Color.CYAN
+        smallF.draw(batch, "SKILL [U]: ${currentArchetype.skillName}", 660f, 260f)
+        smallF.color = Color(0.82f, 0.88f, 0.95f, 1f)
+        smallF.draw(batch, skillDesc, 660f, 242f)
+
+        smallF.color = Color.GOLD
+        smallF.draw(batch, "ULTIMATE [O]: ${currentArchetype.ultName}", 660f, 203f)
+        smallF.color = Color(0.82f, 0.88f, 0.95f, 1f)
+        smallF.draw(batch, ultDesc, 660f, 185f)
 
         // Teks Tombol Bawah
         headF.color = Color.WHITE
@@ -223,7 +294,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
                 val leftHandX = x - 38f
                 val leftHandY = shoulderY - 10f + breath
                 shapeRenderer.rectLine(x, shoulderY + breath, leftHandX, leftHandY, 6f)
-                shapeRenderer.color = Color(0.3f, 0.9f, 1f, 1f)
+                shapeRenderer.color = Color(0.2f, 0.95f, 0.85f, 1f)
                 shapeRenderer.rectLine(leftHandX, leftHandY, leftHandX - 25f, leftHandY + 45f, 6f)
 
                 // Tangan Kanan (Belati Siaga Depan)
@@ -231,7 +302,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
                 val rightHandX = x + 42f
                 val rightHandY = shoulderY - 5f + breath
                 shapeRenderer.rectLine(x, shoulderY + breath, rightHandX, rightHandY, 6f)
-                shapeRenderer.color = Color(0.3f, 0.9f, 1f, 1f)
+                shapeRenderer.color = Color(0.2f, 0.95f, 0.85f, 1f)
                 shapeRenderer.rectLine(rightHandX, rightHandY, rightHandX + 35f, rightHandY + 35f, 6f)
             }
             CharacterArchetype.HEAVY -> {
@@ -243,11 +314,11 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
                 // Bilah Raksasa Slab Tebal
                 val swordTipX = handX + 30f
                 val swordTipY = handY + 145f
-                shapeRenderer.color = Color(0.3f, 0.32f, 0.38f, 1f)
+                shapeRenderer.color = Color(0.28f, 0.30f, 0.36f, 1f)
                 shapeRenderer.rectLine(handX, handY, swordTipX, swordTipY, 20f)
-                // Tepian Berapi
-                shapeRenderer.color = Color(1f, 0.5f, 0.1f, 1f)
-                shapeRenderer.rectLine(handX, handY, swordTipX, swordTipY, 8f)
+                // Tepian Berapi Magma
+                shapeRenderer.color = Color(1f, 0.45f, 0.1f, 1f)
+                shapeRenderer.rectLine(handX, handY, swordTipX, swordTipY, 7f)
                 // Crossguard Raksasa Emas
                 shapeRenderer.color = Color.GOLD
                 shapeRenderer.rectLine(handX - 22f, handY + 20f, handX + 22f, handY + 16f, 10f)
@@ -257,33 +328,71 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
 
     private fun renderStatBars(shapeRenderer: ShapeRenderer, archetype: CharacterArchetype) {
         val barX = 890f
-        val barW = 240f
-        val barH = 14f
+        val totalW = 190f
+        val segCount = 5
+        val segGap = 5f
+        val segW = (totalW - (segCount - 1) * segGap) / segCount
+        val segH = 14f
 
-        fun drawBar(y: Float, fillPct: Float, color: Color) {
-            // Latar Belakang Bar
-            shapeRenderer.color = Color(0.2f, 0.25f, 0.35f, 1f)
-            shapeRenderer.rect(barX, y, barW, barH)
-            // Isi Bar
-            shapeRenderer.color = color
-            shapeRenderer.rect(barX, y, barW * fillPct.coerceIn(0f, 1f), barH)
+        fun drawPips(y: Float, filledCount: Int, color: Color) {
+            for (i in 0 until segCount) {
+                val sx = barX + i * (segW + segGap)
+                if (i < filledCount) {
+                    shapeRenderer.color = color
+                    shapeRenderer.rect(sx, y, segW, segH)
+                    shapeRenderer.color = Color(1f, 1f, 1f, 0.35f)
+                    shapeRenderer.rectLine(sx, y + segH - 1f, sx + segW, y + segH - 1f, 1f)
+                } else {
+                    shapeRenderer.color = Color(0.12f, 0.16f, 0.22f, 0.9f)
+                    shapeRenderer.rect(sx, y, segW, segH)
+                    shapeRenderer.color = Color(0.18f, 0.24f, 0.32f, 0.5f)
+                    shapeRenderer.rectLine(sx, y, sx + segW, y, 1f)
+                }
+            }
         }
 
-        // Speed (5.8f to 9.5f)
-        val speedPct = ((archetype.moveSpeed - 5f) / 5f)
-        drawBar(422f, speedPct, Color.CYAN)
+        val (spdCount, spdColor) = when (archetype) {
+            CharacterArchetype.BALANCED -> Pair(3, Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair(5, Color(1f, 0.85f, 0.25f, 1f))
+            CharacterArchetype.HEAVY -> Pair(2, Color(0.65f, 0.72f, 0.82f, 1f))
+        }
+        val (atkCount, atkColor) = when (archetype) {
+            CharacterArchetype.BALANCED -> Pair(3, Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair(4, Color(0.85f, 0.50f, 1f, 1f))
+            CharacterArchetype.HEAVY -> Pair(5, Color(1f, 0.85f, 0.25f, 1f))
+        }
+        val (defCount, defColor) = when (archetype) {
+            CharacterArchetype.BALANCED -> Pair(3, Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair(2, Color(0.65f, 0.72f, 0.82f, 1f))
+            CharacterArchetype.HEAVY -> Pair(5, Color(1f, 0.85f, 0.25f, 1f))
+        }
+        val (critCount, critColor) = when (archetype) {
+            CharacterArchetype.BALANCED -> Pair(3, Color(0.35f, 0.85f, 1f, 1f))
+            CharacterArchetype.AGILE -> Pair(5, Color(1f, 0.85f, 0.25f, 1f))
+            CharacterArchetype.HEAVY -> Pair(2, Color(0.65f, 0.72f, 0.82f, 1f))
+        }
 
-        // Attack Multiplier (0.85f to 1.55f)
-        val atkPct = (archetype.baseDamageMultiplier / 1.7f)
-        drawBar(382f, atkPct, Color.RED)
+        drawPips(422f, spdCount, Color.CYAN)
+        drawPips(382f, atkCount, Color(1f, 0.35f, 0.35f, 1f))
+        drawPips(342f, defCount, Color(0.25f, 0.88f, 0.45f, 1f))
+        drawPips(302f, critCount, Color(1f, 0.75f, 0.2f, 1f))
 
-        // Defense (-1.0f to +3.5f)
-        val defPct = ((archetype.baseDefenseBonus + 1.5f) / 5.5f)
-        drawBar(342f, defPct, Color.GREEN)
+        // Tier Badge Boxes:
+        fun drawBadgeBox(y: Float, borderColor: Color) {
+            val bx = 1094f
+            shapeRenderer.color = Color(0.10f, 0.14f, 0.22f, 0.95f)
+            shapeRenderer.rect(bx, y - 2f, 32f, 18f)
+            shapeRenderer.color = borderColor
+            shapeRenderer.rectLine(bx, y - 2f, bx + 32f, y - 2f, 1.5f)
+            shapeRenderer.rectLine(bx, y + 16f, bx + 32f, y + 16f, 1.5f)
+            shapeRenderer.rectLine(bx, y - 2f, bx, y + 16f, 1.5f)
+            shapeRenderer.rectLine(bx + 32f, y - 2f, bx + 32f, y + 16f, 1.5f)
+        }
 
-        // Crit (-0.02f to +0.15f)
-        val critPct = ((archetype.baseCritBonus + 0.05f) / 0.25f)
-        drawBar(302f, critPct, Color.ORANGE)
+        drawBadgeBox(422f, spdColor)
+        drawBadgeBox(382f, atkColor)
+        drawBadgeBox(342f, defColor)
+        drawBadgeBox(302f, critColor)
     }
 
     private fun handleInput() {
