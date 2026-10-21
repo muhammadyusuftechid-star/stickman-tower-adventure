@@ -2381,36 +2381,41 @@ class PlayScreen(
         shapeRenderer.rectLine(boxX, boxY, boxX, boxY + boxH, 2f)
         shapeRenderer.rectLine(boxX + boxW, boxY, boxX + boxW, boxY + boxH, 2f)
 
-        // Speaker Tag Box
-        val tagW = 320f
+        // Speaker Tag Box (Dynamic sizing based on title length for zero text clipping)
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
+        val speakerTag = "${line.speaker.uppercase()}  •  ${line.title}"
+        glyphLayout.setText(headF, speakerTag)
+        val tagW = kotlin.math.max(320f, glyphLayout.width + 36f)
         val tagH = 38f
         val tagX = boxX + 25f
         val tagY = boxY + boxH - 6f
         shapeRenderer.setColor(0.12f, 0.16f, 0.24f, 0.98f)
         shapeRenderer.rect(tagX, tagY, tagW, tagH)
         shapeRenderer.setColor(line.speakerColor)
-        shapeRenderer.rectLine(tagX, tagY + tagH, tagX + tagW, tagY + tagH, 2f)
+        shapeRenderer.rectLine(tagX, tagY + tagH, tagX + tagW, tagY + tagH, 2.5f)
+        shapeRenderer.rectLine(tagX, tagY, tagX, tagY + tagH, 1.5f)
+        shapeRenderer.rectLine(tagX + tagW, tagY, tagX + tagW, tagY + tagH, 1.5f)
 
         shapeRenderer.end()
 
         batch.projectionMatrix = uiCamera.combined
         batch.begin()
-        val headF = FontManager.headerFont
-        val regF = FontManager.regularFont
 
         // Speaker Name
         headF.setColor(line.speakerColor)
-        val speakerTag = "${line.speaker.uppercase()}  •  ${line.title}"
-        headF.draw(batch, speakerTag, tagX + 15f, tagY + tagH - 12f)
+        headF.draw(batch, speakerTag, tagX + 18f, tagY + tagH - 12f)
 
         // Dialogue Text
         regF.setColor(0.95f, 0.96f, 1f, 1f)
         regF.draw(batch, line.text, boxX + 40f, boxY + boxH - 35f, boxW - 80f, Align.left, true)
 
-        // Advance Prompt
+        // Advance Prompt (Right-aligned with pulsing glow)
         val blink = (sin(hudAnimTime * 6f) + 1f) * 0.5f
         regF.setColor(1f, 0.85f, 0.3f, 0.65f + 0.35f * blink)
-        regF.draw(batch, "LANJUT [TAP / SPACE] ▶", boxX + boxW - 220f, boxY + 30f)
+        val promptText = "LANJUT [TAP / SPACE] ▶"
+        glyphLayout.setText(regF, promptText)
+        regF.draw(batch, promptText, boxX + boxW - glyphLayout.width - 32f, boxY + 28f)
 
         batch.end()
     }

@@ -282,7 +282,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             CharacterArchetype.AGILE -> regF.setColor(0.2f, 0.95f, 0.85f, 1f)
             CharacterArchetype.HEAVY -> regF.setColor(1f, 0.55f, 0.2f, 1f)
         }
-        regF.draw(batch, "Archetype: ${currentArchetype.displayName}", 780f, 95f)
+        regF.draw(batch, "Hero: ${currentArchetype.characterName}", 780f, 95f)
 
         // Feedback / Notifikasi aksi
         if (feedbackNotice.isNotEmpty()) {
