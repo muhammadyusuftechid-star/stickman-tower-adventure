@@ -38,6 +38,7 @@ import com.stickman.tower.talent.TalentManager
 import com.stickman.tower.ui.FontManager
 import com.stickman.tower.vfx.ParticleManager
 import com.stickman.tower.world.CameraManager
+import com.stickman.tower.tools.DevToolsOverlay
 import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.world.TowerLevelBuilder
 import kotlin.math.sin
@@ -114,10 +115,11 @@ class PlayScreen(
     var endlessSurvivalTime = 0f
     var endlessEnemiesKilled = 0
 
-    // Sistem Pause Menu
+    // Sistem Pause Menu & Developer QA Tools
     var isPaused: Boolean = false
     private var pauseSelectedIndex: Int = 0
-    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "DEVELOPER TOOLS", "MAIN MENU")
+    val devTools = DevToolsOverlay()
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -181,6 +183,44 @@ class PlayScreen(
         player.onLand = { x, y -> particleManager.spawnDust(x, y, count = 6) }
         player.onJump = { x, y -> particleManager.spawnDust(x, y, count = 5) }
         player.onDodge = { x, y -> particleManager.spawnDust(x, y, count = 8) }
+
+        // Hubungkan Callback DevTools QA & Profiler
+        devTools.onWarpFloor = { targetFloor ->
+            gameMode = if (targetFloor >= 4) GameMode.ENDLESS else GameMode.STORY
+            loadFloor(targetFloor)
+            floatingTexts.add(
+                FloatingText("WARPED TO FLOOR $targetFloor", player.position.x, player.position.y + 2.5f, Color.CYAN)
+            )
+        }
+        devTools.onGrantGold = { amount ->
+            player.stats.addGold(amount)
+            floatingTexts.add(
+                FloatingText("+$amount GOLD [DEV CHEAT]", player.position.x, player.position.y + 2.5f, Color.GOLD)
+            )
+        }
+        devTools.onGrantLevel = {
+            grantRewards(player.stats.requiredExp - player.stats.currentExp, 0, player.position.x, player.position.y + 1f)
+        }
+        devTools.onHealFull = {
+            player.health.heal(player.health.maxHp)
+            floatingTexts.add(
+                FloatingText("FULL HEAL [DEV]", player.position.x, player.position.y + 2.5f, Color.GREEN)
+            )
+        }
+        devTools.onKillAllEnemies = {
+            for (enemy in currentFloor.enemies) {
+                if (!enemy.health.isDead) {
+                    enemy.health.takeDamage(enemy.health.currentHp)
+                }
+            }
+            val b = currentFloor.boss
+            if (b != null && !b.health.isDead) {
+                b.health.takeDamage(b.health.currentHp)
+            }
+            floatingTexts.add(
+                FloatingText("ALL MOBS ELIMINATED [DEV]", player.position.x, player.position.y + 2.5f, Color.RED)
+            )
+        }
 
         if (isFirstShow) {
             isFirstShow = false
@@ -290,8 +330,27 @@ class PlayScreen(
         // 1. Polling input controller di awal frame
         input.update(uiViewport)
 
-        if (Gdx.input.isKeyJustPressed(Keys.F1) || Gdx.input.isKeyJustPressed(Keys.TAB)) {
+        // Hotkey DevTools Console & Profiler (F1/F3/~) dan Bounding Boxes (TAB)
+        if (Gdx.input.isKeyJustPressed(Keys.F1) || Gdx.input.isKeyJustPressed(Keys.F3) || Gdx.input.isKeyJustPressed(Keys.GRAVE)) {
+            devTools.toggle()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.TAB)) {
             showDebugBounds = !showDebugBounds
+        }
+
+        // Sinkronisasi status QA Cheats ke Player
+        player.isGodMode = devTools.isGodMode
+        if (devTools.isInfiniteEnergy) {
+            player.skill1.reset()
+            player.ultimate.addEnergy(player.ultimate.maxEnergy)
+        }
+
+        // Konsumsi sentuhan panel Developer Tools jika sedang terbuka
+        if (devTools.isVisible && Gdx.input.justTouched()) {
+            val handled = devTools.handleTouchDown(Gdx.input.x, Gdx.input.y, uiViewport, currentFloor)
+            if (handled) {
+                inputCooldown = 0.15f
+            }
         }
 
         val safeDelta = delta.coerceAtMost(1f / 30f)
@@ -447,7 +506,12 @@ class PlayScreen(
 
             // Cek Batas Jurang / Out of Bounds (Mencegah karakter jatuh ke jurang hampa tanpa batas)
             if (player.position.y < currentFloor.mapBounds.y - 3.5f && !player.health.isDead) {
-                player.health.takeDamage(9999f)
+                if (devTools.isGodMode) {
+                    player.position.set(currentFloor.spawnX, currentFloor.spawnY)
+                    player.velocity.set(0f, 0f)
+                } else {
+                    player.health.takeDamage(9999f)
+                }
             }
 
             // Cek Rintangan Duri Lantai (Spikes)
@@ -583,6 +647,9 @@ class PlayScreen(
         if (isBossIntroActive) {
             renderBossIntroOverlay()
         }
+
+        // 10. Developer Tools & Profiler Overlay (Senior Tools Architecture)
+        devTools.render(shapeRenderer, batch, uiCamera, player, currentFloor, particleManager.activeParticleCount)
     }
 
     private fun renderWorld(delta: Float) {
@@ -626,7 +693,7 @@ class PlayScreen(
         shapeRenderer.end()
 
         // Debug Bounding Boxes
-        if (showDebugBounds) {
+        if (showDebugBounds || devTools.showHitboxes) {
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
             player.renderDebug(shapeRenderer)
             for (enemy in currentFloor.enemies) enemy.renderDebug(shapeRenderer)
@@ -1586,7 +1653,7 @@ class PlayScreen(
             val w = 1280f
             val h = 720f
             val menuW = 320f
-            val startY = h / 2f + 130f
+            val startY = h / 2f + 155f
             val itemH = 38f
             val menuX = w / 2f - menuW / 2f
 
@@ -1641,7 +1708,12 @@ class PlayScreen(
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            7 -> { // Main Menu
+            7 -> { // Developer Tools & Profiler (Tools Architecture)
+                isPaused = false
+                devTools.isVisible = true
+                AudioManager.playSlashLight()
+            }
+            8 -> { // Main Menu
                 isPaused = false
                 AudioManager.playDodge()
                 if (game != null) {
@@ -1667,7 +1739,7 @@ class PlayScreen(
 
         // Pause Menu Card (Dark Obsidian with Gold Accent)
         val cardW = 380f
-        val cardH = 460f
+        val cardH = 500f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
         shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.95f)
@@ -1676,7 +1748,7 @@ class PlayScreen(
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
-        val startY = h / 2f + 130f
+        val startY = h / 2f + 155f
         val itemH = 38f
         val btnY = startY - (pauseSelectedIndex * itemH)
         shapeRenderer.setColor(0.15f, 0.35f, 0.65f, 0.75f)

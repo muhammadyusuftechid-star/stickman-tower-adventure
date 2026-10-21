@@ -42,7 +42,7 @@ object TowerLevelBuilder {
         platforms.add(Platform(x = 13.5f, y = 2.4f, width = 4.5f, height = 0.35f, isOneWay = true))
 
         val spikes = listOf(
-            SpikeHazard(x = 9.0f, y = 1.0f, width = 2.5f, height = 0.5f)
+            SpikeHazard(x = 8.5f, y = 1.0f, width = 2.0f, height = 0.5f)
         )
 
         val chests = listOf(

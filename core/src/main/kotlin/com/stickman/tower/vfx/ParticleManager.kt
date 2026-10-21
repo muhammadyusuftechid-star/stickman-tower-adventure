@@ -57,6 +57,7 @@ class SlashEffect {
 class ParticleManager {
     private val activeParticles = mutableListOf<Particle>()
     private val particlePool = ArrayDeque<Particle>()
+    val activeParticleCount: Int get() = activeParticles.size
 
     private val activeSlashes = mutableListOf<SlashEffect>()
     private val slashPool = ArrayDeque<SlashEffect>()

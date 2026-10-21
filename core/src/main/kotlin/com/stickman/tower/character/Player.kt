@@ -97,6 +97,9 @@ class Player(
         private set
     var onParry: ((Float, Float) -> Unit)? = null
 
+    // God Mode Toggle untuk QA & Testing Tooling
+    var isGodMode: Boolean = false
+
     companion object {
         const val DODGE_DURATION = 0.22f
         const val DODGE_SPEED = 14.5f
@@ -535,6 +538,9 @@ class Player(
     }
 
     fun takeHit(amount: Float, knockDirX: Float, knockDirY: Float): Boolean {
+        // QA & Tooling God Mode
+        if (isGodMode) return false
+
         // Jika sedang dalam Dodge Roll, kebal dari serangan musuh!
         if (isDodging) return false
 
