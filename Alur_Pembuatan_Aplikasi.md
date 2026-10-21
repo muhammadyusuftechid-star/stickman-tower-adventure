@@ -722,10 +722,10 @@ flowchart TD
 | **P6 (Endgame)** | Fase 13 | Endless Spire Mode & Talent Tree | Replayability tanpa batas & kedalaman RPG mendalam [SELESAI] |
 | **P6 (Naratif)** | Fase 14 | Kampanye Cerita 10 Lantai, 5 Boss & Codex Odyssey | Alur cerita epik 4 Act, dialog NPC Aria/Vulcanus, & tablet prasasti [SELESAI] |
 | **P7 (Publikasi)**| Fase 15 | Google Play Services & Release Bundle (.aab) | Kesiapan peluncuran komersial di Google Play Store |
-| **P8 (Quest System)**| Fase 16 | Quest Engine FSM, 7 Main Quests & 3 Heritage Sagas| Aliran objektif terarah, HUD compass, dan hadiah relik unik |
-| **P8 (Tantangan)**| Fase 17 | Scribe's Gauntlets (Parry/Speedrun) & Papan Buronan | Mode tantangan handicap, medali emas, dan kontrak buronan harian |
-| **P9 (Sinematik)**| Fase 18 | Naskah Lakon Standar, Sintesis Voice Chirp & Whispers | Format naskah industri, vokal prosedural osilator & bisikan idle |
-| **P9 (Atmosfer)** | Fase 19 | Penceritaan Lingkungan 4 Babak & Bestiarium Lapangan| Prop reruntuhan visual, catatan lapangan musuh, & UI diegetik |
+| **P8 (Quest System)**| Fase 16 | Quest Engine FSM, 7 Main Quests & 3 Heritage Sagas| Aliran objektif terarah, HUD compass, dan hadiah relik unik [SELESAI] |
+| **P8 (Tantangan)**| Fase 17 | Scribe's Gauntlets (Parry/Speedrun) & Papan Buronan | Mode tantangan handicap, medali emas, dan kontrak buronan harian [SELESAI] |
+| **P9 (Sinematik)**| Fase 18 | Naskah Lakon Standar, Sintesis Voice Chirp & Whispers | Format naskah industri, vokal prosedural osilator & bisikan idle [SELESAI] |
+| **P9 (Atmosfer)** | Fase 19 | Penceritaan Lingkungan 4 Babak & Bestiarium Lapangan| Prop reruntuhan visual, catatan lapangan musuh, & UI diegetik [SELESAI] |
 
 
 ---

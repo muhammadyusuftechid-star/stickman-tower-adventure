@@ -20,7 +20,7 @@ import com.stickman.tower.narrative.DialogueRegistry
 object TowerLevelBuilder {
 
     fun buildFloor(floorNumber: Int, mutator: FloorMutator? = null): TowerFloor {
-        return when (floorNumber) {
+        val floor = when (floorNumber) {
             1 -> buildFloor1()
             2 -> buildFloor2()
             3 -> buildFloor3()
@@ -32,6 +32,62 @@ object TowerLevelBuilder {
             9 -> buildFloor9()
             10 -> buildFloor10()
             else -> buildEndlessFloor(floorNumber, mutator ?: FloorMutator.getRandomMutator(floorNumber))
+        }
+        return floor.copy(environmentalProps = getEnvironmentalPropsForFloor(floorNumber))
+    }
+
+    fun getEnvironmentalPropsForFloor(floorNumber: Int): List<EnvironmentalProp> {
+        return when (floorNumber) {
+            1 -> listOf(
+                EnvironmentalProp(x = 1.0f, y = 5.0f, width = 0.6f, height = 2.4f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 14.0f, y = 1.0f, width = 1.2f, height = 2.0f, type = PropType.BEHEADED_STATUE),
+                EnvironmentalProp(x = 7.0f, y = 3.5f, width = 1.8f, height = 1.4f, type = PropType.INK_SPLATTER_MURAL)
+            )
+            2 -> listOf(
+                EnvironmentalProp(x = 8.0f, y = 8.0f, width = 0.6f, height = 2.8f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 20.0f, y = 1.0f, width = 1.0f, height = 1.8f, type = PropType.BEHEADED_STATUE),
+                EnvironmentalProp(x = 16.0f, y = 7.5f, width = 1.6f, height = 1.2f, type = PropType.INK_SPLATTER_MURAL)
+            )
+            3 -> listOf(
+                EnvironmentalProp(x = 3.0f, y = 6.0f, width = 0.6f, height = 2.5f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 22.0f, y = 1.0f, width = 1.4f, height = 2.2f, type = PropType.BEHEADED_STATUE),
+                EnvironmentalProp(x = 12.0f, y = 4.0f, width = 2.2f, height = 1.6f, type = PropType.INK_SPLATTER_MURAL)
+            )
+            4 -> listOf(
+                EnvironmentalProp(x = 5.0f, y = 1.0f, width = 1.4f, height = 2.2f, type = PropType.SHATTERED_BOOKSHELF),
+                EnvironmentalProp(x = 18.0f, y = 4.8f, width = 1.4f, height = 2.2f, type = PropType.SHATTERED_BOOKSHELF),
+                EnvironmentalProp(x = 11.0f, y = 1.0f, width = 0.8f, height = 1.8f, type = PropType.LEAKING_ALCHEMY_VAT)
+            )
+            5 -> listOf(
+                EnvironmentalProp(x = 6.0f, y = 1.0f, width = 0.9f, height = 2.0f, type = PropType.LEAKING_ALCHEMY_VAT),
+                EnvironmentalProp(x = 21.0f, y = 1.0f, width = 0.9f, height = 2.0f, type = PropType.LEAKING_ALCHEMY_VAT),
+                EnvironmentalProp(x = 13.0f, y = 4.5f, width = 1.2f, height = 2.0f, type = PropType.SHATTERED_BOOKSHELF)
+            )
+            6 -> listOf(
+                EnvironmentalProp(x = 9.2f, y = 1.0f, width = 1.6f, height = 1.5f, type = PropType.TITAN_ANVIL),
+                EnvironmentalProp(x = 16.0f, y = 1.0f, width = 1.2f, height = 1.8f, type = PropType.SHATTERED_BOOKSHELF),
+                EnvironmentalProp(x = 23.0f, y = 1.0f, width = 0.8f, height = 1.6f, type = PropType.LEAKING_ALCHEMY_VAT)
+            )
+            7 -> listOf(
+                EnvironmentalProp(x = 8.0f, y = 5.0f, width = 1.8f, height = 2.6f, type = PropType.VOID_WALL_CRACK),
+                EnvironmentalProp(x = 20.0f, y = 7.0f, width = 2.0f, height = 3.0f, type = PropType.VOID_WALL_CRACK)
+            )
+            8 -> listOf(
+                EnvironmentalProp(x = 12.0f, y = 4.0f, width = 1.8f, height = 2.5f, type = PropType.VOID_WALL_CRACK),
+                EnvironmentalProp(x = 5.0f, y = 1.0f, width = 1.4f, height = 2.0f, type = PropType.BLOOD_ECLIPSE_ALTAR)
+            )
+            9 -> listOf(
+                EnvironmentalProp(x = 14.0f, y = 1.0f, width = 1.6f, height = 2.2f, type = PropType.BLOOD_ECLIPSE_ALTAR),
+                EnvironmentalProp(x = 7.0f, y = 5.0f, width = 1.8f, height = 2.5f, type = PropType.VOID_WALL_CRACK)
+            )
+            10 -> listOf(
+                EnvironmentalProp(x = 2.0f, y = 1.0f, width = 1.0f, height = 4.5f, type = PropType.PURE_CANVAS_PILLAR),
+                EnvironmentalProp(x = 26.0f, y = 1.0f, width = 1.0f, height = 4.5f, type = PropType.PURE_CANVAS_PILLAR),
+                EnvironmentalProp(x = 14.0f, y = 4.5f, width = 1.2f, height = 3.2f, type = PropType.FROZEN_GOLDEN_BRUSH)
+            )
+            else -> listOf(
+                EnvironmentalProp(x = 6.0f, y = 4.0f, width = 1.8f, height = 2.5f, type = PropType.VOID_WALL_CRACK)
+            )
         }
     }
 
@@ -781,7 +837,8 @@ object TowerLevelBuilder {
                 exitPortal = StageExit(x = 24.5f, y = 1.2f),
                 isBossFloor = true,
                 actTitle = "EPILOGUE: THE ENDLESS PARADOX",
-                actSubtitle = "FLOOR $floorNumber"
+                actSubtitle = "FLOOR $floorNumber",
+                environmentalProps = getEnvironmentalPropsForFloor(floorNumber)
             )
         }
 
@@ -866,7 +923,8 @@ object TowerLevelBuilder {
             exitPortal = StageExit(x = mapWidth - 12f, y = 1.0f),
             isBossFloor = false,
             actTitle = "EPILOGUE: THE ENDLESS PARADOX",
-            actSubtitle = "FLOOR $floorNumber"
+            actSubtitle = "FLOOR $floorNumber",
+            environmentalProps = getEnvironmentalPropsForFloor(floorNumber)
         )
     }
 }

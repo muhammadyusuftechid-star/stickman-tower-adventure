@@ -26,8 +26,10 @@ import com.stickman.tower.combat.ComboStep
 import com.stickman.tower.combat.FloatingText
 import com.stickman.tower.combat.HitStopManager
 import com.stickman.tower.enemy.BossEnemy
+import com.stickman.tower.enemy.BossType
 import com.stickman.tower.enemy.CombatDirector
 import com.stickman.tower.enemy.Enemy
+import com.stickman.tower.enemy.EnemyType
 import com.stickman.tower.endless.FloorMutator
 import com.stickman.tower.input.CompositeInput
 import com.stickman.tower.input.GameInput
@@ -54,6 +56,7 @@ import com.stickman.tower.world.StoryDialogue
 import com.stickman.tower.world.MoraleBuffType
 import com.stickman.tower.narrative.TowerWhisperManager
 import com.stickman.tower.world.TowerFloor
+import com.stickman.tower.bestiary.BestiaryManager
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
 import com.stickman.tower.world.ProceduralBackgroundRenderer
@@ -135,8 +138,12 @@ class PlayScreen(
     // Sistem Pause Menu & Developer QA Tools
     var isPaused: Boolean = false
     private var pauseSelectedIndex: Int = 0
-    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "DEVELOPER TOOLS", "MAIN MENU")
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "BESTIARIUM", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "DEVELOPER TOOLS", "MAIN MENU")
     val devTools = DevToolsOverlay()
+
+    // Sistem Bestiarium Lapangan (Fase 19)
+    var isViewingBestiary: Boolean = false
+    var bestiarySelectedIndex: Int = 0
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -448,6 +455,14 @@ class PlayScreen(
                               Gdx.input.isKeyJustPressed(Keys.BACK) ||
                               input.isPauseJustPressed()
 
+        // Shortcut Langsung Bestiarium Lapangan (Fase 19)
+        if (inputCooldown <= 0f && Gdx.input.isKeyJustPressed(Keys.B)) {
+            isViewingBestiary = !isViewingBestiary
+            bestiarySelectedIndex = 0
+            AudioManager.playSlashLight()
+            inputCooldown = 0.20f
+        }
+
         if (inputCooldown <= 0f) {
             if (isBackTriggered) {
                 if (gameStatus == GameStatus.PLAYING && !isPaused) {
@@ -501,6 +516,17 @@ class PlayScreen(
                 game?.setScreen(GauntletScreen(game, player.stats, this))
                 return
             }
+        }
+
+        if (isViewingBestiary) {
+            handleBestiaryInput()
+            renderWorld(0f)
+            uiViewport.apply()
+            shapeRenderer.projectionMatrix = uiCamera.combined
+            batch.projectionMatrix = uiCamera.combined
+            renderHUD()
+            renderBestiaryOverlay()
+            return
         }
 
         if (isPaused) {
@@ -777,6 +803,15 @@ class PlayScreen(
                     grantRewards(enemy.expReward, enemy.goldReward, enemy.position.x + enemy.width / 2f, enemy.position.y + 1f)
                     relicManager.onEnemyDefeated(player, floatingTexts, particleManager)
                     com.stickman.tower.achievement.AchievementManager.onEnemyKilled(false, currentFloorNumber, saveData = saveData)
+
+                    // Pencatatan Eliminasi Bestiarium Lapangan (Fase 19)
+                    val bestiaryId = when {
+                        enemy.type == EnemyType.RANGED -> "AMETHYST_SNIPER"
+                        currentFloorNumber in listOf(4, 7) -> "OBSIDIAN_KNIGHT"
+                        currentFloorNumber in 7..9 -> "SHADOW_PHANTOM"
+                        else -> "CRIMSON_GRUNT"
+                    }
+                    BestiaryManager.recordKill(bestiaryId, saveData)
                 }
             }
 
@@ -801,6 +836,15 @@ class PlayScreen(
                     grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
                     com.stickman.tower.achievement.AchievementManager.onEnemyKilled(true, currentFloorNumber, boss.name, saveData = saveData)
                     QuestManager.notifyEvent(ObjectiveType.DEFEAT_BOSS, boss.type.name)
+
+                    // Pencatatan Eliminasi Bos Bestiarium Lapangan (Fase 19)
+                    val bossBestiaryId = when (boss.type) {
+                        BossType.TOWER_GUARDIAN -> "BOSS_OAKHAVEN"
+                        BossType.AMETHYST_MATRON -> "BOSS_MATRON"
+                        BossType.GRAND_CALLIGRAPHER -> "BOSS_CALLIGRAPHER"
+                        else -> "BOSS_OAKHAVEN"
+                    }
+                    BestiaryManager.recordKill(bossBestiaryId, saveData)
                     floatingTexts.add(
                         FloatingText("★ BOSS DEFEATED! ★", boss.position.x, boss.position.y + 3.2f, Color.GOLD, duration = 3.5f)
                     )
@@ -925,6 +969,13 @@ class PlayScreen(
         )
 
         for (platform in currentFloor.platforms) platform.render(shapeRenderer)
+
+        // 1.5 Render Environmental Storytelling Props (Fase 19)
+        for (prop in currentFloor.environmentalProps) {
+            prop.update(delta)
+            prop.render(shapeRenderer)
+        }
+
         for (spike in currentFloor.spikes) spike.render(shapeRenderer)
         for (chest in currentFloor.chests) chest.render(shapeRenderer)
         for (tablet in currentFloor.loreTablets) tablet.render(shapeRenderer)
@@ -1259,7 +1310,7 @@ class PlayScreen(
                         particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 22, color = Color.GOLD)
                         floatingTexts.add(
                             FloatingText(
-                                "✨ PERFECT PARRY! ✨",
+                                "✨ DENTANG PENOLAKAN TAKDIR! (PARRY) ✨",
                                 player.position.x + player.width / 2f,
                                 player.position.y + player.height + 0.5f,
                                 Color.GOLD,
@@ -1330,7 +1381,7 @@ class PlayScreen(
                     particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 28, color = Color.GOLD)
                     floatingTexts.add(
                         FloatingText(
-                            "✨ PERFECT PARRY! ✨",
+                            "✨ DENTANG PENOLAKAN TAKDIR! (PARRY) ✨",
                             player.position.x + player.width / 2f,
                             player.position.y + player.height + 0.5f,
                             Color.GOLD,
@@ -1975,26 +2026,26 @@ class PlayScreen(
         headF.color = Color.WHITE
         headF.draw(batch, "${player.stats.level}", 34f, h - 50f)
 
-        // HP Overlay Text
+        // HP (Integritas Anima) Overlay Text
         smallF.color = Color.WHITE
-        smallF.draw(batch, "HP: ${player.health.currentHp.toInt()} / ${player.health.maxHp.toInt()}", 86f, h - 22f)
+        smallF.draw(batch, "ANIMA: ${player.health.currentHp.toInt()} / ${player.health.maxHp.toInt()}", 86f, h - 22f)
 
-        // EXP Overlay Text
+        // EXP (Rekoleksi Memori) Overlay Text
         smallF.setColor(0.85f, 0.95f, 1f, 1f)
         val expPctText = (expPercent * 100).toInt()
-        smallF.draw(batch, "EXP: ${player.stats.currentExp}/${player.stats.requiredExp} ($expPctText%)", 86f, h - 42f)
+        smallF.draw(batch, "MEMORI: ${player.stats.currentExp}/${player.stats.requiredExp} ($expPctText%)", 86f, h - 42f)
 
-        // Ultimate Text
+        // Ultimate (Resonansi Tinta) Text
         if (player.ultimate.isReady) smallF.color = Color.GOLD else smallF.color = Color.WHITE
         val ultStatus = if (player.ultimate.isReady) "READY [O]" else "${(player.ultimate.energyPercent * 100).toInt()}%"
-        smallF.draw(batch, "ULT: $ultStatus", 86f, h - 58f)
+        smallF.draw(batch, "RESONANSI: $ultStatus", 86f, h - 58f)
 
-        // Stats Bar & Coins (Di bawah Player Card)
+        // Stats Bar & Coins (Pecahan Aethel)
         regF.color = Color.GOLD
-        regF.draw(batch, "❖ ${player.stats.gold} Coins", 15f, h - 100f)
+        regF.draw(batch, "❖ ${player.stats.gold} Pecahan Aethel", 15f, h - 100f)
         regF.setColor(0.8f, 0.85f, 0.9f, 1f)
         val atkBonusStr = if (player.stats.weaponAtkBonus > 0f) " (+${player.stats.weaponAtkBonus.toInt()})" else ""
-        regF.draw(batch, "ATK: ${player.stats.attackPower.toInt()}$atkBonusStr | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 145f, h - 100f)
+        regF.draw(batch, "ATK: ${player.stats.attackPower.toInt()}$atkBonusStr | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 210f, h - 100f)
 
         // Active Relics Display
         if (relicManager.activeRelics.isNotEmpty()) {
@@ -2094,13 +2145,13 @@ class PlayScreen(
         // Overlays Game Over / Victory
         if (gameStatus == GameStatus.GAME_OVER) {
             headF.setColor(1f, 0.25f, 0.25f, 1f)
-            headF.draw(batch, "=== GAME OVER ===", w / 2f - 110f, h / 2f + 65f)
+            headF.draw(batch, "=== PELARUTAN JIWA (DEFEAT) ===", w / 2f - 165f, h / 2f + 65f)
             regF.setColor(0.9f, 0.9f, 0.95f, 1f)
-            regF.draw(batch, "Pahlawan gugur! Sentuh tombol di bawah atau ketuk layar:", w / 2f - 230f, h / 2f + 20f)
+            regF.draw(batch, "Anima ksatria terlarut ke dalam tinta hitam! Sentuh tombol di bawah atau ketuk layar:", w / 2f - 290f, h / 2f + 20f)
 
             // Tombol Teks
             headF.color = Color.WHITE
-            headF.draw(batch, "RESPAWN (R)", w / 2f - 200f, h / 2f - 42f)
+            headF.draw(batch, "BANGKIT KEMBALI (R)", w / 2f - 200f, h / 2f - 42f)
             headF.setColor(0.9f, 0.95f, 1f, 1f)
             headF.draw(batch, "MENU UTAMA", w / 2f + 70f, h / 2f - 42f)
         }
@@ -2109,9 +2160,9 @@ class PlayScreen(
             val isStory = gameMode == GameMode.STORY
             headF.color = Color.GOLD
             val bannerTitle = if (isStory) {
-                if (currentFloorNumber < 10) "★ ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! THE ENDLESS PARADOX BEGINS! ★"
+                if (currentFloorNumber < 10) "★ KEBANGKITAN KANVAS: ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! KANVAS SEMESTA TERBEBASKAN! ★"
             } else {
-                "★ ENDLESS FLOOR $currentFloorNumber CLEARED! ★"
+                "★ KEBANGKITAN KANVAS: ENDLESS FLOOR $currentFloorNumber CLEARED! ★"
             }
             glyphLayout.setText(headF, bannerTitle)
             headF.draw(batch, bannerTitle, (w - glyphLayout.width) / 2f, h / 2f + 75f)
@@ -2241,27 +2292,32 @@ class PlayScreen(
                     game.setScreen(TalentTreeScreen(game, this))
                 }
             }
-            4 -> { // Control Settings (Fase 12)
+            4 -> { // Bestiarium Menara (Fase 19)
+                AudioManager.playSlashLight()
+                isViewingBestiary = true
+                bestiarySelectedIndex = 0
+            }
+            5 -> { // Control Settings (Fase 12)
                 AudioManager.playSlashLight()
                 if (game != null) {
                     (game as? StickmanGame)?.preserveScreen(this)
                     game.setScreen(ControlSettingsScreen(game, this))
                 }
             }
-            5 -> { // Toggle Audio
+            6 -> { // Toggle Audio
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            6 -> { // Toggle Haptic
+            7 -> { // Toggle Haptic
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            7 -> { // Developer Tools & Profiler (Tools Architecture)
+            8 -> { // Developer Tools & Profiler (Tools Architecture)
                 isPaused = false
                 devTools.isVisible = true
                 AudioManager.playSlashLight()
             }
-            8 -> { // Main Menu
+            9 -> { // Main Menu
                 isPaused = false
                 AudioManager.playDodge()
                 if (game != null) {
@@ -2286,8 +2342,8 @@ class PlayScreen(
         shapeRenderer.rect(0f, 0f, w, h)
 
         // Pause Menu Card (Dark Obsidian with Gold Accent)
-        val cardW = 380f
-        val cardH = 500f
+        val cardW = 390f
+        val cardH = 540f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
         shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.95f)
@@ -2296,8 +2352,8 @@ class PlayScreen(
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
-        val startY = h / 2f + 155f
-        val itemH = 38f
+        val startY = h / 2f + 180f
+        val itemH = 37f
         val btnY = startY - (pauseSelectedIndex * itemH)
         shapeRenderer.setColor(0.15f, 0.35f, 0.65f, 0.75f)
         shapeRenderer.rect(cardX + 25f, btnY - 8f, cardW - 50f, 32f)
@@ -2314,8 +2370,8 @@ class PlayScreen(
 
         for (i in pauseMenuItems.indices) {
             val itemText = when (i) {
-                5 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                6 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                6 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                7 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> pauseMenuItems[i]
             }
             val curY = startY - (i * itemH) + 16f
@@ -2327,6 +2383,185 @@ class PlayScreen(
                 regF.draw(batch, itemText, w / 2f - 70f, curY)
             }
         }
+        batch.end()
+    }
+
+    private fun handleBestiaryInput() {
+        val entries = BestiaryManager.ENTRIES
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.B) || Gdx.input.isKeyJustPressed(Keys.BACKSPACE)) {
+            isViewingBestiary = false
+            AudioManager.playSlashLight()
+            return
+        }
+
+        if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
+            bestiarySelectedIndex = (bestiarySelectedIndex - 1 + entries.size) % entries.size
+            AudioManager.playJump()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
+            bestiarySelectedIndex = (bestiarySelectedIndex + 1) % entries.size
+            AudioManager.playJump()
+        }
+
+        if (Gdx.input.justTouched()) {
+            val touchPoint = Vector3()
+            uiViewport.unproject(touchPoint.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f))
+
+            // Klik item list di panel kiri (x: 50..390)
+            if (touchPoint.x in 50f..390f) {
+                for (i in entries.indices) {
+                    val bY = 560f - (i * 72f)
+                    if (touchPoint.y in (bY - 10f)..(bY + 54f)) {
+                        bestiarySelectedIndex = i
+                        AudioManager.playJump()
+                        break
+                    }
+                }
+            }
+
+            // Klik tombol tutup / kembali di kanan atas atau kiri bawah
+            if (touchPoint.x in 1100f..1230f && touchPoint.y in 640f..700f) {
+                isViewingBestiary = false
+                AudioManager.playSlashLight()
+            }
+        }
+    }
+
+    private fun renderBestiaryOverlay() {
+        val w = 1280f
+        val h = 720f
+        val entries = BestiaryManager.ENTRIES
+        if (entries.isEmpty()) return
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Dim background
+        shapeRenderer.setColor(0.04f, 0.04f, 0.08f, 0.94f)
+        shapeRenderer.rect(0f, 0f, w, h)
+
+        // Top Header Banner
+        shapeRenderer.setColor(0.10f, 0.09f, 0.18f, 0.95f)
+        shapeRenderer.rect(50f, 635f, 1180f, 65f)
+        shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 1f)
+        shapeRenderer.rect(50f, 633f, 1180f, 2f)
+
+        // Tombol Close [X] di Header
+        shapeRenderer.setColor(0.6f, 0.15f, 0.15f, 0.85f)
+        shapeRenderer.rect(1140f, 645f, 80f, 45f)
+
+        // Left Panel (Daftar Entitas Monster)
+        shapeRenderer.setColor(0.07f, 0.07f, 0.13f, 0.90f)
+        shapeRenderer.rect(50f, 50f, 340f, 570f)
+        shapeRenderer.setColor(0.20f, 0.20f, 0.35f, 0.80f)
+        shapeRenderer.rect(388f, 50f, 2f, 570f)
+
+        // Right Panel (Detail Bestiarium, Lore Aurelius & Taktik Valerius)
+        shapeRenderer.setColor(0.07f, 0.07f, 0.13f, 0.90f)
+        shapeRenderer.rect(410f, 50f, 820f, 570f)
+
+        // Highlight dan tombol pada Left Panel
+        for (i in entries.indices) {
+            val entry = entries[i]
+            val bY = 560f - (i * 72f)
+            val isSelected = (i == bestiarySelectedIndex)
+
+            if (isSelected) {
+                shapeRenderer.setColor(0.22f, 0.20f, 0.38f, 1f)
+            } else {
+                shapeRenderer.setColor(0.11f, 0.11f, 0.18f, 0.85f)
+            }
+            shapeRenderer.rect(60f, bY, 320f, 62f)
+
+            // Accent bar kiri sesuai warna entitas jika terpilih
+            if (isSelected) {
+                shapeRenderer.setColor(Color.valueOf(entry.colorHex))
+                shapeRenderer.rect(60f, bY, 6f, 62f)
+            }
+        }
+
+        // Header Card di Right Panel untuk Monster yang Dipilih
+        val selected = entries[bestiarySelectedIndex]
+        shapeRenderer.setColor(0.12f, 0.12f, 0.22f, 0.95f)
+        shapeRenderer.rect(430f, 495f, 780f, 110f)
+        shapeRenderer.setColor(Color.valueOf(selected.colorHex))
+        shapeRenderer.rect(430f, 495f, 8f, 110f)
+
+        // Card Lore Aurelius
+        shapeRenderer.setColor(0.09f, 0.09f, 0.16f, 0.90f)
+        shapeRenderer.rect(430f, 315f, 780f, 165f)
+        shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 0.6f)
+        shapeRenderer.rect(430f, 478f, 780f, 2f)
+
+        // Card Taktik Valerius
+        shapeRenderer.setColor(0.11f, 0.08f, 0.12f, 0.90f)
+        shapeRenderer.rect(430f, 115f, 780f, 185f)
+        shapeRenderer.setColor(0.95f, 0.35f, 0.35f, 0.6f)
+        shapeRenderer.rect(430f, 298f, 780f, 2f)
+
+        shapeRenderer.end()
+
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+
+        val titleF = FontManager.titleFont
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
+        val smallF = FontManager.smallFont
+
+        // Header Title
+        titleF.color = Color.GOLD
+        titleF.draw(batch, "BESTIARIUM MENARA AETHEL", 70f, 680f)
+        smallF.color = Color.LIGHT_GRAY
+        smallF.draw(batch, "Katalog Entitas Gubahan Tinta & Panduan Taktis Perang Valerius  |  [B / ESC] Tutup", 70f, 652f)
+
+        headF.color = Color.WHITE
+        headF.draw(batch, "TUTUP", 1155f, 674f)
+
+        // Left Panel Item Labels
+        for (i in entries.indices) {
+            val entry = entries[i]
+            val bY = 560f - (i * 72f)
+            val isSelected = (i == bestiarySelectedIndex)
+            val kills = BestiaryManager.getKills(saveData, entry.id)
+
+            regF.color = if (isSelected) Color.valueOf(entry.colorHex) else Color.WHITE
+            regF.draw(batch, entry.name, 75f, bY + 48f)
+
+            smallF.color = if (isSelected) Color.GOLD else Color.GRAY
+            smallF.draw(batch, "${entry.title}  |  Ditumpas: $kills", 75f, bY + 24f)
+        }
+
+        // Right Panel Selected Info
+        val kills = BestiaryManager.getKills(saveData, selected.id)
+        headF.color = Color.valueOf(selected.colorHex)
+        headF.draw(batch, selected.name.uppercase(), 455f, 585f)
+
+        regF.color = Color.GOLD
+        regF.draw(batch, "${selected.title}   *   Wilayah: ${selected.threatZone}", 455f, 555f)
+
+        smallF.color = Color.CYAN
+        smallF.draw(batch, "KELEMAHAN TAKTIS: ${selected.weakness.uppercase()}   |   REKOR PENUMPASAN: $kills JIWA", 455f, 525f)
+
+        // Lore Aurelius Section
+        headF.color = Color.GOLD
+        headF.draw(batch, "CATATAN HISTORIS AURELIUS:", 445f, 465f)
+        regF.color = Color(0.92f, 0.92f, 0.96f, 1f)
+        regF.draw(batch, selected.lore, 445f, 435f, 750f, Align.left, true)
+
+        // Tactics Valerius Section
+        headF.color = Color(1.0f, 0.45f, 0.45f, 1f)
+        headF.draw(batch, "DOKTRIN TEMPUR & TAKTIK VALERIUS:", 445f, 285f)
+        regF.color = Color(1.0f, 0.90f, 0.75f, 1f)
+        regF.draw(batch, selected.tactics, 445f, 255f, 750f, Align.left, true)
+
+        // Footer Guidance
+        smallF.color = Color.YELLOW
+        smallF.draw(batch, "[W / S / ATAS / BAWAH] Pilih Entitas   |   [KLIK DAFTAR] Pilih Monster   |   [B / ESC] Kembali ke Medan Pertempuran", 430f, 85f)
+
         batch.end()
     }
 

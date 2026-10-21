@@ -25,6 +25,7 @@ data class SaveData(
     var acceptedBounties: ArrayList<String> = arrayListOf(),
     var completedBounties: ArrayList<String> = arrayListOf(),
     var claimedBounties: ArrayList<String> = arrayListOf(),
+    var bestiaryKills: HashMap<String, Int> = hashMapOf(),
     var selectedArchetype: String = "BALANCED",
     var selectedSubClass: String = "BERSERKER",
     var weaponAtkLevel: Int = 0,
@@ -96,6 +97,10 @@ data class SaveData(
         acceptedBounties.sorted().forEach { mixString(it) }
         completedBounties.sorted().forEach { mixString(it) }
         claimedBounties.sorted().forEach { mixString(it) }
+        bestiaryKills.keys.sorted().forEach { key ->
+            mixString(key)
+            mix(bestiaryKills[key]?.toLong() ?: 0L)
+        }
 
         return hash and 0x7FFFFFFFFFFFFFFFL // Bilangan bulat positif 63-bit
     }
