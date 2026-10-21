@@ -26,15 +26,26 @@ graph TD
 
 ```mermaid
 flowchart LR
-    Fase0["Fase 0:<br/>Setup & Scaffolding"] --> Fase1["Fase 1:<br/>Core Platforming"]
-    Fase1 --> Fase2["Fase 2:<br/>Core Combat"]
-    Fase2 --> Fase3["Fase 3:<br/>Enemy AI & MVP Loop"]
-    Fase3 --> Fase4["Fase 4:<br/>Combo & Touch UI"]
-    Fase4 --> Fase5["Fase 5:<br/>RPG & Save Data"]
-    Fase5 --> Fase6["Fase 6:<br/>Tiled Map & Tower"]
-    Fase6 --> Fase7["Fase 7:<br/>Asset & Audio Polish"]
-    Fase7 --> Fase8["Fase 8:<br/>Android Build & QA"]
+    subgraph Fondasi["Fase 0 - 8: Fondasi Inti (Selesai)"]
+        Fase0["F0: Setup"] --> Fase1["F1: Platforming"]
+        Fase1 --> Fase2["F2: Combat"]
+        Fase2 --> Fase3["F3: MVP Loop"]
+        Fase3 --> Fase4["F4: Combo & Touch"]
+        Fase4 --> Fase5["F5: RPG Save"]
+        Fase5 --> Fase6["F6: Tower Boss"]
+        Fase6 --> Fase7["F7: Polish & SFX"]
+        Fase7 --> Fase8["F8: Android QA"]
+    end
+    subgraph Ekspansi["Fase 9 - 14: Roadmap Ekspansi (Pengembangan Lanjutan)"]
+        Fase8 --> Fase9["F9: Ranged & Haptic"]
+        Fase9 --> Fase10["F10: Blacksmith & Relics"]
+        Fase10 --> Fase11["F11: Parry & Boss Intro"]
+        Fase11 --> Fase12["F12: Gamepad & Touch Layout"]
+        Fase12 --> Fase13["F13: Endless & Talent"]
+        Fase13 --> Fase14["F14: Play Games & Publish"]
+    end
 ```
+
 
 ---
 
@@ -378,6 +389,130 @@ flowchart LR
 
 ---
 
+### FASE 9: Varian Musuh Jarak Jauh (Ranged Enemy) & Android Haptic Feedback
+> **Tujuan Terbesar:** Meningkatkan dinamika taktis pertempuran dengan menghadirkan musuh proyektil jarak jauh (Archer/Sorcerer) serta menambahkan umpan balik getaran haptic mikro pada smartphone Android untuk membuat aksi pertarungan terasa fisik dan nyata.
+
+#### Modul 9.1: Ranged Enemy Entity & Projectile Engine
+- **Task 9.1.1: Pemodelan Ranged Enemy AI**
+  - [ ] Tambahkan varian musuh pada `Enemy.kt` atau buat class baru dengan `EnemyType { MELEE, RANGED }`.
+  - [ ] Logika AI Ranged: Menjaga jarak aman dari pemain (kite behavior 4.5–7.0 meter), cliff avoidance agar tidak jatuh dari platform, dan bidikan horizontal/diagonal.
+  - [ ] Animasi windup/telegraphing: Menarik busur atau mengumpulkan bola energi sihir selama 0.4 detik (mata bersinar ungu/oranye) sebelum menembak.
+- **Task 9.1.2: Sistem Proyektil Musuh & Zero-Allocation Pooling**
+  - [ ] Buat class `EnemyProjectile.kt` dengan pooling terkelola (`com.badlogic.gdx.utils.Pool`).
+  - [ ] Deteksi collision proyektil dengan platform/dinding (hancur memercik) dan hurtbox pemain.
+  - [ ] Berikan kesempatan menghindar: pemain bisa melompati proyektil atau berguling menembusnya menggunakan i-frame *Dodge Roll*.
+
+#### Modul 9.2: Android Haptic Vibration System
+- **Task 9.2.1: Abstraksi Haptic Manager**
+  - [ ] Buat singleton `HapticManager.kt` dengan wrapper aman `Gdx.input.vibrate(milliseconds)` (hanya aktif pada backend Android).
+  - [ ] Definisikan profil getaran haptic:
+    - *Light (18ms):* Dodge roll, mendarat dari lompatan tinggi.
+    - *Medium (35ms):* Tebasan combo mendarat pada musuh.
+    - *Heavy (70ms):* Pemain terkena damage, eksekusi Meteor Cleave, atau aktivasi Ultimate.
+  - [ ] Opsi toggle ON/OFF Haptic di menu Pause dan Main Menu.
+
+#### Modul 9.3: Integrasi Level Menara & Uji Coba Balancing
+- **Task 9.3.1: Penempatan Ranged Enemy di Lantai Menara**
+  - [ ] Letakkan 1 Ranged Enemy di platform atas Lantai 1 dan 2 Ranged Enemy di posisi strategis Lantai 2 untuk melatih manuver vertikal pemain.
+  - [ ] Tulis unit test untuk verifikasi proyektil, pooling lifecycle, dan kalkulasi damage di `core/src/test/kotlin`.
+
+---
+
+### FASE 10: Ekonomi Toko Blacksmith & Sistem Relik Pasif (Pemanfaatan Gold)
+> **Tujuan Terbesar:** Memberikan nilai guna nyata pada perolehan Gold hasil eksplorasi menara melalui penempaan senjata permanen di lobby dan sistem relik pasif yang memperkaya variasi build karakter setiap run.
+
+#### Modul 10.1: Blacksmith Weapon Forge (Upgrade Senjata Permanen)
+- **Task 10.1.1: Model & Data Upgrade Senjata**
+  - [ ] Tambahkan field upgrade level pada `SaveData.kt`: `weaponAtkLevel: Int`, `weaponCritLevel: Int`, `weaponSpdLevel: Int`.
+  - [ ] Biaya upgrade berbasis formula progresif: `Cost = 150 * (level + 1)`.
+- **Task 10.1.2: Antarmuka Blacksmith UI**
+  - [ ] Buat menu atau overlay Blacksmith di Lobby/Lantai Antara: tombol tempa senjata, pratinjau perbandingan statistik sebelum vs sesudah, dan konfirmasi transaksi Gold.
+
+#### Modul 10.2: Relic Merchant (Item Pasif Acak Setiap Run)
+- **Task 10.2.1: Model Arsitektur Relik**
+  - [ ] Buat `enum class RelicType` dan container `RelicManager.kt`:
+    - 🩸 *Vampiric Fang:* Memulihkan 4% Max HP setiap kali menumbangkan musuh.
+    - ⚡ *Thunder Charm:* Menyambar musuh terdekat dengan petir setiap kali combo menyentuh 10x.
+    - 🪶 *Wings of Hermes:* Mengizinkan Triple Jump.
+    - ⏳ *Hourglass of Chronos:* Mengurangi cooldown skill sebesar 25%.
+- **Task 10.2.2: Drop & Pembelian Relik**
+  - [ ] Munculkan peti emas khusus bos atau NPC Merchant di Lantai 2 yang menawarkan pilihan 1 dari 3 relik pasif acak.
+
+---
+
+### FASE 11: Sistem Pertahanan Tingkat Tinggi (Parry / Deflect) & Boss Presentation
+> **Tujuan Terbesar:** Menghadirkan mekanisme *just-frame guard / parry* untuk kepuasan aksi skill ceiling tinggi serta kartu intro sinematik dramatis untuk setiap bos lantai menara.
+
+#### Modul 11.1: Just-Frame Parry / Perfect Deflect System
+- **Task 11.1.1: Timing Window & Deteksi Benturan**
+  - [ ] Window parry 0.12 detik (7 frame) saat tombol dodge ditekan tepat sebelum serangan musuh menyentuh hurtbox pemain.
+  - [ ] Musuh yang tertangkis mengalami *Guard Break* / pingsan (*stun*) selama 1.5 detik.
+- **Task 11.1.2: Audio-Visual Feedback Parry**
+  - [ ] Dentingan logam tajam (*metallic clank SFX*), percikan bunga api emas, micro-freeze 0.08 detik, dan bonus +35% energi Ultimate instan.
+
+#### Modul 11.2: Boss Intro Title Card & Dramatisasi Arena
+- **Task 11.2.1: Cinematic Intro Sequence**
+  - [ ] Kamera lerp zoom-in ke arah bos saat pemain pertama kali memasuki arena lantai 3.
+  - [ ] Kartu nama gelap-emas bergaya kanji/metal (*"GIGAS - THE ANCIENT GOLEM"*), sound roar bos, dan bar darah bos terisi penuh dari kiri ke kanan (*fill animation*).
+- **Task 11.2.2: Super Finish Slow-Motion**
+  - [ ] Saat pukulan terakhir membunuh bos, aktifkan time-dilation 0.25x selama 0.4 detik disertai shockwave radial putih.
+
+---
+
+### FASE 12: Ergonomi Kontrol: Gamepad Controller & Kustomisasi Tombol Sentuh
+> **Tujuan Terbesar:** Memberikan dukungan controller fisik (Bluetooth / USB) via `gdx-controllers` dan editor tata letak tombol sentuh di menu pengaturan.
+
+#### Modul 12.1: Integrasi Gamepad (gdx-controllers)
+- **Task 12.1.1: Dependency & Input Mapping**
+  - [ ] Tambahkan dependensi `com.badlogicgames.gdx-controllers:gdx-controllers-core`.
+  - [ ] Mapping tombol standar XInput / DualShock: D-pad / Joystick kiri untuk lari, tombol A/Silang untuk lompat, X/Kotak untuk serang, B/Lingkaran untuk dodge, LB/L1 untuk skill, RB/R1 untuk ulti.
+- **Task 12.1.2: Auto-Detection Input Device**
+  - [ ] Otomatis sembunyikan on-screen virtual controller di Android jika terdeteksi gamepad Bluetooth aktif terhubung.
+
+#### Modul 12.2: On-Screen Touch Layout Customizer
+- **Task 12.2.1: Interactive Button Editor**
+  - [ ] Layar drag-and-drop di menu Pengaturan untuk menggeser posisi D-Pad dan tombol aksi sesuai kenyamanan jari pemain.
+  - [ ] Slider ukuran tombol (skala 70% hingga 130%) dan slider transparansi.
+  - [ ] Simpan preferensi layout ke `Preferences`.
+
+---
+
+### FASE 13: Roguelite Loop: Mode Menara Tanpa Batas (Endless Spire) & Talent Tree
+> **Tujuan Terbesar:** Membuka konten endgame berupa menara tanpa batas dengan mutator acak prosedural dan percabangan talent tree spesialisasi arketipe.
+
+#### Modul 13.1: Mode Endless Ascent
+- **Task 13.1.1: Procedural Floor Mutators**
+  - [ ] Terbuka setelah menamatkan Lantai 3.
+  - [ ] Setiap lantai baru memiliki mutator acak (Toxic Miasma, Berserk Surge, Low Gravity, Spike Frenzy).
+  - [ ] Scaling HP & damage musuh berbasis formula eksponensial per lantai.
+- **Task 13.1.2: High Score & Record Tracker**
+  - [ ] Pencatatan lantai tertinggi, jumlah musuh ditumbangkan, dan waktu tempuh.
+
+#### Modul 13.2: Sub-Class & Talent Tree System
+- **Task 13.2.1: Talent Branching**
+  - [ ] *Warrior:* Berserker (DPS tinggi saat HP rendah) vs Guardian (Super Armor & Shield).
+  - [ ] *Assassin:* Shadow Stalker (Crit & Teleport) vs Venomancer (Poison DoT).
+  - [ ] *Mage:* Archmage (AoE Blast) vs Spellblade (Melee Infused Elements).
+
+---
+
+### FASE 14: Layanan Google Play Games & Kesiapan Publikasi Play Store
+> **Tujuan Terbesar:** Integrasi Google Play Games (Leaderboard & Achievements), build Android App Bundle (.aab) bertanda tangan rilis, dan aset peluncuran store.
+
+#### Modul 14.1: Google Play Services Integration
+- **Task 14.1.1: Leaderboard & Achievements**
+  - [ ] Papan peringkat global: "Highest Floor Cleared" & "Speedrun Clear Time".
+  - [ ] Sistem achievement: "First Blood", "Untouchable Guardian", "Ascent Legend".
+- **Task 14.1.2: Cloud Save Backup**
+  - [ ] Backup otomatis save data ke Google Drive AppData / Play Games Cloud Save.
+
+#### Modul 14.2: Release Packaging (.aab) & Store Assets
+- **Task 14.2.1: Android App Bundle (.aab)**
+  - [ ] Konfigurasi signing key `keystore.jks` dan ProGuard / R8 minification rule.
+  - [ ] Build file produksi `./gradlew android:bundleRelease`.
+
+---
+
 ## 4. Matriks Ketergantungan & Prioritas Eksekusi
 
 | Prioritas | Fase | Fitur Kunci | Output Terukur |
@@ -390,6 +525,13 @@ flowchart LR
 | **P2 (Sedang)** | Fase 6 | Tiled Map Editor, Multi-Floor Tower, Boss | Level visual rapi dan terdapat pertarungan boss menantang |
 | **P2 (Sedang)** | Fase 7 | SpriteSheet, Sound Effects, Music, 2 Karakter | Tampilan stickman dinamis & audio imersif |
 | **P3 (Rilis)** | Fase 8 | Profiling Android 60 FPS, Build Release APK | APK mandiri terpasang dan berjalan lancar di HP Android fisik |
+| **P4 (Ekspansi A)** | Fase 9 | Ranged Enemy Proyektil & Android Haptic | Variasi pertempuran jarak jauh & sensasi fisik kontrol |
+| **P4 (Ekspansi B)** | Fase 10 | Toko Blacksmith Senjata & Relik Pasif | Pemanfaatan Gold & variasi build karakter per run |
+| **P5 (Lanjutan A)** | Fase 11 | Sistem Parry Deflect & Boss Presentation | Skill ceiling aksi tinggi & visual sinematik bos |
+| **P5 (Lanjutan B)** | Fase 12 | Dukungan Gamepad & Touch Layout Editor | Fleksibilitas kontrol controller & ergonomi sentuh |
+| **P6 (Endgame)** | Fase 13 | Endless Spire Mode & Talent Tree | Replayability tanpa batas & kedalaman RPG mendalam |
+| **P6 (Publikasi)**| Fase 14 | Google Play Services & Release Bundle (.aab) | Kesiapan peluncuran komersial di Google Play Store |
+
 
 ---
 

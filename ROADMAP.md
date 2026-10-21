@@ -3,6 +3,8 @@
 
 Dokumen ini memuat panduan, rekomendasi teknis, dan peta jalan fitur (*strategic roadmap*) untuk mentransformasi purwarupa **Stickman Tower Adventure** menjadi game aksi platformer RPG komersial yang kaya konten, adiktif, dan memiliki replay-value tinggi.
 
+> 📖 **Rencana Kerja & Checklist Dekomposisi Lengkap:** [Alur_Pembuatan_Aplikasi.md](file:///home/yusuf/projekan/game/game1/Alur_Pembuatan_Aplikasi.md)
+
 ---
 
 ## 📌 Ringkasan Fondasi Saat Ini (Fase 1–8 Selesai)
