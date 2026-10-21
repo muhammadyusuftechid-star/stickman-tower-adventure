@@ -13,8 +13,8 @@ import com.stickman.tower.combat.UltimateEnergy
 
 /**
  * On-Screen Virtual Touch Controller untuk target layar sentuh Android dan playtesting desktop.
- * Menggunakan tombol lingkaran melayang (floating translucent glassmorphism) dengan vektor panah geometris
- * untuk D-Pad serta hit-testing berbasis viewport unproject yang akurat di semua aspek rasio layar.
+ * Dilengkapi dengan ikon vektor geometris murni (Pedang ATK, Sayap JUMP, Bayangan DODGE, Rune SKILL, Mahkota Surya ULT)
+ * serta deteksi multi-touch presisi berbasis viewport unproject.
  */
 class VirtualController : GameInput {
     // Tombol D-Pad Kiri Layar (Floating Circles)
@@ -73,14 +73,12 @@ class VirtualController : GameInput {
      * Jika [viewport] disertakan, koordinat sentuhan fisik di-unproject ke koordinat canvas virtual UI.
      */
     fun update(viewport: Viewport? = null) {
-        // Simpan state penekanan sebelumnya
         val prevAttack = wasAttackPressed
         val prevJump = wasJumpPressed
         val prevDodge = wasDodgePressed
         val prevSkill = wasSkillPressed
         val prevUltimate = wasUltimatePressed
 
-        // Reset state aktif
         pressedLeft = false
         pressedRight = false
         pressedJump = false
@@ -90,7 +88,6 @@ class VirtualController : GameInput {
         var curSkill = false
         var curUltimate = false
 
-        // Deteksi Multi-Touch (Pointer 0 s/d 4)
         for (pointer in 0..4) {
             if (Gdx.input != null && Gdx.input.isTouched(pointer)) {
                 touchVec.set(Gdx.input.getX(pointer).toFloat(), Gdx.input.getY(pointer).toFloat(), 0f)
@@ -116,7 +113,6 @@ class VirtualController : GameInput {
             }
         }
 
-        // Hitung Just Pressed
         justPressedAttack = curAttack && !prevAttack
         justPressedJump = curJump && !prevJump
         justPressedDodge = curDodge && !prevDodge
@@ -140,8 +136,7 @@ class VirtualController : GameInput {
     override fun isUltimateJustPressed() = justPressedUltimate
 
     /**
-     * Menggambar tombol kontrol melayang di layar menggunakan ShapeRenderer dan SpriteBatch.
-     * Tidak mengubah projectionMatrix secara internal; mengandalkan matriks UI viewport dari pemanggil.
+     * Menggambar tombol kontrol melayang dan ikon vektor aksi.
      */
     fun render(
         shapeRenderer: ShapeRenderer,
@@ -162,15 +157,13 @@ class VirtualController : GameInput {
         shapeRenderer.color = if (pressedRight) Color(0.2f, 0.6f, 0.95f, 0.75f) else Color(0.08f, 0.12f, 0.18f, 0.45f)
         shapeRenderer.circle(btnRight.x, btnRight.y, btnRight.radius, 24)
 
-        // Vektor Segitiga Panah D-Pad Kiri & Kanan (Anti Glyph Bug)
-        shapeRenderer.color = if (pressedLeft) Color.WHITE else Color(0.75f, 0.85f, 0.95f, 0.8f)
+        // Vektor Segitiga Panah D-Pad Kiri & Kanan
+        shapeRenderer.color = if (pressedLeft) Color.WHITE else Color(0.75f, 0.85f, 0.95f, 0.85f)
         shapeRenderer.triangle(
             btnLeft.x - 14f, btnLeft.y,
             btnLeft.x + 10f, btnLeft.y + 16f,
             btnLeft.x + 10f, btnLeft.y - 16f
         )
-
-        shapeRenderer.color = if (pressedRight) Color.WHITE else Color(0.75f, 0.85f, 0.95f, 0.8f)
         shapeRenderer.triangle(
             btnRight.x + 14f, btnRight.y,
             btnRight.x - 10f, btnRight.y + 16f,
@@ -181,23 +174,76 @@ class VirtualController : GameInput {
         shapeRenderer.color = if (wasAttackPressed) Color(0.95f, 0.2f, 0.25f, 0.85f) else Color(0.75f, 0.15f, 0.2f, 0.5f)
         shapeRenderer.circle(btnAttack.x, btnAttack.y, btnAttack.radius, 28)
 
+        // Vektor Bilah Pedang ATK
+        val atkCx = btnAttack.x
+        val atkCy = btnAttack.y + 4f
+        shapeRenderer.color = Color(0.95f, 0.95f, 1f, 0.95f)
+        shapeRenderer.rectLine(atkCx - 14f, atkCy - 14f, atkCx + 16f, atkCy + 16f, 4f)
+        shapeRenderer.color = Color(1f, 0.85f, 0.25f, 0.95f) // Gagang Emas
+        shapeRenderer.rectLine(atkCx - 9f, atkCy - 1f, atkCx - 1f, atkCy - 9f, 4.5f)
+        shapeRenderer.circle(atkCx - 13f, atkCy - 13f, 3.5f)
+
         // Tombol Jump (Hijau Emerald)
         shapeRenderer.color = if (wasJumpPressed) Color(0.2f, 0.85f, 0.4f, 0.85f) else Color(0.15f, 0.65f, 0.3f, 0.5f)
         shapeRenderer.circle(btnJump.x, btnJump.y, btnJump.radius, 24)
+
+        // Vektor Sayap/Panah Ganda JUMP
+        val jmpCx = btnJump.x
+        val jmpCy = btnJump.y + 4f
+        shapeRenderer.color = Color(0.9f, 1f, 0.9f, 0.95f)
+        shapeRenderer.rectLine(jmpCx - 12f, jmpCy + 2f, jmpCx, jmpCy + 12f, 3.5f)
+        shapeRenderer.rectLine(jmpCx, jmpCy + 12f, jmpCx + 12f, jmpCy + 2f, 3.5f)
+        shapeRenderer.rectLine(jmpCx - 10f, jmpCy - 6f, jmpCx, jmpCy + 3f, 3f)
+        shapeRenderer.rectLine(jmpCx, jmpCy + 3f, jmpCx + 10f, jmpCy - 6f, 3f)
 
         // Tombol Dodge (Biru Azure)
         shapeRenderer.color = if (wasDodgePressed) Color(0.2f, 0.65f, 1f, 0.85f) else Color(0.15f, 0.45f, 0.85f, 0.5f)
         shapeRenderer.circle(btnDodge.x, btnDodge.y, btnDodge.radius, 24)
 
-        // Tombol Skill 1 (Ungu Arcane dengan indikator cooldown)
+        // Vektor Jejak Bayangan Melesat DODGE
+        val ddgCx = btnDodge.x
+        val ddgCy = btnDodge.y + 4f
+        shapeRenderer.color = Color(0.8f, 0.95f, 1f, 0.95f)
+        shapeRenderer.rectLine(ddgCx - 14f, ddgCy + 7f, ddgCx + 6f, ddgCy + 7f, 3f)
+        shapeRenderer.rectLine(ddgCx - 10f, ddgCy, ddgCx + 14f, ddgCy, 4f)
+        shapeRenderer.rectLine(ddgCx - 14f, ddgCy - 7f, ddgCx + 6f, ddgCy - 7f, 3f)
+        shapeRenderer.triangle(ddgCx + 17f, ddgCy, ddgCx + 11f, ddgCy + 5f, ddgCx + 11f, ddgCy - 5f)
+
+        // Tombol Skill 1 (Ungu Arcane)
         val skillColor = if (skill.isReady) Color(0.7f, 0.3f, 0.95f, 0.65f) else Color(0.3f, 0.2f, 0.4f, 0.45f)
         shapeRenderer.color = skillColor
         shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius, 24)
+
+        // Vektor Berlian Runic SKILL
+        val sklCx = btnSkill.x
+        val sklCy = btnSkill.y + 4f
+        shapeRenderer.color = if (skill.isReady) Color(0.92f, 0.75f, 1f, 0.95f) else Color(0.55f, 0.45f, 0.65f, 0.6f)
+        shapeRenderer.triangle(sklCx, sklCy + 14f, sklCx - 11f, sklCy, sklCx + 11f, sklCy)
+        shapeRenderer.triangle(sklCx, sklCy - 14f, sklCx - 11f, sklCy, sklCx + 11f, sklCy)
+        if (skill.isReady) {
+            shapeRenderer.color = Color.WHITE
+            shapeRenderer.triangle(sklCx, sklCy + 6f, sklCx - 5f, sklCy, sklCx + 5f, sklCy)
+            shapeRenderer.triangle(sklCx, sklCy - 6f, sklCx - 5f, sklCy, sklCx + 5f, sklCy)
+        }
 
         // Tombol Ultimate (Emas Surya menyala jika 100%)
         val ultColor = if (ultimate.isReady) Color(1f, 0.85f, 0.2f, 0.85f) else Color(0.45f, 0.38f, 0.15f, 0.45f)
         shapeRenderer.color = ultColor
         shapeRenderer.circle(btnUltimate.x, btnUltimate.y, btnUltimate.radius, 24)
+
+        // Vektor Mahkota Surya Bintang ULT
+        val ultCx = btnUltimate.x
+        val ultCy = btnUltimate.y + 4f
+        shapeRenderer.color = if (ultimate.isReady) Color(1f, 0.95f, 0.4f, 1f) else Color(0.7f, 0.65f, 0.4f, 0.6f)
+        shapeRenderer.circle(ultCx, ultCy, 7f, 16)
+        shapeRenderer.rectLine(ultCx, ultCy + 8f, ultCx, ultCy + 16f, 3.5f)
+        shapeRenderer.rectLine(ultCx, ultCy - 8f, ultCx, ultCy - 16f, 3.5f)
+        shapeRenderer.rectLine(ultCx - 8f, ultCy, ultCx - 16f, ultCy, 3.5f)
+        shapeRenderer.rectLine(ultCx + 8f, ultCy, ultCx + 16f, ultCy, 3.5f)
+        shapeRenderer.rectLine(ultCx - 6f, ultCy + 6f, ultCx - 11f, ultCy + 11f, 2.5f)
+        shapeRenderer.rectLine(ultCx + 6f, ultCy + 6f, ultCx + 12f, ultCy + 12f, 2.5f)
+        shapeRenderer.rectLine(ultCx - 6f, ultCy - 6f, ultCx - 11f, ultCy - 11f, 2.5f)
+        shapeRenderer.rectLine(ultCx + 6f, ultCy - 6f, ultCx + 12f, ultCy - 12f, 2.5f)
 
         shapeRenderer.end()
 
@@ -229,30 +275,29 @@ class VirtualController : GameInput {
         }
         shapeRenderer.end()
 
-        // 3. Gambar Teks Label Tombol (Menggunakan SpriteBatch pada Koordinat UI)
+        // 3. Gambar Teks Label Tombol (Sub-label Halus & Countdown)
         batch.begin()
-        font.color = Color.WHITE
+        font.color = Color(0.9f, 0.9f, 0.95f, 0.85f)
 
-        // Action Labels
-        font.draw(batch, "ATK", btnAttack.x - 14f, btnAttack.y + 6f)
-        font.draw(batch, "JUMP", btnJump.x - 16f, btnJump.y + 6f)
-        font.draw(batch, "DODGE", btnDodge.x - 21f, btnDodge.y + 6f)
+        // Sub-labels di bawah ikon
+        font.draw(batch, "ATK", btnAttack.x - 14f, btnAttack.y - 22f)
+        font.draw(batch, "JUMP", btnJump.x - 17f, btnJump.y - 18f)
+        font.draw(batch, "DODGE", btnDodge.x - 22f, btnDodge.y - 18f)
 
         if (skill.isReady) {
-            font.draw(batch, "SKILL", btnSkill.x - 17f, btnSkill.y + 6f)
+            font.draw(batch, "SKILL", btnSkill.x - 17f, btnSkill.y - 18f)
         } else {
             font.color = Color.YELLOW
             val tenths = (skill.remainingCooldown * 10).toInt().coerceAtLeast(0)
-            font.draw(batch, "${tenths / 10}.${tenths % 10}s", btnSkill.x - 14f, btnSkill.y + 6f)
-            font.color = Color.WHITE
+            font.draw(batch, "${tenths / 10}.${tenths % 10}s", btnSkill.x - 14f, btnSkill.y + 4f)
         }
 
         if (ultimate.isReady) {
             font.color = Color.GOLD
-            font.draw(batch, "ULT!", btnUltimate.x - 15f, btnUltimate.y + 6f)
+            font.draw(batch, "ULT!", btnUltimate.x - 14f, btnUltimate.y - 18f)
         } else {
-            font.color = Color.LIGHT_GRAY
-            font.draw(batch, "${(ultimate.energyPercent * 100).toInt()}%", btnUltimate.x - 14f, btnUltimate.y + 6f)
+            font.color = Color(0.9f, 0.85f, 0.7f, 0.8f)
+            font.draw(batch, "${(ultimate.energyPercent * 100).toInt()}%", btnUltimate.x - 14f, btnUltimate.y + 4f)
         }
 
         batch.end()

@@ -356,15 +356,20 @@ class Enemy(spawnX: Float, spawnY: Float) {
     }
 
     private fun renderHealthBar(shapeRenderer: ShapeRenderer, centerX: Float, barY: Float) {
-        val barW = 0.9f
-        val barH = 0.1f
+        // Hanya tampilkan jika musuh telah terluka atau sedang dalam pertempuran aktif
+        if (health.isDead || (health.currentHp >= health.maxHp && state == EnemyState.PATROL)) return
+
+        val barW = 0.85f
+        val barH = 0.08f
         val barX = centerX - barW / 2f
 
-        shapeRenderer.color = Color(0.1f, 0.1f, 0.15f, 0.8f)
-        shapeRenderer.rect(barX, barY, barW, barH)
+        // Frame Obsidian Gelap
+        shapeRenderer.color = Color(0.06f, 0.08f, 0.12f, 0.85f)
+        shapeRenderer.rect(barX - 0.02f, barY - 0.02f, barW + 0.04f, barH + 0.04f)
 
+        // Fill Bar Darah Crimson
         val hpPercent = (health.currentHp / health.maxHp).coerceIn(0f, 1f)
-        shapeRenderer.color = Color.RED
+        shapeRenderer.color = Color(0.85f, 0.18f, 0.22f, 0.95f)
         shapeRenderer.rect(barX, barY, barW * hpPercent, barH)
     }
 

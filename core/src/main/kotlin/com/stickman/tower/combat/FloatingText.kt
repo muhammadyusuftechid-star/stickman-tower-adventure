@@ -15,7 +15,8 @@ class FloatingText(
     var worldX: Float,
     var worldY: Float,
     val color: Color = Color.RED,
-    val duration: Float = 0.8f
+    val duration: Float = 0.8f,
+    val isCritical: Boolean = false
 ) {
     private var elapsed: Float = 0f
     private val tempVec = Vector3()
@@ -24,7 +25,8 @@ class FloatingText(
 
     fun update(delta: Float) {
         elapsed += delta
-        worldY += 1.5f * delta // Meluncur ke atas
+        val speed = if (isCritical) 2.2f else 1.5f
+        worldY += speed * delta
     }
 
     fun render(batch: SpriteBatch, font: BitmapFont, camera: Camera) {
@@ -39,7 +41,7 @@ class FloatingText(
         val originalColor = font.color
 
         font.color = Color(color.r, color.g, color.b, alpha)
-        font.draw(batch, text, tempVec.x - 10f, tempVec.y)
+        font.draw(batch, text, tempVec.x - (if (isCritical) 20f else 10f), tempVec.y)
         font.color = originalColor
     }
 }

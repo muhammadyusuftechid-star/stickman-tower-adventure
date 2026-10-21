@@ -31,6 +31,7 @@ import com.stickman.tower.vfx.ParticleManager
 import com.stickman.tower.world.CameraManager
 import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.world.TowerLevelBuilder
+import kotlin.math.sin
 
 /**
  * Screen gameplay utama:
@@ -85,6 +86,17 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private var hasSavedStageClear = false
     private var showDebugBounds = false
 
+    // Ghost Health Bar (Lag Bar untuk visual impact saat terkena damage)
+    private var playerGhostHp: Float = player.health.currentHp
+    private var playerGhostDelay: Float = 0f
+    private var bossGhostHp: Float = 0f
+    private var bossGhostDelay: Float = 0f
+
+    // Micro-animasi HUD Juice
+    private var prevComboStep: ComboStep = ComboStep.HIT_1
+    private var comboPopTimer: Float = 0f
+    private var hudAnimTime: Float = 0f
+
     override fun show() {
         AudioManager.init()
         FontManager.init()
@@ -121,6 +133,13 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         hasSavedStageClear = false
         gameStatus = GameStatus.PLAYING
+
+        playerGhostHp = player.health.currentHp
+        playerGhostDelay = 0f
+        bossGhostHp = currentFloor.boss?.health?.currentHp ?: 0f
+        bossGhostDelay = 0f
+        prevComboStep = ComboStep.HIT_1
+        comboPopTimer = 0f
 
         floatingTexts.clear()
         particleManager.clear()
@@ -194,6 +213,43 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         input.update(uiViewport)
         handleStatusInput()
 
+        hudAnimTime += safeDelta
+
+        // Pembaruan Ghost HP Bar Pemain (Smooth Decay Lag)
+        if (playerGhostDelay > 0f) {
+            playerGhostDelay = (playerGhostDelay - safeDelta).coerceAtLeast(0f)
+        } else if (playerGhostHp > player.health.currentHp) {
+            val decaySpeed = ((playerGhostHp - player.health.currentHp) * 4.5f + 25f) * safeDelta
+            playerGhostHp = (playerGhostHp - decaySpeed).coerceAtLeast(player.health.currentHp)
+        } else {
+            playerGhostHp = player.health.currentHp
+        }
+
+        // Pembaruan Ghost HP Bar Boss
+        val activeBoss = currentFloor.boss
+        if (activeBoss != null) {
+            if (bossGhostHp == 0f || bossGhostHp < activeBoss.health.currentHp) {
+                bossGhostHp = activeBoss.health.currentHp
+            }
+            if (bossGhostDelay > 0f) {
+                bossGhostDelay = (bossGhostDelay - safeDelta).coerceAtLeast(0f)
+            } else if (bossGhostHp > activeBoss.health.currentHp) {
+                val decaySpeed = ((bossGhostHp - activeBoss.health.currentHp) * 4f + 35f) * safeDelta
+                bossGhostHp = (bossGhostHp - decaySpeed).coerceAtLeast(activeBoss.health.currentHp)
+            } else {
+                bossGhostHp = activeBoss.health.currentHp
+            }
+        }
+
+        // Pembaruan Animasi Combo Pop
+        if (player.comboManager.currentStep != prevComboStep) {
+            prevComboStep = player.comboManager.currentStep
+            comboPopTimer = 0.28f
+        }
+        if (comboPopTimer > 0f) {
+            comboPopTimer = (comboPopTimer - safeDelta).coerceAtLeast(0f)
+        }
+
         if (saveNotificationTimer > 0f) {
             saveNotificationTimer = (saveNotificationTimer - safeDelta).coerceAtLeast(0f)
         }
@@ -210,6 +266,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             for (spike in currentFloor.spikes) {
                 if (spike.checkCollision(player.bounds) && !player.health.isInvulnerable && !player.isDodging) {
                     if (player.takeHit(spike.damage, 0f, 8.0f)) {
+                        playerGhostDelay = 0.35f
                         hitStopManager.trigger(0.06f)
                         AudioManager.playHit()
                         particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color.RED)
@@ -402,7 +459,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                                     "$critPrefix${player.hitbox.damage.toInt()}",
                                     enemy.position.x + enemy.width / 2f,
                                     enemy.position.y + enemy.height + 0.35f,
-                                    textColor
+                                    textColor,
+                                    isCritical = player.hitbox.isCritical
                                 )
                             )
                         }
@@ -419,6 +477,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     val knockY = player.hitbox.knockbackY
 
                     if (boss.takeHit(player.hitbox.damage, knockX, knockY)) {
+                        bossGhostDelay = 0.35f
                         hitStopManager.trigger(0.06f)
                         AudioManager.playHit()
                         particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 14, color = Color.ORANGE)
@@ -438,7 +497,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                                 "$critPrefix${player.hitbox.damage.toInt()}",
                                 boss.position.x + boss.width / 2f,
                                 boss.position.y + boss.height + 0.45f,
-                                textColor
+                                textColor,
+                                isCritical = player.hitbox.isCritical
                             )
                         )
                     }
@@ -456,6 +516,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     val knockY = enemy.hitbox.knockbackY
 
                     if (player.takeHit(enemy.hitbox.damage, knockX, knockY)) {
+                        playerGhostDelay = 0.35f
                         hitStopManager.trigger(0.08f)
                         AudioManager.playHit()
                         particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
@@ -481,6 +542,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 val knockY = boss.hitbox.knockbackY
 
                 if (player.takeHit(boss.hitbox.damage, knockX, knockY)) {
+                    playerGhostDelay = 0.35f
                     hitStopManager.trigger(0.09f)
                     AudioManager.playHit()
                     particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 12, color = Color.RED)
@@ -503,6 +565,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     proj.isDestroyed = true
                     val knockX = if (proj.velocityX > 0f) 6.5f else -6.5f
                     if (player.takeHit(proj.damage, knockX, 3.5f)) {
+                        playerGhostDelay = 0.35f
                         hitStopManager.trigger(0.06f)
                         AudioManager.playHit()
                         particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
@@ -580,48 +643,76 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         val w = 1280f
         val h = 720f
 
+        val hpPercent = (player.health.currentHp / player.health.maxHp).coerceIn(0f, 1f)
+        val ghostHpPercent = (playerGhostHp / player.health.maxHp).coerceIn(0f, 1f)
+        val isLowHp = hpPercent <= 0.25f
+        val dangerThrob = if (isLowHp) ((Math.sin(hudAnimTime.toDouble() * 9.0).toFloat() + 1f) * 0.5f) else 0f
+
         // 1. Render Elemen Latar Bar & Kartu Karakter (ShapeRenderer pada Screen Space 1280x720)
         shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Panel Latar Player Status Card (Kiri Atas - Obsidian Glassmorphism)
-        shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.92f)
+        shapeRenderer.color = Color(0.06f + 0.08f * dangerThrob, 0.09f * (1f - dangerThrob), 0.15f * (1f - dangerThrob), 0.94f)
         shapeRenderer.rect(12f, h - 90f, 290f, 78f)
-        shapeRenderer.color = Color(0.18f, 0.28f, 0.45f, 0.6f)
+
+        // Top Accent Line (Red danger pulse or Sleek Blue/Gold)
+        shapeRenderer.color = if (isLowHp) Color(1f, 0.2f, 0.2f, 0.7f + 0.3f * dangerThrob) else Color(0.22f, 0.38f, 0.60f, 0.75f)
         shapeRenderer.rectLine(12f, h - 12f, 302f, h - 12f, 2f)
 
         // Level Badge Box
-        shapeRenderer.color = Color(0.12f, 0.18f, 0.28f, 1f)
+        shapeRenderer.color = Color(0.10f, 0.15f, 0.24f, 1f)
         shapeRenderer.rect(18f, h - 84f, 55f, 66f)
+        shapeRenderer.color = Color(0.85f, 0.70f, 0.25f, 0.85f)
+        shapeRenderer.rectLine(18f, h - 84f, 73f, h - 84f, 2f)
 
-        // HP Bar Background
-        shapeRenderer.color = Color(0.1f, 0.12f, 0.18f, 1f)
+        // HP Bar Trough (Dark Obsidian)
+        shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 1f)
         shapeRenderer.rect(80f, h - 35f, 210f, 16f)
 
-        // HP Bar Fill
-        val hpPercent = (player.health.currentHp / player.health.maxHp).coerceIn(0f, 1f)
-        shapeRenderer.color = when {
-            hpPercent > 0.5f -> Color(0.18f, 0.85f, 0.35f, 1f)
-            hpPercent > 0.25f -> Color(0.95f, 0.75f, 0.15f, 1f)
-            else -> Color(0.95f, 0.25f, 0.25f, 1f)
+        // HP Amber Ghost Catch-Up Bar
+        if (ghostHpPercent > hpPercent) {
+            shapeRenderer.color = Color(0.95f, 0.62f, 0.15f, 0.90f)
+            shapeRenderer.rect(80f, h - 35f, 210f * ghostHpPercent, 16f)
         }
+
+        // HP Main Bar Fill (Emerald -> Gold -> Pulsing Crimson Danger)
+        val hpBarColor = when {
+            hpPercent > 0.5f -> Color(0.18f, 0.85f, 0.38f, 1f)
+            hpPercent > 0.25f -> Color(0.95f, 0.75f, 0.15f, 1f)
+            else -> {
+                val throb = (Math.sin(hudAnimTime.toDouble() * 10.0).toFloat() + 1f) * 0.5f
+                Color(0.88f + 0.12f * throb, 0.15f * (1f - throb), 0.15f * (1f - throb), 1f)
+            }
+        }
+        shapeRenderer.color = hpBarColor
         shapeRenderer.rect(80f, h - 35f, 210f * hpPercent, 16f)
 
-        // EXP Bar Background
-        shapeRenderer.color = Color(0.1f, 0.12f, 0.18f, 1f)
+        // HP Bar Highlight Rim
+        shapeRenderer.color = Color(1f, 1f, 1f, 0.22f)
+        shapeRenderer.rectLine(80f, h - 20f, 290f, h - 20f, 1f)
+
+        // EXP Bar Background & Fill
+        shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 1f)
         shapeRenderer.rect(80f, h - 53f, 210f, 12f)
 
-        // EXP Bar Fill (Cyan Elegan)
         val expPercent = (player.stats.currentExp.toFloat() / player.stats.requiredExp.toFloat()).coerceIn(0f, 1f)
         shapeRenderer.color = Color(0.15f, 0.75f, 0.95f, 1f)
         shapeRenderer.rect(80f, h - 53f, 210f * expPercent, 12f)
+        shapeRenderer.color = Color(1f, 1f, 1f, 0.20f)
+        shapeRenderer.rectLine(80f, h - 42f, 290f, h - 42f, 1f)
 
-        // Ultimate Energy Bar Background
-        shapeRenderer.color = Color(0.1f, 0.12f, 0.18f, 1f)
+        // Ultimate Energy Bar Background & Fill
+        shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 1f)
         shapeRenderer.rect(80f, h - 69f, 210f, 10f)
 
-        // Ultimate Energy Bar Fill (Kuning Emas)
-        shapeRenderer.color = if (player.ultimate.isReady) Color(1f, 0.85f, 0.2f, 1f) else Color(0.85f, 0.65f, 0.15f, 0.85f)
+        val ultColor = if (player.ultimate.isReady) {
+            val ultPulse = (Math.sin(hudAnimTime.toDouble() * 7.0).toFloat() + 1f) * 0.5f
+            Color(1f, 0.85f + 0.15f * ultPulse, 0.2f, 1f)
+        } else {
+            Color(0.85f, 0.65f, 0.15f, 0.85f)
+        }
+        shapeRenderer.color = ultColor
         shapeRenderer.rect(80f, h - 69f, 210f * player.ultimate.energyPercent, 10f)
 
         // Save Notification Pill (Jika Aktif)
@@ -636,22 +727,58 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
         shapeRenderer.rectLine(w - 110f, h - 45f, w - 12f, h - 45f, 2f)
 
-        // Bar HP Boss Raksasa (Jika Berada di Boss Floor dan Boss Masih Hidup)
+        // Bar HP Boss Raksasa dengan Amber Ghost Bar & Phase 2 Threshold Marker
         val boss = currentFloor.boss
         if (boss != null && !boss.health.isDead) {
-            val bossBarW = 380f
-            val bossBarH = 20f
+            val bossBarW = 440f
+            val bossBarH = 22f
             val bossBarX = w / 2f - bossBarW / 2f
-            val bossBarY = h - 32f
+            val bossBarY = h - 36f
 
-            // Frame Gelap
-            shapeRenderer.color = Color(0.08f, 0.08f, 0.12f, 0.95f)
-            shapeRenderer.rect(bossBarX - 4f, bossBarY - 4f, bossBarW + 8f, bossBarH + 8f)
+            // Frame Gelap Ornate
+            shapeRenderer.color = Color(0.05f, 0.06f, 0.09f, 0.96f)
+            shapeRenderer.rect(bossBarX - 5f, bossBarY - 5f, bossBarW + 10f, bossBarH + 10f)
 
-            // Fill Bar Boss (Merah Crimson ke Oranye)
+            // Outer border line
+            shapeRenderer.color = if (boss.isPhase2) Color(0.95f, 0.35f, 0.15f, 0.9f) else Color(0.80f, 0.68f, 0.30f, 0.85f)
+            shapeRenderer.rectLine(bossBarX - 5f, bossBarY + bossBarH + 5f, bossBarX + bossBarW + 5f, bossBarY + bossBarH + 5f, 2f)
+            shapeRenderer.rectLine(bossBarX - 5f, bossBarY - 5f, bossBarX + bossBarW + 5f, bossBarY - 5f, 1.5f)
+
+            // Trough
+            shapeRenderer.color = Color(0.08f, 0.08f, 0.12f, 1f)
+            shapeRenderer.rect(bossBarX, bossBarY, bossBarW, bossBarH)
+
+            // Boss Ghost Catch-Up Bar (Amber)
             val bossHpPct = (boss.health.currentHp / boss.health.maxHp).coerceIn(0f, 1f)
-            shapeRenderer.color = if (boss.isPhase2) Color(1f, 0.2f, 0.1f, 1f) else Color(0.85f, 0.15f, 0.25f, 1f)
+            val bossGhostPct = (bossGhostHp / boss.health.maxHp).coerceIn(0f, 1f)
+            if (bossGhostPct > bossHpPct) {
+                shapeRenderer.color = Color(0.95f, 0.62f, 0.15f, 0.90f)
+                shapeRenderer.rect(bossBarX, bossBarY, bossBarW * bossGhostPct, bossBarH)
+            }
+
+            // Boss Main Fill Bar (Crimson ke Api Fasa 2)
+            val bossFillColor = if (boss.isPhase2) {
+                val flame = (Math.sin(hudAnimTime.toDouble() * 9.0).toFloat() + 1f) * 0.5f
+                Color(1f, 0.22f + 0.18f * flame, 0.1f, 1f)
+            } else {
+                Color(0.85f, 0.15f, 0.24f, 1f)
+            }
+            shapeRenderer.color = bossFillColor
             shapeRenderer.rect(bossBarX, bossBarY, bossBarW * bossHpPct, bossBarH)
+
+            // Top subtle highlight line
+            shapeRenderer.color = Color(1f, 1f, 1f, 0.25f)
+            shapeRenderer.rectLine(bossBarX, bossBarY + bossBarH - 2f, bossBarX + bossBarW * bossHpPct, bossBarY + bossBarH - 2f, 1.5f)
+
+            // Phase 2 Threshold Marker (50% HP Indicator Divider)
+            val markerX = bossBarX + bossBarW * 0.5f
+            shapeRenderer.color = Color(1f, 0.88f, 0.35f, 0.95f)
+            shapeRenderer.rectLine(markerX, bossBarY - 4f, markerX, bossBarY + bossBarH + 4f, 2.5f)
+            shapeRenderer.triangle(
+                markerX - 4f, bossBarY + bossBarH + 5f,
+                markerX + 4f, bossBarY + bossBarH + 5f,
+                markerX, bossBarY + bossBarH + 10f
+            )
         }
 
         shapeRenderer.end()
@@ -694,18 +821,25 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         headF.color = Color.CYAN
         headF.draw(batch, currentFloor.floorName, 320f, h - 70f)
 
-        // Combo Step Indicator
+        // Combo Step Indicator dengan Pop Bounce
         val comboText = when (player.comboManager.currentStep) {
             ComboStep.HIT_1 -> "COMBO: [HIT 1]"
             ComboStep.HIT_2 -> "COMBO: [HIT 2]"
             ComboStep.HIT_3 -> "COMBO: [HIT 3 FINISHER!]"
         }
         regF.color = when (player.comboManager.currentStep) {
-            ComboStep.HIT_1 -> Color.YELLOW
-            ComboStep.HIT_2 -> Color.ORANGE
+            ComboStep.HIT_1 -> Color(1f, 0.92f, 0.2f, 1f)
+            ComboStep.HIT_2 -> Color(1f, 0.62f, 0.12f, 1f)
             ComboStep.HIT_3 -> Color(1f, 0.25f, 0.25f, 1f)
         }
+        if (comboPopTimer > 0f) {
+            val bounce = 1.0f + (comboPopTimer / 0.28f) * 0.25f
+            regF.data.setScale(bounce)
+        }
         regF.draw(batch, comboText, 320f, h - 20f)
+        if (comboPopTimer > 0f) {
+            regF.data.setScale(1.0f)
+        }
 
         // Skill & Dodge Status
         regF.color = if (player.skill1.isReady) Color(0.85f, 0.45f, 1f, 1f) else Color.GRAY
@@ -728,9 +862,9 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         // Teks Bar Boss
         if (boss != null && !boss.health.isDead) {
-            regF.color = Color.WHITE
-            val enrageTag = if (boss.isPhase2) " (ENRAGED FASE 2)" else ""
-            regF.draw(batch, "${boss.name} [${boss.health.currentHp.toInt()}/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 140f, h - 14f)
+            regF.color = if (boss.isPhase2) Color(1f, 0.65f, 0.35f, 1f) else Color.WHITE
+            val enrageTag = if (boss.isPhase2) " ❖ ENRAGED FASE 2 ❖" else ""
+            regF.draw(batch, "☠ ${boss.name} [${boss.health.currentHp.toInt()}/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 180f, h - 14f)
         }
 
         // Notifikasi Auto-Save
