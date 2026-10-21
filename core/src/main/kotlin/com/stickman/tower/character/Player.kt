@@ -57,6 +57,7 @@ class Player(
         }
     )
     val ultimate = UltimateEnergy(maxEnergy = 100f)
+    val baseAttackPower: Float get() = stats.attackPower
 
     // Callbacks untuk efek partikel & visual luar
     var onLand: ((Float, Float) -> Unit)? = null
@@ -121,6 +122,13 @@ class Player(
     var maxAirJumps: Int = 1
     var airJumpsRemaining: Int = 1
     var cooldownMultiplier: Float = 1.0f
+
+    // Modifikator Talent & Endless Mutator (Fase 13)
+    var gravityScale: Float = 1.0f
+    var damageReductionMultiplier: Float = 1.0f
+    var hasSuperArmor: Boolean = false
+    var hasUndyingWill: Boolean = false
+    var undyingWillUsed: Boolean = false
 
     fun update(delta: Float, input: GameInput, platforms: List<Platform>) {
         animTime += delta
@@ -195,9 +203,9 @@ class Player(
             }
         }
 
-        // 5. Gravitasi
+        // 5. Gravitasi (Mendukung Low Gravity Mutator Fase 13)
         val gravityMultiplier = if (velocity.y > 0f && !input.isJumpPressed()) 1.8f else 1f
-        velocity.y += GameConfig.GRAVITY * gravityMultiplier * delta
+        velocity.y += GameConfig.GRAVITY * gravityMultiplier * gravityScale * delta
         velocity.y = velocity.y.coerceAtLeast(-25f)
 
         // 6. Resolusi Collision
@@ -507,10 +515,21 @@ class Player(
         if (isDodging) return false
 
         val effectiveDef = stats.defense + archetype.baseDefenseBonus
-        val mitigatedDmg = kotlin.math.max(1f, amount - effectiveDef)
+        val mitigatedDmg = kotlin.math.max(1f, (amount - effectiveDef) * damageReductionMultiplier)
+
+        // Cek Undying Will saat damage mematikan (Fase 13 Berserker)
+        if (health.currentHp <= mitigatedDmg && hasUndyingWill && !undyingWillUsed) {
+            undyingWillUsed = true
+            health.takeDamage(health.currentHp - 1f)
+            HapticManager.vibrateHeavy()
+            return true
+        }
+
         if (health.takeDamage(mitigatedDmg)) {
-            velocity.x = knockDirX
-            velocity.y = knockDirY
+            if (!hasSuperArmor) {
+                velocity.x = knockDirX
+                velocity.y = knockDirY
+            }
             HapticManager.vibrateHeavy()
             return true
         }

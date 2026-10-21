@@ -23,6 +23,7 @@ import com.stickman.tower.combat.FloatingText
 import com.stickman.tower.combat.HitStopManager
 import com.stickman.tower.enemy.BossEnemy
 import com.stickman.tower.enemy.Enemy
+import com.stickman.tower.endless.FloorMutator
 import com.stickman.tower.input.CompositeInput
 import com.stickman.tower.input.GameInput
 import com.stickman.tower.input.KeyboardInput
@@ -32,6 +33,7 @@ import com.stickman.tower.relic.RelicManager
 import com.stickman.tower.relic.RelicType
 import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.rpg.SaveManager
+import com.stickman.tower.talent.TalentManager
 import com.stickman.tower.ui.FontManager
 import com.stickman.tower.vfx.ParticleManager
 import com.stickman.tower.world.CameraManager
@@ -39,12 +41,22 @@ import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.world.TowerLevelBuilder
 import kotlin.math.sin
 
+enum class GameMode {
+    STORY,
+    ENDLESS
+}
+
 /**
  * Screen gameplay utama:
  * Memisahkan World Camera (16x9m physics) dan Screen UI Viewport (1280x720px)
  * untuk menjamin HUD dan Virtual Controller terkunci pixel-perfect di segala resolusi.
+ * Mendukung Story Mode (Lantai 1-3) dan Endless Spire Mode (Lantai 4 ke atas).
  */
-class PlayScreen(private val game: StickmanGame? = null) : Screen {
+class PlayScreen(
+    private val game: StickmanGame? = null,
+    val initialFloor: Int = 1,
+    var gameMode: GameMode = GameMode.STORY
+) : Screen {
     private val cameraManager = CameraManager()
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
@@ -79,16 +91,23 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     // Manajer Partikel VFX
     val particleManager = ParticleManager()
 
-    // Manajer Relik Pasif (Fase 10)
+    // Manajer Relik Pasif (Fase 10) & Talent Tree (Fase 13)
     val relicManager = RelicManager()
+    val talentManager = TalentManager().apply { loadFromSave(saveData) }
     var isChoosingRelic: Boolean = false
     var relicOffer: List<RelicType> = emptyList()
     var relicSelectedIndex: Int = 0
 
+    // Parameter Endless Spire & Mutator (Fase 13)
+    var activeMutator: FloorMutator = FloorMutator.NONE
+    private var miasmaTimer = 0f
+    var endlessSurvivalTime = 0f
+    var endlessEnemiesKilled = 0
+
     // Sistem Pause Menu
     var isPaused: Boolean = false
     private var pauseSelectedIndex: Int = 0
-    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -150,15 +169,16 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         player.onJump = { x, y -> particleManager.spawnDust(x, y, count = 5) }
         player.onDodge = { x, y -> particleManager.spawnDust(x, y, count = 8) }
 
-        loadFloor(1)
+        loadFloor(initialFloor)
     }
 
     /**
-     * Memuat layout lantai menara tertentu (1, 2, atau 3).
+     * Memuat layout lantai menara tertentu (Story 1-3 atau Endless 4+).
      */
     fun loadFloor(floorNumber: Int) {
-        currentFloorNumber = floorNumber.coerceIn(1, 3)
-        currentFloor = TowerLevelBuilder.buildFloor(currentFloorNumber)
+        currentFloorNumber = if (gameMode == GameMode.STORY) floorNumber.coerceIn(1, 3) else floorNumber.coerceAtLeast(4)
+        activeMutator = if (gameMode == GameMode.ENDLESS) FloorMutator.getRandomMutator(currentFloorNumber) else FloorMutator.NONE
+        currentFloor = if (gameMode == GameMode.STORY) TowerLevelBuilder.buildFloor(currentFloorNumber) else TowerLevelBuilder.buildEndlessFloor(currentFloorNumber, activeMutator)
 
         cameraManager.setBounds(
             left = currentFloor.mapBounds.x,
@@ -171,7 +191,12 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         player.velocity.set(0f, 0f)
         player.maxAirJumps = relicManager.getMaxAirJumps()
         player.airJumpsRemaining = player.maxAirJumps
-        player.cooldownMultiplier = relicManager.getCooldownMultiplier()
+        player.cooldownMultiplier = relicManager.getCooldownMultiplier() * talentManager.getCooldownMultiplier()
+        player.gravityScale = activeMutator.gravityMultiplier
+        player.damageReductionMultiplier = talentManager.getDamageReductionMultiplier()
+        player.hasSuperArmor = talentManager.hasSuperArmor()
+        player.hasUndyingWill = talentManager.hasUndyingWill()
+        player.undyingWillUsed = false
         activeCheckpointPos.set(currentFloor.spawnX, currentFloor.spawnY)
 
         hasSavedStageClear = false
@@ -179,6 +204,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         playerGhostHp = player.health.currentHp
         playerGhostDelay = 0f
+        miasmaTimer = 0f
         bossGhostHp = currentFloor.boss?.health?.currentHp ?: 0f
         bossGhostDelay = 0f
         prevComboStep = ComboStep.HIT_1
@@ -425,6 +451,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 enemy.update(updateDelta, player, currentFloor.platforms)
                 if (enemy.health.isDead && !enemy.rewardClaimed) {
                     enemy.rewardClaimed = true
+                    endlessEnemiesKilled++
                     AudioManager.playDeath()
                     particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 16, color = Color.RED)
                     grantRewards(enemy.expReward, enemy.goldReward, enemy.position.x + enemy.width / 2f, enemy.position.y + 1f)
@@ -438,6 +465,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 boss.update(updateDelta, player, currentFloor.platforms)
                 if (boss.health.isDead && !boss.rewardClaimed) {
                     boss.rewardClaimed = true
+                    endlessEnemiesKilled++
                     AudioManager.playDeath()
                     particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 35, color = Color.GOLD)
                     grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
@@ -449,6 +477,25 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
             // 2. Deteksi Pertarungan Dua Arah (Pemain <-> Musuh / Boss)
             handleTwoWayCombat()
+
+            // Toxic Miasma Mutator Tick (Fase 13)
+            if (activeMutator == FloorMutator.TOXIC_MIASMA && !player.health.isDead) {
+                miasmaTimer += updateDelta
+                if (miasmaTimer >= 4.5f) {
+                    miasmaTimer = 0f
+                    player.takeHit(4f, 0f, 0f)
+                    cameraManager.shake(0.2f, 0.15f)
+                    particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color.PURPLE)
+                    floatingTexts.add(
+                        FloatingText("-4 MIASMA", player.position.x + player.width / 2f, player.position.y + player.height + 0.4f, Color(0.7f, 0.2f, 0.9f, 1f))
+                    )
+                }
+            }
+
+            // Endless Survival Time Tracking
+            if (gameMode == GameMode.ENDLESS && !player.health.isDead) {
+                endlessSurvivalTime += updateDelta
+            }
 
             // 3. Evaluasi Kondisi Menang & Kalah
             evaluateGameConditions()
@@ -570,6 +617,24 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                             particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 10, color = if (player.hitbox.isCritical) Color.GOLD else Color.WHITE)
                             relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
 
+                            // Lifesteal Mutator & Talents (Fase 13)
+                            val lifesteal = activeMutator.lifestealPercent
+                            if (lifesteal > 0f) {
+                                val heal = player.hitbox.damage * lifesteal
+                                if (heal >= 0.5f) {
+                                    player.health.heal(heal)
+                                    floatingTexts.add(
+                                        FloatingText("+${heal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.GREEN)
+                                    )
+                                }
+                            }
+
+                            // Toxic Blade Sub-class Talent (Fase 13)
+                            if (talentManager.hasToxicBlade()) {
+                                enemy.applyPoison(3.5f, player.baseAttackPower * 0.35f)
+                                particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 5, color = Color.GREEN)
+                            }
+
                             val energyGain = when {
                                 player.isUlting -> 0f
                                 player.comboManager.currentStep == ComboStep.HIT_3 -> 15f
@@ -617,6 +682,24 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                         particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 14, color = Color.ORANGE)
                         relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
 
+                        // Lifesteal Mutator & Talents (Fase 13)
+                        val lifesteal = activeMutator.lifestealPercent
+                        if (lifesteal > 0f) {
+                            val heal = player.hitbox.damage * lifesteal
+                            if (heal >= 0.5f) {
+                                player.health.heal(heal)
+                                floatingTexts.add(
+                                    FloatingText("+${heal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.GREEN)
+                                )
+                            }
+                        }
+
+                        // Toxic Blade Sub-class Talent (Fase 13)
+                        if (talentManager.hasToxicBlade()) {
+                            boss.applyPoison(3.5f, player.baseAttackPower * 0.35f)
+                            particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 6, color = Color.GREEN)
+                        }
+
                         // Super Finish Slow-Motion & Radial Shockwave jika Boss Mati (Fase 11)
                         if (boss.health.isDead && !bossSlowMoTriggered) {
                             bossSlowMoTriggered = true
@@ -663,6 +746,13 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                         // Sistem Perfect Parry Fase 11: Stun musuh 1.5s, netralkan damage, beri buff ATK + energy
                         enemy.stun(1.5f)
                         player.triggerParry()
+                        if (talentManager.hasParryHeal()) {
+                            val parryHeal = player.health.maxHp * 0.15f
+                            player.health.heal(parryHeal)
+                            floatingTexts.add(
+                                FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
+                            )
+                        }
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
                         HapticManager.vibrateHeavy()
@@ -713,6 +803,13 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     // Sistem Perfect Parry Fase 11: Stun Boss 1.5s (Guard Break!), netralkan damage
                     boss.stun(1.5f)
                     player.triggerParry()
+                    if (talentManager.hasParryHeal()) {
+                        val parryHeal = player.health.maxHp * 0.15f
+                        player.health.heal(parryHeal)
+                        floatingTexts.add(
+                            FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
+                        )
+                    }
                     hitStopManager.trigger(0.08f)
                     AudioManager.playParry()
                     HapticManager.vibrateHeavy()
@@ -759,6 +856,13 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
                     if (player.isParrying) {
                         player.triggerParry()
+                        if (talentManager.hasParryHeal()) {
+                            val parryHeal = player.health.maxHp * 0.15f
+                            player.health.heal(parryHeal)
+                            floatingTexts.add(
+                                FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
+                            )
+                        }
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
                         HapticManager.vibrateHeavy()
@@ -807,6 +911,13 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
                         if (player.isParrying) {
                             player.triggerParry()
+                            if (talentManager.hasParryHeal()) {
+                                val parryHeal = player.health.maxHp * 0.15f
+                                player.health.heal(parryHeal)
+                                floatingTexts.add(
+                                    FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
+                                )
+                            }
                             hitStopManager.trigger(0.08f)
                             AudioManager.playParry()
                             HapticManager.vibrateHeavy()
@@ -867,14 +978,32 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             )
             if (!hasSavedStageClear) {
                 hasSavedStageClear = true
-                val nextFloorNum = (currentFloorNumber + 1).coerceAtMost(3)
-                val expReward = if (currentFloor.isBossFloor) 250 else 100
-                val goldReward = if (currentFloor.isBossFloor) 150 else 60
-                grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
-                triggerSave("Lantai $currentFloorNumber Selesai", highestFloor = nextFloorNum)
+                if (gameMode == GameMode.STORY) {
+                    val nextFloorNum = (currentFloorNumber + 1).coerceAtMost(3)
+                    val expReward = if (currentFloor.isBossFloor) 250 else 100
+                    val goldReward = if (currentFloor.isBossFloor) 150 else 60
+                    grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
+                    triggerSave("Lantai $currentFloorNumber Selesai", highestFloor = nextFloorNum)
 
-                if (currentFloorNumber == 1 && relicManager.activeRelics.isEmpty()) {
-                    triggerRelicChoice()
+                    if (currentFloorNumber == 1 && relicManager.activeRelics.isEmpty()) {
+                        triggerRelicChoice()
+                    }
+                } else {
+                    // Endless Mode Stage Clear
+                    val expReward = 120 + (currentFloorNumber * 25)
+                    val goldReward = 75 + (currentFloorNumber * 15)
+                    grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
+
+                    // Milestone Talent Point: +1 Poin setiap 2 lantai endless
+                    if (currentFloorNumber % 2 == 0) {
+                        talentManager.addTalentPoints(1)
+                        talentManager.syncToSave(saveData)
+                        SaveManager.save(saveData)
+                        floatingTexts.add(
+                            FloatingText("+1 TALENT POINT! ✦", player.position.x + player.width / 2f, player.position.y + player.height + 0.9f, Color.YELLOW, duration = 2.2f)
+                        )
+                    }
+                    triggerSave("Endless Lantai $currentFloorNumber Selesai", highestFloor = currentFloorNumber + 1)
                 }
             }
         }
@@ -889,18 +1018,33 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 gameStatus = GameStatus.PLAYING
             }
         } else if (gameStatus == GameStatus.STAGE_CLEAR) {
-            if (currentFloorNumber < 3) {
-                // Maju ke Lantai Selanjutnya
-                if (Gdx.input.isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ENTER)) {
-                    loadFloor(currentFloorNumber + 1)
-                } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
-                    // Main Ulang Lantai Ini
-                    loadFloor(currentFloorNumber)
+            val proceedTriggered = Gdx.input.isKeyJustPressed(Keys.SPACE) ||
+                                   Gdx.input.isKeyJustPressed(Keys.ENTER) ||
+                                   input.isJumpJustPressed() ||
+                                   (Gdx.input.justTouched() && Gdx.input.y > Gdx.graphics.height / 2)
+
+            if (gameMode == GameMode.STORY) {
+                if (currentFloorNumber < 3) {
+                    if (proceedTriggered) {
+                        loadFloor(currentFloorNumber + 1)
+                    } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+                        loadFloor(currentFloorNumber)
+                    }
+                } else {
+                    // Lantai 3 Selesai (Boss Kalah) -> Buka Akses Endless Spire!
+                    if (proceedTriggered) {
+                        gameMode = GameMode.ENDLESS
+                        loadFloor(4)
+                    } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+                        loadFloor(1)
+                    }
                 }
             } else {
-                // Lantai 3 Selesai (Menara Ditaklukkan) -> Replay dari Lantai 1
-                if (Gdx.input.isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.R)) {
-                    loadFloor(1)
+                // Endless Mode: Lanjut ke Lantai Berikutnya
+                if (proceedTriggered) {
+                    loadFloor(currentFloorNumber + 1)
+                } else if (Gdx.input.isKeyJustPressed(Keys.R)) {
+                    loadFloor(currentFloorNumber)
                 }
             }
         }
@@ -1049,6 +1193,14 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             )
         }
 
+        // Mutator Badge Background
+        if (gameMode == GameMode.ENDLESS && activeMutator != FloorMutator.NONE) {
+            shapeRenderer.color = Color(0.12f, 0.08f, 0.18f, 0.85f)
+            shapeRenderer.rect(w / 2f - 240f, h - 110f, 480f, 38f)
+            shapeRenderer.color = Color(0.85f, 0.45f, 0.95f, 0.9f)
+            shapeRenderer.rectLine(w / 2f - 240f, h - 72f, w / 2f + 240f, h - 72f, 2f)
+        }
+
         shapeRenderer.end()
 
         // 2. Render Teks HUD Informasi
@@ -1150,6 +1302,15 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             smallF.draw(batch, "✓ $saveNotificationText", w / 2f - 90f, h - 20f)
         }
 
+        // Mutator Badge Text
+        if (gameMode == GameMode.ENDLESS && activeMutator != FloorMutator.NONE) {
+            val mutatorBadge = "${activeMutator.iconRune} MUTATOR: ${activeMutator.displayName}"
+            regF.color = Color.ORANGE
+            regF.draw(batch, mutatorBadge, w / 2f - 130f, h - 76f)
+            smallF.color = Color(0.9f, 0.9f, 0.9f, 0.85f)
+            smallF.draw(batch, activeMutator.description, w / 2f - 230f, h - 94f)
+        }
+
         // Overlays Game Over / Victory
         if (gameStatus == GameStatus.GAME_OVER) {
             headF.color = Color.RED
@@ -1159,20 +1320,30 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         }
 
         if (gameStatus == GameStatus.STAGE_CLEAR) {
-            if (currentFloorNumber < 3) {
-                headF.color = Color.GOLD
-                headF.draw(batch, "★ ${currentFloor.floorName.uppercase()} SELESAI! ★", w / 2f - 180f, h / 2f + 45f)
-                regF.color = Color.WHITE
-                regF.draw(batch, "Tekan [SPACE] untuk Naik ke Lantai ${currentFloorNumber + 1}", w / 2f - 170f, h / 2f + 12f)
-                regF.color = Color.CYAN
-                regF.draw(batch, "Tekan [R] untuk Main Ulang Lantai Ini", w / 2f - 140f, h / 2f - 18f)
+            if (gameMode == GameMode.STORY) {
+                if (currentFloorNumber < 3) {
+                    headF.color = Color.GOLD
+                    headF.draw(batch, "★ ${currentFloor.floorName.uppercase()} SELESAI! ★", w / 2f - 180f, h / 2f + 45f)
+                    regF.color = Color.WHITE
+                    regF.draw(batch, "Tekan [SPACE] untuk Naik ke Lantai ${currentFloorNumber + 1}", w / 2f - 170f, h / 2f + 12f)
+                    regF.color = Color.CYAN
+                    regF.draw(batch, "Tekan [R] untuk Main Ulang Lantai Ini", w / 2f - 140f, h / 2f - 18f)
+                } else {
+                    headF.color = Color.GOLD
+                    headF.draw(batch, "★ CONGRATULATIONS! SELURUH MENARA TELAH DITAKLUKKAN! ★", w / 2f - 290f, h / 2f + 45f)
+                    regF.color = Color.WHITE
+                    regF.draw(batch, "Tower Guardian Berhasil Ditumbangkan! Player Lv.${player.stats.level} | Gold: ${player.stats.gold} G", w / 2f - 240f, h / 2f + 12f)
+                    regF.color = Color.YELLOW
+                    regF.draw(batch, "Tekan [SPACE] untuk Memasuki MODE MENARA TANPA BATAS (ENDLESS SPIRE)!", w / 2f - 280f, h / 2f - 18f)
+                }
             } else {
                 headF.color = Color.GOLD
-                headF.draw(batch, "★ CONGRATULATIONS! SELURUH MENARA TELAH DITAKLUKKAN! ★", w / 2f - 290f, h / 2f + 45f)
+                headF.draw(batch, "★ ENDLESS FLOOR $currentFloorNumber CLEARED! ★", w / 2f - 190f, h / 2f + 45f)
                 regF.color = Color.WHITE
-                regF.draw(batch, "Tower Guardian Berhasil Ditumbangkan! Player Lv.${player.stats.level} | Gold: ${player.stats.gold} G", w / 2f - 240f, h / 2f + 12f)
-                regF.color = Color.CYAN
-                regF.draw(batch, "Tekan [SPACE] atau [R] untuk Mengulang Menara dari Lantai 1", w / 2f - 220f, h / 2f - 18f)
+                val talentPtText = if (currentFloorNumber % 2 == 0) " | +1 TALENT POINT ACQUIRED!" else ""
+                regF.draw(batch, "Musuh Tereliminasi: $endlessEnemiesKilled | Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText", w / 2f - 230f, h / 2f + 12f)
+                regF.color = Color.YELLOW
+                regF.draw(batch, "Tekan [SPACE] / [A] untuk Mendaki ke Lantai ${currentFloorNumber + 1}", w / 2f - 210f, h / 2f - 18f)
             }
         }
 
@@ -1206,8 +1377,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             val w = 1280f
             val h = 720f
             val menuW = 320f
-            val startY = h / 2f + 115f
-            val itemH = 40f
+            val startY = h / 2f + 130f
+            val itemH = 38f
             val menuX = w / 2f - menuW / 2f
 
             for (i in pauseMenuItems.indices) {
@@ -1239,21 +1410,27 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     game.setScreen(BlacksmithScreen(game))
                 }
             }
-            3 -> { // Control Settings (Fase 12)
+            3 -> { // Talent Tree (Fase 13)
+                AudioManager.playSlashLight()
+                if (game != null) {
+                    game.setScreen(TalentTreeScreen(game, this))
+                }
+            }
+            4 -> { // Control Settings (Fase 12)
                 AudioManager.playSlashLight()
                 if (game != null) {
                     game.setScreen(ControlSettingsScreen(game, this))
                 }
             }
-            4 -> { // Toggle Audio
+            5 -> { // Toggle Audio
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            5 -> { // Toggle Haptic
+            6 -> { // Toggle Haptic
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            6 -> { // Main Menu
+            7 -> { // Main Menu
                 isPaused = false
                 AudioManager.playDodge()
                 if (game != null) {
@@ -1275,7 +1452,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         // Pause Menu Card (Dark Obsidian with Gold Accent)
         val cardW = 380f
-        val cardH = 430f
+        val cardH = 460f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
         shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
@@ -1284,8 +1461,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
-        val startY = h / 2f + 115f
-        val itemH = 40f
+        val startY = h / 2f + 130f
+        val itemH = 38f
         val btnY = startY - (pauseSelectedIndex * itemH)
         shapeRenderer.color = Color(0.15f, 0.35f, 0.65f, 0.75f)
         shapeRenderer.rect(cardX + 25f, btnY - 8f, cardW - 50f, 32f)
@@ -1302,8 +1479,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         for (i in pauseMenuItems.indices) {
             val itemText = when (i) {
-                4 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                5 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                5 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                6 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> pauseMenuItems[i]
             }
             val curY = startY - (i * itemH) + 16f

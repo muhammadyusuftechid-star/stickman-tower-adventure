@@ -482,17 +482,19 @@ flowchart LR
 
 #### Modul 13.1: Mode Endless Ascent
 - **Task 13.1.1: Procedural Floor Mutators**
-  - [ ] Terbuka setelah menamatkan Lantai 3.
-  - [ ] Setiap lantai baru memiliki mutator acak (Toxic Miasma, Berserk Surge, Low Gravity, Spike Frenzy).
-  - [ ] Scaling HP & damage musuh berbasis formula eksponensial per lantai.
+  - [x] Terbuka setelah menamatkan Lantai 3 atau langsung dari menu utama.
+  - [x] Setiap lantai baru memiliki mutator acak (Toxic Miasma, Berserk Surge, Low Gravity, Spike Frenzy, Vampiric Eclipse).
+  - [x] Scaling HP & damage musuh berbasis formula eksponensial per lantai (kelipatan 5 adalah pertarungan Boss).
 - **Task 13.1.2: High Score & Record Tracker**
-  - [ ] Pencatatan lantai tertinggi, jumlah musuh ditumbangkan, dan waktu tempuh.
+  - [x] Pencatatan lantai tertinggi, jumlah musuh ditumbangkan, dan waktu tempuh.
+  - [x] Hadiah milestone talent point: +1 poin setiap penaklukan 2 lantai endless.
 
 #### Modul 13.2: Sub-Class & Talent Tree System
 - **Task 13.2.1: Talent Branching**
-  - [ ] *Warrior:* Berserker (DPS tinggi saat HP rendah) vs Guardian (Super Armor & Shield).
-  - [ ] *Assassin:* Shadow Stalker (Crit & Teleport) vs Venomancer (Poison DoT).
-  - [ ] *Mage:* Archmage (AoE Blast) vs Spellblade (Melee Infused Elements).
+  - [x] *Warrior:* Berserker (Blood Rage, Frenzy Strikes, Undying Will) vs Guardian (Iron Bulwark, Counter Fortitude, Aegis Stance).
+  - [x] *Assassin:* Shadow Stalker (Lethal Precision, Shadow Step, Assassinate) vs Venomancer (Toxic Blade, Neurotoxin, Plague Burst).
+  - [x] *Mage:* Archmage (Arcane Conduit, Overload Wave, Mana Shield) vs Spellblade (Elemental Infusion, Flame Cleave, Arcane Execute).
+  - [x] Antarmuka interaktif `TalentTreeScreen.kt` dengan alokasi poin, reset gratis (respec), dan sinkronisasi save file.
 
 ---
 

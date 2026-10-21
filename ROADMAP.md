@@ -133,7 +133,7 @@ Mengoptimalkan perolehan **Gold** yang saat ini didapat dari membunuh musuh dan 
 | **Fase 10** | ✅ Selesai | Toko Blacksmith (Senjata) & Relik Pasif | Memberikan nilai guna nyata pada perolehan Gold |
 | **Fase 11** | ✅ Selesai | Sistem Parry / Counter-Attack & Intro Animasi Bos | Meningkatkan kepuasan aksi (*skill ceiling*) & dramatisasi visual |
 | **Fase 12** | ✅ Selesai | Dukungan Gamepad (PC/Android) & Kustomisasi Tombol Sentuh | Kenyamanan ergonomis bermain di berbagai tipe perangkat |
-| **Fase 13** | 🌟 Lanjutan | Mode Menara Tanpa Batas (*Endless Ascent*) & Talent Tree | Replay value tak terbatas dan kedalaman pembangunan karakter (*builds*) |
+| **Fase 13** | ✅ Selesai | Mode Menara Tanpa Batas (*Endless Ascent*) & Talent Tree | Replay value tak terbatas dan kedalaman pembangunan karakter (*builds*) |
 | **Fase 14** | 🚀 Rilis | Integrasi Google Play Games (Leaderboard & Achievements) | Kesiapan rilis publik di Google Play Store |
 
 ---

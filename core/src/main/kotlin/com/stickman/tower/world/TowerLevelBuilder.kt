@@ -7,18 +7,21 @@ import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.enemy.EnemyType
 import com.stickman.tower.physics.Platform
 
+import com.stickman.tower.endless.FloorMutator
+
 /**
  * Pembangun Level Menara Bertingkat (Tower Level Builder).
- * Menyediakan layout preset untuk Lantai 1 s/d Lantai 3 (Apex Boss Arena).
+ * Menyediakan layout preset untuk Lantai 1 s/d Lantai 3 (Apex Boss Arena),
+ * serta generator prosedural dinamis untuk Mode Endless Spire (Lantai 4 ke atas).
  */
 object TowerLevelBuilder {
 
-    fun buildFloor(floorNumber: Int): TowerFloor {
+    fun buildFloor(floorNumber: Int, mutator: FloorMutator? = null): TowerFloor {
         return when (floorNumber) {
             1 -> buildFloor1()
             2 -> buildFloor2()
             3 -> buildFloor3()
-            else -> buildFloor3()
+            else -> buildEndlessFloor(floorNumber, mutator ?: FloorMutator.getRandomMutator(floorNumber))
         }
     }
 
@@ -151,6 +154,132 @@ object TowerLevelBuilder {
             checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
             exitPortal = StageExit(x = 23.5f, y = 1.2f),
             isBossFloor = true
+        )
+    }
+
+    fun buildEndlessFloor(floorNumber: Int, mutator: FloorMutator): TowerFloor {
+        val endlessRank = (floorNumber - 3).coerceAtLeast(1)
+        val hpScale = 1.0f + endlessRank * 0.15f
+        val dmgScale = (1.0f + endlessRank * 0.12f) * mutator.enemyDamageMultiplier
+        val isBossFloor = (floorNumber % 5 == 0)
+
+        val platforms = mutableListOf<Platform>()
+        val spikes = mutableListOf<SpikeHazard>()
+        val chests = mutableListOf<TreasureChest>()
+        val enemies = mutableListOf<Enemy>()
+
+        if (isBossFloor) {
+            // Apex Boss Hall Variant
+            platforms.add(Platform(x = -5f, y = 0f, width = 34f, height = 1.2f, color = Color(0.18f, 0.10f, 0.22f, 1f)))
+            platforms.add(Platform(x = -5f, y = 1.2f, width = 1.2f, height = 16f, color = Color(0.12f, 0.06f, 0.16f, 1f)))
+            platforms.add(Platform(x = 27.8f, y = 1.2f, width = 1.2f, height = 16f, color = Color(0.12f, 0.06f, 0.16f, 1f)))
+
+            platforms.add(Platform(x = 2.5f, y = 4.5f, width = 4.5f, height = 0.35f, isOneWay = true))
+            platforms.add(Platform(x = 16.5f, y = 4.5f, width = 4.5f, height = 0.35f, isOneWay = true))
+            platforms.add(Platform(x = 9.5f, y = 7.5f, width = 5.0f, height = 0.35f, isOneWay = true))
+
+            chests.add(TreasureChest(x = 0.5f, y = 1.2f))
+
+            val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f)
+            boss.health.setMaxHp(350f * hpScale)
+            boss.hitbox.damage *= dmgScale
+
+            return TowerFloor(
+                floorNumber = floorNumber,
+                floorName = "Endless Spire: Floor $floorNumber [BOSS: ${mutator.title}]",
+                mapBounds = Rectangle(-5f, -1f, 34f, 17f),
+                spawnX = 0f,
+                spawnY = 1.5f,
+                platforms = platforms,
+                spikes = emptyList(),
+                chests = chests,
+                enemies = emptyList(),
+                boss = boss,
+                checkpoint = Checkpoint(x = 1.5f, y = 1.2f),
+                exitPortal = StageExit(x = 24.5f, y = 1.2f),
+                isBossFloor = true
+            )
+        }
+
+        // Non-Boss Procedural Variants (0 = Ascent, 1 = Gauntlet, 2 = Colosseum)
+        val variant = floorNumber % 3
+        val mapWidth = 42f
+        val mapHeight = 16f
+
+        platforms.add(Platform(x = -8f, y = 0f, width = mapWidth, height = 1f, color = Color(0.15f, 0.18f, 0.25f, 1f)))
+        platforms.add(Platform(x = -8f, y = 1f, width = 1f, height = mapHeight, color = Color(0.10f, 0.12f, 0.18f, 1f)))
+        platforms.add(Platform(x = mapWidth - 9f, y = 1f, width = 1f, height = mapHeight, color = Color(0.10f, 0.12f, 0.18f, 1f)))
+
+        when (variant) {
+            0 -> {
+                // Vertical Ascent Spire
+                platforms.add(Platform(x = 2f, y = 2.6f, width = 4.0f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 7.5f, y = 4.8f, width = 4.5f, height = 0.5f, color = Color(0.22f, 0.28f, 0.38f, 1f)))
+                platforms.add(Platform(x = 13.5f, y = 7.0f, width = 4.0f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 19.0f, y = 4.2f, width = 5.0f, height = 0.5f, color = Color(0.22f, 0.28f, 0.38f, 1f)))
+                platforms.add(Platform(x = 25.5f, y = 6.8f, width = 4.5f, height = 0.35f, isOneWay = true))
+
+                spikes.add(SpikeHazard(x = 5.0f, y = 1.0f, width = 2.5f, height = 0.5f))
+                spikes.add(SpikeHazard(x = 15.0f, y = 1.0f, width = 3.5f, height = 0.5f))
+                chests.add(TreasureChest(x = 14.5f, y = 7.4f))
+            }
+            1 -> {
+                // Gauntlet of Peril
+                platforms.add(Platform(x = 3.0f, y = 3.2f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
+                platforms.add(Platform(x = 9.5f, y = 3.2f, width = 3.5f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 15.0f, y = 5.5f, width = 5.0f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
+                platforms.add(Platform(x = 22.0f, y = 3.5f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
+                platforms.add(Platform(x = 28.0f, y = 6.0f, width = 4.0f, height = 0.35f, isOneWay = true))
+
+                spikes.add(SpikeHazard(x = 8.0f, y = 1.0f, width = 4.0f, height = 0.5f))
+                spikes.add(SpikeHazard(x = 20.0f, y = 1.0f, width = 4.0f, height = 0.5f))
+                chests.add(TreasureChest(x = 16.5f, y = 6.0f))
+            }
+            else -> {
+                // Tiered Colosseum
+                platforms.add(Platform(x = 2.5f, y = 3.0f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+                platforms.add(Platform(x = 9.5f, y = 5.5f, width = 6.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+                platforms.add(Platform(x = 17.5f, y = 5.5f, width = 6.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+                platforms.add(Platform(x = 25.5f, y = 3.0f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+
+                platforms.add(Platform(x = 13.5f, y = 8.5f, width = 4.0f, height = 0.35f, isOneWay = true))
+
+                spikes.add(SpikeHazard(x = 11.5f, y = 1.0f, width = 4.0f, height = 0.5f))
+                chests.add(TreasureChest(x = 14.5f, y = 9.0f))
+            }
+        }
+
+        if (mutator == FloorMutator.SPIKE_FRENZY) {
+            spikes.add(SpikeHazard(x = 1.0f, y = 1.0f, width = 2.0f, height = 0.5f))
+            spikes.add(SpikeHazard(x = 25.0f, y = 1.0f, width = 3.0f, height = 0.5f))
+        }
+
+        // Spawn scaled enemies
+        enemies.add(Enemy(spawnX = 5.0f, spawnY = 1.2f, type = EnemyType.MELEE))
+        enemies.add(Enemy(spawnX = 11.0f, spawnY = 6.0f, type = EnemyType.RANGED))
+        enemies.add(Enemy(spawnX = 17.0f, spawnY = 1.2f, type = EnemyType.MELEE))
+        enemies.add(Enemy(spawnX = 23.0f, spawnY = 6.0f, type = EnemyType.RANGED))
+        enemies.add(Enemy(spawnX = 27.0f, spawnY = 1.2f, type = EnemyType.MELEE))
+
+        for (enemy in enemies) {
+            enemy.health.setMaxHp(enemy.health.maxHp * hpScale)
+            enemy.hitbox.damage *= dmgScale
+        }
+
+        return TowerFloor(
+            floorNumber = floorNumber,
+            floorName = "Endless Spire: Floor $floorNumber [${mutator.title}]",
+            mapBounds = Rectangle(-8f, -1f, mapWidth, mapHeight),
+            spawnX = -1f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 16.0f, y = 6.0f),
+            exitPortal = StageExit(x = mapWidth - 12f, y = 1.0f),
+            isBossFloor = false
         )
     }
 }

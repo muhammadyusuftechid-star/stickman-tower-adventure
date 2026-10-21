@@ -48,6 +48,15 @@ class Health(
         }
     }
 
+    fun setMaxHp(newMax: Float, healToFull: Boolean = true) {
+        maxHp = newMax
+        if (healToFull) {
+            currentHp = newMax
+        } else {
+            currentHp = currentHp.coerceAtMost(maxHp)
+        }
+    }
+
     fun reset() {
         currentHp = maxHp
         invulnerableTimer = 0f

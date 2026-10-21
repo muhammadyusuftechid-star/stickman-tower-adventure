@@ -58,6 +58,16 @@ class Enemy(
     private var animTime = 0f
     var stunTimer = 0f
         private set
+    var poisonTimer = 0f
+        private set
+    var poisonDps = 0f
+        private set
+    private var poisonTickTimer = 0f
+
+    fun applyPoison(duration: Float = 3.5f, dps: Float = 12f) {
+        poisonTimer = duration.coerceAtLeast(poisonTimer)
+        poisonDps = dps.coerceAtLeast(poisonDps)
+    }
 
     var isGrounded = false
         private set
@@ -84,6 +94,16 @@ class Enemy(
 
         if (attackCooldown > 0f) {
             attackCooldown = (attackCooldown - delta).coerceAtLeast(0f)
+        }
+
+        // Ticking Poison DoT
+        if (poisonTimer > 0f && !health.isDead) {
+            poisonTimer = (poisonTimer - delta).coerceAtLeast(0f)
+            poisonTickTimer += delta
+            if (poisonTickTimer >= 0.5f) {
+                poisonTickTimer = 0f
+                health.takeDamage(poisonDps * 0.5f)
+            }
         }
 
         // Perbarui Proyektil Ranged

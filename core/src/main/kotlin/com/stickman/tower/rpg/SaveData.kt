@@ -10,6 +10,7 @@ data class SaveData(
     var highestTowerFloor: Int = 1,
     var unlockedCharacters: ArrayList<String> = arrayListOf("STICKMAN_SWORD"),
     var selectedArchetype: String = "BALANCED",
+    var selectedSubClass: String = "BERSERKER",
     var weaponAtkLevel: Int = 0,
     var weaponCritLevel: Int = 0,
     var weaponSpdLevel: Int = 0
