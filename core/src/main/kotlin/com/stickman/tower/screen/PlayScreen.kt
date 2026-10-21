@@ -98,6 +98,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private var hudAnimTime: Float = 0f
 
     override fun show() {
+        Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
         FontManager.init()
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
@@ -178,15 +179,19 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             showDebugBounds = !showDebugBounds
         }
 
-        // Toggle Pause dengan ESC atau P
-        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.P)) {
+        // Toggle Pause dengan ESC, P, atau Tombol Android BACK (Hanya saat status PLAYING atau sudah PAUSED)
+        val isBackTriggered = Gdx.input.isKeyJustPressed(Keys.ESCAPE) ||
+                              Gdx.input.isKeyJustPressed(Keys.P) ||
+                              Gdx.input.isKeyJustPressed(Keys.BACK)
+
+        if (isBackTriggered && (gameStatus == GameStatus.PLAYING || isPaused)) {
             isPaused = !isPaused
             pauseSelectedIndex = 0
             if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
         }
 
         // Cek klik tombol Pause di pojok kanan atas HUD
-        if (Gdx.input.justTouched()) {
+        if (Gdx.input.justTouched() && (gameStatus == GameStatus.PLAYING || isPaused)) {
             uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
             uiViewport.unproject(uiTouchVec)
             if (uiTouchVec.x in (1280f - 110f)..1280f && uiTouchVec.y in (720f - 45f)..720f) {
@@ -409,7 +414,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         }
 
         if (floatingTexts.isNotEmpty()) {
-            batch.projectionMatrix.setToOrtho2D(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+            uiViewport.apply()
+            batch.projectionMatrix = uiCamera.combined
             batch.begin()
             val dmgFont = if (FontManager.isInitialized) FontManager.regularFont else font
             for (ft in floatingTexts) {
@@ -903,6 +909,12 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     }
 
     private fun handlePauseInput() {
+        if (Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+            isPaused = false
+            AudioManager.playSlashLight()
+            return
+        }
+
         if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
             pauseSelectedIndex = (pauseSelectedIndex - 1 + pauseMenuItems.size) % pauseMenuItems.size
             AudioManager.playJump()

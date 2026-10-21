@@ -80,6 +80,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     private var currentSaveData: SaveData = SaveManager.load()
 
     override fun show() {
+        Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
         FontManager.init()
         currentSaveData = SaveManager.load()
@@ -296,6 +297,10 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
         if (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)) {
             executeSelection()
+        }
+
+        if (Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+            Gdx.app.exit()
         }
     }
 

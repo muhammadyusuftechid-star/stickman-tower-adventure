@@ -262,5 +262,14 @@ object AudioManager {
         soundDeath?.dispose()
         soundLevelUp?.dispose()
         soundChest?.dispose()
+        soundJump = null
+        soundSlashLight = null
+        soundSlashHeavy = null
+        soundHit = null
+        soundDodge = null
+        soundDeath = null
+        soundLevelUp = null
+        soundChest = null
+        isInitialized = false
     }
 }

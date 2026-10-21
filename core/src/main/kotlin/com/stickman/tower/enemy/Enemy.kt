@@ -282,7 +282,7 @@ class Enemy(spawnX: Float, spawnY: Float) {
             // Animasi roboh di lantai
             val fallProgress = (deadTimer / 1.0f).coerceIn(0f, 1f)
             val corpseAlpha = 1f - fallProgress
-            shapeRenderer.color = Color(bodyColor.r, bodyColor.g, bodyColor.b, corpseAlpha)
+            shapeRenderer.setColor(bodyColor.r, bodyColor.g, bodyColor.b, corpseAlpha)
             shapeRenderer.rectLine(centerX - 0.5f, footY + 0.1f, centerX + 0.5f, footY + 0.1f, 0.1f)
             shapeRenderer.circle(centerX + 0.5f * lookDir, footY + 0.15f, 0.18f, 12)
             return

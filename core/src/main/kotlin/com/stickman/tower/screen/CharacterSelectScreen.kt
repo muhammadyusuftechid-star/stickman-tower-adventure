@@ -39,6 +39,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     private var animTime = 0f
 
     override fun show() {
+        Gdx.input?.setCatchKey(Keys.BACK, true)
         FontManager.init()
         val currentSave = SaveManager.load()
         selectedIndex = archetypes.indexOfFirst { it.name.equals(currentSave.selectedArchetype, ignoreCase = true) }
@@ -408,7 +409,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         if (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)) {
             confirmSelection()
         }
-        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.BACK)) {
             AudioManager.playDodge()
             game.setScreen(MainMenuScreen(game))
         }
