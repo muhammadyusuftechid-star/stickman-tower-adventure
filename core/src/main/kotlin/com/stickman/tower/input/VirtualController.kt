@@ -6,26 +6,27 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Circle
-import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.utils.viewport.Viewport
 import com.stickman.tower.combat.Skill
 import com.stickman.tower.combat.UltimateEnergy
 
 /**
- * On-Screen Virtual Touch Controller untuk target layar sentuh Android.
- * Menyediakan tombol D-Pad kiri-kanan serta tombol aksi (Attack, Jump, Dodge, Skill, Ultimate).
- * Mendukung multi-touch hingga 5 jari secara bersamaan.
+ * On-Screen Virtual Touch Controller untuk target layar sentuh Android dan playtesting desktop.
+ * Menggunakan tombol lingkaran melayang (floating translucent glassmorphism) dengan vektor panah geometris
+ * untuk D-Pad serta hit-testing berbasis viewport unproject yang akurat di semua aspek rasio layar.
  */
 class VirtualController : GameInput {
-    // Tombol D-Pad Kiri Layar
-    private val btnLeft = Rectangle()
-    private val btnRight = Rectangle()
+    // Tombol D-Pad Kiri Layar (Floating Circles)
+    val btnLeft = Circle()
+    val btnRight = Circle()
 
-    // Tombol Aksi Kanan Layar
-    private val btnAttack = Circle()
-    private val btnJump = Circle()
-    private val btnDodge = Circle()
-    private val btnSkill = Circle()
-    private val btnUltimate = Circle()
+    // Tombol Aksi Kanan Layar (Floating Circles)
+    val btnAttack = Circle()
+    val btnJump = Circle()
+    val btnDodge = Circle()
+    val btnSkill = Circle()
+    val btnUltimate = Circle()
 
     // Status Penekanan Frame
     private var pressedLeft = false
@@ -44,26 +45,34 @@ class VirtualController : GameInput {
     private var wasSkillPressed = false
     private var wasUltimatePressed = false
 
+    private val touchVec = Vector3()
     var isVisible = true
 
-    fun resize(width: Int, height: Int) {
-        val w = width.toFloat()
-        val h = height.toFloat()
+    /**
+     * Mengatur posisi tombol dalam koordinat virtual UI Canvas (default 1280x720).
+     */
+    fun resize(virtualWidth: Int = 1280, virtualHeight: Int = 720) {
+        val w = virtualWidth.toFloat()
+        val h = virtualHeight.toFloat()
 
-        // Ukuran dan Posisi D-Pad (Kiri Bawah)
-        val btnSize = 85f
-        btnLeft.set(30f, 30f, btnSize, btnSize)
-        btnRight.set(135f, 30f, btnSize, btnSize)
+        // Ukuran dan Posisi D-Pad Lingkaran Ergonomis (Kiri Bawah)
+        val dpadRadius = 45f
+        btnLeft.set(85f, 95f, dpadRadius)
+        btnRight.set(200f, 95f, dpadRadius)
 
-        // Posisi Tombol Aksi (Kanan Bawah)
-        btnAttack.set(w - 110f, 95f, 52f)     // Tombol Serang Utama
-        btnJump.set(w - 205f, 50f, 40f)       // Tombol Lompat
-        btnDodge.set(w - 215f, 150f, 38f)     // Tombol Dodge
-        btnSkill.set(w - 110f, 220f, 40f)     // Tombol Skill 1
-        btnUltimate.set(w - 205f, 245f, 42f)  // Tombol Ultimate
+        // Posisi Tombol Aksi Konsentris (Kanan Bawah)
+        btnAttack.set(w - 120f, 110f, 54f)     // Tombol Serang Utama (Besar)
+        btnJump.set(w - 235f, 75f, 42f)        // Tombol Lompat
+        btnDodge.set(w - 245f, 175f, 40f)      // Tombol Dodge
+        btnSkill.set(w - 120f, 235f, 42f)      // Tombol Skill 1
+        btnUltimate.set(w - 225f, 275f, 44f)   // Tombol Ultimate (Atas Kanan)
     }
 
-    fun update() {
+    /**
+     * Memperbarui status penekanan tombol menggunakan deteksi multi-touch (pointer 0..4).
+     * Jika [viewport] disertakan, koordinat sentuhan fisik di-unproject ke koordinat canvas virtual UI.
+     */
+    fun update(viewport: Viewport? = null) {
         // Simpan state penekanan sebelumnya
         val prevAttack = wasAttackPressed
         val prevJump = wasJumpPressed
@@ -83,9 +92,15 @@ class VirtualController : GameInput {
 
         // Deteksi Multi-Touch (Pointer 0 s/d 4)
         for (pointer in 0..4) {
-            if (Gdx.input.isTouched(pointer)) {
-                val touchX = Gdx.input.getX(pointer).toFloat()
-                val touchY = (Gdx.graphics.height - Gdx.input.getY(pointer)).toFloat() // Invert Y ke Screen Space
+            if (Gdx.input != null && Gdx.input.isTouched(pointer)) {
+                touchVec.set(Gdx.input.getX(pointer).toFloat(), Gdx.input.getY(pointer).toFloat(), 0f)
+                if (viewport != null) {
+                    viewport.unproject(touchVec)
+                } else if (Gdx.graphics != null) {
+                    touchVec.y = Gdx.graphics.height - touchVec.y
+                }
+                val touchX = touchVec.x
+                val touchY = touchVec.y
 
                 if (btnLeft.contains(touchX, touchY)) pressedLeft = true
                 if (btnRight.contains(touchX, touchY)) pressedRight = true
@@ -125,7 +140,8 @@ class VirtualController : GameInput {
     override fun isUltimateJustPressed() = justPressedUltimate
 
     /**
-     * Menggambar antarmuka tombol sentuh di layar menggunakan ShapeRenderer dan SpriteBatch.
+     * Menggambar tombol kontrol melayang di layar menggunakan ShapeRenderer dan SpriteBatch.
+     * Tidak mengubah projectionMatrix secara internal; mengandalkan matriks UI viewport dari pemanggil.
      */
     fun render(
         shapeRenderer: ShapeRenderer,
@@ -136,86 +152,104 @@ class VirtualController : GameInput {
     ) {
         if (!isVisible) return
 
-        shapeRenderer.projectionMatrix.setToOrtho2D(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
-
-        // 1. Gambar Background Lingkaran/Kotak Tombol (Translucent Glassmorphism)
+        // 1. Gambar Background Tombol Melayang (Translucent Dark Obsidian Glass)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        // D-Pad Kiri & Kanan
-        shapeRenderer.color = if (pressedLeft) Color(0.2f, 0.6f, 0.9f, 0.7f) else Color(0.15f, 0.18f, 0.24f, 0.5f)
-        shapeRenderer.rect(btnLeft.x, btnLeft.y, btnLeft.width, btnLeft.height)
+        // D-Pad Kiri & Kanan (Lingkaran Elegan)
+        shapeRenderer.color = if (pressedLeft) Color(0.2f, 0.6f, 0.95f, 0.75f) else Color(0.08f, 0.12f, 0.18f, 0.45f)
+        shapeRenderer.circle(btnLeft.x, btnLeft.y, btnLeft.radius, 24)
 
-        shapeRenderer.color = if (pressedRight) Color(0.2f, 0.6f, 0.9f, 0.7f) else Color(0.15f, 0.18f, 0.24f, 0.5f)
-        shapeRenderer.rect(btnRight.x, btnRight.y, btnRight.width, btnRight.height)
+        shapeRenderer.color = if (pressedRight) Color(0.2f, 0.6f, 0.95f, 0.75f) else Color(0.08f, 0.12f, 0.18f, 0.45f)
+        shapeRenderer.circle(btnRight.x, btnRight.y, btnRight.radius, 24)
 
-        // Tombol Attack (Merah)
-        shapeRenderer.color = if (wasAttackPressed) Color(1f, 0.2f, 0.25f, 0.85f) else Color(0.85f, 0.25f, 0.3f, 0.55f)
-        shapeRenderer.circle(btnAttack.x, btnAttack.y, btnAttack.radius, 24)
+        // Vektor Segitiga Panah D-Pad Kiri & Kanan (Anti Glyph Bug)
+        shapeRenderer.color = if (pressedLeft) Color.WHITE else Color(0.75f, 0.85f, 0.95f, 0.8f)
+        shapeRenderer.triangle(
+            btnLeft.x - 14f, btnLeft.y,
+            btnLeft.x + 10f, btnLeft.y + 16f,
+            btnLeft.x + 10f, btnLeft.y - 16f
+        )
 
-        // Tombol Jump (Hijau)
-        shapeRenderer.color = if (wasJumpPressed) Color(0.25f, 0.9f, 0.4f, 0.85f) else Color(0.2f, 0.75f, 0.35f, 0.55f)
-        shapeRenderer.circle(btnJump.x, btnJump.y, btnJump.radius, 20)
+        shapeRenderer.color = if (pressedRight) Color.WHITE else Color(0.75f, 0.85f, 0.95f, 0.8f)
+        shapeRenderer.triangle(
+            btnRight.x + 14f, btnRight.y,
+            btnRight.x - 10f, btnRight.y + 16f,
+            btnRight.x - 10f, btnRight.y - 16f
+        )
 
-        // Tombol Dodge (Biru)
-        shapeRenderer.color = if (wasDodgePressed) Color(0.3f, 0.7f, 1f, 0.85f) else Color(0.25f, 0.55f, 0.95f, 0.55f)
-        shapeRenderer.circle(btnDodge.x, btnDodge.y, btnDodge.radius, 20)
+        // Tombol Attack (Merah Crimson)
+        shapeRenderer.color = if (wasAttackPressed) Color(0.95f, 0.2f, 0.25f, 0.85f) else Color(0.75f, 0.15f, 0.2f, 0.5f)
+        shapeRenderer.circle(btnAttack.x, btnAttack.y, btnAttack.radius, 28)
 
-        // Tombol Skill 1 (Ungu dengan indikator cooldown)
-        val skillColor = if (skill.isReady) Color(0.75f, 0.35f, 0.95f, 0.65f) else Color(0.35f, 0.25f, 0.45f, 0.5f)
+        // Tombol Jump (Hijau Emerald)
+        shapeRenderer.color = if (wasJumpPressed) Color(0.2f, 0.85f, 0.4f, 0.85f) else Color(0.15f, 0.65f, 0.3f, 0.5f)
+        shapeRenderer.circle(btnJump.x, btnJump.y, btnJump.radius, 24)
+
+        // Tombol Dodge (Biru Azure)
+        shapeRenderer.color = if (wasDodgePressed) Color(0.2f, 0.65f, 1f, 0.85f) else Color(0.15f, 0.45f, 0.85f, 0.5f)
+        shapeRenderer.circle(btnDodge.x, btnDodge.y, btnDodge.radius, 24)
+
+        // Tombol Skill 1 (Ungu Arcane dengan indikator cooldown)
+        val skillColor = if (skill.isReady) Color(0.7f, 0.3f, 0.95f, 0.65f) else Color(0.3f, 0.2f, 0.4f, 0.45f)
         shapeRenderer.color = skillColor
-        shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius, 20)
+        shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius, 24)
 
-        // Tombol Ultimate (Emas menyala terang jika 100%)
-        val ultColor = if (ultimate.isReady) Color(1f, 0.85f, 0.2f, 0.85f) else Color(0.45f, 0.4f, 0.2f, 0.5f)
+        // Tombol Ultimate (Emas Surya menyala jika 100%)
+        val ultColor = if (ultimate.isReady) Color(1f, 0.85f, 0.2f, 0.85f) else Color(0.45f, 0.38f, 0.15f, 0.45f)
         shapeRenderer.color = ultColor
-        shapeRenderer.circle(btnUltimate.x, btnUltimate.y, btnUltimate.radius, 22)
+        shapeRenderer.circle(btnUltimate.x, btnUltimate.y, btnUltimate.radius, 24)
 
         shapeRenderer.end()
 
-        // 2. Gambar Garis Tepi (Outline)
+        // 2. Gambar Garis Tepi (Outline Lingkaran dengan Efek Halus)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.color = Color.WHITE
+        shapeRenderer.color = Color(0.85f, 0.9f, 1f, 0.5f)
+        shapeRenderer.circle(btnLeft.x, btnLeft.y, btnLeft.radius, 24)
+        shapeRenderer.circle(btnRight.x, btnRight.y, btnRight.radius, 24)
 
-        shapeRenderer.rect(btnLeft.x, btnLeft.y, btnLeft.width, btnLeft.height)
-        shapeRenderer.rect(btnRight.x, btnRight.y, btnRight.width, btnRight.height)
-        shapeRenderer.circle(btnAttack.x, btnAttack.y, btnAttack.radius, 24)
-        shapeRenderer.circle(btnJump.x, btnJump.y, btnJump.radius, 20)
-        shapeRenderer.circle(btnDodge.x, btnDodge.y, btnDodge.radius, 20)
-        shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius, 20)
-        shapeRenderer.circle(btnUltimate.x, btnUltimate.y, btnUltimate.radius, 22)
+        shapeRenderer.color = Color(1f, 0.6f, 0.6f, 0.6f)
+        shapeRenderer.circle(btnAttack.x, btnAttack.y, btnAttack.radius, 28)
+
+        shapeRenderer.color = Color(0.6f, 1f, 0.7f, 0.6f)
+        shapeRenderer.circle(btnJump.x, btnJump.y, btnJump.radius, 24)
+
+        shapeRenderer.color = Color(0.6f, 0.8f, 1f, 0.6f)
+        shapeRenderer.circle(btnDodge.x, btnDodge.y, btnDodge.radius, 24)
+
+        shapeRenderer.color = if (skill.isReady) Color(0.9f, 0.7f, 1f, 0.7f) else Color(0.5f, 0.4f, 0.6f, 0.4f)
+        shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius, 24)
+
+        shapeRenderer.color = if (ultimate.isReady) Color(1f, 0.95f, 0.4f, 0.9f) else Color(0.6f, 0.5f, 0.3f, 0.4f)
+        shapeRenderer.circle(btnUltimate.x, btnUltimate.y, btnUltimate.radius, 24)
 
         // Lingkaran cooldown pada tombol skill
         if (!skill.isReady) {
-            shapeRenderer.color = Color.BLACK
-            shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius * skill.cooldownPercent, 16)
+            shapeRenderer.color = Color(0.1f, 0.1f, 0.15f, 0.8f)
+            shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius * skill.cooldownPercent, 20)
         }
         shapeRenderer.end()
 
-        // 3. Gambar Teks Label Tombol
+        // 3. Gambar Teks Label Tombol (Menggunakan SpriteBatch pada Koordinat UI)
         batch.begin()
         font.color = Color.WHITE
 
-        // D-Pad Labels
-        font.draw(batch, "◀", btnLeft.x + 35f, btnLeft.y + 50f)
-        font.draw(batch, "▶", btnRight.x + 35f, btnRight.y + 50f)
-
         // Action Labels
-        font.draw(batch, "ATK", btnAttack.x - 16f, btnAttack.y + 6f)
-        font.draw(batch, "JUMP", btnJump.x - 18f, btnJump.y + 6f)
-        font.draw(batch, "DODGE", btnDodge.x - 24f, btnDodge.y + 6f)
+        font.draw(batch, "ATK", btnAttack.x - 14f, btnAttack.y + 6f)
+        font.draw(batch, "JUMP", btnJump.x - 16f, btnJump.y + 6f)
+        font.draw(batch, "DODGE", btnDodge.x - 21f, btnDodge.y + 6f)
 
         if (skill.isReady) {
-            font.draw(batch, "SKILL", btnSkill.x - 18f, btnSkill.y + 6f)
+            font.draw(batch, "SKILL", btnSkill.x - 17f, btnSkill.y + 6f)
         } else {
             font.color = Color.YELLOW
             val tenths = (skill.remainingCooldown * 10).toInt().coerceAtLeast(0)
-            font.draw(batch, "${tenths / 10}.${tenths % 10}s", btnSkill.x - 16f, btnSkill.y + 6f)
+            font.draw(batch, "${tenths / 10}.${tenths % 10}s", btnSkill.x - 14f, btnSkill.y + 6f)
             font.color = Color.WHITE
         }
 
         if (ultimate.isReady) {
             font.color = Color.GOLD
-            font.draw(batch, "ULT!", btnUltimate.x - 16f, btnUltimate.y + 6f)
+            font.draw(batch, "ULT!", btnUltimate.x - 15f, btnUltimate.y + 6f)
         } else {
             font.color = Color.LIGHT_GRAY
             font.draw(batch, "${(ultimate.energyPercent * 100).toInt()}%", btnUltimate.x - 14f, btnUltimate.y + 6f)

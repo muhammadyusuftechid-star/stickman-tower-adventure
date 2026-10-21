@@ -18,22 +18,20 @@ import com.stickman.tower.StickmanGame
 import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.rpg.SaveManager
+import com.stickman.tower.ui.FontManager
 import kotlin.math.sin
 
 /**
  * Screen Pemilihan Karakter:
- * Menampilkan preview stickman beranimasi di atas podium dengan senjata khasnya,
+ * Menampilkan preview stickman beranimasi di atas altar runic dengan senjata khasnya,
  * kartu statistik lengkap (Speed, Attack, Defense, Crit, Skill, Ult),
- * serta tombol konfirmasi untuk menyimpan arketipe pilihan ke profil.
+ * serta navigasi vektor panah dan tipografi FreeType anti-aliased.
  */
 class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     private val camera = OrthographicCamera()
     private val viewport: Viewport = FitViewport(1280f, 720f, camera)
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
-    private val font = BitmapFont().apply { data.setScale(1.4f) }
-    private val titleFont = BitmapFont().apply { data.setScale(2.4f) }
-    private val headerFont = BitmapFont().apply { data.setScale(1.8f) }
     private val glyphLayout = GlyphLayout()
 
     private val archetypes = CharacterArchetype.entries.toTypedArray()
@@ -41,6 +39,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     private var animTime = 0f
 
     override fun show() {
+        FontManager.init()
         val currentSave = SaveManager.load()
         selectedIndex = archetypes.indexOfFirst { it.name.equals(currentSave.selectedArchetype, ignoreCase = true) }
             .coerceAtLeast(0)
@@ -61,23 +60,23 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // Latar Belakang Kartu Kanan (Statistik & Kemampuan)
-        shapeRenderer.color = Color(0.1f, 0.14f, 0.22f, 0.9f)
+        shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.92f)
         shapeRenderer.rect(620f, 120f, 560f, 480f)
-        shapeRenderer.color = Color(0.2f, 0.5f, 0.85f, 0.7f)
-        shapeRenderer.rect(620f, 596f, 560f, 4f)
+        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
+        shapeRenderer.rect(620f, 596f, 560f, 3f)
 
-        // Podium Karakter di Kiri
+        // Podium Karakter di Kiri (Runic Slate Altar)
         val podiumCenterX = 350f
         val podiumBaseY = 170f
-        shapeRenderer.color = Color(0.12f, 0.18f, 0.30f, 1f)
-        shapeRenderer.rect(podiumCenterX - 180f, podiumBaseY - 30f, 360f, 40f)
-        shapeRenderer.color = Color(0.3f, 0.7f, 1f, 0.6f)
-        shapeRenderer.rectLine(podiumCenterX - 180f, podiumBaseY + 10f, podiumCenterX + 180f, podiumBaseY + 10f, 4f)
+        shapeRenderer.color = Color(0.1f, 0.14f, 0.22f, 0.95f)
+        shapeRenderer.rect(podiumCenterX - 180f, podiumBaseY - 24f, 360f, 34f)
+        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.8f)
+        shapeRenderer.rectLine(podiumCenterX - 180f, podiumBaseY + 10f, podiumCenterX + 180f, podiumBaseY + 10f, 3f)
 
-        // Cincin Cahaya Podium
-        val pulse = sin(animTime * 4f) * 0.15f
-        shapeRenderer.color = Color(0.2f, 0.75f, 1f, 0.35f + pulse)
-        shapeRenderer.circle(podiumCenterX, podiumBaseY + 10f, 110f, 24)
+        // Cincin Cahaya Aura Halus
+        val pulse = sin(animTime * 3f) * 0.08f
+        shapeRenderer.color = Color(0.15f, 0.45f, 0.8f, 0.22f + pulse)
+        shapeRenderer.circle(podiumCenterX, podiumBaseY + 10f, 85f, 24)
 
         // Gambar Karakter Stickman Preview di Podium
         renderStickmanPreview(shapeRenderer, podiumCenterX, podiumBaseY + 10f, currentArchetype)
@@ -86,77 +85,90 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         renderStatBars(shapeRenderer, currentArchetype)
 
         // Tombol Navigasi Bawah
-        // Tombol Select & Play
+        // Tombol Select & Play (Gilded Obsidian)
         val btnPlayX = 720f
         val btnPlayY = 45f
-        shapeRenderer.color = Color(0.15f, 0.65f, 0.35f, 0.9f)
+        shapeRenderer.color = Color(0.10f, 0.18f, 0.14f, 0.95f)
         shapeRenderer.rect(btnPlayX, btnPlayY, 260f, 52f)
-        shapeRenderer.color = Color.GREEN
+        shapeRenderer.color = Color(0.25f, 0.85f, 0.45f, 0.9f)
         shapeRenderer.rectLine(btnPlayX, btnPlayY + 52f, btnPlayX + 260f, btnPlayY + 52f, 3f)
 
-        // Tombol Back
+        // Tombol Back (Muted Obsidian)
         val btnBackX = 300f
         val btnBackY = 45f
-        shapeRenderer.color = Color(0.35f, 0.18f, 0.22f, 0.9f)
+        shapeRenderer.color = Color(0.12f, 0.15f, 0.22f, 0.95f)
         shapeRenderer.rect(btnBackX, btnBackY, 220f, 52f)
-        shapeRenderer.color = Color.CORAL
+        shapeRenderer.color = Color(0.6f, 0.7f, 0.85f, 0.8f)
         shapeRenderer.rectLine(btnBackX, btnBackY + 52f, btnBackX + 220f, btnBackY + 52f, 3f)
 
-        // Tombol Panah Kiri / Kanan Podium
-        shapeRenderer.color = Color(0.2f, 0.45f, 0.8f, 0.85f)
-        shapeRenderer.rect(podiumCenterX - 230f, 320f, 40f, 60f)
-        shapeRenderer.rect(podiumCenterX + 190f, 320f, 40f, 60f)
+        // Tombol Panah Kiri / Kanan Podium (Vektor Segitiga)
+        shapeRenderer.color = Color(0.12f, 0.16f, 0.25f, 0.85f)
+        shapeRenderer.rect(podiumCenterX - 230f, 320f, 44f, 56f)
+        shapeRenderer.rect(podiumCenterX + 190f, 320f, 44f, 56f)
+
+        // Vektor Segitiga Panah Kiri
+        shapeRenderer.color = Color(1f, 0.85f, 0.25f, 0.95f)
+        shapeRenderer.triangle(
+            podiumCenterX - 218f, 348f,
+            podiumCenterX - 200f, 362f,
+            podiumCenterX - 200f, 334f
+        )
+        // Vektor Segitiga Panah Kanan
+        shapeRenderer.triangle(
+            podiumCenterX + 222f, 348f,
+            podiumCenterX + 204f, 362f,
+            podiumCenterX + 204f, 334f
+        )
 
         shapeRenderer.end()
 
-        // 2. Render Tipografi & Teks
+        // 2. Render Tipografi & Teks (FontManager FreeType Anti-Aliased)
         batch.begin()
+        val titleF = if (FontManager.isInitialized) FontManager.titleFont else BitmapFont()
+        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
+        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
 
         // Judul Atas
-        titleFont.color = Color.WHITE
-        glyphLayout.setText(titleFont, "CHOOSE YOUR HERO")
-        titleFont.draw(batch, "CHOOSE YOUR HERO", (1280f - glyphLayout.width) / 2f, 675f)
-
-        // Panah Kiri / Kanan
-        headerFont.color = Color.YELLOW
-        headerFont.draw(batch, "<", podiumCenterX - 218f, 360f)
-        headerFont.draw(batch, ">", podiumCenterX + 202f, 360f)
+        titleF.color = Color.WHITE
+        glyphLayout.setText(titleF, "CHOOSE YOUR HERO")
+        titleF.draw(batch, "CHOOSE YOUR HERO", (1280f - glyphLayout.width) / 2f, 675f)
 
         // Nama & Gelar Karakter Terpilih (Kiri Atas Podium)
-        headerFont.color = Color.CYAN
-        glyphLayout.setText(headerFont, currentArchetype.displayName)
-        headerFont.draw(batch, currentArchetype.displayName, podiumCenterX - glyphLayout.width / 2f, 595f)
+        headF.color = Color.CYAN
+        glyphLayout.setText(headF, currentArchetype.displayName)
+        headF.draw(batch, currentArchetype.displayName, podiumCenterX - glyphLayout.width / 2f, 595f)
 
-        font.color = Color.GOLD
-        glyphLayout.setText(font, currentArchetype.title)
-        font.draw(batch, currentArchetype.title, podiumCenterX - glyphLayout.width / 2f, 560f)
+        regF.color = Color.GOLD
+        glyphLayout.setText(regF, currentArchetype.title)
+        regF.draw(batch, currentArchetype.title, podiumCenterX - glyphLayout.width / 2f, 560f)
 
         // Teks Kartu Statistik (Kanan)
-        headerFont.color = Color.WHITE
-        headerFont.draw(batch, "ATTRIBUTES & SKILLS", 650f, 570f)
+        headF.color = Color.WHITE
+        headF.draw(batch, "ATTRIBUTES & SKILLS", 650f, 570f)
 
-        font.color = Color.LIGHT_GRAY
-        font.draw(batch, currentArchetype.description, 650f, 525f, 500f, -1, true)
+        regF.color = Color(0.85f, 0.88f, 0.95f, 1f)
+        regF.draw(batch, currentArchetype.description, 650f, 525f, 500f, -1, true)
 
-        font.color = Color.WHITE
-        font.draw(batch, "Movement Speed:", 650f, 435f)
-        font.draw(batch, "Base Attack Multiplier:", 650f, 395f)
-        font.draw(batch, "Defense Bonus:", 650f, 355f)
-        font.draw(batch, "Critical Rate Bonus:", 650f, 315f)
+        regF.color = Color.WHITE
+        regF.draw(batch, "Movement Speed:", 650f, 435f)
+        regF.draw(batch, "Base Attack Multiplier:", 650f, 395f)
+        regF.draw(batch, "Defense Bonus:", 650f, 355f)
+        regF.draw(batch, "Critical Rate Bonus:", 650f, 315f)
 
         // Info Kemampuan Unik (Skill & Ult)
-        font.color = Color.CYAN
-        font.draw(batch, "Special Skill: ${currentArchetype.skillName}", 650f, 255f)
-        font.color = Color.GOLD
-        font.draw(batch, "Ultimate: ${currentArchetype.ultName}", 650f, 215f)
+        regF.color = Color.CYAN
+        regF.draw(batch, "Special Skill: ${currentArchetype.skillName}", 650f, 255f)
+        regF.color = Color.GOLD
+        regF.draw(batch, "Ultimate: ${currentArchetype.ultName}", 650f, 215f)
 
         // Teks Tombol Bawah
-        font.color = Color.WHITE
-        glyphLayout.setText(font, "CONFIRM & PLAY")
-        font.draw(batch, "CONFIRM & PLAY", btnPlayX + (260f - glyphLayout.width) / 2f, btnPlayY + 34f)
+        headF.color = Color.WHITE
+        glyphLayout.setText(headF, "CONFIRM & PLAY")
+        headF.draw(batch, "CONFIRM & PLAY", btnPlayX + (260f - glyphLayout.width) / 2f, btnPlayY + 36f)
 
-        glyphLayout.setText(font, "< MAIN MENU")
-        font.draw(batch, "< MAIN MENU", btnBackX + (220f - glyphLayout.width) / 2f, btnBackY + 34f)
+        regF.color = Color(0.9f, 0.9f, 0.95f, 1f)
+        glyphLayout.setText(regF, "< MAIN MENU")
+        regF.draw(batch, "< MAIN MENU", btnBackX + (220f - glyphLayout.width) / 2f, btnBackY + 34f)
 
         batch.end()
     }
@@ -339,8 +351,5 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     override fun dispose() {
         shapeRenderer.dispose()
         batch.dispose()
-        font.dispose()
-        titleFont.dispose()
-        headerFont.dispose()
     }
 }

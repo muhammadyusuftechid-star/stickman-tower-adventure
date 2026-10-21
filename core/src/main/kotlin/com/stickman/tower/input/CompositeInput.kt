@@ -1,5 +1,7 @@
 package com.stickman.tower.input
 
+import com.badlogic.gdx.utils.viewport.Viewport
+
 /**
  * Menggabungkan input keyboard (Desktop) dan virtual touch controller (Android)
  * ke dalam satu antarmuka GameInput yang mulus.
@@ -8,8 +10,8 @@ class CompositeInput(
     val keyboard: KeyboardInput,
     val virtual: VirtualController
 ) : GameInput {
-    fun update() {
-        virtual.update()
+    fun update(viewport: Viewport? = null) {
+        virtual.update(viewport)
     }
 
     override fun isMoveLeft() = keyboard.isMoveLeft() || virtual.isMoveLeft()

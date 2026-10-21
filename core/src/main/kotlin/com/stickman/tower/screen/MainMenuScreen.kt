@@ -20,24 +20,19 @@ import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.rpg.SaveData
 import com.stickman.tower.rpg.SaveManager
+import com.stickman.tower.ui.FontManager
 import kotlin.math.sin
 
 /**
- * Menu Utama Bergaya Neon Cyber-Fantasy:
+ * Menu Utama Bergaya Dark Fantasy / Spire of Shadows:
  * Menampilkan animasi partikel atmosferik, navigasi tombol keyboard & sentuh/mouse,
- * info profil progresi RPG, opsi audio, dan transisi ke pemilihan karakter & menara.
+ * info profil progresi RPG, opsi audio, dan tipografi anti-aliased FreeType.
  */
 class MainMenuScreen(private val game: StickmanGame) : Screen {
     private val camera = OrthographicCamera()
     private val viewport: Viewport = FitViewport(1280f, 720f, camera)
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
-    private val font = BitmapFont().apply {
-        data.setScale(1.5f)
-    }
-    private val titleFont = BitmapFont().apply {
-        data.setScale(2.6f)
-    }
     private val glyphLayout = GlyphLayout()
 
     // Partikel Latar Belakang (Recycled in-place, zero GC allocation)
@@ -85,6 +80,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
     override fun show() {
         AudioManager.init()
+        FontManager.init()
         currentSaveData = SaveManager.load()
         particles.clear()
         for (i in 0 until 45) {
@@ -117,13 +113,13 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
             shapeRenderer.circle(p.pos.x, p.pos.y, p.size)
         }
 
-        // Panel Judul & Kartu Status Pemain
-        shapeRenderer.color = Color(0.1f, 0.14f, 0.22f, 0.85f)
+        // Panel Judul & Kartu Status Pemain (Dark Slate Obsidian dengan Gold Line)
+        shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.90f)
         shapeRenderer.rect(140f, 40f, 1000f, 120f)
-        shapeRenderer.color = Color(0.3f, 0.7f, 1f, 0.5f)
-        shapeRenderer.rect(140f, 158f, 1000f, 2f)
+        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.7f)
+        shapeRenderer.rectLine(140f, 158f, 1140f, 158f, 2f)
 
-        // Highlight Tombol Terpilih
+        // Highlight Tombol Terpilih (Sleek Obsidian dengan Trim Emas)
         val buttonWidth = 420f
         val buttonHeight = 48f
         val startY = 460f
@@ -131,28 +127,34 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         val btnX = (1280f - buttonWidth) / 2f
         val btnY = startY - (selectedIndex * spacingY)
 
-        val pulse = sin(animTime * 6f) * 0.1f
-        shapeRenderer.color = Color(0.18f, 0.45f, 0.85f, 0.75f + pulse)
+        val pulse = sin(animTime * 6f) * 0.08f
+        shapeRenderer.color = Color(0.12f, 0.16f, 0.25f, 0.90f)
         shapeRenderer.rect(btnX - 10f, btnY - 6f, buttonWidth + 20f, buttonHeight + 12f)
-        shapeRenderer.color = Color.CYAN
+        shapeRenderer.color = Color(0.95f, 0.75f, 0.2f, 0.85f + pulse)
+        shapeRenderer.rectLine(btnX - 10f, btnY - 6f, btnX + buttonWidth + 10f, btnY - 6f, 2f)
+        shapeRenderer.rectLine(btnX - 10f, btnY + buttonHeight + 6f, btnX + buttonWidth + 10f, btnY + buttonHeight + 6f, 2f)
         shapeRenderer.rectLine(btnX - 10f, btnY - 6f, btnX - 10f, btnY + buttonHeight + 6f, 3f)
         shapeRenderer.rectLine(btnX + buttonWidth + 10f, btnY - 6f, btnX + buttonWidth + 10f, btnY + buttonHeight + 6f, 3f)
 
         shapeRenderer.end()
 
-        // 2. Render Teks & Tipografi
+        // 2. Render Teks & Tipografi (FontManager FreeType Anti-Aliased)
         batch.begin()
 
+        val titleF = if (FontManager.isInitialized) FontManager.titleFont else BitmapFont()
+        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
+        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
+
         // Judul Utama
-        titleFont.color = Color.WHITE
-        glyphLayout.setText(titleFont, "STICKMAN TOWER ADVENTURE")
-        titleFont.draw(batch, "STICKMAN TOWER ADVENTURE", (1280f - glyphLayout.width) / 2f, 650f)
+        titleF.color = Color.WHITE
+        glyphLayout.setText(titleF, "STICKMAN TOWER ADVENTURE")
+        titleF.draw(batch, "STICKMAN TOWER ADVENTURE", (1280f - glyphLayout.width) / 2f, 650f)
 
         // Subtitle Emas
-        font.color = Color.GOLD
+        regF.color = Color.GOLD
         val subtitle = "Ascend the Spire of Shadows • 2D Action RPG"
-        glyphLayout.setText(font, subtitle)
-        font.draw(batch, subtitle, (1280f - glyphLayout.width) / 2f, 595f)
+        glyphLayout.setText(regF, subtitle)
+        regF.draw(batch, subtitle, (1280f - glyphLayout.width) / 2f, 595f)
 
         // Tombol-tombol Navigasi
         for (i in menuItems.indices) {
@@ -162,40 +164,41 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
                 menuItems[i]
             }
 
-            val curY = startY - (i * spacingY) + 30f
+            val curY = startY - (i * spacingY) + 32f
             if (i == selectedIndex) {
-                font.color = Color.YELLOW
-                glyphLayout.setText(font, "> $itemText <")
-                font.draw(batch, "> $itemText <", (1280f - glyphLayout.width) / 2f, curY)
+                headF.color = Color(1f, 0.85f, 0.25f, 1f)
+                val markedText = "⚔  $itemText  ⚔"
+                glyphLayout.setText(headF, markedText)
+                headF.draw(batch, markedText, (1280f - glyphLayout.width) / 2f, curY)
             } else {
-                font.color = Color(0.85f, 0.88f, 0.95f, 1f)
-                glyphLayout.setText(font, itemText)
-                font.draw(batch, itemText, (1280f - glyphLayout.width) / 2f, curY)
+                headF.color = Color(0.82f, 0.86f, 0.95f, 0.9f)
+                glyphLayout.setText(headF, itemText)
+                headF.draw(batch, itemText, (1280f - glyphLayout.width) / 2f, curY)
             }
         }
 
         // Kartu Profil Pemain
         val currentArchetype = CharacterArchetype.fromString(currentSaveData.selectedArchetype)
-        font.color = Color.CYAN
-        font.draw(batch, "HERO STATUS:", 170f, 135f)
-        font.color = Color.WHITE
-        font.draw(batch, "Level: ${currentSaveData.playerLevel}", 170f, 95f)
-        font.draw(batch, "Gold: ${currentSaveData.gold} G", 360f, 95f)
-        font.draw(batch, "Highest Floor: Floor ${currentSaveData.highestTowerFloor}", 540f, 95f)
-        font.color = Color.GOLD
-        font.draw(batch, "Archetype: ${currentArchetype.displayName}", 780f, 95f)
+        regF.color = Color.CYAN
+        regF.draw(batch, "HERO STATUS:", 170f, 135f)
+        regF.color = Color.WHITE
+        regF.draw(batch, "Level: ${currentSaveData.playerLevel}", 170f, 95f)
+        regF.draw(batch, "Gold: ${currentSaveData.gold} G", 360f, 95f)
+        regF.draw(batch, "Highest Floor: Floor ${currentSaveData.highestTowerFloor}", 540f, 95f)
+        regF.color = Color.GOLD
+        regF.draw(batch, "Archetype: ${currentArchetype.displayName}", 780f, 95f)
 
         // Feedback / Notifikasi aksi
         if (feedbackNotice.isNotEmpty()) {
-            font.color = Color.GREEN
-            glyphLayout.setText(font, feedbackNotice)
-            font.draw(batch, feedbackNotice, (1280f - glyphLayout.width) / 2f, 195f)
+            regF.color = Color.GREEN
+            glyphLayout.setText(regF, feedbackNotice)
+            regF.draw(batch, feedbackNotice, (1280f - glyphLayout.width) / 2f, 195f)
         }
 
         // Petunjuk Kontrol
-        font.color = Color(0.6f, 0.65f, 0.75f, 0.8f)
-        glyphLayout.setText(font, "[W/S / UP/DOWN / CLICK] Navigate  |  [ENTER / SPACE] Select")
-        font.draw(batch, "[W/S / UP/DOWN / CLICK] Navigate  |  [ENTER / SPACE] Select", (1280f - glyphLayout.width) / 2f, 25f)
+        regF.color = Color(0.6f, 0.65f, 0.75f, 0.8f)
+        glyphLayout.setText(regF, "[W/S / UP/DOWN / CLICK] Navigate  |  [ENTER / SPACE] Select")
+        regF.draw(batch, "[W/S / UP/DOWN / CLICK] Navigate  |  [ENTER / SPACE] Select", (1280f - glyphLayout.width) / 2f, 25f)
 
         batch.end()
     }
@@ -285,7 +288,5 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     override fun dispose() {
         shapeRenderer.dispose()
         batch.dispose()
-        font.dispose()
-        titleFont.dispose()
     }
 }

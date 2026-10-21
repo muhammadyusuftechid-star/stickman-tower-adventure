@@ -4,12 +4,14 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.ScreenUtils
+import com.badlogic.gdx.utils.viewport.FitViewport
 import com.stickman.tower.StickmanGame
 import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.character.CharacterArchetype
@@ -24,22 +26,27 @@ import com.stickman.tower.input.KeyboardInput
 import com.stickman.tower.input.VirtualController
 import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.rpg.SaveManager
+import com.stickman.tower.ui.FontManager
 import com.stickman.tower.vfx.ParticleManager
 import com.stickman.tower.world.CameraManager
 import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.world.TowerLevelBuilder
 
 /**
- * Screen gameplay utama Fase 7:
- * Menghadirkan Menara Bertingkat, Boss Fight 2-Fase,
- * Integrasi Audio Prosedural Lengkap, Partikel VFX (Dust, Sparks, Slashes),
- * In-game Pause Menu Overlay, serta 3 Arketipe Karakter Berbeda.
+ * Screen gameplay utama:
+ * Memisahkan World Camera (16x9m physics) dan Screen UI Viewport (1280x720px)
+ * untuk menjamin HUD dan Virtual Controller terkunci pixel-perfect di segala resolusi.
  */
 class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private val cameraManager = CameraManager()
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
     private val font = BitmapFont()
+
+    // Dedicated UI Viewport Pass (Pixel-Perfect 1280x720 Screen Space)
+    private val uiCamera = OrthographicCamera()
+    private val uiViewport = FitViewport(1280f, 720f, uiCamera)
+    private val uiTouchVec = Vector3()
 
     // Dual Input Layer: Keyboard Desktop + Virtual Controller Mobile Touch
     private val keyboardInput = KeyboardInput()
@@ -80,7 +87,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
     override fun show() {
         AudioManager.init()
-        virtualController.resize(Gdx.graphics.width, Gdx.graphics.height)
+        FontManager.init()
+        if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
+            uiViewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
+        }
+        virtualController.resize(1280, 720)
 
         // Hubungkan Callback Partikel VFX Pemain
         player.onLand = { x, y -> particleManager.spawnDust(x, y, count = 6) }
@@ -157,11 +168,9 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         // Cek klik tombol Pause di pojok kanan atas HUD
         if (Gdx.input.justTouched()) {
-            val touchX = Gdx.input.x.toFloat()
-            val touchY = Gdx.graphics.height.toFloat() - Gdx.input.y.toFloat()
-            val w = Gdx.graphics.width.toFloat()
-            val h = Gdx.graphics.height.toFloat()
-            if (touchX in (w - 110f)..w && touchY in (h - 45f)..h) {
+            uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+            uiViewport.unproject(uiTouchVec)
+            if (uiTouchVec.x in (1280f - 110f)..1280f && uiTouchVec.y in (720f - 45f)..720f) {
                 isPaused = !isPaused
                 pauseSelectedIndex = 0
                 if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
@@ -173,13 +182,16 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         if (isPaused) {
             handlePauseInput()
             renderWorld(0f)
+            uiViewport.apply()
+            shapeRenderer.projectionMatrix = uiCamera.combined
+            batch.projectionMatrix = uiCamera.combined
             renderHUD()
             renderPauseOverlay()
             return
         }
 
-        // Perbarui Input Virtual Controller
-        input.update()
+        // Perbarui Input Virtual Controller dengan uiViewport
+        input.update(uiViewport)
         handleStatusInput()
 
         if (saveNotificationTimer > 0f) {
@@ -277,13 +289,24 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             if (ft.isExpired) iterator.remove()
         }
 
-        // 5. Render Objek Dunia 2D & Partikel
+        // 5. Render Objek Dunia 2D & Partikel (World Space: Meters)
         renderWorld(safeDelta)
 
-        // 6. Render Virtual Controller (On-Screen Touch Buttons untuk Android/Desktop)
-        virtualController.render(shapeRenderer, batch, font, player.skill1, player.ultimate)
+        // 6. UI Viewport Pass (Pixel-Perfect 1280x720 Screen Space)
+        uiViewport.apply()
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        batch.projectionMatrix = uiCamera.combined
 
-        // 7. Render Enhanced In-Game RPG HUD
+        // 7. Render Virtual Controller (On-Screen Touch Buttons untuk Android/Desktop)
+        virtualController.render(
+            shapeRenderer,
+            batch,
+            if (FontManager.isInitialized) FontManager.smallFont else font,
+            player.skill1,
+            player.ultimate
+        )
+
+        // 8. Render Enhanced In-Game RPG HUD
         renderHUD()
     }
 
@@ -328,11 +351,15 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             shapeRenderer.end()
         }
 
-        batch.begin()
-        for (ft in floatingTexts) {
-            ft.render(batch, font, cameraManager.camera)
+        if (floatingTexts.isNotEmpty()) {
+            batch.projectionMatrix.setToOrtho2D(0f, 0f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+            batch.begin()
+            val dmgFont = if (FontManager.isInitialized) FontManager.regularFont else font
+            for (ft in floatingTexts) {
+                ft.render(batch, dmgFont, cameraManager.camera)
+            }
+            batch.end()
         }
-        batch.end()
     }
 
     private fun handleTwoWayCombat() {
@@ -550,36 +577,38 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     }
 
     private fun renderHUD() {
-        val w = Gdx.graphics.width.toFloat()
-        val h = Gdx.graphics.height.toFloat()
+        val w = 1280f
+        val h = 720f
 
-        // 1. Render Elemen Latar Bar & Kartu Karakter (ShapeRenderer)
-        shapeRenderer.projectionMatrix.setToOrtho2D(0f, 0f, w, h)
+        // 1. Render Elemen Latar Bar & Kartu Karakter (ShapeRenderer pada Screen Space 1280x720)
+        shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        // Panel Latar Player Status Card (Kiri Atas)
-        shapeRenderer.color = Color(0.08f, 0.11f, 0.16f, 0.90f)
+        // Panel Latar Player Status Card (Kiri Atas - Obsidian Glassmorphism)
+        shapeRenderer.color = Color(0.06f, 0.09f, 0.15f, 0.92f)
         shapeRenderer.rect(12f, h - 90f, 290f, 78f)
+        shapeRenderer.color = Color(0.18f, 0.28f, 0.45f, 0.6f)
+        shapeRenderer.rectLine(12f, h - 12f, 302f, h - 12f, 2f)
 
         // Level Badge Box
-        shapeRenderer.color = Color(0.15f, 0.22f, 0.32f, 1f)
+        shapeRenderer.color = Color(0.12f, 0.18f, 0.28f, 1f)
         shapeRenderer.rect(18f, h - 84f, 55f, 66f)
 
         // HP Bar Background
-        shapeRenderer.color = Color(0.12f, 0.15f, 0.2f, 1f)
+        shapeRenderer.color = Color(0.1f, 0.12f, 0.18f, 1f)
         shapeRenderer.rect(80f, h - 35f, 210f, 16f)
 
         // HP Bar Fill
         val hpPercent = (player.health.currentHp / player.health.maxHp).coerceIn(0f, 1f)
         shapeRenderer.color = when {
             hpPercent > 0.5f -> Color(0.18f, 0.85f, 0.35f, 1f)
-            hpPercent > 0.25f -> Color.YELLOW
+            hpPercent > 0.25f -> Color(0.95f, 0.75f, 0.15f, 1f)
             else -> Color(0.95f, 0.25f, 0.25f, 1f)
         }
         shapeRenderer.rect(80f, h - 35f, 210f * hpPercent, 16f)
 
         // EXP Bar Background
-        shapeRenderer.color = Color(0.12f, 0.15f, 0.2f, 1f)
+        shapeRenderer.color = Color(0.1f, 0.12f, 0.18f, 1f)
         shapeRenderer.rect(80f, h - 53f, 210f, 12f)
 
         // EXP Bar Fill (Cyan Elegan)
@@ -588,7 +617,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.rect(80f, h - 53f, 210f * expPercent, 12f)
 
         // Ultimate Energy Bar Background
-        shapeRenderer.color = Color(0.12f, 0.15f, 0.2f, 1f)
+        shapeRenderer.color = Color(0.1f, 0.12f, 0.18f, 1f)
         shapeRenderer.rect(80f, h - 69f, 210f, 10f)
 
         // Ultimate Energy Bar Fill (Kuning Emas)
@@ -602,9 +631,9 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         }
 
         // Tombol Pause (Pojok Kanan Atas)
-        shapeRenderer.color = Color(0.15f, 0.20f, 0.30f, 0.90f)
+        shapeRenderer.color = Color(0.12f, 0.16f, 0.25f, 0.85f)
         shapeRenderer.rect(w - 110f, h - 45f, 98f, 32f)
-        shapeRenderer.color = Color.CYAN
+        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.85f)
         shapeRenderer.rectLine(w - 110f, h - 45f, w - 12f, h - 45f, 2f)
 
         // Bar HP Boss Raksasa (Jika Berada di Boss Floor dan Boss Masih Hidup)
@@ -616,7 +645,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             val bossBarY = h - 32f
 
             // Frame Gelap
-            shapeRenderer.color = Color(0.1f, 0.1f, 0.14f, 0.92f)
+            shapeRenderer.color = Color(0.08f, 0.08f, 0.12f, 0.95f)
             shapeRenderer.rect(bossBarX - 4f, bossBarY - 4f, bossBarW + 8f, bossBarH + 8f)
 
             // Fill Bar Boss (Merah Crimson ke Oranye)
@@ -628,37 +657,42 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.end()
 
         // 2. Render Teks HUD Informasi
+        batch.projectionMatrix = uiCamera.combined
         batch.begin()
 
         // Level Badge Text
-        font.color = Color(0.7f, 0.85f, 1f, 1f)
-        font.draw(batch, "LVL", 32f, h - 28f)
-        font.color = Color.WHITE
-        font.draw(batch, "${player.stats.level}", 36f, h - 50f)
+        val smallF = if (FontManager.isInitialized) FontManager.smallFont else font
+        val regF = if (FontManager.isInitialized) FontManager.regularFont else font
+        val headF = if (FontManager.isInitialized) FontManager.headerFont else font
+
+        smallF.color = Color(0.7f, 0.85f, 1f, 1f)
+        smallF.draw(batch, "LVL", 32f, h - 28f)
+        headF.color = Color.WHITE
+        headF.draw(batch, "${player.stats.level}", 34f, h - 50f)
 
         // HP Overlay Text
-        font.color = Color.WHITE
-        font.draw(batch, "HP: ${player.health.currentHp.toInt()} / ${player.health.maxHp.toInt()}", 86f, h - 22f)
+        smallF.color = Color.WHITE
+        smallF.draw(batch, "HP: ${player.health.currentHp.toInt()} / ${player.health.maxHp.toInt()}", 86f, h - 22f)
 
         // EXP Overlay Text
-        font.color = Color(0.85f, 0.95f, 1f, 1f)
+        smallF.color = Color(0.85f, 0.95f, 1f, 1f)
         val expPctText = (expPercent * 100).toInt()
-        font.draw(batch, "EXP: ${player.stats.currentExp}/${player.stats.requiredExp} ($expPctText%)", 86f, h - 42f)
+        smallF.draw(batch, "EXP: ${player.stats.currentExp}/${player.stats.requiredExp} ($expPctText%)", 86f, h - 42f)
 
         // Ultimate Text
-        font.color = if (player.ultimate.isReady) Color.GOLD else Color.WHITE
+        smallF.color = if (player.ultimate.isReady) Color.GOLD else Color.WHITE
         val ultStatus = if (player.ultimate.isReady) "READY [O]" else "${(player.ultimate.energyPercent * 100).toInt()}%"
-        font.draw(batch, "ULT: $ultStatus", 86f, h - 58f)
+        smallF.draw(batch, "ULT: $ultStatus", 86f, h - 58f)
 
         // Stats Bar & Coins (Di bawah Player Card)
-        font.color = Color.GOLD
-        font.draw(batch, "[G] ${player.stats.gold} Coins", 15f, h - 100f)
-        font.color = Color(0.8f, 0.85f, 0.9f, 1f)
-        font.draw(batch, "ATK: ${player.stats.attackPower.toInt()} | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 125f, h - 100f)
+        regF.color = Color.GOLD
+        regF.draw(batch, "❖ ${player.stats.gold} Coins", 15f, h - 100f)
+        regF.color = Color(0.8f, 0.85f, 0.9f, 1f)
+        regF.draw(batch, "ATK: ${player.stats.attackPower.toInt()} | DEF: ${player.stats.defense.toInt()} | CRIT: ${(player.stats.critRate * 100).toInt()}%", 145f, h - 100f)
 
         // Floor Name Banner
-        font.color = Color.CYAN
-        font.draw(batch, currentFloor.floorName, 320f, h - 70f)
+        headF.color = Color.CYAN
+        headF.draw(batch, currentFloor.floorName, 320f, h - 70f)
 
         // Combo Step Indicator
         val comboText = when (player.comboManager.currentStep) {
@@ -666,68 +700,68 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             ComboStep.HIT_2 -> "COMBO: [HIT 2]"
             ComboStep.HIT_3 -> "COMBO: [HIT 3 FINISHER!]"
         }
-        font.color = when (player.comboManager.currentStep) {
+        regF.color = when (player.comboManager.currentStep) {
             ComboStep.HIT_1 -> Color.YELLOW
             ComboStep.HIT_2 -> Color.ORANGE
             ComboStep.HIT_3 -> Color(1f, 0.25f, 0.25f, 1f)
         }
-        font.draw(batch, comboText, 320f, h - 22f)
+        regF.draw(batch, comboText, 320f, h - 20f)
 
         // Skill & Dodge Status
-        font.color = if (player.skill1.isReady) Color(0.85f, 0.45f, 1f, 1f) else Color.GRAY
+        regF.color = if (player.skill1.isReady) Color(0.85f, 0.45f, 1f, 1f) else Color.GRAY
         val skillStatus = if (player.skill1.isReady) "READY" else {
             val t = (player.skill1.remainingCooldown * 10).toInt().coerceAtLeast(0)
             "${t / 10}.${t % 10}s"
         }
-        font.draw(batch, "Skill [U]: $skillStatus", 320f, h - 45f)
+        regF.draw(batch, "Skill [U]: $skillStatus", 320f, h - 45f)
 
-        font.color = if (player.dodgeCooldown <= 0f) Color(0.3f, 0.8f, 1f, 1f) else Color.GRAY
+        regF.color = if (player.dodgeCooldown <= 0f) Color(0.3f, 0.8f, 1f, 1f) else Color.GRAY
         val dodgeStatus = if (player.dodgeCooldown <= 0f) "READY" else {
             val t = (player.dodgeCooldown * 10).toInt().coerceAtLeast(0)
             "${t / 10}.${t % 10}s"
         }
-        font.draw(batch, "Dodge [L/Shift]: $dodgeStatus", 450f, h - 45f)
+        regF.draw(batch, "Dodge [L/Shift]: $dodgeStatus", 490f, h - 45f)
 
         // Teks Tombol Pause
-        font.color = Color.WHITE
-        font.draw(batch, "[PAUSE]", w - 95f, h - 24f)
+        regF.color = Color.WHITE
+        regF.draw(batch, "PAUSE", w - 88f, h - 23f)
 
         // Teks Bar Boss
         if (boss != null && !boss.health.isDead) {
-            font.color = Color.WHITE
+            regF.color = Color.WHITE
             val enrageTag = if (boss.isPhase2) " (ENRAGED FASE 2)" else ""
-            font.draw(batch, "${boss.name} [${boss.health.currentHp.toInt()}/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 120f, h - 18f)
+            regF.draw(batch, "${boss.name} [${boss.health.currentHp.toInt()}/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 140f, h - 14f)
         }
 
         // Notifikasi Auto-Save
         if (saveNotificationTimer > 0f) {
-            font.color = Color.WHITE
-            font.draw(batch, "[OK] $saveNotificationText", w / 2f - 95f, h - 21f)
+            smallF.color = Color.WHITE
+            smallF.draw(batch, "✓ $saveNotificationText", w / 2f - 90f, h - 20f)
         }
 
         // Overlays Game Over / Victory
         if (gameStatus == GameStatus.GAME_OVER) {
-            font.color = Color.RED
-            font.draw(batch, "=== GAME OVER ===", w / 2f - 75f, h / 2f + 30f)
-            font.color = Color.WHITE
-            font.draw(batch, "Tekan [R] untuk Respawn di Checkpoint", w / 2f - 140f, h / 2f)
+            headF.color = Color.RED
+            headF.draw(batch, "=== GAME OVER ===", w / 2f - 120f, h / 2f + 40f)
+            regF.color = Color.WHITE
+            regF.draw(batch, "Tekan [R] untuk Respawn di Checkpoint", w / 2f - 160f, h / 2f)
         }
 
         if (gameStatus == GameStatus.STAGE_CLEAR) {
             if (currentFloorNumber < 3) {
-                font.color = Color.GOLD
-                font.draw(batch, "★ ${currentFloor.floorName.uppercase()} SELESAI! ★", w / 2f - 170f, h / 2f + 40f)
-                font.color = Color.WHITE
-                font.draw(batch, "Tekan [SPACE] untuk Naik ke Lantai ${currentFloorNumber + 1}", w / 2f - 160f, h / 2f + 12f)
-                font.color = Color.CYAN
-                font.draw(batch, "Tekan [R] untuk Main Ulang Lantai Ini", w / 2f - 130f, h / 2f - 18f)
+                headF.color = Color.GOLD
+                headF.draw(batch, "★ ${currentFloor.floorName.uppercase()} SELESAI! ★", w / 2f - 180f, h / 2f + 45f)
+                regF.color = Color.WHITE
+                regF.draw(batch, "Tekan [SPACE] untuk Naik ke Lantai ${currentFloorNumber + 1}", w / 2f - 170f, h / 2f + 12f)
+                regF.color = Color.CYAN
+                regF.draw(batch, "Tekan [R] untuk Main Ulang Lantai Ini", w / 2f - 140f, h / 2f - 18f)
             } else {
-                font.color = Color.GOLD
-                font.draw(batch, "★ CONGRATULATIONS! SELURUH MENARA TELAH DITAKLUKKAN! ★", w / 2f - 240f, h / 2f + 40f)
-                font.color = Color.WHITE
-                font.draw(batch, "Tower Guardian Berhasil Ditumbangkan! Player Lv.${player.stats.level} | Gold: ${player.stats.gold} G", w / 2f - 220f, h / 2f + 12f)
-                font.color = Color.CYAN
-                font.draw(batch, "Tekan [SPACE] atau [R] untuk Mengulang Menara dari Lantai 1", w / 2f - 200f, h / 2f - 18f)
+                headF.color = Color.GOLD
+                headF.draw(batch, "★ CONGRATULATIONS! SELURUH MENARA TELAH DITAKLUKKAN! ★", w / 2f - 290f, h / 2f + 45f)
+                regF.color = Color.WHITE
+                regF.draw(batch, "Tower Guardian Berhasil Ditumbangkan! Player Lv.${player.stats.level} | Gold: ${player.stats.gold} G", w / 2f - 240f, h / 2f + 12f)
+                regF.color = Color.CYAN
+                regF.draw(batch, "Tekan [SPACE] atau [R] untuk Mengulang Menara dari Lantai 1", w / 2f - 220f, h / 2f - 18f)
             }
         }
 
@@ -748,10 +782,12 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         }
 
         if (Gdx.input.justTouched()) {
-            val touchX = Gdx.input.x.toFloat()
-            val touchY = Gdx.graphics.height.toFloat() - Gdx.input.y.toFloat()
-            val w = Gdx.graphics.width.toFloat()
-            val h = Gdx.graphics.height.toFloat()
+            uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+            uiViewport.unproject(uiTouchVec)
+            val touchX = uiTouchVec.x
+            val touchY = uiTouchVec.y
+            val w = 1280f
+            val h = 720f
             val menuW = 280f
             val startY = h / 2f + 35f
             val itemH = 46f
@@ -794,37 +830,41 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     }
 
     private fun renderPauseOverlay() {
-        val w = Gdx.graphics.width.toFloat()
-        val h = Gdx.graphics.height.toFloat()
+        val w = 1280f
+        val h = 720f
 
         // Dimmer background
-        shapeRenderer.projectionMatrix.setToOrtho2D(0f, 0f, w, h)
+        shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
         shapeRenderer.color = Color(0f, 0f, 0f, 0.75f)
         shapeRenderer.rect(0f, 0f, w, h)
 
-        // Pause Menu Card
+        // Pause Menu Card (Dark Obsidian with Gold Accent)
         val cardW = 340f
         val cardH = 280f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
-        shapeRenderer.color = Color(0.1f, 0.13f, 0.20f, 0.95f)
+        shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
         shapeRenderer.rect(cardX, cardY, cardW, cardH)
-        shapeRenderer.color = Color.CYAN
+        shapeRenderer.color = Color(0.9f, 0.75f, 0.25f, 0.9f)
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
         val startY = h / 2f + 35f
         val itemH = 46f
         val btnY = startY - (pauseSelectedIndex * itemH)
-        shapeRenderer.color = Color(0.2f, 0.45f, 0.85f, 0.75f)
+        shapeRenderer.color = Color(0.15f, 0.35f, 0.65f, 0.75f)
         shapeRenderer.rect(cardX + 25f, btnY - 5f, cardW - 50f, 38f)
 
         shapeRenderer.end()
 
+        batch.projectionMatrix = uiCamera.combined
         batch.begin()
-        font.color = Color.GOLD
-        font.draw(batch, "=== GAME PAUSED ===", w / 2f - 85f, cardY + cardH - 25f)
+        val regF = if (FontManager.isInitialized) FontManager.regularFont else font
+        val headF = if (FontManager.isInitialized) FontManager.headerFont else font
+
+        headF.color = Color.GOLD
+        headF.draw(batch, "=== GAME PAUSED ===", w / 2f - 110f, cardY + cardH - 22f)
 
         for (i in pauseMenuItems.indices) {
             val itemText = if (i == 2) {
@@ -834,11 +874,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             }
             val curY = startY - (i * itemH) + 20f
             if (i == pauseSelectedIndex) {
-                font.color = Color.YELLOW
-                font.draw(batch, "> $itemText <", w / 2f - 60f, curY)
+                regF.color = Color.YELLOW
+                regF.draw(batch, "> $itemText <", w / 2f - 70f, curY)
             } else {
-                font.color = Color.WHITE
-                font.draw(batch, itemText, w / 2f - 45f, curY)
+                regF.color = Color.WHITE
+                regF.draw(batch, itemText, w / 2f - 55f, curY)
             }
         }
         batch.end()
@@ -846,7 +886,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
     override fun resize(width: Int, height: Int) {
         cameraManager.resize(width, height)
-        virtualController.resize(width, height)
+        uiViewport.update(width, height, true)
+        virtualController.resize(1280, 720)
     }
 
     override fun pause() {}
