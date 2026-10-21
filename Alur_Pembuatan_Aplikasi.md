@@ -464,16 +464,16 @@ flowchart LR
 
 #### Modul 12.1: Integrasi Gamepad (gdx-controllers)
 - **Task 12.1.1: Dependency & Input Mapping**
-  - [ ] Tambahkan dependensi `com.badlogicgames.gdx-controllers:gdx-controllers-core`.
-  - [ ] Mapping tombol standar XInput / DualShock: D-pad / Joystick kiri untuk lari, tombol A/Silang untuk lompat, X/Kotak untuk serang, B/Lingkaran untuk dodge, LB/L1 untuk skill, RB/R1 untuk ulti.
+  - [x] Tambahkan dependensi `com.badlogicgames.gdx-controllers:gdx-controllers-core`.
+  - [x] Mapping tombol standar XInput / DualShock: D-pad / Joystick kiri untuk lari, tombol A/Silang untuk lompat, X/Kotak untuk serang, B/Lingkaran untuk dodge, LB/L1 untuk skill, RB/R1 untuk ulti.
 - **Task 12.1.2: Auto-Detection Input Device**
-  - [ ] Otomatis sembunyikan on-screen virtual controller di Android jika terdeteksi gamepad Bluetooth aktif terhubung.
+  - [x] Otomatis sembunyikan on-screen virtual controller di Android jika terdeteksi gamepad Bluetooth aktif terhubung.
 
 #### Modul 12.2: On-Screen Touch Layout Customizer
 - **Task 12.2.1: Interactive Button Editor**
-  - [ ] Layar drag-and-drop di menu Pengaturan untuk menggeser posisi D-Pad dan tombol aksi sesuai kenyamanan jari pemain.
-  - [ ] Slider ukuran tombol (skala 70% hingga 130%) dan slider transparansi.
-  - [ ] Simpan preferensi layout ke `Preferences`.
+  - [x] Layar drag-and-drop di menu Pengaturan untuk menggeser posisi D-Pad dan tombol aksi sesuai kenyamanan jari pemain.
+  - [x] Slider ukuran tombol (skala 70% hingga 130%) dan slider transparansi.
+  - [x] Simpan preferensi layout ke `Preferences`.
 
 ---
 

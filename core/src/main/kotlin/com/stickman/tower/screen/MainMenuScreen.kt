@@ -70,13 +70,14 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "START TOWER",
         "BLACKSMITH FORGE",
         "SELECT CHARACTER",
+        "CONTROL SETTINGS",
         "AUDIO: ON",
         "HAPTIC: ON",
         "RESET SAVE DATA",
         "QUIT GAME"
     )
     private var selectedIndex = 0
-    private var selectorY = 505f
+    private var selectorY = 515f
     private var animTime = 0f
     private var feedbackNotice = ""
     private var feedbackTimer = 0f
@@ -156,9 +157,9 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
         // Wadah Tombol-tombol Menu (Glassmorphism Cards)
         val buttonWidth = 440f
-        val buttonHeight = 38f
-        val startY = 505f
-        val spacingY = 48f
+        val buttonHeight = 36f
+        val startY = 515f
+        val spacingY = 44f
         val btnX = (1280f - buttonWidth) / 2f
 
         // Render Latar Belakang Kartu untuk Seluruh Tombol Menu
@@ -221,8 +222,8 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         // Tombol-tombol Navigasi
         for (i in menuItems.indices) {
             val itemText = when (i) {
-                3 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                4 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                4 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                5 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> menuItems[i]
             }
 
@@ -327,21 +328,25 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
                 game.setScreen(CharacterSelectScreen(game))
             }
             3 -> {
+                AudioManager.playSlashLight()
+                game.setScreen(ControlSettingsScreen(game, this))
+            }
+            4 -> {
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            4 -> {
+            5 -> {
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            5 -> {
+            6 -> {
                 SaveManager.save(SaveData())
                 currentSaveData = SaveManager.load()
                 feedbackNotice = "Save Data Successfully Reset!"
                 feedbackTimer = 3.0f
                 AudioManager.playDeath()
             }
-            6 -> {
+            7 -> {
                 Gdx.app.exit()
             }
         }

@@ -26,6 +26,7 @@ import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.input.CompositeInput
 import com.stickman.tower.input.GameInput
 import com.stickman.tower.input.KeyboardInput
+import com.stickman.tower.input.TouchSettingsManager
 import com.stickman.tower.input.VirtualController
 import com.stickman.tower.relic.RelicManager
 import com.stickman.tower.relic.RelicType
@@ -87,7 +88,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     // Sistem Pause Menu
     var isPaused: Boolean = false
     private var pauseSelectedIndex: Int = 0
-    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "MAIN MENU")
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -142,7 +143,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
             uiViewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
         }
-        virtualController.resize(1280, 720)
+        virtualController.applySettings(TouchSettingsManager.load(), 1280, 720)
 
         // Hubungkan Callback Partikel VFX Pemain
         player.onLand = { x, y -> particleManager.spawnDust(x, y, count = 6) }
@@ -240,10 +241,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             showDebugBounds = !showDebugBounds
         }
 
-        // Toggle Pause dengan ESC, P, atau Tombol Android BACK (Hanya saat status PLAYING atau sudah PAUSED)
+        // Toggle Pause dengan ESC, P, Tombol Android BACK, atau Gamepad START (Hanya saat status PLAYING atau sudah PAUSED)
         val isBackTriggered = Gdx.input.isKeyJustPressed(Keys.ESCAPE) ||
                               Gdx.input.isKeyJustPressed(Keys.P) ||
-                              Gdx.input.isKeyJustPressed(Keys.BACK)
+                              Gdx.input.isKeyJustPressed(Keys.BACK) ||
+                              input.isPauseJustPressed()
 
         if (isBackTriggered && (gameStatus == GameStatus.PLAYING || isPaused)) {
             isPaused = !isPaused
@@ -664,6 +666,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
                         HapticManager.vibrateHeavy()
+                        input.gamepad.vibrate(200, 1.0f)
                         cameraManager.shake(0.5f, 0.25f)
                         particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 22, color = Color.GOLD)
                         floatingTexts.add(
@@ -684,6 +687,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                             playerGhostDelay = 0.35f
                             hitStopManager.trigger(0.08f)
                             AudioManager.playHit()
+                            HapticManager.vibrateMedium()
+                            input.gamepad.vibrate(150, 0.6f)
                             particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
                             floatingTexts.add(
                                 FloatingText(
@@ -711,6 +716,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     hitStopManager.trigger(0.08f)
                     AudioManager.playParry()
                     HapticManager.vibrateHeavy()
+                    input.gamepad.vibrate(250, 1.0f)
                     cameraManager.shake(0.8f, 0.35f)
                     particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 28, color = Color.GOLD)
                     floatingTexts.add(
@@ -756,6 +762,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
                         HapticManager.vibrateHeavy()
+                        input.gamepad.vibrate(200, 1.0f)
                         cameraManager.shake(0.6f, 0.3f)
                         particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 20, color = Color.GOLD)
                         floatingTexts.add(
@@ -774,6 +781,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                             playerGhostDelay = 0.35f
                             hitStopManager.trigger(0.06f)
                             AudioManager.playHit()
+                            HapticManager.vibrateMedium()
+                            input.gamepad.vibrate(150, 0.6f)
                             particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
                             floatingTexts.add(
                                 FloatingText(
@@ -801,6 +810,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                             hitStopManager.trigger(0.08f)
                             AudioManager.playParry()
                             HapticManager.vibrateHeavy()
+                            input.gamepad.vibrate(200, 1.0f)
                             cameraManager.shake(0.5f, 0.25f)
                             particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 18, color = Color.GOLD)
                             floatingTexts.add(
@@ -1170,21 +1180,21 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     }
 
     private fun handlePauseInput() {
-        if (Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE) || input.isPauseJustPressed()) {
             isPaused = false
             AudioManager.playSlashLight()
             return
         }
 
-        if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
+        if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W) || input.gamepad.isUpJustPressed()) {
             pauseSelectedIndex = (pauseSelectedIndex - 1 + pauseMenuItems.size) % pauseMenuItems.size
             AudioManager.playJump()
         }
-        if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
+        if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S) || input.gamepad.isDownJustPressed()) {
             pauseSelectedIndex = (pauseSelectedIndex + 1) % pauseMenuItems.size
             AudioManager.playJump()
         }
-        if (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)) {
+        if (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE) || input.isJumpJustPressed() || input.isAttackJustPressed()) {
             executePauseSelection()
         }
 
@@ -1195,14 +1205,14 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             val touchY = uiTouchVec.y
             val w = 1280f
             val h = 720f
-            val menuW = 300f
-            val startY = h / 2f + 85f
-            val itemH = 42f
+            val menuW = 320f
+            val startY = h / 2f + 115f
+            val itemH = 40f
             val menuX = w / 2f - menuW / 2f
 
             for (i in pauseMenuItems.indices) {
                 val itemY = startY - (i * itemH)
-                if (touchX in menuX..(menuX + menuW) && touchY in itemY..(itemY + itemH)) {
+                if (touchX in menuX..(menuX + menuW) && touchY in (itemY - 10f)..(itemY + itemH - 10f)) {
                     pauseSelectedIndex = i
                     executePauseSelection()
                     break
@@ -1229,15 +1239,21 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                     game.setScreen(BlacksmithScreen(game))
                 }
             }
-            3 -> { // Toggle Audio
+            3 -> { // Control Settings (Fase 12)
+                AudioManager.playSlashLight()
+                if (game != null) {
+                    game.setScreen(ControlSettingsScreen(game, this))
+                }
+            }
+            4 -> { // Toggle Audio
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            4 -> { // Toggle Haptic
+            5 -> { // Toggle Haptic
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            5 -> { // Main Menu
+            6 -> { // Main Menu
                 isPaused = false
                 AudioManager.playDodge()
                 if (game != null) {
@@ -1258,8 +1274,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.rect(0f, 0f, w, h)
 
         // Pause Menu Card (Dark Obsidian with Gold Accent)
-        val cardW = 360f
-        val cardH = 380f
+        val cardW = 380f
+        val cardH = 430f
         val cardX = w / 2f - cardW / 2f
         val cardY = h / 2f - cardH / 2f
         shapeRenderer.color = Color(0.08f, 0.11f, 0.18f, 0.95f)
@@ -1268,11 +1284,11 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
-        val startY = h / 2f + 85f
-        val itemH = 42f
+        val startY = h / 2f + 115f
+        val itemH = 40f
         val btnY = startY - (pauseSelectedIndex * itemH)
         shapeRenderer.color = Color(0.15f, 0.35f, 0.65f, 0.75f)
-        shapeRenderer.rect(cardX + 25f, btnY - 5f, cardW - 50f, 34f)
+        shapeRenderer.rect(cardX + 25f, btnY - 8f, cardW - 50f, 32f)
 
         shapeRenderer.end()
 
@@ -1286,17 +1302,17 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         for (i in pauseMenuItems.indices) {
             val itemText = when (i) {
-                3 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                4 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                4 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                5 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> pauseMenuItems[i]
             }
-            val curY = startY - (i * itemH) + 18f
+            val curY = startY - (i * itemH) + 16f
             if (i == pauseSelectedIndex) {
                 regF.color = Color.YELLOW
-                regF.draw(batch, "> $itemText <", w / 2f - 75f, curY)
+                regF.draw(batch, "> $itemText <", w / 2f - 85f, curY)
             } else {
                 regF.color = Color.WHITE
-                regF.draw(batch, itemText, w / 2f - 60f, curY)
+                regF.draw(batch, itemText, w / 2f - 70f, curY)
             }
         }
         batch.end()

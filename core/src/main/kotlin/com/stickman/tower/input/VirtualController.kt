@@ -47,25 +47,43 @@ class VirtualController : GameInput {
 
     private val touchVec = Vector3()
     var isVisible = true
+    var settings: TouchControlSettings = TouchSettingsManager.load()
 
     /**
-     * Mengatur posisi tombol dalam koordinat virtual UI Canvas (default 1280x720).
+     * Menerapkan konfigurasi tata letak dan ergonomi tombol baru.
+     */
+    fun applySettings(newSettings: TouchControlSettings, virtualWidth: Int = 1280, virtualHeight: Int = 720) {
+        settings = newSettings.copy()
+        resize(virtualWidth, virtualHeight)
+    }
+
+    /**
+     * Mengatur posisi dan ukuran tombol dalam koordinat virtual UI Canvas (default 1280x720)
+     * berdasarkan skala dan offset kustomisasi pengguna.
      */
     fun resize(virtualWidth: Int = 1280, virtualHeight: Int = 720) {
         val w = virtualWidth.toFloat()
         val h = virtualHeight.toFloat()
+        val scale = settings.scale
 
-        // Ukuran dan Posisi D-Pad Lingkaran Ergonomis (Kiri Bawah)
-        val dpadRadius = 45f
-        btnLeft.set(85f, 95f, dpadRadius)
-        btnRight.set(200f, 95f, dpadRadius)
+        // Ukuran dan Posisi D-Pad Lingkaran Ergonomis (Kiri Bawah dengan offset pengguna)
+        val dpadRadius = 45f * scale
+        val dpadBaseX = 85f + settings.dpadOffsetX
+        val dpadBaseY = 95f + settings.dpadOffsetY
+        val dpadSpacing = 115f * scale
 
-        // Posisi Tombol Aksi Konsentris (Kanan Bawah)
-        btnAttack.set(w - 120f, 110f, 54f)     // Tombol Serang Utama (Besar)
-        btnJump.set(w - 235f, 75f, 42f)        // Tombol Lompat
-        btnDodge.set(w - 245f, 175f, 40f)      // Tombol Dodge
-        btnSkill.set(w - 120f, 235f, 42f)      // Tombol Skill 1
-        btnUltimate.set(w - 225f, 275f, 44f)   // Tombol Ultimate (Atas Kanan)
+        btnLeft.set(dpadBaseX, dpadBaseY, dpadRadius)
+        btnRight.set(dpadBaseX + dpadSpacing, dpadBaseY, dpadRadius)
+
+        // Posisi Tombol Aksi Konsentris (Kanan Bawah dengan offset pengguna)
+        val actionBaseX = (w - 120f) + settings.actionOffsetX
+        val actionBaseY = 110f + settings.actionOffsetY
+
+        btnAttack.set(actionBaseX, actionBaseY, 54f * scale)
+        btnJump.set(actionBaseX - 115f * scale, actionBaseY - 35f * scale, 42f * scale)
+        btnDodge.set(actionBaseX - 125f * scale, actionBaseY + 65f * scale, 40f * scale)
+        btnSkill.set(actionBaseX, actionBaseY + 125f * scale, 42f * scale)
+        btnUltimate.set(actionBaseX - 105f * scale, actionBaseY + 165f * scale, 44f * scale)
     }
 
     /**
@@ -136,7 +154,7 @@ class VirtualController : GameInput {
     override fun isUltimateJustPressed() = justPressedUltimate
 
     /**
-     * Menggambar tombol kontrol melayang dan ikon vektor aksi.
+     * Menggambar tombol kontrol melayang dan ikon vektor aksi sesuai skala dan transparansi kustom.
      */
     fun render(
         shapeRenderer: ShapeRenderer,
@@ -147,157 +165,160 @@ class VirtualController : GameInput {
     ) {
         if (!isVisible) return
 
+        val op = settings.opacity
+        val sc = settings.scale
+
         // 1. Gambar Background Tombol Melayang (Translucent Dark Obsidian Glass)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
         // D-Pad Kiri & Kanan (Lingkaran Elegan)
-        shapeRenderer.color = if (pressedLeft) Color(0.2f, 0.6f, 0.95f, 0.75f) else Color(0.08f, 0.12f, 0.18f, 0.45f)
+        shapeRenderer.color = if (pressedLeft) Color(0.2f, 0.6f, 0.95f, 0.75f * op) else Color(0.08f, 0.12f, 0.18f, 0.45f * op)
         shapeRenderer.circle(btnLeft.x, btnLeft.y, btnLeft.radius, 24)
 
-        shapeRenderer.color = if (pressedRight) Color(0.2f, 0.6f, 0.95f, 0.75f) else Color(0.08f, 0.12f, 0.18f, 0.45f)
+        shapeRenderer.color = if (pressedRight) Color(0.2f, 0.6f, 0.95f, 0.75f * op) else Color(0.08f, 0.12f, 0.18f, 0.45f * op)
         shapeRenderer.circle(btnRight.x, btnRight.y, btnRight.radius, 24)
 
         // Vektor Segitiga Panah D-Pad Kiri & Kanan
-        shapeRenderer.color = if (pressedLeft) Color.WHITE else Color(0.75f, 0.85f, 0.95f, 0.85f)
+        shapeRenderer.color = if (pressedLeft) Color(1f, 1f, 1f, op) else Color(0.75f, 0.85f, 0.95f, 0.85f * op)
         shapeRenderer.triangle(
-            btnLeft.x - 14f, btnLeft.y,
-            btnLeft.x + 10f, btnLeft.y + 16f,
-            btnLeft.x + 10f, btnLeft.y - 16f
+            btnLeft.x - 14f * sc, btnLeft.y,
+            btnLeft.x + 10f * sc, btnLeft.y + 16f * sc,
+            btnLeft.x + 10f * sc, btnLeft.y - 16f * sc
         )
         shapeRenderer.triangle(
-            btnRight.x + 14f, btnRight.y,
-            btnRight.x - 10f, btnRight.y + 16f,
-            btnRight.x - 10f, btnRight.y - 16f
+            btnRight.x + 14f * sc, btnRight.y,
+            btnRight.x - 10f * sc, btnRight.y + 16f * sc,
+            btnRight.x - 10f * sc, btnRight.y - 16f * sc
         )
 
         // Tombol Attack (Merah Crimson)
-        shapeRenderer.color = if (wasAttackPressed) Color(0.95f, 0.2f, 0.25f, 0.85f) else Color(0.75f, 0.15f, 0.2f, 0.5f)
+        shapeRenderer.color = if (wasAttackPressed) Color(0.95f, 0.2f, 0.25f, 0.85f * op) else Color(0.75f, 0.15f, 0.2f, 0.5f * op)
         shapeRenderer.circle(btnAttack.x, btnAttack.y, btnAttack.radius, 28)
 
         // Vektor Bilah Pedang ATK
         val atkCx = btnAttack.x
-        val atkCy = btnAttack.y + 4f
-        shapeRenderer.color = Color(0.95f, 0.95f, 1f, 0.95f)
-        shapeRenderer.rectLine(atkCx - 14f, atkCy - 14f, atkCx + 16f, atkCy + 16f, 4f)
-        shapeRenderer.color = Color(1f, 0.85f, 0.25f, 0.95f) // Gagang Emas
-        shapeRenderer.rectLine(atkCx - 9f, atkCy - 1f, atkCx - 1f, atkCy - 9f, 4.5f)
-        shapeRenderer.circle(atkCx - 13f, atkCy - 13f, 3.5f)
+        val atkCy = btnAttack.y + 4f * sc
+        shapeRenderer.color = Color(0.95f, 0.95f, 1f, 0.95f * op)
+        shapeRenderer.rectLine(atkCx - 14f * sc, atkCy - 14f * sc, atkCx + 16f * sc, atkCy + 16f * sc, 4f * sc)
+        shapeRenderer.color = Color(1f, 0.85f, 0.25f, 0.95f * op) // Gagang Emas
+        shapeRenderer.rectLine(atkCx - 9f * sc, atkCy - 1f * sc, atkCx - 1f * sc, atkCy - 9f * sc, 4.5f * sc)
+        shapeRenderer.circle(atkCx - 13f * sc, atkCy - 13f * sc, 3.5f * sc)
 
         // Tombol Jump (Hijau Emerald)
-        shapeRenderer.color = if (wasJumpPressed) Color(0.2f, 0.85f, 0.4f, 0.85f) else Color(0.15f, 0.65f, 0.3f, 0.5f)
+        shapeRenderer.color = if (wasJumpPressed) Color(0.2f, 0.85f, 0.4f, 0.85f * op) else Color(0.15f, 0.65f, 0.3f, 0.5f * op)
         shapeRenderer.circle(btnJump.x, btnJump.y, btnJump.radius, 24)
 
         // Vektor Sayap/Panah Ganda JUMP
         val jmpCx = btnJump.x
-        val jmpCy = btnJump.y + 4f
-        shapeRenderer.color = Color(0.9f, 1f, 0.9f, 0.95f)
-        shapeRenderer.rectLine(jmpCx - 12f, jmpCy + 2f, jmpCx, jmpCy + 12f, 3.5f)
-        shapeRenderer.rectLine(jmpCx, jmpCy + 12f, jmpCx + 12f, jmpCy + 2f, 3.5f)
-        shapeRenderer.rectLine(jmpCx - 10f, jmpCy - 6f, jmpCx, jmpCy + 3f, 3f)
-        shapeRenderer.rectLine(jmpCx, jmpCy + 3f, jmpCx + 10f, jmpCy - 6f, 3f)
+        val jmpCy = btnJump.y + 4f * sc
+        shapeRenderer.color = Color(0.9f, 1f, 0.9f, 0.95f * op)
+        shapeRenderer.rectLine(jmpCx - 12f * sc, jmpCy + 2f * sc, jmpCx, jmpCy + 12f * sc, 3.5f * sc)
+        shapeRenderer.rectLine(jmpCx, jmpCy + 12f * sc, jmpCx + 12f * sc, jmpCy + 2f * sc, 3.5f * sc)
+        shapeRenderer.rectLine(jmpCx - 10f * sc, jmpCy - 6f * sc, jmpCx, jmpCy + 3f * sc, 3f * sc)
+        shapeRenderer.rectLine(jmpCx, jmpCy + 3f * sc, jmpCx + 10f * sc, jmpCy - 6f * sc, 3f * sc)
 
         // Tombol Dodge (Biru Azure)
-        shapeRenderer.color = if (wasDodgePressed) Color(0.2f, 0.65f, 1f, 0.85f) else Color(0.15f, 0.45f, 0.85f, 0.5f)
+        shapeRenderer.color = if (wasDodgePressed) Color(0.2f, 0.65f, 1f, 0.85f * op) else Color(0.15f, 0.45f, 0.85f, 0.5f * op)
         shapeRenderer.circle(btnDodge.x, btnDodge.y, btnDodge.radius, 24)
 
         // Vektor Jejak Bayangan Melesat DODGE
         val ddgCx = btnDodge.x
-        val ddgCy = btnDodge.y + 4f
-        shapeRenderer.color = Color(0.8f, 0.95f, 1f, 0.95f)
-        shapeRenderer.rectLine(ddgCx - 14f, ddgCy + 7f, ddgCx + 6f, ddgCy + 7f, 3f)
-        shapeRenderer.rectLine(ddgCx - 10f, ddgCy, ddgCx + 14f, ddgCy, 4f)
-        shapeRenderer.rectLine(ddgCx - 14f, ddgCy - 7f, ddgCx + 6f, ddgCy - 7f, 3f)
-        shapeRenderer.triangle(ddgCx + 17f, ddgCy, ddgCx + 11f, ddgCy + 5f, ddgCx + 11f, ddgCy - 5f)
+        val ddgCy = btnDodge.y + 4f * sc
+        shapeRenderer.color = Color(0.8f, 0.95f, 1f, 0.95f * op)
+        shapeRenderer.rectLine(ddgCx - 14f * sc, ddgCy + 7f * sc, ddgCx + 6f * sc, ddgCy + 7f * sc, 3f * sc)
+        shapeRenderer.rectLine(ddgCx - 10f * sc, ddgCy, ddgCx + 14f * sc, ddgCy, 4f * sc)
+        shapeRenderer.rectLine(ddgCx - 14f * sc, ddgCy - 7f * sc, ddgCx + 6f * sc, ddgCy - 7f * sc, 3f * sc)
+        shapeRenderer.triangle(ddgCx + 17f * sc, ddgCy, ddgCx + 11f * sc, ddgCy + 5f * sc, ddgCx + 11f * sc, ddgCy - 5f * sc)
 
         // Tombol Skill 1 (Ungu Arcane)
-        val skillColor = if (skill.isReady) Color(0.7f, 0.3f, 0.95f, 0.65f) else Color(0.3f, 0.2f, 0.4f, 0.45f)
+        val skillColor = if (skill.isReady) Color(0.7f, 0.3f, 0.95f, 0.65f * op) else Color(0.3f, 0.2f, 0.4f, 0.45f * op)
         shapeRenderer.color = skillColor
         shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius, 24)
 
         // Vektor Berlian Runic SKILL
         val sklCx = btnSkill.x
-        val sklCy = btnSkill.y + 4f
-        shapeRenderer.color = if (skill.isReady) Color(0.92f, 0.75f, 1f, 0.95f) else Color(0.55f, 0.45f, 0.65f, 0.6f)
-        shapeRenderer.triangle(sklCx, sklCy + 14f, sklCx - 11f, sklCy, sklCx + 11f, sklCy)
-        shapeRenderer.triangle(sklCx, sklCy - 14f, sklCx - 11f, sklCy, sklCx + 11f, sklCy)
+        val sklCy = btnSkill.y + 4f * sc
+        shapeRenderer.color = if (skill.isReady) Color(0.92f, 0.75f, 1f, 0.95f * op) else Color(0.55f, 0.45f, 0.65f, 0.6f * op)
+        shapeRenderer.triangle(sklCx, sklCy + 14f * sc, sklCx - 11f * sc, sklCy, sklCx + 11f * sc, sklCy)
+        shapeRenderer.triangle(sklCx, sklCy - 14f * sc, sklCx - 11f * sc, sklCy, sklCx + 11f * sc, sklCy)
         if (skill.isReady) {
-            shapeRenderer.color = Color.WHITE
-            shapeRenderer.triangle(sklCx, sklCy + 6f, sklCx - 5f, sklCy, sklCx + 5f, sklCy)
-            shapeRenderer.triangle(sklCx, sklCy - 6f, sklCx - 5f, sklCy, sklCx + 5f, sklCy)
+            shapeRenderer.color = Color(1f, 1f, 1f, op)
+            shapeRenderer.triangle(sklCx, sklCy + 6f * sc, sklCx - 5f * sc, sklCy, sklCx + 5f * sc, sklCy)
+            shapeRenderer.triangle(sklCx, sklCy - 6f * sc, sklCx - 5f * sc, sklCy, sklCx + 5f * sc, sklCy)
         }
 
         // Tombol Ultimate (Emas Surya menyala jika 100%)
-        val ultColor = if (ultimate.isReady) Color(1f, 0.85f, 0.2f, 0.85f) else Color(0.45f, 0.38f, 0.15f, 0.45f)
+        val ultColor = if (ultimate.isReady) Color(1f, 0.85f, 0.2f, 0.85f * op) else Color(0.45f, 0.38f, 0.15f, 0.45f * op)
         shapeRenderer.color = ultColor
         shapeRenderer.circle(btnUltimate.x, btnUltimate.y, btnUltimate.radius, 24)
 
         // Vektor Mahkota Surya Bintang ULT
         val ultCx = btnUltimate.x
-        val ultCy = btnUltimate.y + 4f
-        shapeRenderer.color = if (ultimate.isReady) Color(1f, 0.95f, 0.4f, 1f) else Color(0.7f, 0.65f, 0.4f, 0.6f)
-        shapeRenderer.circle(ultCx, ultCy, 7f, 16)
-        shapeRenderer.rectLine(ultCx, ultCy + 8f, ultCx, ultCy + 16f, 3.5f)
-        shapeRenderer.rectLine(ultCx, ultCy - 8f, ultCx, ultCy - 16f, 3.5f)
-        shapeRenderer.rectLine(ultCx - 8f, ultCy, ultCx - 16f, ultCy, 3.5f)
-        shapeRenderer.rectLine(ultCx + 8f, ultCy, ultCx + 16f, ultCy, 3.5f)
-        shapeRenderer.rectLine(ultCx - 6f, ultCy + 6f, ultCx - 11f, ultCy + 11f, 2.5f)
-        shapeRenderer.rectLine(ultCx + 6f, ultCy + 6f, ultCx + 12f, ultCy + 12f, 2.5f)
-        shapeRenderer.rectLine(ultCx - 6f, ultCy - 6f, ultCx - 11f, ultCy - 11f, 2.5f)
-        shapeRenderer.rectLine(ultCx + 6f, ultCy - 6f, ultCx + 12f, ultCy - 12f, 2.5f)
+        val ultCy = btnUltimate.y + 4f * sc
+        shapeRenderer.color = if (ultimate.isReady) Color(1f, 0.95f, 0.4f, op) else Color(0.7f, 0.65f, 0.4f, 0.6f * op)
+        shapeRenderer.circle(ultCx, ultCy, 7f * sc, 16)
+        shapeRenderer.rectLine(ultCx, ultCy + 8f * sc, ultCx, ultCy + 16f * sc, 3.5f * sc)
+        shapeRenderer.rectLine(ultCx, ultCy - 8f * sc, ultCx, ultCy - 16f * sc, 3.5f * sc)
+        shapeRenderer.rectLine(ultCx - 8f * sc, ultCy, ultCx - 16f * sc, ultCy, 3.5f * sc)
+        shapeRenderer.rectLine(ultCx + 8f * sc, ultCy, ultCx + 16f * sc, ultCy, 3.5f * sc)
+        shapeRenderer.rectLine(ultCx - 6f * sc, ultCy + 6f * sc, ultCx - 11f * sc, ultCy + 11f * sc, 2.5f * sc)
+        shapeRenderer.rectLine(ultCx + 6f * sc, ultCy + 6f * sc, ultCx + 12f * sc, ultCy + 12f * sc, 2.5f * sc)
+        shapeRenderer.rectLine(ultCx - 6f * sc, ultCy - 6f * sc, ultCx - 11f * sc, ultCy - 11f * sc, 2.5f * sc)
+        shapeRenderer.rectLine(ultCx + 6f * sc, ultCy - 6f * sc, ultCx + 12f * sc, ultCy - 12f * sc, 2.5f * sc)
 
         shapeRenderer.end()
 
         // 2. Gambar Garis Tepi (Outline Lingkaran dengan Efek Halus)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line)
-        shapeRenderer.color = Color(0.85f, 0.9f, 1f, 0.5f)
+        shapeRenderer.color = Color(0.85f, 0.9f, 1f, 0.5f * op)
         shapeRenderer.circle(btnLeft.x, btnLeft.y, btnLeft.radius, 24)
         shapeRenderer.circle(btnRight.x, btnRight.y, btnRight.radius, 24)
 
-        shapeRenderer.color = Color(1f, 0.6f, 0.6f, 0.6f)
+        shapeRenderer.color = Color(1f, 0.6f, 0.6f, 0.6f * op)
         shapeRenderer.circle(btnAttack.x, btnAttack.y, btnAttack.radius, 28)
 
-        shapeRenderer.color = Color(0.6f, 1f, 0.7f, 0.6f)
+        shapeRenderer.color = Color(0.6f, 1f, 0.7f, 0.6f * op)
         shapeRenderer.circle(btnJump.x, btnJump.y, btnJump.radius, 24)
 
-        shapeRenderer.color = Color(0.6f, 0.8f, 1f, 0.6f)
+        shapeRenderer.color = Color(0.6f, 0.8f, 1f, 0.6f * op)
         shapeRenderer.circle(btnDodge.x, btnDodge.y, btnDodge.radius, 24)
 
-        shapeRenderer.color = if (skill.isReady) Color(0.9f, 0.7f, 1f, 0.7f) else Color(0.5f, 0.4f, 0.6f, 0.4f)
+        shapeRenderer.color = if (skill.isReady) Color(0.9f, 0.7f, 1f, 0.7f * op) else Color(0.5f, 0.4f, 0.6f, 0.4f * op)
         shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius, 24)
 
-        shapeRenderer.color = if (ultimate.isReady) Color(1f, 0.95f, 0.4f, 0.9f) else Color(0.6f, 0.5f, 0.3f, 0.4f)
+        shapeRenderer.color = if (ultimate.isReady) Color(1f, 0.95f, 0.4f, 0.9f * op) else Color(0.6f, 0.5f, 0.3f, 0.4f * op)
         shapeRenderer.circle(btnUltimate.x, btnUltimate.y, btnUltimate.radius, 24)
 
         // Lingkaran cooldown pada tombol skill
         if (!skill.isReady) {
-            shapeRenderer.color = Color(0.1f, 0.1f, 0.15f, 0.8f)
+            shapeRenderer.color = Color(0.1f, 0.1f, 0.15f, 0.8f * op)
             shapeRenderer.circle(btnSkill.x, btnSkill.y, btnSkill.radius * skill.cooldownPercent, 20)
         }
         shapeRenderer.end()
 
         // 3. Gambar Teks Label Tombol (Sub-label Halus & Countdown)
         batch.begin()
-        font.color = Color(0.9f, 0.9f, 0.95f, 0.85f)
+        font.color = Color(0.9f, 0.9f, 0.95f, 0.85f * op)
 
         // Sub-labels di bawah ikon
-        font.draw(batch, "ATK", btnAttack.x - 14f, btnAttack.y - 22f)
-        font.draw(batch, "JUMP", btnJump.x - 17f, btnJump.y - 18f)
-        font.draw(batch, "DODGE", btnDodge.x - 22f, btnDodge.y - 18f)
+        font.draw(batch, "ATK", btnAttack.x - 14f * sc, btnAttack.y - 22f * sc)
+        font.draw(batch, "JUMP", btnJump.x - 17f * sc, btnJump.y - 18f * sc)
+        font.draw(batch, "DODGE", btnDodge.x - 22f * sc, btnDodge.y - 18f * sc)
 
         if (skill.isReady) {
-            font.draw(batch, "SKILL", btnSkill.x - 17f, btnSkill.y - 18f)
+            font.draw(batch, "SKILL", btnSkill.x - 17f * sc, btnSkill.y - 18f * sc)
         } else {
-            font.color = Color.YELLOW
+            font.color = Color(1f, 1f, 0.2f, op)
             val tenths = (skill.remainingCooldown * 10).toInt().coerceAtLeast(0)
-            font.draw(batch, "${tenths / 10}.${tenths % 10}s", btnSkill.x - 14f, btnSkill.y + 4f)
+            font.draw(batch, "${tenths / 10}.${tenths % 10}s", btnSkill.x - 14f * sc, btnSkill.y + 4f * sc)
         }
 
         if (ultimate.isReady) {
-            font.color = Color.GOLD
-            font.draw(batch, "ULT!", btnUltimate.x - 14f, btnUltimate.y - 18f)
+            font.color = Color(1f, 0.85f, 0.25f, op)
+            font.draw(batch, "ULT!", btnUltimate.x - 14f * sc, btnUltimate.y - 18f * sc)
         } else {
-            font.color = Color(0.9f, 0.85f, 0.7f, 0.8f)
-            font.draw(batch, "${(ultimate.energyPercent * 100).toInt()}%", btnUltimate.x - 14f, btnUltimate.y + 4f)
+            font.color = Color(0.9f, 0.85f, 0.7f, 0.8f * op)
+            font.draw(batch, "${(ultimate.energyPercent * 100).toInt()}%", btnUltimate.x - 14f * sc, btnUltimate.y + 4f * sc)
         }
 
         batch.end()

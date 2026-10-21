@@ -1,6 +1,7 @@
 package com.stickman.tower.input
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input.Buttons
 import com.badlogic.gdx.Input.Keys
 
 /**
@@ -9,47 +10,55 @@ import com.badlogic.gdx.Input.Keys
  */
 class KeyboardInput : GameInput {
     override fun isMoveLeft(): Boolean {
-        return Gdx.input.isKeyPressed(Keys.A) || Gdx.input.isKeyPressed(Keys.LEFT)
+        val input = Gdx.input ?: return false
+        return input.isKeyPressed(Keys.A) || input.isKeyPressed(Keys.LEFT)
     }
 
     override fun isMoveRight(): Boolean {
-        return Gdx.input.isKeyPressed(Keys.D) || Gdx.input.isKeyPressed(Keys.RIGHT)
+        val input = Gdx.input ?: return false
+        return input.isKeyPressed(Keys.D) || input.isKeyPressed(Keys.RIGHT)
     }
 
     override fun isJumpJustPressed(): Boolean {
-        return Gdx.input.isKeyJustPressed(Keys.SPACE) ||
-               Gdx.input.isKeyJustPressed(Keys.W) ||
-               Gdx.input.isKeyJustPressed(Keys.UP) ||
-               Gdx.input.isKeyJustPressed(Keys.K)
+        val input = Gdx.input ?: return false
+        return input.isKeyJustPressed(Keys.SPACE) ||
+               input.isKeyJustPressed(Keys.W) ||
+               input.isKeyJustPressed(Keys.UP) ||
+               input.isKeyJustPressed(Keys.K)
     }
 
     override fun isJumpPressed(): Boolean {
-        return Gdx.input.isKeyPressed(Keys.SPACE) ||
-               Gdx.input.isKeyPressed(Keys.W) ||
-               Gdx.input.isKeyPressed(Keys.UP) ||
-               Gdx.input.isKeyPressed(Keys.K)
+        val input = Gdx.input ?: return false
+        return input.isKeyPressed(Keys.SPACE) ||
+               input.isKeyPressed(Keys.W) ||
+               input.isKeyPressed(Keys.UP) ||
+               input.isKeyPressed(Keys.K)
     }
 
     override fun isAttackJustPressed(): Boolean {
-        return Gdx.input.isKeyJustPressed(Keys.J) ||
-               Gdx.input.isKeyJustPressed(Keys.ENTER) ||
-               Gdx.input.isKeyJustPressed(Keys.X) ||
-               Gdx.input.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT)
+        val input = Gdx.input ?: return false
+        return input.isKeyJustPressed(Keys.J) ||
+               input.isKeyJustPressed(Keys.ENTER) ||
+               input.isKeyJustPressed(Keys.X) ||
+               input.isButtonJustPressed(Buttons.LEFT)
     }
 
     override fun isDodgeJustPressed(): Boolean {
-        return Gdx.input.isKeyJustPressed(Keys.L) ||
-               Gdx.input.isKeyJustPressed(Keys.SHIFT_LEFT) ||
-               Gdx.input.isKeyJustPressed(Keys.C)
+        val input = Gdx.input ?: return false
+        return input.isKeyJustPressed(Keys.L) ||
+               input.isKeyJustPressed(Keys.SHIFT_LEFT) ||
+               input.isKeyJustPressed(Keys.C)
     }
 
     override fun isSkillJustPressed(): Boolean {
-        return Gdx.input.isKeyJustPressed(Keys.U) ||
-               Gdx.input.isKeyJustPressed(Keys.I)
+        val input = Gdx.input ?: return false
+        return input.isKeyJustPressed(Keys.U) ||
+               input.isKeyJustPressed(Keys.I)
     }
 
     override fun isUltimateJustPressed(): Boolean {
-        return Gdx.input.isKeyJustPressed(Keys.O) ||
-               Gdx.input.isKeyJustPressed(Keys.Q)
+        val input = Gdx.input ?: return false
+        return input.isKeyJustPressed(Keys.O) ||
+               input.isKeyJustPressed(Keys.Q)
     }
 }

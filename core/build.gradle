@@ -4,6 +4,7 @@ eclipse.project.name = appName + '-core'
 dependencies {
   api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
+  api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
   api "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
   testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlinVersion"
 
