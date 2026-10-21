@@ -13,6 +13,7 @@ import com.stickman.tower.combat.Hitbox
 import com.stickman.tower.combat.Hurtbox
 import com.stickman.tower.combat.Skill
 import com.stickman.tower.audio.AudioManager
+import com.stickman.tower.audio.HapticManager
 import com.stickman.tower.combat.UltimateEnergy
 import com.stickman.tower.input.GameInput
 import com.stickman.tower.physics.Platform
@@ -190,6 +191,7 @@ class Player(
             // Berikan i-Frames kebal penuh selama dodge
             health.takeDamage(0f)
             AudioManager.playDodge()
+            HapticManager.vibrateLight()
             onDodge?.invoke(position.x + width / 2f, position.y)
             return
         }
@@ -209,6 +211,7 @@ class Player(
                 hitbox.knockbackY = 4.0f
                 hitbox.reset()
                 AudioManager.playSlashHeavy()
+                HapticManager.vibrateMedium()
                 return
             }
         }
@@ -229,6 +232,7 @@ class Player(
                 hitbox.knockbackY = 7.0f
                 hitbox.reset()
                 AudioManager.playSlashHeavy()
+                HapticManager.vibrateHeavy()
                 return
             }
         }
@@ -444,6 +448,7 @@ class Player(
         if (health.takeDamage(mitigatedDmg)) {
             velocity.x = knockDirX
             velocity.y = knockDirY
+            HapticManager.vibrateHeavy()
             return true
         }
         return false

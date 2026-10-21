@@ -5,10 +5,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.character.Player
 import com.stickman.tower.combat.Health
 import com.stickman.tower.combat.Hitbox
 import com.stickman.tower.combat.Hurtbox
+import com.stickman.tower.combat.Projectile
 import com.stickman.tower.physics.Platform
 import com.stickman.tower.world.GameConfig
 import kotlin.math.abs
@@ -16,10 +18,14 @@ import kotlin.math.sin
 
 /**
  * Entitas Musuh Stickman dengan Artificial Intelligence (AI) Finite State Machine:
- * Patroli mandiri (anti-jurang), deteksi & pengejaran pemain, serangan berancang-ancang (telegraphed),
- * dan reaksi damage / eliminasi.
+ * Mendukung varian MELEE (petarung belati crimson jarak dekat) dan RANGED (pemanah sihir amethyst jarak jauh).
+ * Dilengkapi patroli mandiri (anti-jurang), kiting menjaga jarak, proyektil, dan reaksi eliminasi.
  */
-class Enemy(spawnX: Float, spawnY: Float) {
+class Enemy(
+    spawnX: Float,
+    spawnY: Float,
+    val type: EnemyType = EnemyType.MELEE
+) {
     val position = Vector2(spawnX, spawnY)
     val velocity = Vector2(0f, 0f)
 
@@ -28,13 +34,14 @@ class Enemy(spawnX: Float, spawnY: Float) {
     val bounds = Rectangle(position.x, position.y, width, height)
 
     // Komponen Combat
-    val health = Health(maxHp = 50f, invulnerableDuration = 0.25f)
+    val health = Health(maxHp = if (type == EnemyType.RANGED) 40f else 50f, invulnerableDuration = 0.25f)
     val hurtbox = Hurtbox(this)
-    val hitbox = Hitbox(this, damage = 12f, knockbackX = 5.5f, knockbackY = 3.0f)
+    val hitbox = Hitbox(this, damage = if (type == EnemyType.RANGED) 8f else 12f, knockbackX = 5.5f, knockbackY = 3.0f)
+    val projectiles = mutableListOf<Projectile>()
 
     // RPG Progression Reward
-    val expReward: Int = 25
-    val goldReward: Int = 10
+    val expReward: Int = if (type == EnemyType.RANGED) 35 else 25
+    val goldReward: Int = if (type == EnemyType.RANGED) 15 else 10
     var rewardClaimed: Boolean = false
 
     // AI & Parameter Status
@@ -46,6 +53,7 @@ class Enemy(spawnX: Float, spawnY: Float) {
     private var patrolDir = 1f
     private var attackCooldown = 0f
     private var attackTimer = 0f
+    private var hasFiredProjectile = false
     private var deadTimer = 0f
     private var animTime = 0f
 
@@ -76,6 +84,24 @@ class Enemy(spawnX: Float, spawnY: Float) {
             attackCooldown = (attackCooldown - delta).coerceAtLeast(0f)
         }
 
+        // Perbarui Proyektil Ranged
+        if (projectiles.isNotEmpty()) {
+            val it = projectiles.iterator()
+            while (it.hasNext()) {
+                val proj = it.next()
+                proj.update(delta)
+                for (platform in platforms) {
+                    if (!proj.isDestroyed && proj.bounds.overlaps(platform.bounds)) {
+                        proj.isDestroyed = true
+                        break
+                    }
+                }
+                if (proj.isDestroyed) {
+                    it.remove()
+                }
+            }
+        }
+
         // Jika Musuh Mati
         if (health.isDead) {
             state = EnemyState.DEAD
@@ -97,7 +123,7 @@ class Enemy(spawnX: Float, spawnY: Float) {
         // 1. Eksekusi AI State Machine
         when (state) {
             EnemyState.PATROL -> updatePatrolState(delta, player, platforms)
-            EnemyState.CHASE -> updateChaseState(delta, player)
+            EnemyState.CHASE -> updateChaseState(delta, player, platforms)
             EnemyState.ATTACK -> updateAttackState(delta)
             EnemyState.HURT -> updateHurtState(delta)
             EnemyState.DEAD -> {}
@@ -112,11 +138,11 @@ class Enemy(spawnX: Float, spawnY: Float) {
     }
 
     private fun updatePatrolState(delta: Float, player: Player, platforms: List<Platform>) {
-        // Cek apakah pemain masuk dalam jangkauan deteksi
+        val detectRadius = if (type == EnemyType.RANGED) 8.5f else DETECTION_RADIUS
         val dx = player.position.x - position.x
         val dy = abs(player.position.y - position.y)
 
-        if (abs(dx) < DETECTION_RADIUS && dy < 2.5f && !player.health.isDead) {
+        if (abs(dx) < detectRadius && dy < 3.2f && !player.health.isDead) {
             state = EnemyState.CHASE
             return
         }
@@ -136,12 +162,14 @@ class Enemy(spawnX: Float, spawnY: Float) {
         velocity.x = patrolDir * PATROL_SPEED
     }
 
-    private fun updateChaseState(delta: Float, player: Player) {
+    private fun updateChaseState(delta: Float, player: Player, platforms: List<Platform>) {
         val dx = player.position.x - position.x
         val dy = abs(player.position.y - position.y)
+        val dist = abs(dx)
+        val maxSight = if (type == EnemyType.RANGED) 12.0f else (DETECTION_RADIUS * 1.3f)
 
         // Jika pemain kabur terlalu jauh atau pemain sudah mati
-        if (abs(dx) > DETECTION_RADIUS * 1.3f || dy > 3.0f || player.health.isDead) {
+        if (dist > maxSight || dy > 4.2f || player.health.isDead) {
             state = EnemyState.PATROL
             velocity.x = 0f
             return
@@ -149,48 +177,105 @@ class Enemy(spawnX: Float, spawnY: Float) {
 
         facingRight = dx > 0
 
-        // Jika sudah dalam jangkauan serang
-        if (abs(dx) <= ATTACK_RADIUS) {
-            if (attackCooldown <= 0f) {
-                state = EnemyState.ATTACK
-                attackTimer = 0f
-                hitbox.reset()
-                velocity.x = 0f
+        if (type == EnemyType.RANGED) {
+            // Kiting AI: Menjaga jarak optimal 3.5m .. 7.0m dari pemain
+            if (dist < 3.2f) {
+                // Terlalu dekat! Mundur menjauh dari pemain jika ada platform di belakang
+                val retreatDir = if (dx > 0) -1f else 1f
+                var canRetreat = true
+                if (isGrounded) {
+                    val checkX = if (retreatDir > 0) position.x + width + 0.25f else position.x - 0.25f
+                    val checkY = position.y - 0.3f
+                    canRetreat = platforms.any { checkX >= it.left && checkX <= it.right && checkY >= it.bottom && checkY <= it.top + 0.1f }
+                }
+                velocity.x = if (canRetreat) retreatDir * (PATROL_SPEED * 1.3f) else 0f
+            } else if (dist > 7.2f) {
+                // Terlalu jauh! Maju mendekat ke pemain
+                val approachDir = if (dx > 0) 1f else -1f
+                velocity.x = approachDir * (CHASE_SPEED * 0.85f)
             } else {
-                // Berhenti bersiap menyerang saat cooldown
+                // Berada di sweet spot (3.2m .. 7.2m): Berhenti dan bersiap menembak
                 velocity.x = MathUtils.lerp(velocity.x, 0f, 15f * delta)
+                if (attackCooldown <= 0f && dy < 2.5f) {
+                    state = EnemyState.ATTACK
+                    attackTimer = 0f
+                    hasFiredProjectile = false
+                    velocity.x = 0f
+                }
             }
         } else {
-            // Lari mendekati pemain
-            val targetVx = if (dx > 0) CHASE_SPEED else -CHASE_SPEED
-            velocity.x = MathUtils.lerp(velocity.x, targetVx, 12f * delta)
+            // Melee AI
+            if (dist <= ATTACK_RADIUS) {
+                if (attackCooldown <= 0f) {
+                    state = EnemyState.ATTACK
+                    attackTimer = 0f
+                    hitbox.reset()
+                    velocity.x = 0f
+                } else {
+                    velocity.x = MathUtils.lerp(velocity.x, 0f, 15f * delta)
+                }
+            } else {
+                val targetVx = if (dx > 0) CHASE_SPEED else -CHASE_SPEED
+                velocity.x = MathUtils.lerp(velocity.x, targetVx, 12f * delta)
+            }
         }
     }
 
     private fun updateAttackState(delta: Float) {
         attackTimer += delta
-        velocity.x = 0f // Berhenti saat ancang-ancang & menebas
+        velocity.x = 0f // Berhenti saat ancang-ancang
 
-        when {
-            attackTimer < ATTACK_WINDUP -> {
-                // Ancang-ancang telegraphed (mata menyala)
-                hitbox.isActive = false
+        if (type == EnemyType.RANGED) {
+            val rangedWindup = 0.40f
+            val rangedTotalTime = 0.70f
+
+            if (attackTimer >= rangedWindup && !hasFiredProjectile) {
+                hasFiredProjectile = true
+                val projVx = if (facingRight) 9.5f else -9.5f
+                val projX = if (facingRight) position.x + width + 0.15f else position.x - 0.95f
+                val projY = position.y + height * 0.62f
+                projectiles.add(
+                    Projectile(
+                        startX = projX,
+                        startY = projY,
+                        velocityX = projVx,
+                        velocityY = 0f,
+                        damage = 14f,
+                        width = 0.80f,
+                        height = 0.35f,
+                        maxLifetime = 2.5f,
+                        color = Color(0.75f, 0.25f, 1f, 1f)
+                    )
+                )
+                AudioManager.playSlashLight()
             }
-            attackTimer < ATTACK_WINDUP + ATTACK_ACTIVE -> {
-                // Hitbox aktif melukai pemain
-                val hbW = 1.25f
-                val hbH = 1.25f
-                val hbX = if (facingRight) position.x + width * 0.6f else position.x - hbW + width * 0.4f
-                val hbY = position.y + 0.35f
-                hitbox.set(hbX, hbY, hbW, hbH, active = true)
-            }
-            attackTimer < TOTAL_ATTACK_TIME -> {
-                hitbox.isActive = false
-            }
-            else -> {
-                hitbox.reset()
-                attackCooldown = 1.2f
+
+            if (attackTimer >= rangedTotalTime) {
+                attackCooldown = 1.8f
                 state = EnemyState.CHASE
+            }
+        } else {
+            when {
+                attackTimer < ATTACK_WINDUP -> {
+                    // Ancang-ancang telegraphed (mata menyala)
+                    hitbox.isActive = false
+                }
+                attackTimer < ATTACK_WINDUP + ATTACK_ACTIVE -> {
+                    // Hitbox aktif melukai pemain
+                    val hbW = 1.25f
+                    val hbH = 1.25f
+                    val hbX = if (facingRight) position.x + width * 0.6f else position.x - hbW + width * 0.4f
+                    val hbY = position.y + 0.35f
+                    hitbox.set(hbX, hbY, hbW, hbH, active = true)
+                }
+                attackTimer < TOTAL_ATTACK_TIME -> {
+                    hitbox.isActive = false
+                }
+                else -> {
+                    hitbox.reset()
+                    attackCooldown = 1.2f
+                    state = EnemyState.CHASE
+                }
             }
         }
     }
@@ -265,6 +350,13 @@ class Enemy(spawnX: Float, spawnY: Float) {
     fun render(shapeRenderer: ShapeRenderer) {
         if (isDespawned) return
 
+        // Render Seluruh Proyektil Ranged Aktif
+        if (projectiles.isNotEmpty()) {
+            for (proj in projectiles) {
+                proj.render(shapeRenderer)
+            }
+        }
+
         val centerX = position.x + width / 2f
         val footY = position.y
         val headRadius = 0.22f
@@ -274,8 +366,9 @@ class Enemy(spawnX: Float, spawnY: Float) {
         val shoulderY = neckY - 0.15f
         val lookDir = if (facingRight) 1f else -1f
 
-        // Warna Tubuh: Merah Crimson (musuh gelap), Berkedip Putih saat hurt
-        val bodyColor = if (health.isFlashing) Color.WHITE else Color(0.85f, 0.2f, 0.25f, 1f)
+        // Warna Tubuh: Merah Crimson (Melee) / Amethyst Ungu (Ranged), Berkedip Putih saat hurt
+        val baseColor = if (type == EnemyType.RANGED) Color(0.68f, 0.28f, 0.95f, 1f) else Color(0.85f, 0.2f, 0.25f, 1f)
+        val bodyColor = if (health.isFlashing) Color.WHITE else baseColor
         shapeRenderer.color = bodyColor
 
         if (state == EnemyState.DEAD) {
@@ -291,9 +384,14 @@ class Enemy(spawnX: Float, spawnY: Float) {
         // 1. Kepala
         shapeRenderer.circle(centerX, headCenterY, headRadius, 16)
 
-        // 2. Mata Merah Menyala / Kuning saat Ancang-ancang Telegraphed
-        val isTelegraphing = state == EnemyState.ATTACK && attackTimer < ATTACK_WINDUP
-        shapeRenderer.color = if (isTelegraphing) Color.YELLOW else Color(0.4f, 0f, 0f, 1f)
+        // 2. Mata Merah Menyala / Ungu Sihir / Kuning saat Ancang-ancang Telegraphed
+        val isTelegraphing = state == EnemyState.ATTACK && attackTimer < (if (type == EnemyType.RANGED) 0.40f else ATTACK_WINDUP)
+        val eyeColor = when {
+            isTelegraphing -> Color.YELLOW
+            type == EnemyType.RANGED -> Color(0.92f, 0.45f, 1f, 1f)
+            else -> Color(0.4f, 0f, 0f, 1f)
+        }
+        shapeRenderer.color = eyeColor
         val eyeX = centerX + (headRadius * 0.45f * lookDir)
         val eyeY = headCenterY + 0.04f
         shapeRenderer.circle(eyeX, eyeY, if (isTelegraphing) 0.07f else 0.045f, 8)
@@ -321,35 +419,63 @@ class Enemy(spawnX: Float, spawnY: Float) {
         shapeRenderer.rectLine(centerX, pelvisY, legLeftFootX, footY, 0.07f)
         shapeRenderer.rectLine(centerX, pelvisY, legRightFootX, footY, 0.07f)
 
-        // 5. Tangan dan Senjata Gada / Belati Musuh
-        val armHandX: Float
-        val armHandY: Float
-        val weaponTipX: Float
-        val weaponTipY: Float
+        // 5. Tangan dan Senjata (Busur Panah untuk Ranged, Belati untuk Melee)
+        if (type == EnemyType.RANGED) {
+            val bowX = centerX + 0.35f * lookDir
+            val bowTopY = shoulderY + 0.35f
+            val bowMidY = shoulderY
+            val bowBotY = shoulderY - 0.35f
 
-        if (state == EnemyState.ATTACK && attackTimer >= ATTACK_WINDUP && attackTimer < ATTACK_WINDUP + ATTACK_ACTIVE) {
-            // Ayunan tebasan kuat ke depan
-            armHandX = centerX + 0.4f * lookDir
-            armHandY = shoulderY - 0.05f
-            weaponTipX = armHandX + 0.8f * lookDir
-            weaponTipY = armHandY - 0.25f
+            shapeRenderer.color = Color(0.55f, 0.40f, 0.25f, 1f) // Kayu busur
+            shapeRenderer.rectLine(bowX, bowMidY, bowX + 0.15f * lookDir, bowTopY, 0.05f)
+            shapeRenderer.rectLine(bowX, bowMidY, bowX + 0.15f * lookDir, bowBotY, 0.05f)
+            // Tali busur
+            shapeRenderer.color = Color(0.85f, 0.85f, 0.85f, 0.8f)
+            shapeRenderer.rectLine(bowX + 0.15f * lookDir, bowTopY, bowX + 0.15f * lookDir, bowBotY, 0.03f)
 
-            // Efek tebasan merah musuh
-            shapeRenderer.color = Color(1f, 0.15f, 0.15f, 0.8f)
-            shapeRenderer.rectLine(armHandX, armHandY + 0.2f, weaponTipX, weaponTipY - 0.1f, 0.08f)
+            // Tangan memegang busur
+            shapeRenderer.color = bodyColor
+            shapeRenderer.rectLine(centerX, shoulderY, bowX, bowMidY, 0.06f)
+
+            // Anak panah dan bola energi saat membidik
+            if (isTelegraphing) {
+                val arrowTipX = bowX + 0.45f * lookDir
+                val arrowTailX = bowX - 0.20f * lookDir
+                shapeRenderer.color = Color(0.85f, 0.35f, 1f, 1f)
+                shapeRenderer.rectLine(arrowTailX, bowMidY, arrowTipX, bowMidY, 0.06f)
+                val pulse = (sin(animTime * 15f) + 1f) * 0.03f
+                shapeRenderer.circle(arrowTipX, bowMidY, 0.10f + pulse, 10)
+            }
         } else {
-            armHandX = centerX + 0.22f * lookDir
-            armHandY = shoulderY - 0.35f
-            weaponTipX = armHandX + 0.5f * lookDir
-            weaponTipY = armHandY - 0.3f
+            val armHandX: Float
+            val armHandY: Float
+            val weaponTipX: Float
+            val weaponTipY: Float
+
+            if (state == EnemyState.ATTACK && attackTimer >= ATTACK_WINDUP && attackTimer < ATTACK_WINDUP + ATTACK_ACTIVE) {
+                // Ayunan tebasan kuat ke depan
+                armHandX = centerX + 0.4f * lookDir
+                armHandY = shoulderY - 0.05f
+                weaponTipX = armHandX + 0.8f * lookDir
+                weaponTipY = armHandY - 0.25f
+
+                // Efek tebasan merah musuh
+                shapeRenderer.color = Color(1f, 0.15f, 0.15f, 0.8f)
+                shapeRenderer.rectLine(armHandX, armHandY + 0.2f, weaponTipX, weaponTipY - 0.1f, 0.08f)
+            } else {
+                armHandX = centerX + 0.22f * lookDir
+                armHandY = shoulderY - 0.35f
+                weaponTipX = armHandX + 0.5f * lookDir
+                weaponTipY = armHandY - 0.3f
+            }
+
+            shapeRenderer.color = bodyColor
+            shapeRenderer.rectLine(centerX, shoulderY, armHandX, armHandY, 0.06f)
+
+            // Bilah Belati Musuh (Dark Steel)
+            shapeRenderer.color = Color(0.35f, 0.35f, 0.4f, 1f)
+            shapeRenderer.rectLine(armHandX, armHandY, weaponTipX, weaponTipY, 0.07f)
         }
-
-        shapeRenderer.color = bodyColor
-        shapeRenderer.rectLine(centerX, shoulderY, armHandX, armHandY, 0.06f)
-
-        // Bilah Belati Musuh (Dark Steel)
-        shapeRenderer.color = Color(0.35f, 0.35f, 0.4f, 1f)
-        shapeRenderer.rectLine(armHandX, armHandY, weaponTipX, weaponTipY, 0.07f)
 
         // 6. Mini HP Bar Musuh
         renderHealthBar(shapeRenderer, centerX, position.y + height + 0.2f)

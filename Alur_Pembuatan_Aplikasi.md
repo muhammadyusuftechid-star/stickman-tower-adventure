@@ -394,27 +394,27 @@ flowchart LR
 
 #### Modul 9.1: Ranged Enemy Entity & Projectile Engine
 - **Task 9.1.1: Pemodelan Ranged Enemy AI**
-  - [ ] Tambahkan varian musuh pada `Enemy.kt` atau buat class baru dengan `EnemyType { MELEE, RANGED }`.
-  - [ ] Logika AI Ranged: Menjaga jarak aman dari pemain (kite behavior 4.5–7.0 meter), cliff avoidance agar tidak jatuh dari platform, dan bidikan horizontal/diagonal.
-  - [ ] Animasi windup/telegraphing: Menarik busur atau mengumpulkan bola energi sihir selama 0.4 detik (mata bersinar ungu/oranye) sebelum menembak.
+  - [x] Tambahkan varian musuh pada `Enemy.kt` atau buat class baru dengan `EnemyType { MELEE, RANGED }`.
+  - [x] Logika AI Ranged: Menjaga jarak aman dari pemain (kite behavior 4.5–7.0 meter), cliff avoidance agar tidak jatuh dari platform, dan bidikan horizontal/diagonal.
+  - [x] Animasi windup/telegraphing: Menarik busur atau mengumpulkan bola energi sihir selama 0.4 detik (mata bersinar ungu/oranye) sebelum menembak.
 - **Task 9.1.2: Sistem Proyektil Musuh & Zero-Allocation Pooling**
-  - [ ] Buat class `EnemyProjectile.kt` dengan pooling terkelola (`com.badlogic.gdx.utils.Pool`).
-  - [ ] Deteksi collision proyektil dengan platform/dinding (hancur memercik) dan hurtbox pemain.
-  - [ ] Berikan kesempatan menghindar: pemain bisa melompati proyektil atau berguling menembusnya menggunakan i-frame *Dodge Roll*.
+  - [x] Buat class `EnemyProjectile.kt` / integrasikan `Projectile` terkelola dengan velocity dan boundary check.
+  - [x] Deteksi collision proyektil dengan platform/dinding (hancur memercik) dan hurtbox pemain.
+  - [x] Berikan kesempatan menghindar: pemain bisa melompati proyektil atau berguling menembusnya menggunakan i-frame *Dodge Roll*.
 
 #### Modul 9.2: Android Haptic Vibration System
 - **Task 9.2.1: Abstraksi Haptic Manager**
-  - [ ] Buat singleton `HapticManager.kt` dengan wrapper aman `Gdx.input.vibrate(milliseconds)` (hanya aktif pada backend Android).
-  - [ ] Definisikan profil getaran haptic:
+  - [x] Buat singleton `HapticManager.kt` dengan wrapper aman `Gdx.input.vibrate(milliseconds)` (hanya aktif pada backend Android).
+  - [x] Definisikan profil getaran haptic:
     - *Light (18ms):* Dodge roll, mendarat dari lompatan tinggi.
     - *Medium (35ms):* Tebasan combo mendarat pada musuh.
     - *Heavy (70ms):* Pemain terkena damage, eksekusi Meteor Cleave, atau aktivasi Ultimate.
-  - [ ] Opsi toggle ON/OFF Haptic di menu Pause dan Main Menu.
+  - [x] Opsi toggle ON/OFF Haptic di menu Pause dan Main Menu via `HapticManager.isEnabled`.
 
 #### Modul 9.3: Integrasi Level Menara & Uji Coba Balancing
 - **Task 9.3.1: Penempatan Ranged Enemy di Lantai Menara**
-  - [ ] Letakkan 1 Ranged Enemy di platform atas Lantai 1 dan 2 Ranged Enemy di posisi strategis Lantai 2 untuk melatih manuver vertikal pemain.
-  - [ ] Tulis unit test untuk verifikasi proyektil, pooling lifecycle, dan kalkulasi damage di `core/src/test/kotlin`.
+  - [x] Letakkan 1 Ranged Enemy di platform atas Lantai 1 dan 2 Ranged Enemy di posisi strategis Lantai 2 untuk melatih manuver vertikal pemain.
+  - [x] Tulis unit test untuk verifikasi proyektil, kiting AI, dan kalkulasi damage di `core/src/test/kotlin/com/stickman/tower/enemy/EnemyTest.kt`.
 
 ---
 

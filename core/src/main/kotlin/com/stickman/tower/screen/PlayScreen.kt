@@ -587,6 +587,32 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                 }
             }
         }
+
+        // E. Proyektil Ranged Enemy Mengenai Pemain
+        for (enemy in currentFloor.enemies) {
+            if (enemy.projectiles.isNotEmpty()) {
+                for (proj in enemy.projectiles) {
+                    if (!proj.isDestroyed && proj.bounds.overlaps(player.hurtbox.bounds) && !player.health.isDead) {
+                        proj.isDestroyed = true
+                        val knockX = if (proj.velocityX > 0f) 5.0f else -5.0f
+                        if (player.takeHit(proj.damage, knockX, 2.5f)) {
+                            playerGhostDelay = 0.35f
+                            hitStopManager.trigger(0.05f)
+                            AudioManager.playHit()
+                            particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color(0.85f, 0.35f, 1f, 1f))
+                            floatingTexts.add(
+                                FloatingText(
+                                    "-${proj.damage.toInt()}",
+                                    player.position.x + player.width / 2f,
+                                    player.position.y + player.height + 0.35f,
+                                    Color(0.9f, 0.3f, 1f, 1f)
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun evaluateGameConditions() {

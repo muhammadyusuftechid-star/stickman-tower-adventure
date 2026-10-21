@@ -7,17 +7,17 @@ Dokumen ini memuat panduan, rekomendasi teknis, dan peta jalan fitur (*strategic
 
 ---
 
-## 📌 Ringkasan Fondasi Saat Ini (Fase 1–8 Selesai)
+## 📌 Ringkasan Fondasi Saat Ini (Fase 1–9 Selesai)
 * **Fisika & Platforming:** Kinematic Box2D-style physics, Raycast grounding, One-way platform, Double jump, Wall slide, Dash.
-* **Sistem Tempur:** 3-Hit combo chain, Launcher attack, Downward Meteor Cleave, Dodge roll ber-i-frames, Skil unik & Ultimate burst, Hitstop, Dynamic screen shake.
+* **Sistem Tempur & Haptic:** 3-Hit combo chain, Launcher attack, Downward Meteor Cleave, Dodge roll ber-i-frames, Skil unik & Ultimate burst, Hitstop, Dynamic screen shake, serta Android Haptic Feedback (Light, Medium, Heavy vibration).
+* **Varian Musuh & Bos:** Musuh Melee (Crimson Daggers), Musuh Ranged (Amethyst Archer dengan kiting AI & proyektil busur), Windup telegraphing, Stun state, Bos 3 lantai dengan Phase 2 Rage Mode, Minion Summoning, dan Wind Slash projectiles.
 * **Arketipe Karakter:**
   * ⚔️ **Warrior:** Seimbang, Meteor Cleave, Whirlwind Slash.
   * 🗡️ **Assassin:** Cepat, Shadow Dash, Teleport Backstab, High Critical.
   * 🔮 **Mage:** Jarak jauh, Magic Barrier, Arcane Meteor Storm.
 * **Sistem RPG & Progresi:** Leveling (Max Lv. 20), Alokasi stat (ATK, DEF, HP, SPD, CRIT), Perolehan Gold & EXP, Auto-save multi-slot (Desktop JSON + Android SharedPreferences).
-* **AI Musuh & Bos Menara:** Patrol, Chase, Windup telegraphing, Stun state, Bos 3 lantai dengan Phase 2 Rage Mode & Minion Summoning.
 * **UI/UX Anti-AI Slop:** Viewport matrix separation (16x9m gameplay vs 1280x720 UI), Tipografi HD FreeType (`NotoSans-Bold.ttf`), Segmented 5-pip stat meters dengan badge tier S/A/B/C, Health bar berlapis dengan Amber Ghost bar, Runic Altar dengan orbital motes.
-* **Lintas Platform:** Desktop (LWJGL3) dan Android (Touch D-pad, Action Buttons, Hardware Back key capture, 60 FPS zero-allocation particle pooling).
+* **Lintas Platform:** Desktop (LWJGL3) dan Android (Touch D-pad, Action Buttons, Hardware Back key capture, 60 FPS zero-allocation particle pooling, standalone .apk packaging).
 
 ---
 
@@ -129,7 +129,7 @@ Mengoptimalkan perolehan **Gold** yang saat ini didapat dari membunuh musuh dan 
 
 | Tahap | Prioritas | Fitur Utama | Estimasi Dampak |
 | :--- | :--- | :--- | :--- |
-| **Fase 9** | 🔥 Tinggi | Varian Musuh Ranged & Haptic Feedback Android | Menambah variasi pertarungan & rasa kontrol fisik yang nyata |
+| **Fase 9** | ✅ Selesai | Varian Musuh Ranged & Haptic Feedback Android | Menambah variasi pertarungan & rasa kontrol fisik yang nyata |
 | **Fase 10** | 🔥 Tinggi | Toko Blacksmith (Senjata) & Relik Pasif | Memberikan nilai guna nyata pada perolehan Gold |
 | **Fase 11** | ⚡ Menengah | Sistem Parry / Counter-Attack & Intro Animasi Bos | Meningkatkan kepuasan aksi (*skill ceiling*) & dramatisasi visual |
 | **Fase 12** | ⚡ Menengah | Dukungan Gamepad (PC/Android) & Kustomisasi Tombol Sentuh | Kenyamanan ergonomis bermain di berbagai tipe perangkat |

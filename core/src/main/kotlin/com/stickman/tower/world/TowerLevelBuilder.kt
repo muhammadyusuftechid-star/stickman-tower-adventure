@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Rectangle
 import com.stickman.tower.enemy.BossEnemy
 import com.stickman.tower.enemy.Enemy
+import com.stickman.tower.enemy.EnemyType
 import com.stickman.tower.physics.Platform
 
 /**
@@ -46,9 +47,9 @@ object TowerLevelBuilder {
         )
 
         val enemies = listOf(
-            Enemy(spawnX = 5.0f, spawnY = 1.2f),
-            Enemy(spawnX = 15.0f, spawnY = 7.0f),
-            Enemy(spawnX = 23.5f, spawnY = 1.2f)
+            Enemy(spawnX = 5.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 15.0f, spawnY = 7.0f, type = EnemyType.RANGED),
+            Enemy(spawnX = 23.5f, spawnY = 1.2f, type = EnemyType.MELEE)
         )
 
         return TowerFloor(
@@ -96,10 +97,10 @@ object TowerLevelBuilder {
         )
 
         val enemies = listOf(
-            Enemy(spawnX = 7.5f, spawnY = 1.2f),
-            Enemy(spawnX = 13.5f, spawnY = 6.8f),
-            Enemy(spawnX = 19.5f, spawnY = 1.2f),
-            Enemy(spawnX = 25.0f, spawnY = 10.1f)
+            Enemy(spawnX = 7.5f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 13.5f, spawnY = 6.8f, type = EnemyType.RANGED),
+            Enemy(spawnX = 19.5f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 25.0f, spawnY = 10.1f, type = EnemyType.RANGED)
         )
 
         return TowerFloor(
