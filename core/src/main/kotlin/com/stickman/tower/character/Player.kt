@@ -87,10 +87,19 @@ class Player(
     private var ultTimer = 0f
     val ultRadius = 3.6f
 
+    // Parameter Tangkisan Sempurna (Perfect Parry / Deflect - Fase 11)
+    val isParrying: Boolean get() = isDodging && dodgeTimer <= PARRY_WINDOW
+    var hasParryBuff: Boolean = false
+        private set
+    var parryBuffTimer: Float = 0f
+        private set
+    var onParry: ((Float, Float) -> Unit)? = null
+
     companion object {
         const val DODGE_DURATION = 0.22f
         const val DODGE_SPEED = 14.5f
         const val DODGE_COOLDOWN = 0.65f
+        const val PARRY_WINDOW = 0.12f // Jendela 0.12s (7 frame) saat awal dodge roll
 
         const val SKILL_DURATION = 0.18f
         const val SKILL_SPEED = 22.0f
@@ -121,6 +130,13 @@ class Player(
 
         if (dodgeCooldown > 0f) {
             dodgeCooldown = (dodgeCooldown - delta).coerceAtLeast(0f)
+        }
+
+        if (hasParryBuff) {
+            parryBuffTimer = (parryBuffTimer - delta).coerceAtLeast(0f)
+            if (parryBuffTimer <= 0f) {
+                hasParryBuff = false
+            }
         }
 
         hurtbox.set(position.x, position.y, width, height)
@@ -192,6 +208,21 @@ class Player(
         updateState()
     }
 
+    /**
+     * Mengeksekusi Tangkisan Sempurna (Perfect Parry):
+     * Memulihkan +35% Ultimate Energy, memberikan buff +25% ATK balasan,
+     * serta memicu dentingan logam dan getaran haptic berat.
+     */
+    fun triggerParry(): Boolean {
+        ultimate.addEnergy(35f)
+        hasParryBuff = true
+        parryBuffTimer = 4.0f
+        AudioManager.playParry()
+        HapticManager.vibrateHeavy()
+        onParry?.invoke(position.x + width / 2f, position.y + height / 2f)
+        return true
+    }
+
     private fun handleActionTriggers(input: GameInput) {
         // Pemicu Dodge Roll
         if (input.isDodgeJustPressed() && !isDodging && !isSkillStriking && !isUlting && dodgeCooldown <= 0f) {
@@ -215,8 +246,13 @@ class Player(
                 isSkillStriking = true
                 skillTimer = 0f
                 attackPhase = AttackPhase.INACTIVE
+                val parryBonus = if (hasParryBuff) 1.25f else 1.0f
+                if (hasParryBuff) {
+                    hasParryBuff = false
+                    parryBuffTimer = 0f
+                }
                 val (baseDmg, isCrit) = stats.calculateDamage(30f)
-                val finalDmg = baseDmg * archetype.baseDamageMultiplier
+                val finalDmg = baseDmg * archetype.baseDamageMultiplier * parryBonus
                 val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
                 hitbox.damage = finalDmg
                 hitbox.isCritical = finalCrit
@@ -236,8 +272,13 @@ class Player(
                 ultTimer = 0f
                 attackPhase = AttackPhase.INACTIVE
                 velocity.set(0f, 0f)
+                val parryBonus = if (hasParryBuff) 1.25f else 1.0f
+                if (hasParryBuff) {
+                    hasParryBuff = false
+                    parryBuffTimer = 0f
+                }
                 val (baseDmg, isCrit) = stats.calculateDamage(65f)
-                val finalDmg = baseDmg * archetype.baseDamageMultiplier
+                val finalDmg = baseDmg * archetype.baseDamageMultiplier * parryBonus
                 val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
                 hitbox.damage = finalDmg
                 hitbox.isCritical = finalCrit
@@ -256,8 +297,13 @@ class Player(
                 val hitConfig = comboManager.startNextHit()
                 attackPhase = AttackPhase.STARTUP
                 attackTimer = 0f
+                val parryBonus = if (hasParryBuff) 1.25f else 1.0f
+                if (hasParryBuff) {
+                    hasParryBuff = false
+                    parryBuffTimer = 0f
+                }
                 val (baseDmg, isCrit) = stats.calculateDamage(hitConfig.damage)
-                val finalDmg = baseDmg * archetype.baseDamageMultiplier
+                val finalDmg = baseDmg * archetype.baseDamageMultiplier * parryBonus
                 val finalCrit = isCrit || (Random.nextFloat() < archetype.baseCritBonus)
                 hitbox.damage = finalDmg
                 hitbox.isCritical = finalCrit
@@ -503,18 +549,27 @@ class Player(
         if (isDodging) {
             for ((idx, ghost) in afterimages.withIndex()) {
                 val alpha = (0.2f * (idx + 1)).coerceIn(0.1f, 0.6f)
-                shapeRenderer.color = Color(0.3f, 0.7f, 1f, alpha)
+                val ghostColor = if (isParrying) Color(1f, 0.9f, 0.3f, alpha) else Color(0.3f, 0.7f, 1f, alpha)
+                shapeRenderer.color = ghostColor
                 shapeRenderer.circle(ghost.x + width / 2f, ghost.y + height - headRadius - 0.05f, headRadius, 10)
                 shapeRenderer.rectLine(ghost.x + width / 2f, ghost.y + 0.75f, ghost.x + width / 2f, ghost.y, 0.06f)
             }
         }
 
-        // 2. Warna Tubuh (Biru saat Dodge, Ungu saat Skill, Emas saat Ult, Merah saat Hurt, Putih normal)
+        // Aura Emas Berkilau saat Parry Buff Aktif (+25% Damage Balasan)
+        if (hasParryBuff && !isDodging && !isUlting) {
+            val auraPulse = 0.35f + kotlin.math.sin(animTime * 12f) * 0.15f
+            shapeRenderer.color = Color(1f, 0.85f, 0.2f, auraPulse)
+            shapeRenderer.circle(centerX, pelvisY + 0.15f, 0.68f, 16)
+        }
+
+        // 2. Warna Tubuh (Biru saat Dodge, Ungu saat Skill, Emas saat Ult/Parry, Merah saat Hurt, Putih normal)
         val bodyColor = when {
             health.isFlashing -> Color.RED
+            isParrying -> Color(1f, 0.95f, 0.4f, 1f)
             isDodging -> Color(0.4f, 0.8f, 1f, 1f)
             isSkillStriking -> Color(0.85f, 0.45f, 1f, 1f)
-            isUlting -> Color.GOLD
+            isUlting || hasParryBuff -> Color.GOLD
             else -> Color.WHITE
         }
         shapeRenderer.color = bodyColor

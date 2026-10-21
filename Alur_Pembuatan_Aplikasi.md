@@ -445,17 +445,17 @@ flowchart LR
 
 #### Modul 11.1: Just-Frame Parry / Perfect Deflect System
 - **Task 11.1.1: Timing Window & Deteksi Benturan**
-  - [ ] Window parry 0.12 detik (7 frame) saat tombol dodge ditekan tepat sebelum serangan musuh menyentuh hurtbox pemain.
-  - [ ] Musuh yang tertangkis mengalami *Guard Break* / pingsan (*stun*) selama 1.5 detik.
+  - [x] Window parry 0.12 detik (7 frame) saat tombol dodge ditekan tepat sebelum serangan musuh menyentuh hurtbox pemain.
+  - [x] Musuh yang tertangkis mengalami *Guard Break* / pingsan (*stun*) selama 1.5 detik.
 - **Task 11.1.2: Audio-Visual Feedback Parry**
-  - [ ] Dentingan logam tajam (*metallic clank SFX*), percikan bunga api emas, micro-freeze 0.08 detik, dan bonus +35% energi Ultimate instan.
+  - [x] Dentingan logam tajam (*metallic clank SFX*), percikan bunga api emas, micro-freeze 0.08 detik, dan bonus +35% energi Ultimate instan.
 
 #### Modul 11.2: Boss Intro Title Card & Dramatisasi Arena
 - **Task 11.2.1: Cinematic Intro Sequence**
-  - [ ] Kamera lerp zoom-in ke arah bos saat pemain pertama kali memasuki arena lantai 3.
-  - [ ] Kartu nama gelap-emas bergaya kanji/metal (*"GIGAS - THE ANCIENT GOLEM"*), sound roar bos, dan bar darah bos terisi penuh dari kiri ke kanan (*fill animation*).
+  - [x] Kamera lerp zoom-in ke arah bos saat pemain pertama kali memasuki arena lantai 3.
+  - [x] Kartu nama gelap-emas bergaya kanji/metal (*"GIGAS - THE ANCIENT GOLEM"*), sound roar bos, dan bar darah bos terisi penuh dari kiri ke kanan (*fill animation*).
 - **Task 11.2.2: Super Finish Slow-Motion**
-  - [ ] Saat pukulan terakhir membunuh bos, aktifkan time-dilation 0.25x selama 0.4 detik disertai shockwave radial putih.
+  - [x] Saat pukulan terakhir membunuh bos, aktifkan time-dilation 0.25x selama 0.4 detik disertai shockwave radial putih.
 
 ---
 

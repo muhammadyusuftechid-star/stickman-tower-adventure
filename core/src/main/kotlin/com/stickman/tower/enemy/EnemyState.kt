@@ -8,5 +8,6 @@ enum class EnemyState {
     CHASE,  // Mengejar posisi pemain saat terdeteksi
     ATTACK, // Berancang-ancang dan melancarkan tebasan ke arah pemain
     HURT,   // Terkena serangan pemain (knockback & stun sesaat)
+    STUNNED,// Mengalami Guard Break akibat Perfect Parry (pingsan tak bisa bergerak)
     DEAD    // HP habis, animasi tumbang sebelum despawn
 }

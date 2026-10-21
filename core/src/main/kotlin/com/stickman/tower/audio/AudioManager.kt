@@ -24,6 +24,8 @@ object AudioManager {
     private var soundDeath: Sound? = null
     private var soundLevelUp: Sound? = null
     private var soundChest: Sound? = null
+    private var soundParry: Sound? = null
+    private var soundBossRoar: Sound? = null
 
     var isMuted: Boolean = false
     var sfxVolume: Float = 0.85f
@@ -44,6 +46,8 @@ object AudioManager {
             soundDeath = createSound(cacheDir, "death.wav") { genDeath(it) }
             soundLevelUp = createSound(cacheDir, "levelup.wav") { genLevelUp(it) }
             soundChest = createSound(cacheDir, "chest.wav") { genChest(it) }
+            soundParry = createSound(cacheDir, "parry.wav") { genParry(it) }
+            soundBossRoar = createSound(cacheDir, "boss_roar.wav") { genBossRoar(it) }
 
             Gdx.app.log("AudioManager", "Procedural SFX synthesis completed successfully.")
         } catch (e: Exception) {
@@ -214,6 +218,40 @@ object AudioManager {
         return data
     }
 
+    private fun genParry(sampleRate: Int): ShortArray {
+        val duration = 0.28f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val env = (1f - (t / duration)).let { it * it }
+            // Harmoni logam tajam dengan desis burst awal
+            val metallic = (sin(2.0 * Math.PI * 1480.0 * t) * 0.45 +
+                    sin(2.0 * Math.PI * 2240.0 * t) * 0.35 +
+                    sin(2.0 * Math.PI * 3120.0 * t) * 0.20)
+            val burst = if (t < 0.015f) MathUtils.random(-0.5f, 0.5f) else 0f
+            val sample = (metallic * 0.85 + burst * 0.15) * env
+            data[i] = (sample * 28000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
+    private fun genBossRoar(sampleRate: Int): ShortArray {
+        val duration = 0.85f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val env = if (t < 0.15f) (t / 0.15f) else (1f - (t - 0.15f) / 0.70f).coerceIn(0f, 1f)
+            val freq = MathUtils.lerp(105f, 60f, t / duration)
+            val sub = sin(2.0 * Math.PI * freq * t)
+            val noise = MathUtils.random(-0.35f, 0.35f)
+            val sample = (sub * 0.65 + noise * 0.35) * env
+            data[i] = (sample * 27000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
     // --- Public Audio Triggers ---
 
     fun playJump() {
@@ -248,6 +286,14 @@ object AudioManager {
         if (!isMuted) soundChest?.play(sfxVolume * 0.85f)
     }
 
+    fun playParry() {
+        if (!isMuted) soundParry?.play(sfxVolume * 1.0f)
+    }
+
+    fun playBossRoar() {
+        if (!isMuted) soundBossRoar?.play(sfxVolume * 1.0f)
+    }
+
     fun toggleMute(): Boolean {
         isMuted = !isMuted
         return isMuted
@@ -262,6 +308,8 @@ object AudioManager {
         soundDeath?.dispose()
         soundLevelUp?.dispose()
         soundChest?.dispose()
+        soundParry?.dispose()
+        soundBossRoar?.dispose()
         soundJump = null
         soundSlashLight = null
         soundSlashHeavy = null
@@ -270,6 +318,8 @@ object AudioManager {
         soundDeath = null
         soundLevelUp = null
         soundChest = null
+        soundParry = null
+        soundBossRoar = null
         isInitialized = false
     }
 }

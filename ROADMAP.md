@@ -131,7 +131,7 @@ Mengoptimalkan perolehan **Gold** yang saat ini didapat dari membunuh musuh dan 
 | :--- | :--- | :--- | :--- |
 | **Fase 9** | ✅ Selesai | Varian Musuh Ranged & Haptic Feedback Android | Menambah variasi pertarungan & rasa kontrol fisik yang nyata |
 | **Fase 10** | ✅ Selesai | Toko Blacksmith (Senjata) & Relik Pasif | Memberikan nilai guna nyata pada perolehan Gold |
-| **Fase 11** | ⚡ Menengah | Sistem Parry / Counter-Attack & Intro Animasi Bos | Meningkatkan kepuasan aksi (*skill ceiling*) & dramatisasi visual |
+| **Fase 11** | ✅ Selesai | Sistem Parry / Counter-Attack & Intro Animasi Bos | Meningkatkan kepuasan aksi (*skill ceiling*) & dramatisasi visual |
 | **Fase 12** | ⚡ Menengah | Dukungan Gamepad (PC/Android) & Kustomisasi Tombol Sentuh | Kenyamanan ergonomis bermain di berbagai tipe perangkat |
 | **Fase 13** | 🌟 Lanjutan | Mode Menara Tanpa Batas (*Endless Ascent*) & Talent Tree | Replay value tak terbatas dan kedalaman pembangunan karakter (*builds*) |
 | **Fase 14** | 🚀 Rilis | Integrasi Google Play Games (Leaderboard & Achievements) | Kesiapan rilis publik di Google Play Store |

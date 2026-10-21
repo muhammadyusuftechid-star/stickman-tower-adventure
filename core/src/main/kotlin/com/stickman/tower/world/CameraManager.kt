@@ -58,7 +58,28 @@ class CameraManager(
         camera.position.x += (desiredX - camera.position.x) * lerpFactor
         camera.position.y += (desiredY - camera.position.y) * lerpFactor
 
+        // Screen Shake Trauma Decay
+        if (shakeTimer > 0f) {
+            shakeTimer = (shakeTimer - delta).coerceAtLeast(0f)
+            val currentIntensity = shakeIntensity * (if (shakeDuration > 0f) shakeTimer / shakeDuration else 0f)
+            camera.position.x += MathUtils.random(-currentIntensity, currentIntensity)
+            camera.position.y += MathUtils.random(-currentIntensity, currentIntensity)
+        }
+
         camera.update()
+    }
+
+    private var shakeIntensity = 0f
+    private var shakeDuration = 0f
+    private var shakeTimer = 0f
+
+    /**
+     * Memulai getaran kamera (screen shake) dengan intensitas dan durasi tertentu.
+     */
+    fun shake(intensity: Float, duration: Float) {
+        shakeIntensity = intensity
+        shakeDuration = duration
+        shakeTimer = duration
     }
 
     fun resize(width: Int, height: Int) {

@@ -23,6 +23,7 @@ enum class BossState {
     GROUND_SLAM_DOWN,
     ENRAGE_ROAR,
     WIND_SLASH,
+    STUNNED,
     DEAD
 }
 
@@ -63,6 +64,8 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
     private var isGrounded = false
     private var animTime = 0f
     private var enragePulse = 0f
+    var stunTimer = 0f
+        private set
 
     val projectiles = mutableListOf<Projectile>()
 
@@ -243,6 +246,17 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
                 }
             }
 
+            BossState.STUNNED -> {
+                actionTimer += delta
+                velocity.x = 0f
+                hitbox.reset()
+                if (actionTimer >= stunTimer) {
+                    state = BossState.CHASE
+                    attackCooldown = 0.6f
+                    actionTimer = 0f
+                }
+            }
+
             BossState.DEAD -> {}
         }
 
@@ -298,6 +312,17 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         return false
     }
 
+    /**
+     * Mengaktifkan status Guard Break / Stun akibat Perfect Parry dari pemain.
+     */
+    fun stun(duration: Float = 1.5f) {
+        state = BossState.STUNNED
+        stunTimer = duration
+        actionTimer = 0f
+        velocity.x = 0f
+        hitbox.reset()
+    }
+
     fun render(shapeRenderer: ShapeRenderer) {
         val centerX = position.x + width / 2f
         val footY = position.y
@@ -337,6 +362,18 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         // Tanduk Baja di Kepala
         shapeRenderer.color = Color(0.9f, 0.75f, 0.2f, 1f)
         shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX + lookDir * 0.45f, headCenterY + headRadius + 0.35f, 0.09f)
+
+        // Visual Guard Break / Stun Stars di atas kepala Bos
+        if (state == BossState.STUNNED) {
+            shapeRenderer.color = Color.GOLD
+            val orbitRadius = 0.52f
+            for (i in 0 until 4) {
+                val angle = animTime * 5.5f + (i * 1.57f)
+                val starX = centerX + kotlin.math.cos(angle.toDouble()).toFloat() * orbitRadius
+                val starY = headCenterY + headRadius + 0.42f + kotlin.math.sin(angle.toDouble()).toFloat() * 0.12f
+                shapeRenderer.circle(starX, starY, 0.08f, 8)
+            }
+        }
 
         // Tubuh / Torso (Lebih tebal & berotot)
         shapeRenderer.color = bodyColor

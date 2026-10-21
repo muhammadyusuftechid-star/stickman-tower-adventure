@@ -56,6 +56,8 @@ class Enemy(
     private var hasFiredProjectile = false
     private var deadTimer = 0f
     private var animTime = 0f
+    var stunTimer = 0f
+        private set
 
     var isGrounded = false
         private set
@@ -126,6 +128,7 @@ class Enemy(
             EnemyState.CHASE -> updateChaseState(delta, player, platforms)
             EnemyState.ATTACK -> updateAttackState(delta)
             EnemyState.HURT -> updateHurtState(delta)
+            EnemyState.STUNNED -> updateStunnedState(delta)
             EnemyState.DEAD -> {}
         }
 
@@ -287,6 +290,15 @@ class Enemy(
         }
     }
 
+    private fun updateStunnedState(delta: Float) {
+        velocity.x = MathUtils.lerp(velocity.x, 0f, 12f * delta)
+        hitbox.isActive = false
+        stunTimer = (stunTimer - delta).coerceAtLeast(0f)
+        if (stunTimer <= 0f) {
+            state = EnemyState.CHASE
+        }
+    }
+
     private fun resolveCollision(delta: Float, platforms: List<Platform>) {
         // Sumbu X
         position.x += velocity.x * delta
@@ -347,6 +359,17 @@ class Enemy(
         return false
     }
 
+    /**
+     * Mengaktifkan status Guard Break / Stun akibat Perfect Parry dari pemain.
+     */
+    fun stun(duration: Float = 1.5f) {
+        state = EnemyState.STUNNED
+        stunTimer = duration
+        velocity.x = 0f
+        hitbox.isActive = false
+        attackCooldown = 0.8f
+    }
+
     fun render(shapeRenderer: ShapeRenderer) {
         if (isDespawned) return
 
@@ -387,6 +410,7 @@ class Enemy(
         // 2. Mata Merah Menyala / Ungu Sihir / Kuning saat Ancang-ancang Telegraphed
         val isTelegraphing = state == EnemyState.ATTACK && attackTimer < (if (type == EnemyType.RANGED) 0.40f else ATTACK_WINDUP)
         val eyeColor = when {
+            state == EnemyState.STUNNED -> Color.GOLD
             isTelegraphing -> Color.YELLOW
             type == EnemyType.RANGED -> Color(0.92f, 0.45f, 1f, 1f)
             else -> Color(0.4f, 0f, 0f, 1f)
@@ -395,6 +419,18 @@ class Enemy(
         val eyeX = centerX + (headRadius * 0.45f * lookDir)
         val eyeY = headCenterY + 0.04f
         shapeRenderer.circle(eyeX, eyeY, if (isTelegraphing) 0.07f else 0.045f, 8)
+
+        // Visual Guard Break / Stun Stars di atas kepala
+        if (state == EnemyState.STUNNED) {
+            shapeRenderer.color = Color.GOLD
+            val orbitRadius = 0.26f
+            for (i in 0 until 3) {
+                val angle = animTime * 6.5f + (i * 2.094f) // 120 derajat
+                val starX = centerX + kotlin.math.cos(angle.toDouble()).toFloat() * orbitRadius
+                val starY = headCenterY + headRadius + 0.22f + kotlin.math.sin(angle.toDouble()).toFloat() * 0.08f
+                shapeRenderer.circle(starX, starY, 0.04f, 6)
+            }
+        }
 
         // Jika sedang ancang-ancang, gambar tanda seru bahaya di atas kepala
         if (isTelegraphing) {

@@ -24,6 +24,7 @@ import com.stickman.tower.combat.HitStopManager
 import com.stickman.tower.enemy.BossEnemy
 import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.input.CompositeInput
+import com.stickman.tower.input.GameInput
 import com.stickman.tower.input.KeyboardInput
 import com.stickman.tower.input.VirtualController
 import com.stickman.tower.relic.RelicManager
@@ -57,6 +58,16 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private val keyboardInput = KeyboardInput()
     val virtualController = VirtualController()
     private val input = CompositeInput(keyboardInput, virtualController)
+    private val noInput = object : GameInput {
+        override fun isMoveLeft(): Boolean = false
+        override fun isMoveRight(): Boolean = false
+        override fun isJumpJustPressed(): Boolean = false
+        override fun isJumpPressed(): Boolean = false
+        override fun isAttackJustPressed(): Boolean = false
+        override fun isDodgeJustPressed(): Boolean = false
+        override fun isSkillJustPressed(): Boolean = false
+        override fun isUltimateJustPressed(): Boolean = false
+    }
 
     // Data Progresi RPG & Karakter Pemain (Sesuai Arketipe Tersimpan)
     private val saveData = SaveManager.load()
@@ -106,6 +117,20 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
     private var prevComboStep: ComboStep = ComboStep.HIT_1
     private var comboPopTimer: Float = 0f
     private var hudAnimTime: Float = 0f
+
+    // Boss Presentation & Sinematik (Fase 11)
+    var isBossIntroActive: Boolean = false
+    var bossIntroTimer: Float = 0f
+    var bossHpBarAnimated: Float = 0f
+    var hasPlayedBossIntro: Boolean = false
+
+    // Slow Motion Super Finish & Shockwave (Fase 11)
+    var bossSlowMoTimer: Float = 0f
+    var isBossShockwaveActive: Boolean = false
+    var shockwaveRadius: Float = 0f
+    var shockwaveCenterX: Float = 0f
+    var shockwaveCenterY: Float = 0f
+    private var bossSlowMoTriggered: Boolean = false
 
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
@@ -160,6 +185,26 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         floatingTexts.clear()
         particleManager.clear()
+
+        bossSlowMoTriggered = false
+        bossSlowMoTimer = 0f
+        isBossShockwaveActive = false
+        shockwaveRadius = 0f
+
+        if (currentFloor.isBossFloor && !hasPlayedBossIntro) {
+            isBossIntroActive = true
+            bossIntroTimer = 2.8f
+            bossHpBarAnimated = 0f
+            hasPlayedBossIntro = true
+            AudioManager.playBossRoar()
+            HapticManager.vibrateHeavy()
+            cameraManager.shake(0.8f, 0.6f)
+        } else {
+            isBossIntroActive = false
+            bossIntroTimer = 0f
+            bossHpBarAnimated = 1f
+        }
+
         floatingTexts.add(
             FloatingText("=== ${currentFloor.floorName} ===", player.position.x, player.position.y + 2.5f, Color.GOLD, duration = 2.8f)
         )
@@ -242,6 +287,37 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             return
         }
 
+        // Pembaruan Sinematik Boss Intro (Fase 11)
+        if (isBossIntroActive) {
+            if (Gdx.input.isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.justTouched()) {
+                isBossIntroActive = false
+                bossIntroTimer = 0f
+                bossHpBarAnimated = 1f
+            } else {
+                bossIntroTimer = (bossIntroTimer - safeDelta).coerceAtLeast(0f)
+                bossHpBarAnimated = (1f - (bossIntroTimer / 2.8f)).coerceIn(0f, 1f)
+                if (bossIntroTimer <= 0f) {
+                    isBossIntroActive = false
+                    bossHpBarAnimated = 1f
+                }
+            }
+        }
+
+        // Pembaruan Radial Shockwave & Time Dilation Super Finish (Fase 11)
+        if (isBossShockwaveActive) {
+            shockwaveRadius += 16f * safeDelta
+            if (shockwaveRadius >= 22f) {
+                isBossShockwaveActive = false
+            }
+        }
+
+        val updateDelta = if (bossSlowMoTimer > 0f) {
+            bossSlowMoTimer = (bossSlowMoTimer - safeDelta).coerceAtLeast(0f)
+            safeDelta * 0.25f
+        } else {
+            safeDelta
+        }
+
         // Perbarui Input Virtual Controller dengan uiViewport
         input.update(uiViewport)
         handleStatusInput()
@@ -291,9 +367,10 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         val isFrozen = hitStopManager.update(safeDelta)
 
         if (!isFrozen && gameStatus == GameStatus.PLAYING) {
-            // Pembaruan Pemain
-            player.update(safeDelta, input, currentFloor.platforms)
-            particleManager.update(safeDelta)
+            // Pembaruan Pemain (abaikan input kendali jika sedang intro sinematik)
+            val activeInput = if (isBossIntroActive) noInput else input
+            player.update(updateDelta, activeInput, currentFloor.platforms)
+            particleManager.update(updateDelta)
 
             // Cek Rintangan Duri Lantai (Spikes)
             for (spike in currentFloor.spikes) {
@@ -343,7 +420,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
             // Pembaruan Musuh Biasa
             for (enemy in currentFloor.enemies) {
-                enemy.update(safeDelta, player, currentFloor.platforms)
+                enemy.update(updateDelta, player, currentFloor.platforms)
                 if (enemy.health.isDead && !enemy.rewardClaimed) {
                     enemy.rewardClaimed = true
                     AudioManager.playDeath()
@@ -356,7 +433,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             // Pembaruan Boss (Jika Ada)
             val boss = currentFloor.boss
             if (boss != null) {
-                boss.update(safeDelta, player, currentFloor.platforms)
+                boss.update(updateDelta, player, currentFloor.platforms)
                 if (boss.health.isDead && !boss.rewardClaimed) {
                     boss.rewardClaimed = true
                     AudioManager.playDeath()
@@ -379,7 +456,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         val iterator = floatingTexts.iterator()
         while (iterator.hasNext()) {
             val ft = iterator.next()
-            ft.update(safeDelta)
+            ft.update(updateDelta)
             if (ft.isExpired) iterator.remove()
         }
 
@@ -402,12 +479,17 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         // 8. Render Enhanced In-Game RPG HUD
         renderHUD()
+
+        // 9. Render Boss Cinematic Presentation Overlay (Fase 11)
+        if (isBossIntroActive) {
+            renderBossIntroOverlay()
+        }
     }
 
     private fun renderWorld(delta: Float) {
-        val playerCenterX = player.position.x + player.width / 2f
-        val playerCenterY = player.position.y + player.height / 2f + 0.5f
-        cameraManager.update(playerCenterX, playerCenterY, delta)
+        val targetCamX = if (isBossIntroActive && currentFloor.boss != null) currentFloor.boss!!.position.x + currentFloor.boss!!.width / 2f else player.position.x + player.width / 2f
+        val targetCamY = if (isBossIntroActive && currentFloor.boss != null) currentFloor.boss!!.position.y + 1.2f else player.position.y + player.height / 2f + 0.5f
+        cameraManager.update(targetCamX, targetCamY, delta)
 
         val clearR = if (currentFloor.isBossFloor) 0.12f else 0.08f
         val clearG = if (currentFloor.isBossFloor) 0.08f else 0.09f
@@ -430,6 +512,15 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         // Render Efek Partikel VFX
         particleManager.render(shapeRenderer)
+
+        // Render Radial Shockwave Super Finish Boss (Fase 11)
+        if (isBossShockwaveActive && shockwaveRadius > 0f) {
+            val shockAlpha = (1f - shockwaveRadius / 22f).coerceIn(0f, 1f)
+            shapeRenderer.color = Color(1f, 1f, 1f, shockAlpha * 0.9f)
+            shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, shockwaveRadius, 36)
+            shapeRenderer.color = Color(0.9f, 0.7f, 0.2f, shockAlpha * 0.5f)
+            shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, (shockwaveRadius - 0.35f).coerceAtLeast(0f), 36)
+        }
         shapeRenderer.end()
 
         // Debug Bounding Boxes
@@ -524,6 +615,18 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
                         particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 14, color = Color.ORANGE)
                         relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
 
+                        // Super Finish Slow-Motion & Radial Shockwave jika Boss Mati (Fase 11)
+                        if (boss.health.isDead && !bossSlowMoTriggered) {
+                            bossSlowMoTriggered = true
+                            bossSlowMoTimer = 0.55f
+                            isBossShockwaveActive = true
+                            shockwaveRadius = 0.5f
+                            shockwaveCenterX = boss.position.x + boss.width / 2f
+                            shockwaveCenterY = boss.position.y + boss.height / 2f
+                            cameraManager.shake(1.2f, 0.7f)
+                            HapticManager.vibrateHeavy()
+                        }
+
                         val energyGain = when {
                             player.isUlting -> 0f
                             player.comboManager.currentStep == ComboStep.HIT_3 -> 18f
@@ -548,75 +651,93 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             }
         }
 
-        // B. Serangan Musuh Biasa Mengenai Pemain
+        // B. Serangan Musuh Biasa Mengenai Pemain (Dapat di-Parry / Guard Break)
         for (enemy in currentFloor.enemies) {
             if (enemy.hitbox.isActive && !enemy.hitbox.hitEntities.contains(player) && !player.health.isDead) {
                 if (enemy.hitbox.bounds.overlaps(player.hurtbox.bounds)) {
                     enemy.hitbox.hitEntities.add(player)
 
-                    val knockX = if (enemy.facingRight) enemy.hitbox.knockbackX else -enemy.hitbox.knockbackX
-                    val knockY = enemy.hitbox.knockbackY
-
-                    if (player.takeHit(enemy.hitbox.damage, knockX, knockY)) {
-                        playerGhostDelay = 0.35f
+                    if (player.isParrying) {
+                        // Sistem Perfect Parry Fase 11: Stun musuh 1.5s, netralkan damage, beri buff ATK + energy
+                        enemy.stun(1.5f)
+                        player.triggerParry()
                         hitStopManager.trigger(0.08f)
-                        AudioManager.playHit()
-                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
+                        AudioManager.playParry()
+                        HapticManager.vibrateHeavy()
+                        cameraManager.shake(0.5f, 0.25f)
+                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 22, color = Color.GOLD)
                         floatingTexts.add(
                             FloatingText(
-                                "-${enemy.hitbox.damage.toInt()}",
+                                "✨ PERFECT PARRY! ✨",
                                 player.position.x + player.width / 2f,
-                                player.position.y + player.height + 0.35f,
-                                Color(1f, 0.35f, 0.35f, 1f)
+                                player.position.y + player.height + 0.5f,
+                                Color.GOLD,
+                                duration = 1.4f,
+                                isCritical = true
                             )
                         )
+                    } else {
+                        val knockX = if (enemy.facingRight) enemy.hitbox.knockbackX else -enemy.hitbox.knockbackX
+                        val knockY = enemy.hitbox.knockbackY
+
+                        if (player.takeHit(enemy.hitbox.damage, knockX, knockY)) {
+                            playerGhostDelay = 0.35f
+                            hitStopManager.trigger(0.08f)
+                            AudioManager.playHit()
+                            particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
+                            floatingTexts.add(
+                                FloatingText(
+                                    "-${enemy.hitbox.damage.toInt()}",
+                                    player.position.x + player.width / 2f,
+                                    player.position.y + player.height + 0.35f,
+                                    Color(1f, 0.35f, 0.35f, 1f)
+                                )
+                            )
+                        }
                     }
                 }
             }
         }
 
-        // C. Serangan Melee Boss Mengenai Pemain
+        // C. Serangan Melee Boss Mengenai Pemain (Dapat di-Parry / Guard Break)
         if (boss != null && boss.hitbox.isActive && !boss.hitbox.hitEntities.contains(player) && !player.health.isDead) {
             if (boss.hitbox.bounds.overlaps(player.hurtbox.bounds)) {
                 boss.hitbox.hitEntities.add(player)
 
-                val knockX = if (boss.facingRight) boss.hitbox.knockbackX else -boss.hitbox.knockbackX
-                val knockY = boss.hitbox.knockbackY
-
-                if (player.takeHit(boss.hitbox.damage, knockX, knockY)) {
-                    playerGhostDelay = 0.35f
-                    hitStopManager.trigger(0.09f)
-                    AudioManager.playHit()
-                    particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 12, color = Color.RED)
+                if (player.isParrying) {
+                    // Sistem Perfect Parry Fase 11: Stun Boss 1.5s (Guard Break!), netralkan damage
+                    boss.stun(1.5f)
+                    player.triggerParry()
+                    hitStopManager.trigger(0.08f)
+                    AudioManager.playParry()
+                    HapticManager.vibrateHeavy()
+                    cameraManager.shake(0.8f, 0.35f)
+                    particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 28, color = Color.GOLD)
                     floatingTexts.add(
                         FloatingText(
-                            "-${boss.hitbox.damage.toInt()}",
+                            "✨ PERFECT PARRY! ✨",
                             player.position.x + player.width / 2f,
-                            player.position.y + player.height + 0.35f,
-                            Color(1f, 0.25f, 0.25f, 1f)
+                            player.position.y + player.height + 0.5f,
+                            Color.GOLD,
+                            duration = 1.4f,
+                            isCritical = true
                         )
                     )
-                }
-            }
-        }
+                } else {
+                    val knockX = if (boss.facingRight) boss.hitbox.knockbackX else -boss.hitbox.knockbackX
+                    val knockY = boss.hitbox.knockbackY
 
-        // D. Proyektil Wind Slash Boss Mengenai Pemain
-        if (boss != null) {
-            for (proj in boss.projectiles) {
-                if (!proj.isDestroyed && proj.bounds.overlaps(player.hurtbox.bounds) && !player.health.isDead) {
-                    proj.isDestroyed = true
-                    val knockX = if (proj.velocityX > 0f) 6.5f else -6.5f
-                    if (player.takeHit(proj.damage, knockX, 3.5f)) {
+                    if (player.takeHit(boss.hitbox.damage, knockX, knockY)) {
                         playerGhostDelay = 0.35f
-                        hitStopManager.trigger(0.06f)
+                        hitStopManager.trigger(0.09f)
                         AudioManager.playHit()
-                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
+                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 12, color = Color.RED)
                         floatingTexts.add(
                             FloatingText(
-                                "-${proj.damage.toInt()}",
+                                "-${boss.hitbox.damage.toInt()}",
                                 player.position.x + player.width / 2f,
                                 player.position.y + player.height + 0.35f,
-                                Color.RED
+                                Color(1f, 0.25f, 0.25f, 1f)
                             )
                         )
                     }
@@ -624,26 +745,90 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             }
         }
 
-        // E. Proyektil Ranged Enemy Mengenai Pemain
-        for (enemy in currentFloor.enemies) {
-            if (enemy.projectiles.isNotEmpty()) {
-                for (proj in enemy.projectiles) {
-                    if (!proj.isDestroyed && proj.bounds.overlaps(player.hurtbox.bounds) && !player.health.isDead) {
-                        proj.isDestroyed = true
-                        val knockX = if (proj.velocityX > 0f) 5.0f else -5.0f
-                        if (player.takeHit(proj.damage, knockX, 2.5f)) {
+        // D. Proyektil Wind Slash Boss Mengenai Pemain (Dapat di-Deflect)
+        if (boss != null) {
+            for (proj in boss.projectiles) {
+                if (!proj.isDestroyed && proj.bounds.overlaps(player.hurtbox.bounds) && !player.health.isDead) {
+                    proj.isDestroyed = true
+
+                    if (player.isParrying) {
+                        player.triggerParry()
+                        hitStopManager.trigger(0.08f)
+                        AudioManager.playParry()
+                        HapticManager.vibrateHeavy()
+                        cameraManager.shake(0.6f, 0.3f)
+                        particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 20, color = Color.GOLD)
+                        floatingTexts.add(
+                            FloatingText(
+                                "✨ DEFLECTED! ✨",
+                                player.position.x + player.width / 2f,
+                                player.position.y + player.height + 0.5f,
+                                Color.GOLD,
+                                duration = 1.4f,
+                                isCritical = true
+                            )
+                        )
+                    } else {
+                        val knockX = if (proj.velocityX > 0f) 6.5f else -6.5f
+                        if (player.takeHit(proj.damage, knockX, 3.5f)) {
                             playerGhostDelay = 0.35f
-                            hitStopManager.trigger(0.05f)
+                            hitStopManager.trigger(0.06f)
                             AudioManager.playHit()
-                            particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color(0.85f, 0.35f, 1f, 1f))
+                            particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 10, color = Color.RED)
                             floatingTexts.add(
                                 FloatingText(
                                     "-${proj.damage.toInt()}",
                                     player.position.x + player.width / 2f,
                                     player.position.y + player.height + 0.35f,
-                                    Color(0.9f, 0.3f, 1f, 1f)
+                                    Color.RED
                                 )
                             )
+                        }
+                    }
+                }
+            }
+        }
+
+        // E. Proyektil Ranged Enemy Mengenai Pemain (Dapat di-Deflect)
+        for (enemy in currentFloor.enemies) {
+            if (enemy.projectiles.isNotEmpty()) {
+                for (proj in enemy.projectiles) {
+                    if (!proj.isDestroyed && proj.bounds.overlaps(player.hurtbox.bounds) && !player.health.isDead) {
+                        proj.isDestroyed = true
+
+                        if (player.isParrying) {
+                            player.triggerParry()
+                            hitStopManager.trigger(0.08f)
+                            AudioManager.playParry()
+                            HapticManager.vibrateHeavy()
+                            cameraManager.shake(0.5f, 0.25f)
+                            particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 18, color = Color.GOLD)
+                            floatingTexts.add(
+                                FloatingText(
+                                    "✨ DEFLECTED! ✨",
+                                    player.position.x + player.width / 2f,
+                                    player.position.y + player.height + 0.5f,
+                                    Color.GOLD,
+                                    duration = 1.4f,
+                                    isCritical = true
+                                )
+                            )
+                        } else {
+                            val knockX = if (proj.velocityX > 0f) 5.0f else -5.0f
+                            if (player.takeHit(proj.damage, knockX, 2.5f)) {
+                                playerGhostDelay = 0.35f
+                                hitStopManager.trigger(0.05f)
+                                AudioManager.playHit()
+                                particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height / 2f, count = 8, color = Color(0.85f, 0.35f, 1f, 1f))
+                                floatingTexts.add(
+                                    FloatingText(
+                                        "-${proj.damage.toInt()}",
+                                        player.position.x + player.width / 2f,
+                                        player.position.y + player.height + 0.35f,
+                                        Color(0.9f, 0.3f, 1f, 1f)
+                                    )
+                                )
+                            }
                         }
                     }
                 }
@@ -821,9 +1006,10 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
             shapeRenderer.rect(bossBarX, bossBarY, bossBarW, bossBarH)
 
             // Boss Ghost Catch-Up Bar (Amber)
-            val bossHpPct = (boss.health.currentHp / boss.health.maxHp).coerceIn(0f, 1f)
+            val currentBossHpPct = (boss.health.currentHp / boss.health.maxHp).coerceIn(0f, 1f)
+            val bossHpPct = if (isBossIntroActive) bossHpBarAnimated else currentBossHpPct
             val bossGhostPct = (bossGhostHp / boss.health.maxHp).coerceIn(0f, 1f)
-            if (bossGhostPct > bossHpPct) {
+            if (!isBossIntroActive && bossGhostPct > bossHpPct) {
                 shapeRenderer.color = Color(0.95f, 0.62f, 0.15f, 0.90f)
                 shapeRenderer.rect(bossBarX, bossBarY, bossBarW * bossGhostPct, bossBarH)
             }
@@ -944,7 +1130,8 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         if (boss != null && !boss.health.isDead) {
             regF.color = if (boss.isPhase2) Color(1f, 0.65f, 0.35f, 1f) else Color.WHITE
             val enrageTag = if (boss.isPhase2) " ❖ ENRAGED FASE 2 ❖" else ""
-            regF.draw(batch, "☠ ${boss.name} [${boss.health.currentHp.toInt()}/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 180f, h - 14f)
+            val hpDisplay = if (isBossIntroActive) (bossHpBarAnimated * boss.health.maxHp).toInt() else boss.health.currentHp.toInt()
+            regF.draw(batch, "☠ ${boss.name} [$hpDisplay/${boss.health.maxHp.toInt()}]$enrageTag", w / 2f - 180f, h - 14f)
         }
 
         // Notifikasi Auto-Save
@@ -1289,6 +1476,69 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
         regF.color = Color(0.6f, 0.65f, 0.75f, 0.8f)
         glyphLayout.setText(regF, "[A / D / LEFT / RIGHT / TOUCH] Browse  |  [1 / 2 / 3 / SPACE / ENTER] Claim Relic")
         regF.draw(batch, "[A / D / LEFT / RIGHT / TOUCH] Browse  |  [1 / 2 / 3 / SPACE / ENTER] Claim Relic", (w - glyphLayout.width) / 2f, cardY - 20f)
+
+        batch.end()
+    }
+
+    private fun renderBossIntroOverlay() {
+        val w = 1280f
+        val h = 720f
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Letterbox Bars (Top & Bottom Sinematik)
+        val barHeight = 85f
+        shapeRenderer.color = Color(0f, 0f, 0f, 0.95f)
+        shapeRenderer.rect(0f, h - barHeight, w, barHeight)
+        shapeRenderer.rect(0f, 0f, w, barHeight)
+
+        // Gold Accent Lines on Letterbox Edge
+        shapeRenderer.color = Color(0.92f, 0.78f, 0.28f, 0.75f)
+        shapeRenderer.rectLine(0f, h - barHeight, w, h - barHeight, 2f)
+        shapeRenderer.rectLine(0f, barHeight, w, barHeight, 2f)
+
+        // Title Card Plaque (Center-Lower Obsidian Glassmorphism)
+        val cardW = 620f
+        val cardH = 100f
+        val cardX = (w - cardW) / 2f
+        val cardY = 190f
+        shapeRenderer.color = Color(0.06f, 0.08f, 0.14f, 0.94f)
+        shapeRenderer.rect(cardX, cardY, cardW, cardH)
+
+        // Card Border Lines
+        shapeRenderer.color = Color(0.92f, 0.78f, 0.28f, 0.9f)
+        shapeRenderer.rectLine(cardX, cardY, cardX + cardW, cardY, 2.5f)
+        shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 2.5f)
+        shapeRenderer.rectLine(cardX, cardY, cardX, cardY + cardH, 2f)
+        shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW, cardY + cardH, 2f)
+
+        shapeRenderer.end()
+
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+        val titleF = FontManager.titleFont
+        val regF = FontManager.regularFont
+        val smallF = FontManager.smallFont
+
+        // Boss Title in Gold
+        titleF.color = Color(1f, 0.85f, 0.25f, 1f)
+        val bossTitle = "⚔ GIGAS - THE ANCIENT GOLEM ⚔"
+        glyphLayout.setText(titleF, bossTitle)
+        titleF.draw(batch, bossTitle, (w - glyphLayout.width) / 2f, cardY + cardH - 24f)
+
+        // Boss Subtitle / Lore
+        regF.color = Color(0.85f, 0.90f, 1f, 0.95f)
+        val bossSub = "Titan of the Obsidian Spire  •  Floor 3 Guardian"
+        glyphLayout.setText(regF, bossSub)
+        regF.draw(batch, bossSub, (w - glyphLayout.width) / 2f, cardY + 38f)
+
+        // Skip prompt inside bottom letterbox
+        val skipPulse = (sin(hudAnimTime * 6f) + 1f) * 0.5f
+        smallF.color = Color(0.85f + 0.15f * skipPulse, 0.85f + 0.15f * skipPulse, 0.85f, 0.85f)
+        val skipText = "[TOUCH / SPACE / ENTER] Skip Intro"
+        glyphLayout.setText(smallF, skipText)
+        smallF.draw(batch, skipText, (w - glyphLayout.width) / 2f, barHeight / 2f + 6f)
 
         batch.end()
     }
