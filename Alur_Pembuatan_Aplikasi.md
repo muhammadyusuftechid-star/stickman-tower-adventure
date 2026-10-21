@@ -1,0 +1,407 @@
+# Alur dan Rencana Kerja Pembuatan Aplikasi: Stickman Tower Adventure
+
+> **Dokumen Rujukan Utama:** [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md)  
+> **Tech Stack:** Kotlin, libGDX, Gradle, Tiled Map Editor, Target Android & Desktop (LWJGL3)  
+> **Metode Pembagian:** Dekomposisi Bertingkat — dari Makro (Fase Utama), Meso (Modul Fungsional), Mikro (Komponen/Task), hingga Terkecil (Atomic Checklist & Kriteria Selesai).
+
+---
+
+## 1. Peta Hierarki Dekomposisi
+
+Alur kerja ini dibedah ke dalam 4 tingkatan presisi:
+
+```mermaid
+graph TD
+    L1["<b>LEVEL 1: FASE UTAMA (Makro)</b><br/>Tahapan milestone besar proyek dari setup hingga rilis"]
+    L2["<b>LEVEL 2: MODUL & FITUR (Meso)</b><br/>Kelompok fungsional sistem & subsistem arsitektur"]
+    L3["<b>LEVEL 3: KOMPONEN & TASK TEKNIS (Mikro)</b><br/>Class, logika algoritma, integrasi file & UI"]
+    L4["<b>LEVEL 4: ATOMIC CHECKLIST (Terkecil)</b><br/>Tugas sekali jalan, pengujian, dan kriteria selesai (DoD)"]
+
+    L1 --> L2 --> L3 --> L4
+```
+
+---
+
+## 2. Roadmap Visual Keseluruhan (Macro Pipeline)
+
+```mermaid
+flowchart LR
+    Fase0["Fase 0:<br/>Setup & Scaffolding"] --> Fase1["Fase 1:<br/>Core Platforming"]
+    Fase1 --> Fase2["Fase 2:<br/>Core Combat"]
+    Fase2 --> Fase3["Fase 3:<br/>Enemy AI & MVP Loop"]
+    Fase3 --> Fase4["Fase 4:<br/>Combo & Touch UI"]
+    Fase4 --> Fase5["Fase 5:<br/>RPG & Save Data"]
+    Fase5 --> Fase6["Fase 6:<br/>Tiled Map & Tower"]
+    Fase6 --> Fase7["Fase 7:<br/>Asset & Audio Polish"]
+    Fase7 --> Fase8["Fase 8:<br/>Android Build & QA"]
+```
+
+---
+
+## 3. Bedah Rinci Alur Kerja: Dari Terbesar ke Terkecil
+
+---
+
+### FASE 0: Persiapan Lingkungan & Scaffolding Proyek (Setup & Toolchain)
+> **Tujuan Terbesar:** Memastikan toolchain Kotlin & libGDX terpasang dengan benar pada Linux Mint tanpa membebani kapasitas disk (30 GB tersisa) dan dapat di-build dengan lancar.
+
+#### Modul 0.1: Verifikasi dan Audit Environment Linux Mint
+- **Task 0.1.1: Pengecekan JDK dan Android SDK**
+  - [ ] Periksa instalasi JDK aktif dengan perintah terminal `java -version` (target: JDK 17 LTS).
+  - [ ] Pastikan variabel `JAVA_HOME` dan `ANDROID_HOME` / `ANDROID_SDK_ROOT` terpasang di `~/.bashrc`.
+  - [ ] Verifikasi sisa disk minimal 25 GB terjaga agar proses Gradle daemon tidak kehabisan memori disk.
+
+#### Modul 0.2: Pembuatan Fondasi Proyek via Gdx-Liftoff
+- **Task 0.2.1: Generator Setup**
+  - [ ] Unduh atau jalankan generator resmi **Gdx-Liftoff**.
+  - [ ] Konfigurasi parameter proyek:
+    - *Project Name:* `stickman-tower`
+    - *Package Name:* `com.stickman.tower`
+    - *Language:* Kotlin
+    - *Platforms:* `Desktop (LWJGL3)` dan `Android`
+    - *Extensions:* FreeType (untuk font), Box2D (opsional / biarkan uncheck di awal untuk custom kinematic).
+  - [ ] Ekstrak/inisialisasi ke direktori kerja utama.
+- **Task 0.2.2: Inisialisasi Version Control & Git Hygiene**
+  - [ ] Buat file `.gitignore` yang memblokir folder `.gradle/`, `build/`, `local.properties`, `.idea/`, dan binary build.
+  - [ ] Lakukan inisialisasi Git: `git init`, `git add .`, commit perdana `feat: initial libgdx project scaffold`.
+
+#### Modul 0.3: Pengujian Build Perdana (Sanity Check)
+- **Task 0.3.1: Running Desktop Module**
+  - [ ] Jalankan `./gradlew lwjgl3:run` via terminal.
+  - [ ] Pastikan jendela window libGDX muncul menampilkan template default 60 FPS tanpa error JVM.
+  - [ ] Verifikasi konsumsi RAM build desktop (di bawah 1 GB).
+
+---
+
+### FASE 1: Core Platforming Engine (Pondasi Gerak & Fisika Dasar)
+> **Tujuan Terbesar:** Membuat karakter stickman placeholder yang dapat bergerak halus di atas platform dengan deteksi collision dan kontrol kamera yang responsif.
+
+#### Modul 1.1: World, Viewport & Sistem Kamera 2D
+- **Task 1.1.1: Konfigurasi Virtual Resolution**
+  - [ ] Tentukan target resolusi dunia logika (misal: World Units 16:9, misal lebar `16f` meter, tinggi `9f` meter atau skala piksel `800x450`).
+  - [ ] Implementasikan `FitViewport` atau `ExtendViewport` pada `OrthographicCamera` untuk mencegah distorsi aspek rasio di berbagai layar HP Android.
+- **Task 1.1.2: Camera Follow System**
+  - [ ] Buat class `CameraManager.kt` dengan algoritma *linear interpolation (lerp)* agar kamera mengikuti posisi pemain secara mulus.
+  - [ ] Tambahkan batasan batas map (*clamping*) agar kamera tidak menampilkan ruang kosong di luar level.
+
+#### Modul 1.2: Player Entity & Controller Kinematik Custom
+- **Task 1.2.1: Model Karakter dan Vektor Gerak**
+  - [ ] Buat class `Player.kt` yang memiliki properti: `position (Vector2)`, `velocity (Vector2)`, `size (width, height)`, `facingRight (Boolean)`.
+  - [ ] Buat kotak placeholder karakter stickman menggunakan `ShapeRenderer` atau sprite kotak 2D sederhana.
+- **Task 1.2.2: Sistem Input Abstraksi**
+  - [ ] Buat antarmuka `GameInput` (`isMoveLeft()`, `isMoveRight()`, `isJumpJustPressed()`, dll.).
+  - [ ] Buat implementasi desktop `DesktopKeyboardInput.kt` membaca tombol `A`, `D`, `Space` / `K`.
+- **Task 1.2.3: Platformer Physics (Gravitasi & Lompatan)**
+  - [ ] Definisikan konstanta fisika: `GRAVITY = -25f`, `MOVE_SPEED = 7f`, `JUMP_VELOCITY = 12f`.
+  - [ ] Terapkan kalkulasi Euler integration: `velocity.y += GRAVITY * delta`, `position.add(velocity * delta)`.
+  - [ ] Tambahkan toleransi *coyote time* (100ms setelah meninggalkan platform masih bisa lompat) dan *jump buffering* agar kontrol terasa sangat responsif dan tidak kaku.
+
+#### Modul 1.3: Collision Platform Sederhana
+- **Task 1.3.1: Deteksi Lantai & Rintangan**
+  - [ ] Buat class `Platform.kt` (bounding box `Rectangle`).
+  - [ ] Implementasikan collision resolver: deteksi tumpang tindih sumbu Y saat karakter sedang jatuh (`velocity.y <= 0`) untuk mendarat tepat di atas platform (`isGrounded = true`).
+  - [ ] Deteksi tabrakan horizontal sumbu X agar pemain tidak menembus dinding samping platform.
+
+#### Modul 1.4: Karakter State Machine (FSM Dasar)
+- **Task 1.4.1: Enumerasi dan Alur State Gerak**
+  - [ ] Buat `enum class CharacterState { IDLE, RUN, JUMP, FALL }`.
+  - [ ] Implementasikan fungsi `updateState()`:
+    - Jika `velocity.y > 0` dan tidak di tanah $\rightarrow$ `JUMP`.
+    - Jika `velocity.y < 0` dan tidak di tanah $\rightarrow$ `FALL`.
+    - Jika di tanah dan `abs(velocity.x) > 0.1f` $\rightarrow$ `RUN`.
+    - Jika di tanah dan `abs(velocity.x) <= 0.1f` $\rightarrow$ `IDLE`.
+
+---
+
+### FASE 2: Core Combat & Hitbox Engine (Sistem Pertarungan Dasar)
+> **Tujuan Terbesar:** Membangun sistem serang, deteksi serangan (hitbox) versus tubuh penerima serangan (hurtbox), kalkulasi damage, dan respon benturan.
+
+#### Modul 2.1: Arsitektur Hitbox vs Hurtbox
+- **Task 2.1.1: Pemisahan Bounding Box**
+  - [ ] **Collision Box:** Mengatur interaksi karakter dengan platform/lantai.
+  - [ ] **Hurtbox:** Area tubuh karakter/musuh yang dapat menerima serangan musuh.
+  - [ ] **Hitbox:** Area serangan senjata/pukulan yang aktif hanya pada frame tertentu.
+- **Task 2.1.2: Debug Hitbox Visualizer**
+  - [ ] Tambahkan rendering garis warna menggunakan `ShapeRenderer`:
+    - Hijau = Collision box platform.
+    - Biru = Hurtbox tubuh.
+    - Merah = Hitbox serangan aktif.
+
+#### Modul 2.2: Basic Attack & Frame Window Lifecycle
+- **Task 2.2.1: Attack Phase Timing**
+  - [ ] Definisikan 3 fase serangan dalam `AttackConfig.kt`:
+    - *Startup:* Waktu ancang-ancang sebelum serangan keluar (misal: 0.08 detik).
+    - *Active:* Frame di mana hitbox merah aktif dan dapat melukai musuh (misal: 0.12 detik).
+    - *Recovery:* Waktu jeda setelah memukul sebelum karakter boleh bergerak kembali (misal: 0.15 detik).
+  - [ ] Tambahkan state `ATTACK1` ke dalam State Machine karakter. Cegah pergerakan horizontal selama fase serangan kecuali serangan meluncur.
+
+#### Modul 2.3: Damage Calculator & Health Component
+- **Task 2.3.1: Komponen Nyawa (Health)**
+  - [ ] Buat class `Health.kt` (`currentHp`, `maxHp`, `isAlive`).
+  - [ ] Buat method `takeDamage(amount: Float, knockbackDir: Vector2)`.
+- **Task 2.3.2: Logika Damage & Invincibility Frame (i-Frame)**
+  - [ ] Tambahkan durasi kebal sesaat setelah terkena hit (misal: 0.25 detik) agar entitas tidak langsung mati terkena multi-hit dalam 1 serangan yang sama.
+  - [ ] Berikan dorongan fisik (*knockback*) saat terkena serangan.
+
+#### Modul 2.4: Visual Feedback & Game Juice
+- **Task 2.4.1: Hit Feedback**
+  - [ ] Implementasikan efek kedip merah (*flash white/red*) pada sprite saat menerima damage.
+  - [ ] Tambahkan efek *hit stop / frame freeze* ringan (0.05 detik) saat pukulan berhasil mengenai sasaran untuk memberikan rasa benturan yang mantap (*impact*).
+  - [ ] Buat placeholder pop-up angka damage (*floating damage text*).
+
+---
+
+### FASE 3: Basic Enemy AI & Validasi MVP Stage Loop
+> **Tujuan Terbesar:** Memiliki 1 musuh aktif dengan kecerdasan buatan (AI) sederhana dan 1 stage terisolasi yang dapat dimainkan dari awal hingga menang/kalah. Ini adalah pintu verifikasi MVP!
+
+#### Modul 3.1: Enemy Entity & AI State Machine
+- **Task 3.1.1: Model Musuh Dasar**
+  - [ ] Buat class `Enemy.kt` yang mengimplementasikan `Health`, `Hurtbox`, `Hitbox`, dan `PlatformerPhysics`.
+- **Task 3.1.2: Logika FSM Enemy AI**
+  - [ ] `IDLE / PATROL`: Bergerak bolak-balik dalam jarak tertentu atau berhenti jika sampai di ujung jurang platform.
+  - [ ] `DETECT PLAYER`: Cek jarak ($distance < detectionRange$) dan garis pandang (*line of sight*).
+  - [ ] `CHASE`: Bergerak mendekati posisi X pemain jika berada dalam jangkauan.
+  - [ ] `ATTACK`: Saat berada dalam jangkauan pukul ($distance \le attackRange$), jalankan animasi/telegraphed attack.
+  - [ ] `HURT & DEAD`: Animasi terpental ketika HP habis, nonaktifkan hitbox/hurtbox, lalu hilangkan entitas dari memory (*despawn*).
+
+#### Modul 3.2: Stage MVP Sederhana (Level 1 Prototype)
+- **Task 3.2.1: Layout Stage Sederhana**
+  - [ ] Buat arena statis: 1 lantai dasar panjang, 3 platform bertingkat, dan 1 pintu/objek keluar (*Goal Exit*).
+  - [ ] Tentukan koordinat titik spawn pemain dan spawn 2-3 musuh stickman.
+
+#### Modul 3.3: Game Loop: Kondisi Menang, Kalah & Checkpoint
+- **Task 3.3.1: Trigger Menang & Kalah**
+  - [ ] Kondisi Kalah: HP Pemain == 0 $\rightarrow$ Tampilkan teks `Game Over`, tombol `Restart / Checkpoint`.
+  - [ ] Kondisi Menang: Pemain berhasil mengalahkan semua musuh dan menyentuh area `Exit` $\rightarrow$ Tampilkan `Stage Clear!`.
+- **Task 3.3.2: Checkpoint Manager**
+  - [ ] Buat objek `Checkpoint.kt` yang menyimpan koordinat terakhir pemain saat disentuh.
+  - [ ] Reset posisi pemain ke checkpoint saat memilih `Restart`.
+
+#### Modul 3.4: Milestone Check: Validasi MVP
+- [ ] **Kriteria Verifikasi MVP:**
+  1. Karakter bisa jalan, lompat, mendarat mulus di platform.
+  2. Kamera mengikuti karakter tanpa jitter.
+  3. Serangan mengenai musuh, musuh berkedip & HP berkurang.
+  4. Musuh membalas menyerang jika pemain mendekat.
+  5. Pemain bisa kalah jika HP habis, dan bisa menang jika mencapai target.
+  6. Game berjalan stabil 60 FPS di desktop.
+
+---
+
+### FASE 4: Combat Lanjutan & Mobile Touch Controls
+> **Tujuan Terbesar:** Meningkatkan kedalaman gameplay aksi (combo 3-hit, dodge/dash ber-iframe, skill & ultimate) serta menghadirkan virtual controller layar sentuh untuk Android.
+
+#### Modul 4.1: Sistem Serangan Combo (3-Hit Combo Chain)
+- **Task 4.1.1: Buffer Input & Combo Window Timer**
+  - [ ] Buat `ComboManager.kt` dengan state: `ATTACK_1`, `ATTACK_2`, `ATTACK_3`.
+  - [ ] Buat timer *combo window* (misal: 0.3 detik setelah hit selesai): jika tombol serang ditekan sebelum timer habis, sambung ke attack berikutnya.
+  - [ ] Konfigurasikan pukulan ke-3 memiliki damage terbesar dan knockback lebih jauh.
+
+#### Modul 4.2: Mekanik Dash / Dodge (Menghindar)
+- **Task 4.2.1: Dodge Roll / Dash Kinematics**
+  - [ ] Berikan dorongan kecepatan horizontal tinggi instan selama 0.2 detik.
+  - [ ] Aktifkan status `isInvulnerable = true` (kebal damage) selama durasi dodge.
+  - [ ] Berikan cooldown singkat (misal: 0.6 detik) agar pemain tidak melakukan *spam* dodge tanpa batas.
+
+#### Modul 4.3: Hybrid Skill System (Cooldown + Ultimate Energy)
+- **Task 4.3.1: Skill Biasa (Cooldown-Based)**
+  - [ ] Buat class `Skill.kt` dengan properti `cooldownTime` dan `remainingCooldown`.
+  - [ ] Implementasikan Skill 1: Serangan tebasan meluncur (*Dash Strike* / AoE).
+  - [ ] Buat logika aktivasi: jika cooldown == 0, aktifkan skill dan set cooldown timer.
+- **Task 4.3.2: Ultimate Skill (Energy-Based)**
+  - [ ] Buat komponen `UltimateEnergy.kt` (`currentEnergy`, `maxEnergy = 100`).
+  - [ ] Tambahkan akumulasi energi: setiap serangan dasar atau combo yang berhasil mendarat menambah +5 hingga +10 energi.
+  - [ ] Tombol ultimate hanya aktif saat energi mencapai 100%.
+  - [ ] Saat aktif: luncurkan serangan dahsyat berarea luas, kurangi energi menjadi 0.
+
+#### Modul 4.4: On-Screen Touch Controls (Virtual Buttons Android)
+- **Task 4.4.1: Virtual D-Pad / Touch Buttons**
+  - [ ] Gunakan `Touchpad` bawaan libGDX (scene2d.ui) untuk analog kiri-kanan ATAU buat dua tombol sentuh panah Kiri dan Kanan.
+  - [ ] Buat tombol aksi di sisi kanan layar:
+    - Tombol `Attack` (ukuran terbesar)
+    - Tombol `Jump`
+    - Tombol `Dodge`
+    - Tombol `Skill 1` (dengan overlay lingkaran cooldown)
+    - Tombol `Ultimate` (dengan indikator glow/nyala saat energi penuh)
+- **Task 4.4.2: Dual-Input Layer Abstraction**
+  - [ ] Integrasikan `InputProcessor` sehingga sistem membaca input dari keyboard (desktop) dan tombol layar (Android) tanpa mengubah logika karakter `Player.kt`.
+
+---
+
+### FASE 5: Sistem Progresi RPG & Penyimpanan Data Lokal
+> **Tujuan Terbesar:** Menghadirkan sistem EXP, level-up, statistik, dan menyimpan seluruh progres karakter ke dalam penyimpanan lokal file JSON / Preferences.
+
+#### Modul 5.1: Model Statistik Karakter
+- **Task 5.1.1: Stat Container**
+  - [ ] Buat class `CharacterStats.kt`:
+    - `level: Int`
+    - `maxHp: Float`
+    - `attackPower: Float`
+    - `defense: Float`
+    - `critRate: Float`
+- **Task 5.1.2: Rumus Damage Calculation**
+  - [ ] Rumus: $\text{Final Damage} = \max(1f, \text{Attack} \times \text{Multiplier} - \text{Target Defense})$.
+
+#### Modul 5.2: Sistem EXP dan Level Up
+- **Task 5.2.1: Drop EXP & Kurva Level**
+  - [ ] Musuh yang mati menjatuhkan EXP point (misal: 15 EXP per musuh biasa).
+  - [ ] Rumus kurva level up: $\text{ReqEXP}(L) = 50 \times L^{1.5}$.
+  - [ ] Efek level up: kembalikan HP ke penuh, naikkan `maxHp` (+10%), `attackPower` (+5%), dan tampilkan animasi teks `LEVEL UP!`.
+
+#### Modul 5.3: Sistem Penyimpanan Data Lokal (Save/Load)
+- **Task 5.3.1: Data Schema Progresi**
+  - [ ] Buat data class `SaveData.kt`:
+    ```kotlin
+    data class SaveData(
+        var playerLevel: Int = 1,
+        var currentExp: Int = 0,
+        var highestTowerFloor: Int = 1,
+        var gold: Int = 0,
+        var unlockedCharacters: List<String> = listOf("STICKMAN_SWORD")
+    )
+    ```
+- **Task 5.3.2: Serialisasi JSON & LibGDX Preferences**
+  - [ ] Gunakan `com.badlogic.gdx.utils.Json` untuk convert `SaveData` ke string JSON.
+  - [ ] Simpan ke file lokal: `Gdx.files.local("save_data.json")` atau `Gdx.app.getPreferences("StickmanSave")`.
+  - [ ] Tambahkan fitur auto-save saat stage berhasil diselesaikan atau saat menyentuh checkpoint.
+
+#### Modul 5.4: User Interface (In-Game HUD)
+- **Task 5.4.1: scene2d.ui HUD Layer**
+  - [ ] Tampilkan bar HP merah di pojok kiri atas.
+  - [ ] Tampilkan bar energi ultimate kuning di bawah bar HP.
+  - [ ] Tampilkan level karakter, bar EXP, dan koin yang dikumpulkan.
+  - [ ] Tampilkan icon tombol Pause di pojok kanan atas.
+
+---
+
+### FASE 6: Stage Design, Tiled Map & Multi-Floor Tower
+> **Tujuan Terbesar:** Mengganti platform kotak primitif dengan map visual dari Tiled Map Editor, serta membangun arsitektur tower bertingkat dengan boss sederhana.
+
+#### Modul 6.1: Integrasi Tiled Map Editor (`.tmx`)
+- **Task 6.1.1: Pembuatan Tilemap Tiled**
+  - [ ] Buat tileset platform stickman sederhana (misal ukuran tile 16x16 atau 32x32 piksel).
+  - [ ] Buat layer Tiled:
+    - `Background Layer` (visual gedung/menara).
+    - `Ground / Terrain Layer` (lantai platform yang diinjak).
+    - `Object Layer` (persegi panjang untuk spawn point, enemies, traps, checkpoint, exit).
+- **Task 6.1.2: Loader Tiled di libGDX**
+  - [ ] Gunakan `TmxMapLoader` dan `OrthogonalTiledMapRenderer`.
+  - [ ] Ekstrak object rectangle dari `MapObjects` dan konversikan secara otomatis menjadi list `Platform` dan trigger zone.
+
+#### Modul 6.2: Rintangan & Objek Interaktif Lingkungan
+- **Task 6.2.1: Jebakan (Hazard)**
+  - [ ] Duri lantai (*Spikes*): memberikan damage instan dan melempar pemain mundur saat diinjak.
+  - [ ] Platform tembus dari bawah (*One-Way Platform*): pemain bisa melompat dari bawah menembus ke atas, tapi berdiri kokoh di atasnya.
+- **Task 6.2.2: Peti Reward (Chest)**
+  - [ ] Objek peti yang bisa dipukul atau disentuh dengan tombol aksi untuk menjatuhkan koin atau item pemulih HP.
+
+#### Modul 6.3: Multi-Lantai Tower Loop
+- **Task 6.3.1: State Mesin Stage Tower**
+  - [ ] Lantai 1: Pengenalan rintangan dan musuh dasar.
+  - [ ] Lantai 2: Platform bertingkat, jebakan duri, dan gelombang musuh lebih banyak.
+  - [ ] Lantai 3 (Boss Floor): Arena tertutup tanpa jalan keluar sampai boss dikalahkan.
+- **Task 6.3.2: Boss AI Dasar**
+  - [ ] Bar HP Boss besar di bagian atas layar.
+  - [ ] Memiliki 2 fase serangan:
+    - *Fase 1 (HP > 50%):* Serangan tebasan jarak dekat dan lompat menghantam tanah (*Ground Slam*).
+    - *Fase 2 (HP <= 50% - Enrage):* Gerakan lebih cepat dan meluncurkan proyektil tebasan angin (*Wind Slash*).
+
+---
+
+### FASE 7: Audio, Visual Polish & Diversifikasi Karakter
+> **Tujuan Terbesar:** Memasukkan asset visual sprite atlas, animasi stickman yang hidup, efek audio (SFX/BGM), menu utama, serta variasi karakter (Agile vs Heavy).
+
+#### Modul 7.1: Sprite Sheet & TextureAtlas Management
+- **Task 7.1.1: Pembuatan & Packing Asset Visual**
+  - [ ] Gunakan tool `TexturePacker` bawaan libGDX untuk menggabungkan frame sprite stickman ke dalam satu file `.atlas`.
+  - [ ] Muat animasi menggunakan class `Animation<TextureRegion>`:
+    - Animasi: `idle`, `run`, `jump_up`, `fall_down`, `attack1`, `attack2`, `attack3`, `dodge`, `hurt`, `death`.
+- **Task 7.1.2: Partikel dan Efek Visual (VFX)**
+  - [ ] Buat efek partikel debu saat melompat/mendarat via `ParticleEffect`.
+  - [ ] Buat efek garis tebasan pedang (*Slash arc effect*) pada setiap ayunan senjata.
+
+#### Modul 7.2: Audio & Sound Effects (SFX)
+- **Task 7.2.1: Sound Manager**
+  - [ ] Buat class `AudioManager.kt` untuk mengontrol volume master, musik, dan efek suara.
+  - [ ] Integrasikan SFX:
+    - `sfx_jump.wav`
+    - `sfx_slash_light.wav`, `sfx_slash_heavy.wav`
+    - `sfx_hit_impact.wav`
+    - `sfx_dodge_whoosh.wav`
+    - `sfx_enemy_death.wav`
+  - [ ] Integrasikan Background Music (BGM): musik bertema menara/aksi yang loop otomatis.
+
+#### Modul 7.3: Sistem Menu Lengkap
+- **Task 7.3.1: Screen Navigation Architecture**
+  - [ ] `MainMenuScreen`: Tombol Start, Character Select, Settings, Exit.
+  - [ ] `CharacterSelectScreen`: Memilih arketipe karakter sebelum memulai game.
+  - [ ] `PauseScreen`: Melanjutkan permainan atau kembali ke Menu Utama.
+  - [ ] `GameOverScreen` dan `VictoryScreen`.
+
+#### Modul 7.4: Diversifikasi Karakter (Sesuai GDD v0.1)
+- **Task 7.4.1: Arketipe 1 — Fast/Agile Stickman (Dual Daggers)**
+  - [ ] Kecepatan lari tinggi, durasi startup/recovery serangan sangat cepat, damage per hit moderat.
+  - [ ] Skill: Dash ganda dan serangan berputar kilat.
+- **Task 7.4.2: Arketipe 2 — Heavy/Strength Stickman (Greatsword)**
+  - [ ] Kecepatan lari lebih lambat, recovery serangan lebih lama, damage per hit besar, jangkauan serang lebar, knockback sangat kuat.
+  - [ ] Skill: Hantaman tanah area (*Ground Breaker*).
+
+---
+
+### FASE 8: Optimasi Android, Build APK & Quality Assurance
+> **Tujuan Terbesar:** Melakukan uji coba di HP Android fisik via USB Debugging, optimasi performa 60 FPS, meminimalkan penggunaan memori, dan mengemas APK siap instal.
+
+#### Modul 8.1: Optimasi Memori & Garbage Collection (GC)
+- **Task 8.1.1: Mencegah GC Pauses saat Gameplay**
+  - [ ] Hindari alokasi objek baru di dalam method `render()` (misal: jangan lakukan `Vector2()`, `Rectangle()`, atau instansiasi objek berulang setiap frame).
+  - [ ] Gunakan teknik *Object Pooling* (`com.badlogic.gdx.utils.Pool`) untuk proyektil, partikel, atau floating damage numbers.
+  - [ ] Buat `AssetManager` terpusat untuk memuat semua tekstur dan suara di awal (*loading screen*), serta memastikan pelepasan memori (`dispose()`) saat screen ditutup.
+
+#### Modul 8.2: Konfigurasi Android Launcher & Siklus Hidup Aplikasi
+- **Task 8.2.1: AndroidManifest.xml & Konfigurasi Layar**
+  - [ ] Kunci orientasi ke Landscape: `android:screenOrientation="sensorLandscape"`.
+  - [ ] Aktifkan mode Immersive Sticky Fullscreen (sembunyikan tombol navigasi bar dan status bar Android secara otomatis).
+  - [ ] Tangani siklus hidup aplikasi libGDX: otomatis pause audio dan game saat aplikasi di-minimize (`onPause()`) dan resume saat dibuka kembali (`onResume()`).
+
+#### Modul 8.3: Pengujian di Perangkat Android Fisik
+- **Task 8.3.1: USB Debugging & Deployment**
+  - [ ] Sambungkan HP Android via kabel USB dan aktifkan *Developer Options* $\rightarrow$ *USB Debugging*.
+  - [ ] Cek koneksi device: jalankan `adb devices`.
+  - [ ] Deploy langsung ke HP tanpa emulator: `./gradlew android:installDebug android:run`.
+- **Task 8.3.2: User Experience Check di Layar Sentuh**
+  - [ ] Uji apakah ukuran virtual button pas untuk ukuran jempol (tidak terlalu kecil, tidak saling tumpang tindih).
+  - [ ] Uji responsivitas multi-touch (bisa menekan tombol arah kiri/kanan bersamaan dengan tombol lompat dan serang).
+
+#### Modul 8.4: Build Final APK Release
+- **Task 8.4.1: Standalone APK Packaging**
+  - [ ] Jalankan `./gradlew android:assembleRelease` atau `assembleDebug`.
+  - [ ] Ambil file APK hasil build di `android/build/outputs/apk/`.
+  - [ ] Lakukan instalasi uji coba di perangkat untuk memastikan tidak ada crash saat aplikasi dibuka tanpa koneksi PC.
+
+---
+
+## 4. Matriks Ketergantungan & Prioritas Eksekusi
+
+| Prioritas | Fase | Fitur Kunci | Output Terukur |
+|:---:|:---:|:---|:---|
+| **P0 (Kritis)** | Fase 0 & 1 | Environment, Viewport, Platforming Kinematik | Karakter kotak bisa lari & lompat di platform di laptop (desktop) |
+| **P0 (Kritis)** | Fase 2 | Hitbox, Hurtbox, Basic Attack, HP | Karakter bisa mengayunkan serangan dengan area deteksi hit yang valid |
+| **P0 (Kritis)** | Fase 3 | Enemy AI FSM, Win/Lose, 1 Stage Playable | **MILESTONE MVP TERCAPAI:** Game utuh 1 level bisa dimainkan & ditamatkan |
+| **P1 (Tinggi)** | Fase 4 | Combo 3-Hit, Dodge, Skills, Android Virtual Button | Combat terasa seru dan kontrol sentuh HP berfungsi |
+| **P1 (Tinggi)** | Fase 5 | Stats, EXP, Level Up, Local Save Data | Progres tersimpan di file lokal setelah aplikasi ditutup |
+| **P2 (Sedang)** | Fase 6 | Tiled Map Editor, Multi-Floor Tower, Boss | Level visual rapi dan terdapat pertarungan boss menantang |
+| **P2 (Sedang)** | Fase 7 | SpriteSheet, Sound Effects, Music, 2 Karakter | Tampilan stickman dinamis & audio imersif |
+| **P3 (Rilis)** | Fase 8 | Profiling Android 60 FPS, Build Release APK | APK mandiri terpasang dan berjalan lancar di HP Android fisik |
+
+---
+
+## 5. Tips Eksekusi Khusus Laptop (Linux Mint, RAM 12 GB, Storage 30 GB)
+
+1. **Gunakan Build Desktop untuk 90% Waktu Development:**
+   - Menjalankan `./gradlew lwjgl3:run` memakan waktu hitungan detik dan menggunakan RAM minimal (~300MB), sangat cepat untuk uji coba algoritma gerak, combo, dan AI.
+2. **Hindari Memasang Android Studio Emulator:**
+   - Android Emulator membutuhkan 8-12 GB disk space dan menguras RAM 4-6 GB. Gunakan langsung **HP Android fisik lewat kabel USB (`adb`)**. Jauh lebih ringan, cepat, dan akurat menguji respons layar sentuh asli.
+3. **Pembersihan Cache Gradle Berkala:**
+   - Karena sisa disk 30 GB, bersihkan cache build secara berkala jika sudah menumpuk dengan `./gradlew clean` atau membersihkan folder `~/.gradle/caches/` bila perlu.
+4. **Pendekatan Iteratif (Jangan Langsung Aset Berat):**
+   - Gunakan kotak primitif (`ShapeRenderer`) atau stickman garis sederhana sampai mekanik combat terasa sangat enak dimainkan. Jangan buang waktu membuat animasi rumit sebelum hitbox dan collision terasa solid.
