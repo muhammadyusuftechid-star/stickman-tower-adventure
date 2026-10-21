@@ -23,6 +23,7 @@ import com.stickman.tower.combat.ComboStep
 import com.stickman.tower.combat.FloatingText
 import com.stickman.tower.combat.HitStopManager
 import com.stickman.tower.enemy.BossEnemy
+import com.stickman.tower.enemy.CombatDirector
 import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.endless.FloorMutator
 import com.stickman.tower.input.CompositeInput
@@ -251,6 +252,7 @@ class PlayScreen(
      * Memuat layout lantai menara tertentu (Story 1-3 atau Endless 4+).
      */
     fun loadFloor(floorNumber: Int) {
+        CombatDirector.reset()
         currentFloorNumber = if (gameMode == GameMode.STORY) floorNumber.coerceIn(1, 10) else floorNumber.coerceAtLeast(11)
         activeMutator = if (gameMode == GameMode.ENDLESS) FloorMutator.getRandomMutator(currentFloorNumber) else FloorMutator.NONE
         currentFloor = if (gameMode == GameMode.STORY) TowerLevelBuilder.buildFloor(currentFloorNumber) else TowerLevelBuilder.buildEndlessFloor(currentFloorNumber, activeMutator)
@@ -659,7 +661,8 @@ class PlayScreen(
                 }
             }
 
-            // Pembaruan Musuh Biasa
+            // Pembaruan Sistem AI Combat Director & Musuh Biasa
+            CombatDirector.update(updateDelta)
             for (enemy in currentFloor.enemies) {
                 enemy.update(updateDelta, player, currentFloor.platforms)
                 if (enemy.health.isDead && !enemy.rewardClaimed) {
@@ -883,6 +886,30 @@ class PlayScreen(
                     if (player.hitbox.bounds.overlaps(enemy.hurtbox.bounds)) {
                         player.hitbox.hitEntities.add(enemy)
 
+                        val isHeavyAttack = player.comboManager.currentStep == ComboStep.HIT_3 ||
+                                player.isSkillStriking || player.isSkill2Active || player.isSkill3Active || player.isUlting
+
+                        if (enemy.canBlockHitFrom(player.position.x)) {
+                            if (isHeavyAttack) {
+                                enemy.breakGuard(1.8f)
+                                AudioManager.playParry()
+                                hitStopManager.trigger(0.08f)
+                                particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height * 0.6f, count = 18, color = Color.GOLD)
+                                floatingTexts.add(
+                                    FloatingText("★ GUARD BREAK! ★", enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height + 0.45f, Color.GOLD, isCritical = true)
+                                )
+                            } else {
+                                AudioManager.playParry()
+                                hitStopManager.trigger(0.04f)
+                                particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height * 0.6f, count = 10, color = Color.CYAN)
+                                floatingTexts.add(
+                                    FloatingText("BLOCKED!", enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height + 0.35f, Color.CYAN)
+                                )
+                                enemy.velocity.x += if (player.facingRight) 2.0f else -2.0f
+                                continue
+                            }
+                        }
+
                         val knockX = if (player.facingRight) player.hitbox.knockbackX else -player.hitbox.knockbackX
                         val knockY = player.hitbox.knockbackY
 
@@ -1021,6 +1048,15 @@ class PlayScreen(
 
             for (enemy in currentFloor.enemies) {
                 if (!enemy.health.isDead && proj.bounds.overlaps(enemy.hurtbox.bounds)) {
+                    if (enemy.canBlockHitFrom(proj.position.x)) {
+                        AudioManager.playParry()
+                        particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height * 0.6f, count = 10, color = Color.CYAN)
+                        floatingTexts.add(
+                            FloatingText("BLOCKED!", enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height + 0.35f, Color.CYAN)
+                        )
+                        proj.isDestroyed = true
+                        break
+                    }
                     val knockX = if (proj.velocityX > 0) 6f else -6f
                     if (enemy.takeHit(proj.damage, knockX, 2f)) {
                         particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 8, color = proj.color)

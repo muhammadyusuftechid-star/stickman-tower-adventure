@@ -23,6 +23,10 @@ enum class BossState {
     GROUND_SLAM_DOWN,
     ENRAGE_ROAR,
     WIND_SLASH,
+    EVASIVE_LEAP,    // Matron: lompatan akrobatik mundur sambil menembak panah
+    SHADOW_DODGE,    // Doppelganger: shadow roll cross-up menembus pemain ke belakang
+    BLOOD_BLINK,     // Sovereign: teleportasi kabut darah ke belakang pemain
+    SUMMON_RUNES,    // Calligrapher: memanggil segel tinta meledak di bawah pemain
     STUNNED,
     DEAD
 }
@@ -36,8 +40,13 @@ enum class BossType {
 }
 
 /**
- * Boss Menara:
- * Mendukung 5 tipe bos kampanye naratif (Lantai 3, 5, 8, 9, 10) serta bos Endless Spire.
+ * Boss Menara dengan Arsitektur AI Kepribadian Taktikal Berbeda (10/10 AI Systems):
+ * Masing-masing dari 5 Bos Legendaris memiliki pohon keputusan dan taktik khas:
+ * - TOWER_GUARDIAN: Juggernaut tanky, Cleave jarak dekat, Ground Slam seismik, Wind Slash.
+ * - AMETHYST_MATRON: Sniper kiter, Evasive Leap mundur saat didekati, Double/Triple Arrow Fan.
+ * - SHADOW_DOPPELGANGER: Shinobi mirror, Shadow Roll menembus pemain untuk counter-backstab, Sabit Bayangan.
+ * - CRIMSON_SOVEREIGN: Assassin darah, Blood Blink teleportasi instan ke belakang pemain, Berserk Flurry.
+ * - GRAND_CALLIGRAPHER: Sorcerer kosmis, memanggil Rune Segel Tinta meledak, Komet Kosmis, Warp dimensi.
  */
 class BossEnemy(
     spawnX: Float = 14f,
@@ -147,7 +156,8 @@ class BossEnemy(
     private var hasTriggeredEnrage = false
 
     private var actionTimer = 0f
-    private var attackCooldown = 1.2f
+    var attackCooldown = 0.4f
+        internal set
     private var isGrounded = false
     private var animTime = 0f
     private var enragePulse = 0f
@@ -158,6 +168,12 @@ class BossEnemy(
     var poisonDps = 0f
         private set
     private var poisonTickTimer = 0f
+
+    // Signature Boss Parameters
+    private var runeTargetX = 0f
+    private var runeTargetY = 0f
+    private var runeExploded = false
+    private var hasFiredLeapShot = false
 
     fun applyPoison(duration: Float = 3.5f, dps: Float = 12f) {
         poisonTimer = duration.coerceAtLeast(poisonTimer)
@@ -180,6 +196,7 @@ class BossEnemy(
         val COLOR_BOSS_HORN = Color(0.9f, 0.75f, 0.2f, 1f)
         val COLOR_BLADE_PHASE2 = Color(1f, 0.35f, 0.2f, 1f)
         val COLOR_BLADE_NORMAL = Color(0.85f, 0.85f, 0.9f, 1f)
+        val COLOR_RUNE_WARNING = Color(1f, 0.85f, 0.2f, 0.8f)
     }
 
     fun update(delta: Float, player: Player, platforms: List<Platform>) {
@@ -202,7 +219,7 @@ class BossEnemy(
             val p = it.next()
             p.update(delta)
             for (platform in platforms) {
-                if (platform.isOneWay) continue // Proyektil angin bos menembus platform one-way
+                if (platform.isOneWay) continue
                 if (!p.isDestroyed && p.bounds.overlaps(platform.bounds)) {
                     p.isDestroyed = true
                     break
@@ -240,13 +257,15 @@ class BossEnemy(
         val distToPlayer = player.position.x - (position.x + width / 2f)
         val absDist = abs(distToPlayer)
 
-        // Update AI State Machine
+        // =====================================================================
+        // AI STATE MACHINE DENGAN CABANG KEPRIBADIAN BOS
+        // =====================================================================
         when (state) {
             BossState.IDLE -> {
                 actionTimer += delta
                 facingRight = distToPlayer > 0
                 velocity.x = 0f
-                if (actionTimer >= 0.4f) {
+                if (actionTimer >= (if (isPhase2) 0.25f else 0.4f)) {
                     state = BossState.CHASE
                     actionTimer = 0f
                 }
@@ -255,37 +274,143 @@ class BossEnemy(
             BossState.CHASE -> {
                 facingRight = distToPlayer > 0
                 val moveSpeed = if (isPhase2) ENRAGE_SPEED else BASE_SPEED
-                velocity.x = if (facingRight) moveSpeed else -moveSpeed
 
-                // Pilih Pola Serangan Taktikal Berdasarkan Jarak
-                if (attackCooldown <= 0f) {
-                    if (absDist <= CLEAVE_RANGE) {
-                        state = BossState.CLEAVE
-                        actionTimer = 0f
-                        hitbox.damage = if (isPhase2) 28f else 22f
-                        hitbox.knockbackX = 8.5f
-                        hitbox.knockbackY = 4.0f
-                        hitbox.reset()
-                        velocity.x = 0f
-                    } else if (isPhase2 && absDist > 6.0f) {
-                        // Fase 2 Long Range: Luncurkan Wind Slash dari Jarak Jauh
-                        state = BossState.WIND_SLASH
-                        actionTimer = 0f
-                        hasFiredWindSlash = false
-                        velocity.x = 0f
-                    } else if (absDist in 2.5f..7.5f) {
-                        // Mid Range: Ground Slam Melompat Menghantam Tanah ke Posisi Pemain
-                        state = BossState.GROUND_SLAM_UP
-                        actionTimer = 0f
-                        velocity.y = 12.5f
-                        // Trajectory leap terarah: waktu menuju apex sekitar 0.45s
-                        val leapTargetVx = (distToPlayer / 0.45f).coerceIn(-moveSpeed * 1.5f, moveSpeed * 1.5f)
-                        velocity.x = leapTargetVx
-                    } else if (isPhase2) {
-                        state = BossState.WIND_SLASH
-                        actionTimer = 0f
-                        hasFiredWindSlash = false
-                        velocity.x = 0f
+                // Logika Gerakan Khas Masing-Masing Bos:
+                when (type) {
+                    BossType.AMETHYST_MATRON -> {
+                        // Kiter AI: jika pemain terlalu dekat (< 3.2m), mundur atau lakukan Evasive Leap
+                        if (absDist < 3.2f) {
+                            if (attackCooldown <= 0f) {
+                                state = BossState.EVASIVE_LEAP
+                                actionTimer = 0f
+                                hasFiredLeapShot = false
+                                velocity.y = 10.0f
+                                velocity.x = (if (facingRight) -1f else 1f) * 7.5f
+                                isGrounded = false
+                            } else {
+                                // Mundur sambil membidik
+                                velocity.x = (if (facingRight) -moveSpeed else moveSpeed) * 0.8f
+                            }
+                        } else if (absDist > 7.5f) {
+                            velocity.x = if (facingRight) moveSpeed else -moveSpeed
+                        } else {
+                            // Sweet spot: berhenti dan tembakkan panah kristal
+                            velocity.x = MathUtils.lerp(velocity.x, 0f, 15f * delta)
+                            if (attackCooldown <= 0f) {
+                                state = BossState.WIND_SLASH
+                                actionTimer = 0f
+                                hasFiredWindSlash = false
+                                velocity.x = 0f
+                            }
+                        }
+                    }
+
+                    BossType.SHADOW_DOPPELGANGER -> {
+                        velocity.x = if (facingRight) moveSpeed * 1.1f else -moveSpeed * 1.1f
+                        if (attackCooldown <= 0f) {
+                            if (absDist <= 2.2f) {
+                                // Taktik Ninja: 50% Shadow Roll menembus ke belakang pemain (Cross-up)
+                                if (MathUtils.randomBoolean(0.55f)) {
+                                    state = BossState.SHADOW_DODGE
+                                    actionTimer = 0f
+                                } else {
+                                    state = BossState.CLEAVE
+                                    actionTimer = 0f
+                                    hitbox.damage = if (isPhase2) 30f else 25f
+                                    hitbox.reset()
+                                    velocity.x = 0f
+                                }
+                            } else if (absDist in 2.5f..6.5f) {
+                                if (MathUtils.randomBoolean(0.4f)) {
+                                    state = BossState.WIND_SLASH
+                                    actionTimer = 0f
+                                    hasFiredWindSlash = false
+                                    velocity.x = 0f
+                                } else {
+                                    state = BossState.GROUND_SLAM_UP
+                                    actionTimer = 0f
+                                    velocity.y = 12.5f
+                                    val leapVx = (distToPlayer / 0.45f).coerceIn(-moveSpeed * 1.5f, moveSpeed * 1.5f)
+                                    velocity.x = leapVx
+                                }
+                            }
+                        }
+                    }
+
+                    BossType.CRIMSON_SOVEREIGN -> {
+                        velocity.x = if (facingRight) moveSpeed else -moveSpeed
+                        if (attackCooldown <= 0f) {
+                            if (absDist in 3.0f..8.5f && MathUtils.randomBoolean(0.6f)) {
+                                // Taktik Vampiric: Blood Blink teleport ke belakang pemain
+                                state = BossState.BLOOD_BLINK
+                                actionTimer = 0f
+                                velocity.set(0f, 0f)
+                            } else if (absDist <= CLEAVE_RANGE) {
+                                state = BossState.CLEAVE
+                                actionTimer = 0f
+                                hitbox.damage = if (isPhase2) 34f else 28f
+                                hitbox.reset()
+                                velocity.x = 0f
+                            } else if (isPhase2 || absDist > 6.0f) {
+                                state = BossState.WIND_SLASH
+                                actionTimer = 0f
+                                hasFiredWindSlash = false
+                                velocity.x = 0f
+                            }
+                        }
+                    }
+
+                    BossType.GRAND_CALLIGRAPHER -> {
+                        velocity.x = if (facingRight) moveSpeed * 0.75f else -moveSpeed * 0.75f
+                        if (attackCooldown <= 0f) {
+                            if (absDist in 3.0f..10.0f && MathUtils.randomBoolean(0.5f)) {
+                                // Memanggil Ink Rune di bawah kaki pemain
+                                state = BossState.SUMMON_RUNES
+                                actionTimer = 0f
+                                runeTargetX = player.position.x
+                                runeTargetY = player.position.y
+                                runeExploded = false
+                                velocity.x = 0f
+                            } else if (absDist <= CLEAVE_RANGE + 0.5f) {
+                                state = BossState.CLEAVE
+                                actionTimer = 0f
+                                hitbox.damage = if (isPhase2) 40f else 35f
+                                hitbox.reset()
+                                velocity.x = 0f
+                            } else {
+                                state = BossState.WIND_SLASH
+                                actionTimer = 0f
+                                hasFiredWindSlash = false
+                                velocity.x = 0f
+                            }
+                        }
+                    }
+
+                    BossType.TOWER_GUARDIAN -> {
+                        // Pola Standar Bastion Juggernaut
+                        velocity.x = if (facingRight) moveSpeed else -moveSpeed
+                        if (attackCooldown <= 0f) {
+                            if (absDist <= CLEAVE_RANGE) {
+                                state = BossState.CLEAVE
+                                actionTimer = 0f
+                                hitbox.damage = if (isPhase2) 28f else 22f
+                                hitbox.knockbackX = 8.5f
+                                hitbox.knockbackY = 4.0f
+                                hitbox.reset()
+                                velocity.x = 0f
+                            } else if (absDist in 2.5f..7.5f) {
+                                state = BossState.GROUND_SLAM_UP
+                                actionTimer = 0f
+                                velocity.y = 12.5f
+                                val leapTargetVx = (distToPlayer / 0.45f).coerceIn(-moveSpeed * 1.5f, moveSpeed * 1.5f)
+                                velocity.x = leapTargetVx
+                            } else if (isPhase2 && absDist > 6.0f) {
+                                state = BossState.WIND_SLASH
+                                actionTimer = 0f
+                                hasFiredWindSlash = false
+                                velocity.x = 0f
+                            }
+                        }
                     }
                 }
             }
@@ -295,11 +420,9 @@ class BossEnemy(
                 velocity.x = 0f
                 when {
                     actionTimer < 0.28f -> {
-                        // Startup Windup
                         hitbox.isActive = false
                     }
                     actionTimer < 0.44f -> {
-                        // Active Cleave
                         val hbW = 2.4f
                         val hbH = 2.2f
                         val hbX = if (facingRight) position.x + width * 0.7f else position.x - hbW + width * 0.3f
@@ -307,7 +430,6 @@ class BossEnemy(
                         hitbox.set(hbX, hbY, hbW, hbH, active = true)
                     }
                     actionTimer < 0.70f -> {
-                        // Recovery
                         hitbox.reset()
                     }
                     else -> {
@@ -323,7 +445,6 @@ class BossEnemy(
                 hitbox.isActive = false
                 hasLanded = false
                 if (velocity.y <= 0f) {
-                    // Capai puncak lompatan: Menghunjam ke Bawah dengan Kecepatan Tinggi
                     state = BossState.GROUND_SLAM_DOWN
                     velocity.y = -22.0f
                     velocity.x = 0f
@@ -338,7 +459,6 @@ class BossEnemy(
                     velocity.set(0f, 0f)
 
                     if (actionTimer < 0.18f) {
-                        // Hantam Tanah! Aktifkan Shockwave Hitbox Luas
                         val shockW = 4.2f
                         val shockH = 1.0f
                         hitbox.damage = if (isPhase2) 32f else 25f
@@ -346,7 +466,6 @@ class BossEnemy(
                         hitbox.knockbackY = 6.0f
                         hitbox.set(position.x + width / 2f - shockW / 2f, position.y, shockW, shockH, active = true)
                     } else {
-                        // Shockwave mereda: matikan hitbox segera agar adil bagi pemain (punish window)
                         hitbox.reset()
                     }
 
@@ -391,27 +510,108 @@ class BossEnemy(
                             )
                         }
                         BossType.AMETHYST_MATRON -> {
-                            // Hujan Panah Kristal Amethyst (Triple Fan Volley)
                             projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.6f, velocityX = projVx * 1.15f, velocityY = 2.0f, damage = 16f, color = Color(0.85f, 0.45f, 1f, 1f)))
                             projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.45f, velocityX = projVx * 1.25f, velocityY = 0f, damage = 18f, color = Color(0.85f, 0.45f, 1f, 1f)))
                             projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.3f, velocityX = projVx * 1.15f, velocityY = -2.0f, damage = 16f, color = Color(0.85f, 0.45f, 1f, 1f)))
                         }
                         BossType.SHADOW_DOPPELGANGER -> {
-                            // Tebasan Sabit Bayangan Cermin
                             projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.45f, velocityX = projVx * 1.35f, damage = 24f, color = Color(0.4f, 0.85f, 1f, 1f)))
                         }
                         BossType.CRIMSON_SOVEREIGN -> {
-                            // Bilah Sabit Darah Vampiric
                             projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.45f, velocityX = projVx * 1.3f, damage = 28f, color = Color(1f, 0.2f, 0.25f, 1f)))
                         }
                         BossType.GRAND_CALLIGRAPHER -> {
-                            // Komet Tinta Kosmis Raksasa
                             projectiles.add(Projectile(startX = projStartX, startY = position.y + height * 0.5f, velocityX = projVx * 1.1f, damage = 35f, width = 1.6f, height = 0.8f, color = Color(1f, 0.85f, 0.25f, 1f)))
                         }
                     }
                 }
                 if (actionTimer >= 0.55f) {
-                    attackCooldown = 1.1f
+                    attackCooldown = if (type == BossType.AMETHYST_MATRON) 0.8f else 1.1f
+                    state = BossState.IDLE
+                    actionTimer = 0f
+                }
+            }
+
+            // =================================================================
+            // SIGNATURE BOSS BEHAVIOR STATES
+            // =================================================================
+            BossState.EVASIVE_LEAP -> {
+                actionTimer += delta
+                if (actionTimer >= 0.20f && !hasFiredLeapShot) {
+                    hasFiredLeapShot = true
+                    val arrowVx = (if (facingRight) 1f else -1f) * 11f
+                    projectiles.add(
+                        Projectile(
+                            startX = position.x + width / 2f,
+                            startY = position.y + 0.5f,
+                            velocityX = arrowVx,
+                            velocityY = -4.5f,
+                            damage = 18f,
+                            color = Color(0.85f, 0.45f, 1f, 1f)
+                        )
+                    )
+                }
+                if (isGrounded && actionTimer >= 0.35f) {
+                    attackCooldown = 0.6f
+                    state = BossState.CHASE
+                    actionTimer = 0f
+                }
+            }
+
+            BossState.SHADOW_DODGE -> {
+                actionTimer += delta
+                val rollDir = if (facingRight) 1f else -1f
+                velocity.x = rollDir * 11.5f
+
+                if (actionTimer >= 0.22f) {
+                    // Berbalik arah menghadap punggung pemain dan langsung lancarkan Cleave
+                    facingRight = !facingRight
+                    state = BossState.CLEAVE
+                    actionTimer = 0f
+                    hitbox.damage = if (isPhase2) 32f else 26f
+                    hitbox.reset()
+                    velocity.x = 0f
+                }
+            }
+
+            BossState.BLOOD_BLINK -> {
+                actionTimer += delta
+                velocity.set(0f, 0f)
+                if (actionTimer >= 0.15f) {
+                    // Reappear di belakang punggung pemain
+                    val targetX = player.position.x + (if (player.facingRight) -1.3f else 1.3f)
+                    position.x = targetX.coerceIn(-8f, 30f)
+                    position.y = player.position.y
+                    facingRight = player.position.x > position.x
+                    state = BossState.CLEAVE
+                    actionTimer = 0f
+                    hitbox.damage = if (isPhase2) 36f else 30f
+                    hitbox.reset()
+                }
+            }
+
+            BossState.SUMMON_RUNES -> {
+                actionTimer += delta
+                velocity.x = 0f
+                if (actionTimer >= 0.55f && !runeExploded) {
+                    runeExploded = true
+                    // Erupsi Geyser Tinta Kosmis vertikal
+                    projectiles.add(
+                        Projectile(
+                            startX = runeTargetX - 0.4f,
+                            startY = runeTargetY,
+                            velocityX = 0f,
+                            velocityY = 13.0f,
+                            damage = 32f,
+                            width = 0.85f,
+                            height = 1.8f,
+                            maxLifetime = 0.7f,
+                            color = Color.GOLD
+                        )
+                    )
+                }
+                if (actionTimer >= 0.85f) {
+                    attackCooldown = 1.0f
                     state = BossState.IDLE
                     actionTimer = 0f
                 }
@@ -476,7 +676,7 @@ class BossEnemy(
 
     fun takeHit(amount: Float, knockX: Float, knockY: Float): Boolean {
         if (health.takeDamage(amount)) {
-            // Boss memiliki hyper armor: resistensi knockback tinggi (hanya bergeser sedikit)
+            // Boss memiliki hyper armor: resistensi knockback tinggi
             velocity.x += knockX * 0.25f
             return true
         }
@@ -504,8 +704,17 @@ class BossEnemy(
         val shoulderY = neckY - 0.22f
         val lookDir = if (facingRight) 1f else -1f
 
-        // 1. Render Proyektil Wind Slash
+        // 1. Render Proyektil Aktif
         for (p in projectiles) p.render(shapeRenderer)
+
+        // 1b. Render Indikator Visual Segel Tinta / Ink Rune Calligrapher
+        if (state == BossState.SUMMON_RUNES && !runeExploded) {
+            val runePulse = (sin(animTime * 18f) + 1f) * 0.15f
+            shapeRenderer.color = COLOR_RUNE_WARNING
+            shapeRenderer.circle(runeTargetX, runeTargetY + 0.1f, 0.75f + runePulse, 16)
+            shapeRenderer.color = Color.RED
+            shapeRenderer.circle(runeTargetX, runeTargetY + 0.1f, 0.3f, 10)
+        }
 
         // 2. Aura Merah Membara di Fase 2 (Enrage Mode)
         if (isPhase2 && !health.isDead) {
@@ -514,7 +723,7 @@ class BossEnemy(
             shapeRenderer.circle(centerX, position.y + height / 2f, (height / 2f) + 0.3f, 20)
         }
 
-        // 3. Warna Tubuh Boss (Hitam legam dengan armor merah marun)
+        // 3. Warna Tubuh Boss
         val bodyColor = when {
             health.isFlashing -> Color.WHITE
             state == BossState.DEAD -> COLOR_BOSS_DEAD
@@ -537,7 +746,6 @@ class BossEnemy(
                 shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX + lookDir * 0.45f, headCenterY + headRadius + 0.35f, 0.09f)
             }
             BossType.AMETHYST_MATRON -> {
-                // Mahkota Kristal Amethyst
                 shapeRenderer.color = Color(0.85f, 0.45f, 1f, 1f)
                 shapeRenderer.triangle(
                     centerX - 0.25f, headCenterY + headRadius,
@@ -546,18 +754,15 @@ class BossEnemy(
                 )
             }
             BossType.SHADOW_DOPPELGANGER -> {
-                // Wisp Bayangan Mengambang di Kepala
                 shapeRenderer.color = Color.CYAN
                 shapeRenderer.circle(centerX, headCenterY + headRadius + 0.15f, 0.14f, 10)
             }
             BossType.CRIMSON_SOVEREIGN -> {
-                // Tanduk Sayap Kelelawar Darah Ganda
                 shapeRenderer.color = Color(1f, 0.15f, 0.25f, 1f)
                 shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX + lookDir * 0.45f, headCenterY + headRadius + 0.4f, 0.08f)
                 shapeRenderer.rectLine(centerX, headCenterY + headRadius * 0.6f, centerX - lookDir * 0.35f, headCenterY + headRadius + 0.35f, 0.08f)
             }
             BossType.GRAND_CALLIGRAPHER -> {
-                // Cincin Halo Ilahi Emas Kosmis
                 shapeRenderer.color = Color.GOLD
                 shapeRenderer.circle(centerX, headCenterY + 0.15f, headRadius + 0.28f, 20)
                 shapeRenderer.color = Color.WHITE
@@ -565,7 +770,7 @@ class BossEnemy(
             }
         }
 
-        // Visual Guard Break / Stun Stars di atas kepala Bos
+        // Visual Guard Break / Stun Stars
         if (state == BossState.STUNNED) {
             shapeRenderer.color = Color.GOLD
             val orbitRadius = 0.52f
@@ -577,7 +782,7 @@ class BossEnemy(
             }
         }
 
-        // Tubuh / Torso (Lebih tebal & berotot)
+        // Tubuh / Torso
         shapeRenderer.color = bodyColor
         shapeRenderer.rectLine(centerX, neckY, centerX, pelvisY, 0.16f)
 
@@ -601,7 +806,6 @@ class BossEnemy(
 
         when (type) {
             BossType.AMETHYST_MATRON -> {
-                // Busur Bayangan Amethyst
                 val bowRadius = 1.1f
                 shapeRenderer.color = Color(0.85f, 0.45f, 1f, 1f)
                 shapeRenderer.rectLine(handX, handY - 0.8f, handX + lookDir * 0.4f, handY, 0.08f)
@@ -610,7 +814,6 @@ class BossEnemy(
                 shapeRenderer.rectLine(handX, handY - 0.8f, handX, handY + 0.8f, 0.03f)
             }
             BossType.SHADOW_DOPPELGANGER -> {
-                // Belati Bayangan Ganda
                 val daggerLen = 1.2f
                 val tipX = handX + MathUtils.cosDeg(bladeAngle) * daggerLen
                 val tipY = handY + MathUtils.sinDeg(bladeAngle) * daggerLen
@@ -618,31 +821,26 @@ class BossEnemy(
                 shapeRenderer.rectLine(handX, handY, tipX, tipY, 0.08f)
             }
             BossType.CRIMSON_SOVEREIGN -> {
-                // Sabit Darah (Blood Scythe)
                 val shaftLen = 2.2f
                 val shaftEndX = handX + MathUtils.cosDeg(bladeAngle) * shaftLen
                 val shaftEndY = handY + MathUtils.sinDeg(bladeAngle) * shaftLen
                 shapeRenderer.color = Color(0.3f, 0.1f, 0.15f, 1f)
                 shapeRenderer.rectLine(handX, handY, shaftEndX, shaftEndY, 0.10f)
-                // Bilah Melengkung Sabit
                 shapeRenderer.color = Color(1f, 0.2f, 0.25f, 1f)
                 shapeRenderer.rectLine(shaftEndX, shaftEndY, shaftEndX + lookDir * 0.9f, shaftEndY - 0.6f, 0.16f)
             }
             BossType.GRAND_CALLIGRAPHER -> {
-                // Kuas Tinta Kosmis Raksasa
                 val brushLen = 2.6f
                 val brushEndX = handX + MathUtils.cosDeg(bladeAngle) * brushLen
                 val brushEndY = handY + MathUtils.sinDeg(bladeAngle) * brushLen
                 shapeRenderer.color = Color(0.85f, 0.70f, 0.25f, 1f)
                 shapeRenderer.rectLine(handX, handY, brushEndX, brushEndY, 0.16f)
-                // Ujung Bulu Kuas Bertabur Bintang
                 shapeRenderer.color = Color.WHITE
                 shapeRenderer.circle(brushEndX, brushEndY, 0.25f, 12)
                 shapeRenderer.color = Color(0.2f, 0.8f, 1f, 0.8f)
                 shapeRenderer.circle(brushEndX, brushEndY, 0.15f, 8)
             }
             else -> {
-                // TOWER_GUARDIAN: Standard Colossal Greatsword
                 val bladeLen = 2.0f
                 val swordEndX = handX + MathUtils.cosDeg(bladeAngle) * bladeLen
                 val swordEndY = handY + MathUtils.sinDeg(bladeAngle) * bladeLen

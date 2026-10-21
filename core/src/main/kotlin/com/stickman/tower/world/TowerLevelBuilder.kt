@@ -310,9 +310,10 @@ object TowerLevelBuilder {
         val enemies = listOf(
             Enemy(spawnX = 4.0f, spawnY = 2.9f, type = EnemyType.MELEE),
             Enemy(spawnX = 15.0f, spawnY = 6.1f, type = EnemyType.RANGED),
-            Enemy(spawnX = 22.0f, spawnY = 4.5f, type = EnemyType.MELEE),
+            Enemy(spawnX = 22.0f, spawnY = 6.5f, type = EnemyType.FLYING),
             Enemy(spawnX = 28.5f, spawnY = 6.3f, type = EnemyType.RANGED)
         )
+
 
         val loreTablets = listOf(
             LoreTablet(
@@ -550,10 +551,10 @@ object TowerLevelBuilder {
         )
 
         val enemies = listOf(
-            Enemy(spawnX = 6.0f, spawnY = 3.7f, type = EnemyType.MELEE),
+            Enemy(spawnX = 6.0f, spawnY = 3.7f, type = EnemyType.SHIELDED),
             Enemy(spawnX = 13.0f, spawnY = 6.0f, type = EnemyType.RANGED),
-            Enemy(spawnX = 20.0f, spawnY = 4.7f, type = EnemyType.MELEE),
-            Enemy(spawnX = 27.5f, spawnY = 6.8f, type = EnemyType.RANGED)
+            Enemy(spawnX = 20.0f, spawnY = 6.5f, type = EnemyType.FLYING),
+            Enemy(spawnX = 27.5f, spawnY = 6.8f, type = EnemyType.SHIELDED)
         )
 
         val storyDialogues = listOf(
@@ -931,10 +932,10 @@ object TowerLevelBuilder {
             spikes.add(SpikeHazard(x = 25.0f, y = 1.0f, width = 2.5f, height = 0.5f))
         }
 
-        // Spawn scaled enemies
-        enemies.add(Enemy(spawnX = 5.0f, spawnY = 1.2f, type = EnemyType.MELEE))
+        // Spawn scaled enemies across all 4 archetypes
+        enemies.add(Enemy(spawnX = 5.0f, spawnY = 1.2f, type = EnemyType.SHIELDED))
         enemies.add(Enemy(spawnX = 11.0f, spawnY = 5.0f, type = EnemyType.RANGED))
-        enemies.add(Enemy(spawnX = 17.0f, spawnY = 1.2f, type = EnemyType.MELEE))
+        enemies.add(Enemy(spawnX = 17.0f, spawnY = 6.0f, type = EnemyType.FLYING))
         enemies.add(Enemy(spawnX = 23.0f, spawnY = 5.0f, type = EnemyType.RANGED))
         enemies.add(Enemy(spawnX = 27.0f, spawnY = 1.2f, type = EnemyType.MELEE))
 
