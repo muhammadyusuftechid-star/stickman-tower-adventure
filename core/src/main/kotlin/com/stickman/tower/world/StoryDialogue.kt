@@ -6,17 +6,40 @@ import com.badlogic.gdx.math.Rectangle
 import kotlin.math.sin
 
 /**
- * Satu baris dialog naratif cerita.
+ * Tipe buff moril percabangan dialog (Morale Surge Buffs).
+ */
+enum class MoraleBuffType(val displayName: String, val effectDescription: String) {
+    NONE("Tanpa Efek", "Tiada modifikasi tempur."),
+    KINETIC_SURGE("Kinetic Surge", "+8% ATK Power di Lantai 7"),
+    SPIRITUAL_WARD("Spiritual Ward", "+15% Max HP & +1 HP/s Regen di Lantai 7")
+}
+
+/**
+ * Pilihan percabangan respon pemain dalam dialog interaktif.
+ */
+data class DialogueBranchOption(
+    val choiceId: String,
+    val promptText: String,
+    val reactionSpeaker: String,
+    val reactionTitle: String,
+    val reactionText: String,
+    val moraleBuff: MoraleBuffType = MoraleBuffType.NONE
+)
+
+/**
+ * Satu baris dialog naratif cerita dengan dukungan percabangan.
  */
 data class DialogueLine(
     val speaker: String,
     val title: String,
     val text: String,
-    val speakerColor: Color = Color.GOLD
+    val speakerColor: Color = Color.GOLD,
+    val branchOptions: List<DialogueBranchOption> = emptyList()
 )
 
 /**
- * Pemicu dialog naratif (NPC atau cutscene trigger).
+ * Pemicu dialog naratif (NPC atau cutscene trigger) terintegrasi dengan mesin Typewriter
+ * dan percabangan keputusan moril.
  */
 class StoryDialogue(
     val triggerX: Float,
@@ -27,17 +50,157 @@ class StoryDialogue(
     var isTriggered: Boolean = false
     var currentLineIndex: Int = 0
 
-    val currentLine: DialogueLine?
-        get() = if (currentLineIndex in lines.indices) lines[currentLineIndex] else null
+    // State Typewriter (35 karakter/detik)
+    var revealedCharCount: Int = 0
+    private var charTimer: Float = 0f
+    private var pauseTimer: Float = 0f
+    val charsPerSecond: Float = 35f
 
+    // State Percabangan
+    var isWaitingForChoice: Boolean = false
+    var activeBranchReaction: DialogueLine? = null
+    var chosenMoraleBuff: MoraleBuffType = MoraleBuffType.NONE
+
+    val currentLine: DialogueLine?
+        get() = activeBranchReaction ?: if (currentLineIndex in lines.indices) lines[currentLineIndex] else null
+
+    /**
+     * Memperbarui pergerakan karakter typewriter.
+     * Mengembalikan true jika sebuah karakter baru (selain spasi) berhasil diungkapkan
+     * (untuk memicu sintesis suara voice chirp).
+     */
+    fun updateTypewriter(delta: Float): Boolean {
+        val line = currentLine ?: return false
+        val fullText = line.text
+
+        if (revealedCharCount >= fullText.length) {
+            if (line.branchOptions.isNotEmpty() && activeBranchReaction == null) {
+                isWaitingForChoice = true
+            }
+            return false
+        }
+
+        if (pauseTimer > 0f) {
+            pauseTimer -= delta
+            return false
+        }
+
+        charTimer += delta
+        val interval = 1f / charsPerSecond
+        var revealedNewChar = false
+
+        while (charTimer >= interval && revealedCharCount < fullText.length) {
+            charTimer -= interval
+            val charRevealed = fullText[revealedCharCount]
+            revealedCharCount++
+
+            // Jeda tanda baca
+            when (charRevealed) {
+                '.' -> pauseTimer = 0.35f
+                ',', ';', ':' -> pauseTimer = 0.15f
+                '!', '?' -> pauseTimer = 0.30f
+            }
+
+            if (!charRevealed.isWhitespace()) {
+                revealedNewChar = true
+            }
+
+            if (pauseTimer > 0f) break
+        }
+
+        if (revealedCharCount >= fullText.length && line.branchOptions.isNotEmpty() && activeBranchReaction == null) {
+            isWaitingForChoice = true
+        }
+
+        return revealedNewChar
+    }
+
+    /**
+     * Mengambil potongan teks yang saat ini telah terungkap oleh efek typewriter.
+     */
+    fun getDisplayText(): String {
+        val line = currentLine ?: return ""
+        return line.text.take(revealedCharCount.coerceIn(0, line.text.length))
+    }
+
+    /**
+     * Memeriksa apakah teks pada baris saat ini telah selesai terungkap seutuhnya.
+     */
+    fun isCurrentLineCompleted(): Boolean {
+        val line = currentLine ?: return true
+        return revealedCharCount >= line.text.length
+    }
+
+    /**
+     * Mengungkapkan seluruh teks secara instan (Instant-Skip saat pemain tap/space).
+     */
+    fun instantReveal() {
+        val line = currentLine ?: return
+        revealedCharCount = line.text.length
+        pauseTimer = 0f
+        if (line.branchOptions.isNotEmpty() && activeBranchReaction == null) {
+            isWaitingForChoice = true
+        }
+    }
+
+    /**
+     * Memilih salah satu opsi percabangan respon pemain.
+     */
+    fun selectBranch(optionIndex: Int, onMoraleBuffGranted: ((MoraleBuffType) -> Unit)? = null): Boolean {
+        val line = currentLine ?: return false
+        if (!isWaitingForChoice || optionIndex !in line.branchOptions.indices) return false
+
+        val option = line.branchOptions[optionIndex]
+        chosenMoraleBuff = option.moraleBuff
+        if (option.moraleBuff != MoraleBuffType.NONE) {
+            onMoraleBuffGranted?.invoke(option.moraleBuff)
+        }
+
+        // Tampilkan reaksi respon NPC
+        activeBranchReaction = DialogueLine(
+            speaker = option.reactionSpeaker,
+            title = option.reactionTitle,
+            text = option.reactionText,
+            speakerColor = line.speakerColor
+        )
+
+        isWaitingForChoice = false
+        revealedCharCount = 0
+        charTimer = 0f
+        pauseTimer = 0f
+        return true
+    }
+
+    /**
+     * Melanjutkan dialog ke baris berikutnya.
+     * Mengembalikan true jika masih ada dialog tersisa, false jika seluruh adegan selesai.
+     */
     fun advance(): Boolean {
+        if (activeBranchReaction != null) {
+            activeBranchReaction = null
+            currentLineIndex++
+            resetTypewriter()
+            return currentLineIndex < lines.size
+        }
+
         currentLineIndex++
+        resetTypewriter()
         return currentLineIndex < lines.size
+    }
+
+    private fun resetTypewriter() {
+        revealedCharCount = 0
+        charTimer = 0f
+        pauseTimer = 0f
+        isWaitingForChoice = false
     }
 
     fun reset() {
         currentLineIndex = 0
         isTriggered = false
+        activeBranchReaction = null
+        chosenMoraleBuff = MoraleBuffType.NONE
+        resetTypewriter()
     }
 }
 

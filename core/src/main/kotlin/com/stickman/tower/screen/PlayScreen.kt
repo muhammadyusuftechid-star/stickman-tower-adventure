@@ -51,6 +51,8 @@ import com.stickman.tower.world.CameraManager
 import com.stickman.tower.tools.DevToolsOverlay
 import com.stickman.tower.world.LoreTablet
 import com.stickman.tower.world.StoryDialogue
+import com.stickman.tower.world.MoraleBuffType
+import com.stickman.tower.narrative.TowerWhisperManager
 import com.stickman.tower.world.TowerFloor
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
@@ -188,6 +190,10 @@ class PlayScreen(
     var activeStoryDialogue: StoryDialogue? = null
     var nearbyTabletPrompt: LoreTablet? = null
     var nearbyDialoguePrompt: StoryDialogue? = null
+
+    // Engine Dialog Dinamis & Naskah Sinematik (Fase 18)
+    var activeMoraleBuff: MoraleBuffType = MoraleBuffType.NONE
+    val towerWhisperManager = TowerWhisperManager()
 
     // Sistem Pencapaian & Trofi (Fase 15)
     private var activeAchievementBanner: com.stickman.tower.achievement.Achievement? = null
@@ -335,6 +341,15 @@ class PlayScreen(
         activeStoryDialogue = null
         nearbyTabletPrompt = null
         nearbyDialoguePrompt = null
+        towerWhisperManager.reset()
+
+        if (currentFloorNumber == 1) {
+            activeMoraleBuff = MoraleBuffType.NONE
+        } else if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.SPIRITUAL_WARD) {
+            val bonusHp = player.health.maxHp * 0.15f
+            player.health.maxHp += bonusHp
+            player.health.heal(bonusHp)
+        }
 
         if (currentFloor.isBossFloor && lastBossIntroFloor != currentFloorNumber) {
             isBossIntroActive = true
@@ -523,6 +538,10 @@ class PlayScreen(
         }
 
         if (activeStoryDialogue != null) {
+            val revealedNewChar = activeStoryDialogue?.updateTypewriter(delta) ?: false
+            if (revealedNewChar) {
+                activeStoryDialogue?.currentLine?.let { AudioManager.playVoiceChirp(it.speaker) }
+            }
             handleStoryDialogueInput()
             renderWorld(0f)
             uiViewport.apply()
@@ -634,6 +653,24 @@ class PlayScreen(
             val activeInput = if (isBossIntroActive) noInput else input
             player.update(updateDelta, activeInput, currentFloor.platforms)
             particleManager.update(updateDelta)
+
+            // Tower Whispers Ambient Monologue (Fase 18)
+            val isPlayerIdle = abs(player.velocity.x) < 0.1f && abs(player.velocity.y) < 0.1f &&
+                    !player.isDodging && !player.isSkillStriking &&
+                    !player.isSkill2Active && !player.isSkill3Active && !player.isUlting &&
+                    !player.hitbox.isActive && !input.isMoveLeft() && !input.isMoveRight() &&
+                    !input.isAttackJustPressed()
+            val actNum = when (currentFloorNumber) {
+                in 1..3 -> 1
+                in 4..6 -> 2
+                else -> 3
+            }
+            towerWhisperManager.update(updateDelta, isPlayerIdle, actNum)
+
+            // Morale Surge: Spiritual Ward Regen di Lantai 7 (Fase 18)
+            if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.SPIRITUAL_WARD && !player.health.isDead) {
+                player.health.heal(1.0f * updateDelta)
+            }
 
             // Cek Batas Jurang / Out of Bounds (Mencegah karakter jatuh ke jurang hampa tanpa batas)
             if (player.position.y < currentFloor.mapBounds.y - 3.5f && !player.health.isDead) {
@@ -980,8 +1017,9 @@ class PlayScreen(
 
                         val knockX = if (player.facingRight) player.hitbox.knockbackX else -player.hitbox.knockbackX
                         val knockY = player.hitbox.knockbackY
+                        val actualDmg = if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) player.hitbox.damage * 1.08f else player.hitbox.damage
 
-                        if (enemy.takeHit(player.hitbox.damage, knockX, knockY)) {
+                        if (enemy.takeHit(actualDmg, knockX, knockY)) {
                             val combo = player.comboManager.registerHit()
                             hitStopManager.trigger(0.06f)
                             AudioManager.playHit()
@@ -1038,7 +1076,7 @@ class PlayScreen(
 
                             floatingTexts.add(
                                 FloatingText(
-                                    "$critPrefix${player.hitbox.damage.toInt()}",
+                                    "$critPrefix${actualDmg.toInt()}",
                                     enemy.position.x + enemy.width / 2f,
                                     enemy.position.y + enemy.height + 0.35f,
                                     textColor,
@@ -1057,8 +1095,9 @@ class PlayScreen(
 
                     val knockX = if (player.facingRight) player.hitbox.knockbackX else -player.hitbox.knockbackX
                     val knockY = player.hitbox.knockbackY
+                    val actualDmg = if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) player.hitbox.damage * 1.08f else player.hitbox.damage
 
-                    if (boss.takeHit(player.hitbox.damage, knockX, knockY)) {
+                    if (boss.takeHit(actualDmg, knockX, knockY)) {
                         val combo = player.comboManager.registerHit()
                         bossGhostDelay = 0.35f
                         hitStopManager.trigger(0.06f)
@@ -1121,7 +1160,7 @@ class PlayScreen(
                         val textColor = if (player.hitbox.isCritical) Color.GOLD else Color.RED
                         floatingTexts.add(
                             FloatingText(
-                                "$critPrefix${player.hitbox.damage.toInt()}",
+                                "$critPrefix${actualDmg.toInt()}",
                                 boss.position.x + boss.width / 2f,
                                 boss.position.y + boss.height + 0.45f,
                                 textColor,
@@ -1964,6 +2003,24 @@ class PlayScreen(
             smallF.draw(batch, "RELICS: $relicStr", 15f, h - 122f)
         }
 
+        // Morale Surge Buff Indicator (Fase 18)
+        if (currentFloorNumber == 7 && activeMoraleBuff != MoraleBuffType.NONE) {
+            val buffColor = if (activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) Color(1.0f, 0.65f, 0.25f, 1f) else Color(0.35f, 0.85f, 1.0f, 1f)
+            smallF.setColor(buffColor)
+            smallF.draw(batch, "✦ MORALE SURGE: ${activeMoraleBuff.displayName} (${activeMoraleBuff.effectDescription})", 15f, h - 140f)
+        }
+
+        // Tower Whispers Ambient Monologue (Fase 18)
+        if (towerWhisperManager.isWhisperActive && towerWhisperManager.whisperAlpha > 0.01f) {
+            val whisper = towerWhisperManager.currentWhisper ?: ""
+            val alpha = towerWhisperManager.whisperAlpha
+            regF.setColor(0.85f, 0.92f, 1.0f, alpha * 0.90f)
+            glyphLayout.setText(regF, whisper)
+            val wx = (w - glyphLayout.width) / 2f
+            val wy = 630f
+            regF.draw(batch, whisper, wx, wy)
+        }
+
         // Floor Name Banner
         headF.color = Color.CYAN
         headF.draw(batch, currentFloor.floorName, 320f, h - 70f)
@@ -2568,16 +2625,66 @@ class PlayScreen(
 
     private fun handleStoryDialogueInput() {
         val dialogue = activeStoryDialogue ?: return
+
+        // 1. Pilihan Percabangan Moril Interaktif (Fase 18)
+        if (dialogue.isWaitingForChoice) {
+            val line = dialogue.currentLine
+            if (line != null && line.branchOptions.isNotEmpty()) {
+                val boxX = 100f
+                val boxY = 40f
+                val card1X = boxX + 30f
+                val card1Y = boxY + 12f
+                val card1W = 500f
+                val card1H = 46f
+
+                val card2X = boxX + 550f
+                val card2Y = boxY + 12f
+                val card2W = 500f
+                val card2H = 46f
+
+                var choiceSelected = -1
+
+                if (Gdx.input.isKeyJustPressed(Keys.NUM_1) || Gdx.input.isKeyJustPressed(Keys.NUMPAD_1)) {
+                    choiceSelected = 0
+                } else if (Gdx.input.isKeyJustPressed(Keys.NUM_2) || Gdx.input.isKeyJustPressed(Keys.NUMPAD_2)) {
+                    choiceSelected = 1
+                } else if (Gdx.input.justTouched()) {
+                    uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                    uiViewport.unproject(uiTouchVec)
+                    if (uiTouchVec.x in card1X..(card1X + card1W) && uiTouchVec.y in card1Y..(card1Y + card1H)) {
+                        choiceSelected = 0
+                    } else if (uiTouchVec.x in card2X..(card2X + card2W) && uiTouchVec.y in card2Y..(card2Y + card2H)) {
+                        choiceSelected = 1
+                    }
+                }
+
+                if (choiceSelected in line.branchOptions.indices) {
+                    dialogue.selectBranch(choiceSelected) { buff ->
+                        activeMoraleBuff = buff
+                    }
+                    AudioManager.playSlashLight()
+                    inputCooldown = 0.2f
+                }
+            }
+            return
+        }
+
+        // 2. Navigasi Baris Naratif (Typewriter instant reveal atau advance)
         if (Gdx.input.isKeyJustPressed(Keys.E) ||
             Gdx.input.isKeyJustPressed(Keys.SPACE) ||
             Gdx.input.isKeyJustPressed(Keys.ENTER) ||
             input.isAttackJustPressed() ||
             input.isJumpJustPressed() ||
             Gdx.input.justTouched()) {
-            val hasNext = dialogue.advance()
-            if (!hasNext) {
-                dialogue.isTriggered = true
-                activeStoryDialogue = null
+
+            if (!dialogue.isCurrentLineCompleted()) {
+                dialogue.instantReveal()
+            } else {
+                val hasNext = dialogue.advance()
+                if (!hasNext) {
+                    dialogue.isTriggered = true
+                    activeStoryDialogue = null
+                }
             }
             AudioManager.playSlashLight()
             inputCooldown = 0.2f
@@ -2690,6 +2797,7 @@ class PlayScreen(
         // Speaker Tag Box (Dynamic sizing based on title length for zero text clipping)
         val headF = FontManager.headerFont
         val regF = FontManager.regularFont
+        val smallF = FontManager.smallFont
         val speakerTag = "${line.speaker.uppercase()}  •  ${line.title}"
         glyphLayout.setText(headF, speakerTag)
         val tagW = kotlin.math.max(320f, glyphLayout.width + 36f)
@@ -2703,6 +2811,37 @@ class PlayScreen(
         shapeRenderer.rectLine(tagX, tagY, tagX, tagY + tagH, 1.5f)
         shapeRenderer.rectLine(tagX + tagW, tagY, tagX + tagW, tagY + tagH, 1.5f)
 
+        // Jika sedang menunggu pilihan percabangan
+        if (dialogue.isWaitingForChoice && line.branchOptions.isNotEmpty()) {
+            val card1X = boxX + 30f
+            val card1Y = boxY + 12f
+            val card1W = 500f
+            val card1H = 46f
+
+            val card2X = boxX + 550f
+            val card2Y = boxY + 12f
+            val card2W = 500f
+            val card2H = 46f
+
+            // Opsi 1 (Oranye Bara / Vengeance)
+            shapeRenderer.setColor(0.12f, 0.14f, 0.22f, 0.95f)
+            shapeRenderer.rect(card1X, card1Y, card1W, card1H)
+            shapeRenderer.setColor(1.0f, 0.65f, 0.25f, 0.9f)
+            shapeRenderer.rectLine(card1X, card1Y + card1H, card1X + card1W, card1Y + card1H, 2f)
+            shapeRenderer.rectLine(card1X, card1Y, card1X + card1W, card1Y, 1f)
+            shapeRenderer.rectLine(card1X, card1Y, card1X, card1Y + card1H, 1f)
+            shapeRenderer.rectLine(card1X + card1W, card1Y, card1X + card1W, card1Y + card1H, 1f)
+
+            // Opsi 2 (Biru Spiritual / Restoration)
+            shapeRenderer.setColor(0.12f, 0.14f, 0.22f, 0.95f)
+            shapeRenderer.rect(card2X, card2Y, card2W, card2H)
+            shapeRenderer.setColor(0.35f, 0.85f, 1.0f, 0.9f)
+            shapeRenderer.rectLine(card2X, card2Y + card2H, card2X + card2W, card2Y + card2H, 2f)
+            shapeRenderer.rectLine(card2X, card2Y, card2X + card2W, card2Y, 1f)
+            shapeRenderer.rectLine(card2X, card2Y, card2X, card2Y + card2H, 1f)
+            shapeRenderer.rectLine(card2X + card2W, card2Y, card2X + card2W, card2Y + card2H, 1f)
+        }
+
         shapeRenderer.end()
 
         batch.projectionMatrix = uiCamera.combined
@@ -2712,16 +2851,32 @@ class PlayScreen(
         headF.setColor(line.speakerColor)
         headF.draw(batch, speakerTag, tagX + 18f, tagY + tagH - 12f)
 
-        // Dialogue Text
+        // Typewriter Revealed Text
+        val displayedText = dialogue.getDisplayText()
         regF.setColor(0.95f, 0.96f, 1f, 1f)
-        regF.draw(batch, line.text, boxX + 40f, boxY + boxH - 35f, boxW - 80f, Align.left, true)
+        regF.draw(batch, displayedText, boxX + 40f, boxY + boxH - 35f, boxW - 80f, Align.left, true)
 
-        // Advance Prompt (Right-aligned with pulsing glow)
-        val blink = (sin(hudAnimTime * 6f) + 1f) * 0.5f
-        regF.setColor(1f, 0.85f, 0.3f, 0.65f + 0.35f * blink)
-        val promptText = "LANJUT [TAP / SPACE] ▶"
-        glyphLayout.setText(regF, promptText)
-        regF.draw(batch, promptText, boxX + boxW - glyphLayout.width - 32f, boxY + 28f)
+        if (dialogue.isWaitingForChoice && line.branchOptions.isNotEmpty()) {
+            val card1X = boxX + 30f
+            val card1Y = boxY + 12f
+            val card2X = boxX + 550f
+            val card2Y = boxY + 12f
+
+            smallF.setColor(1.0f, 0.75f, 0.35f, 1f)
+            smallF.draw(batch, line.branchOptions[0].promptText, card1X + 16f, card1Y + 30f)
+
+            if (line.branchOptions.size > 1) {
+                smallF.setColor(0.45f, 0.90f, 1.0f, 1f)
+                smallF.draw(batch, line.branchOptions[1].promptText, card2X + 16f, card2Y + 30f)
+            }
+        } else {
+            // Advance Prompt (Right-aligned with pulsing glow)
+            val blink = (sin(hudAnimTime * 6f) + 1f) * 0.5f
+            regF.setColor(1f, 0.85f, 0.3f, 0.65f + 0.35f * blink)
+            val promptText = if (dialogue.isCurrentLineCompleted()) "LANJUT [TAP / SPACE] ▶" else "LEWATI [TAP / SPACE] ⏩"
+            glyphLayout.setText(regF, promptText)
+            regF.draw(batch, promptText, boxX + boxW - glyphLayout.width - 32f, boxY + 28f)
+        }
 
         batch.end()
     }

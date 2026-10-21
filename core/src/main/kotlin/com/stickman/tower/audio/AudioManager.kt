@@ -27,6 +27,14 @@ object AudioManager {
     private var soundParry: Sound? = null
     private var soundBossRoar: Sound? = null
 
+    // Voice Chirp Prosedural (Fase 18 Screenplay & Voice Engine)
+    private var soundChirpAria: Sound? = null
+    private var soundChirpVulcanus: Sound? = null
+    private var soundChirpCalligrapher: Sound? = null
+    private var soundChirpKaelen: Sound? = null
+    private var soundChirpOakhaven: Sound? = null
+    private var soundChirpMatron: Sound? = null
+
     private const val PREF_AUDIO = "stickman_audio_settings"
     private const val KEY_VOLUME = "sfx_volume"
     private const val KEY_MUTED = "is_muted"
@@ -79,6 +87,14 @@ object AudioManager {
             soundChest = createSound(cacheDir, "chest.wav") { genChest(it) }
             soundParry = createSound(cacheDir, "parry.wav") { genParry(it) }
             soundBossRoar = createSound(cacheDir, "boss_roar.wav") { genBossRoar(it) }
+
+            // Voice Chirps untuk Karakter Sinematik (Fase 18)
+            soundChirpAria = createSound(cacheDir, "chirp_aria.wav") { genChirpAria(it) }
+            soundChirpVulcanus = createSound(cacheDir, "chirp_vulcanus.wav") { genChirpVulcanus(it) }
+            soundChirpCalligrapher = createSound(cacheDir, "chirp_calligrapher.wav") { genChirpCalligrapher(it) }
+            soundChirpKaelen = createSound(cacheDir, "chirp_kaelen.wav") { genChirpKaelen(it) }
+            soundChirpOakhaven = createSound(cacheDir, "chirp_oakhaven.wav") { genChirpOakhaven(it) }
+            soundChirpMatron = createSound(cacheDir, "chirp_matron.wav") { genChirpMatron(it) }
 
             Gdx.app.log("AudioManager", "Procedural SFX synthesis completed successfully.")
         } catch (e: Exception) {
@@ -283,6 +299,106 @@ object AudioManager {
         return data
     }
 
+    // --- Voice Chirp Waveform Synthesizers (Fase 18) ---
+
+    private fun genChirpAria(sampleRate: Int): ShortArray {
+        val duration = 0.045f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val progress = t / duration
+            val freq = MathUtils.lerp(880f, 1046f, progress)
+            val env = sin(progress * Math.PI.toFloat())
+            val sample = sin(2.0 * Math.PI * freq * t) * env
+            data[i] = (sample * 21000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
+    private fun genChirpVulcanus(sampleRate: Int): ShortArray {
+        val duration = 0.055f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val progress = t / duration
+            val freq = MathUtils.lerp(140f, 180f, progress)
+            val env = 1f - progress
+            // Gelombang segitiga nada rendah bergemuruh
+            val phase = (t * freq) % 1.0
+            val triangle = (kotlin.math.abs(phase * 4.0 - 2.0) - 1.0).toFloat()
+            val sample = triangle * env
+            data[i] = (sample * 25000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
+    private fun genChirpCalligrapher(sampleRate: Int): ShortArray {
+        val duration = 0.060f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val progress = t / duration
+            val env = sin(progress * Math.PI.toFloat())
+            // Harmonik ganda mistis: 55Hz (otoritas gaib) + 440Hz (bisikan kosmis)
+            val sub = sin(2.0 * Math.PI * 55.0 * t) * 0.60
+            val overtone = sin(2.0 * Math.PI * 440.0 * t) * 0.40
+            val sample = (sub + overtone).toFloat() * env
+            data[i] = (sample * 26000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
+    private fun genChirpKaelen(sampleRate: Int): ShortArray {
+        val duration = 0.042f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val progress = t / duration
+            val freq = MathUtils.lerp(240f, 290f, progress)
+            val env = (1f - progress)
+            val fundamental = sin(2.0 * Math.PI * freq * t) * 0.75
+            val harmonic = sin(2.0 * Math.PI * freq * 2.0 * t) * 0.25
+            val sample = (fundamental + harmonic).toFloat() * env
+            data[i] = (sample * 23000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
+    private fun genChirpOakhaven(sampleRate: Int): ShortArray {
+        val duration = 0.052f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val progress = t / duration
+            val freq = MathUtils.lerp(170f, 215f, progress)
+            val env = 1f - progress * progress
+            val sample = sin(2.0 * Math.PI * freq * t) * env
+            data[i] = (sample * 24000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
+    private fun genChirpMatron(sampleRate: Int): ShortArray {
+        val duration = 0.048f
+        val numSamples = (sampleRate * duration).toInt()
+        val data = ShortArray(numSamples)
+        for (i in 0 until numSamples) {
+            val t = i.toFloat() / sampleRate
+            val progress = t / duration
+            val vibrato = sin(2.0 * Math.PI * 28.0 * t).toFloat() * 35f
+            val freq = 710f + vibrato
+            val env = sin(progress * Math.PI.toFloat())
+            val sample = sin(2.0 * Math.PI * freq * t) * env
+            data[i] = (sample * 20000).toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return data
+    }
+
     // --- Public Audio Triggers ---
 
     fun playJump() {
@@ -325,6 +441,25 @@ object AudioManager {
         if (!isMuted) soundBossRoar?.play(sfxVolume * 1.0f)
     }
 
+    /**
+     * Memainkan suara kicauan vokal prosedural (Voice Chirp) sesuai persona karakter.
+     */
+    fun playVoiceChirp(speaker: String) {
+        if (isMuted) return
+        val pitchVariance = MathUtils.random(0.96f, 1.04f)
+        val vol = sfxVolume * 0.65f
+        val speakerLower = speaker.lowercase()
+
+        when {
+            speakerLower.contains("aria") -> soundChirpAria?.play(vol, pitchVariance, 0f)
+            speakerLower.contains("vulcanus") -> soundChirpVulcanus?.play(vol, pitchVariance, 0f)
+            speakerLower.contains("calligrapher") || speakerLower.contains("kaligrafer") -> soundChirpCalligrapher?.play(vol, pitchVariance, 0f)
+            speakerLower.contains("oakhaven") -> soundChirpOakhaven?.play(vol, pitchVariance, 0f)
+            speakerLower.contains("matron") -> soundChirpMatron?.play(vol, pitchVariance, 0f)
+            else -> soundChirpKaelen?.play(vol, pitchVariance, 0f)
+        }
+    }
+
     fun toggleMute(): Boolean {
         isMuted = !isMuted
         return isMuted
@@ -341,6 +476,14 @@ object AudioManager {
         soundChest?.dispose()
         soundParry?.dispose()
         soundBossRoar?.dispose()
+
+        soundChirpAria?.dispose()
+        soundChirpVulcanus?.dispose()
+        soundChirpCalligrapher?.dispose()
+        soundChirpKaelen?.dispose()
+        soundChirpOakhaven?.dispose()
+        soundChirpMatron?.dispose()
+
         soundJump = null
         soundSlashLight = null
         soundSlashHeavy = null
@@ -351,6 +494,14 @@ object AudioManager {
         soundChest = null
         soundParry = null
         soundBossRoar = null
+
+        soundChirpAria = null
+        soundChirpVulcanus = null
+        soundChirpCalligrapher = null
+        soundChirpKaelen = null
+        soundChirpOakhaven = null
+        soundChirpMatron = null
+
         isInitialized = false
     }
 }

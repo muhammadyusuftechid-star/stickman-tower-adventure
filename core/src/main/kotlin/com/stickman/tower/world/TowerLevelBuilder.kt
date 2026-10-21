@@ -8,6 +8,7 @@ import com.stickman.tower.enemy.Enemy
 import com.stickman.tower.enemy.EnemyType
 import com.stickman.tower.physics.Platform
 import com.stickman.tower.endless.FloorMutator
+import com.stickman.tower.narrative.DialogueRegistry
 
 /**
  * Pembangun Level Menara Bertingkat (Tower Level Builder).
@@ -78,21 +79,7 @@ object TowerLevelBuilder {
             )
         )
 
-        val storyDialogues = listOf(
-            StoryDialogue(
-                triggerX = 2.0f,
-                triggerY = 1.0f,
-                triggerRadius = 2.5f,
-                lines = listOf(
-                    DialogueLine(
-                        speaker = "Aria",
-                        title = "Sang Gema Warna Terakhir",
-                        text = "Mereka merampas merahnya mawar, birunya samudra, dan hangatnya fajar dari kita, saudaraku. Tunjukkan pada mereka bahwa di balik tubuh siluet ini, ada jiwa yang membakar lebih terang daripada bintang!",
-                        speakerColor = Color.CYAN
-                    )
-                )
-            )
-        )
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(1))
 
         return TowerFloor(
             floorNumber = 1,
@@ -228,27 +215,7 @@ object TowerLevelBuilder {
 
         val boss = BossEnemy(spawnX = 17.0f, spawnY = 1.5f, type = BossType.TOWER_GUARDIAN)
 
-        val storyDialogues = listOf(
-            StoryDialogue(
-                triggerX = 4.0f,
-                triggerY = 1.2f,
-                triggerRadius = 3.5f,
-                lines = listOf(
-                    DialogueLine(
-                        speaker = "Jenderal Oakhaven",
-                        title = "The Tower Guardian",
-                        text = "Berhenti, pengelana bernisan emas! Aku adalah Jenderal Oakhaven, pelindung gerbang benteng bawah. Menara atas bukanlah tempat bagi jiwa yang fana! Buktikan tekadmu atau luruhlah kembali menjadi tinta!",
-                        speakerColor = Color.GOLD
-                    ),
-                    DialogueLine(
-                        speaker = "Aria",
-                        title = "Sang Gema Warna Terakhir",
-                        text = "Hati-hati! Ayunan pedangnya sanggup membelah batu. Bersiaplah melakukan Perfect Parry saat bilahnya berkilat!",
-                        speakerColor = Color.CYAN
-                    )
-                )
-            )
-        )
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(3))
 
         return TowerFloor(
             floorNumber = 3,
@@ -393,27 +360,7 @@ object TowerLevelBuilder {
 
         val boss = BossEnemy(spawnX = 18.0f, spawnY = 1.5f, type = BossType.AMETHYST_MATRON)
 
-        val storyDialogues = listOf(
-            StoryDialogue(
-                triggerX = 4.0f,
-                triggerY = 1.2f,
-                triggerRadius = 3.5f,
-                lines = listOf(
-                    DialogueLine(
-                        speaker = "The Amethyst Matron",
-                        title = "Sang Ratu Busur Bayang",
-                        text = "Kalian yang berjalan dengan pedang tumpul takkan pernah mengerti... Mendekati bilah di menara ini adalah kebodohan! Tinta ini telah menjadi darah kami, dan panah kristal amethyst kami akan menembus jantungmu!",
-                        speakerColor = Color(0.85f, 0.45f, 1f, 1f)
-                    ),
-                    DialogueLine(
-                        speaker = "Aria",
-                        title = "Sang Gema Warna Terakhir",
-                        text = "Gunakan platform udara untuk menghindari tembakan panah beracunnya! Dekati dan serang saat ia memulihkan busurnya!",
-                        speakerColor = Color.CYAN
-                    )
-                )
-            )
-        )
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(5))
 
         return TowerFloor(
             floorNumber = 5,
@@ -468,27 +415,7 @@ object TowerLevelBuilder {
             )
         )
 
-        val storyDialogues = listOf(
-            StoryDialogue(
-                triggerX = 10.5f,
-                triggerY = 1.5f,
-                triggerRadius = 2.8f,
-                lines = listOf(
-                    DialogueLine(
-                        speaker = "Vulcanus",
-                        title = "Sang Penempa Jiwa",
-                        text = "Denting paluku adalah satu-satunya irama yang menolak tunduk pada keheningan menara ini.",
-                        speakerColor = Color.ORANGE
-                    ),
-                    DialogueLine(
-                        speaker = "Vulcanus",
-                        title = "Sang Penempa Jiwa",
-                        text = "Koin emas yang kau bawa adalah tetesan cahaya matahari para pendaki masa lalu. Berikan padaku di tempaan, kan kutempa bilah bajamu agar sanggup membelah takdir!",
-                        speakerColor = Color.ORANGE
-                    )
-                )
-            )
-        )
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(6))
 
         return TowerFloor(
             floorNumber = 6,
@@ -776,27 +703,7 @@ object TowerLevelBuilder {
 
         val boss = BossEnemy(spawnX = 18.5f, spawnY = 1.5f, type = BossType.GRAND_CALLIGRAPHER)
 
-        val storyDialogues = listOf(
-            StoryDialogue(
-                triggerX = 4.0f,
-                triggerY = 1.3f,
-                triggerRadius = 3.5f,
-                lines = listOf(
-                    DialogueLine(
-                        speaker = "The Grand Calligrapher",
-                        title = "Sang Penulis Takdir Purba",
-                        text = "Kemanusiaan dan kehendak bebas adalah noda yang merusak keheningan kanvas semesta. Ribuan tahun lalu kutenggelamkan dunia ini ke dalam tinta murni, dan kau berani menodai ketenangan mutlak ini?",
-                        speakerColor = Color(0.95f, 0.95f, 1f, 1f)
-                    ),
-                    DialogueLine(
-                        speaker = "Aria",
-                        title = "Sang Gema Warna Terakhir",
-                        text = "Jangan dengarkan dia! Nyalakan Anima Emasmu! Hancurkan pena takdirnya dan kembalikan warna ke seluruh semesta Aethelgard!",
-                        speakerColor = Color.CYAN
-                    )
-                )
-            )
-        )
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(10))
 
         return TowerFloor(
             floorNumber = 10,
