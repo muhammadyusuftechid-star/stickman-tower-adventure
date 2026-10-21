@@ -31,6 +31,7 @@ class CompositeInput(
 
     override fun isMoveLeft() = keyboard.isMoveLeft() || virtual.isMoveLeft() || gamepad.isMoveLeft()
     override fun isMoveRight() = keyboard.isMoveRight() || virtual.isMoveRight() || gamepad.isMoveRight()
+    override fun isMoveDown() = keyboard.isMoveDown() || virtual.isMoveDown() || gamepad.isMoveDown()
     override fun isJumpJustPressed() = keyboard.isJumpJustPressed() || virtual.isJumpJustPressed() || gamepad.isJumpJustPressed()
     override fun isJumpPressed() = keyboard.isJumpPressed() || virtual.isJumpPressed() || gamepad.isJumpPressed()
     override fun isAttackJustPressed() = keyboard.isAttackJustPressed() || virtual.isAttackJustPressed() || gamepad.isAttackJustPressed()

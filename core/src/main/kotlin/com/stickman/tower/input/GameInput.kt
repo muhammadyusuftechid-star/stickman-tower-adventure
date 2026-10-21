@@ -7,6 +7,7 @@ package com.stickman.tower.input
 interface GameInput {
     fun isMoveLeft(): Boolean
     fun isMoveRight(): Boolean
+    fun isMoveDown(): Boolean = false
     fun isJumpJustPressed(): Boolean
     fun isJumpPressed(): Boolean
     fun isAttackJustPressed(): Boolean

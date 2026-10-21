@@ -167,6 +167,9 @@ class Player(
     var hasUndyingWill: Boolean = false
     var undyingWillUsed: Boolean = false
 
+    // Platforming & Combat Feel Enhancement (Senior Gameplay Programming)
+    var ignoreOneWayTimer: Float = 0f
+
     fun update(delta: Float, input: GameInput, platforms: List<Platform>) {
         animTime += delta
         health.update(delta)
@@ -174,6 +177,10 @@ class Player(
         skill2.update(delta)
         skill3.update(delta)
         comboManager.update(delta, attackPhase != AttackPhase.INACTIVE)
+
+        if (ignoreOneWayTimer > 0f) {
+            ignoreOneWayTimer = (ignoreOneWayTimer - delta).coerceAtLeast(0f)
+        }
 
         // Update proyektil aktif pemain
         val projIter = projectiles.iterator()
@@ -229,7 +236,22 @@ class Player(
         if (isGrounded) coyoteTimer = GameConfig.COYOTE_TIME
         else coyoteTimer = (coyoteTimer - delta).coerceAtLeast(0f)
 
-        if (input.isJumpJustPressed() && canControlMove) jumpBufferTimer = GameConfig.JUMP_BUFFER_TIME
+        // Drop-through One-Way Platform (Down + Jump)
+        if (input.isMoveDown() && input.isJumpJustPressed() && canControlMove && isGrounded) {
+            val isOnOneWay = platforms.any {
+                it.isOneWay && (bounds.overlaps(it.bounds) || (abs(position.y - it.top) < 0.25f && position.x + width > it.left && position.x < it.right))
+            }
+            if (isOnOneWay) {
+                ignoreOneWayTimer = 0.28f
+                position.y -= 0.18f
+                velocity.y = -3.5f
+                isGrounded = false
+                jumpBufferTimer = 0f
+                AudioManager.playDodge()
+            }
+        }
+
+        if (input.isJumpJustPressed() && canControlMove && ignoreOneWayTimer <= 0f) jumpBufferTimer = GameConfig.JUMP_BUFFER_TIME
         else jumpBufferTimer = (jumpBufferTimer - delta).coerceAtLeast(0f)
 
         if (jumpBufferTimer > 0f) {
@@ -238,6 +260,11 @@ class Player(
                 jumpBufferTimer = 0f
                 coyoteTimer = 0f
                 isGrounded = false
+                // Jump cancel on attack recovery untuk fluid action-combat
+                if (attackPhase == AttackPhase.RECOVERY) {
+                    attackPhase = AttackPhase.INACTIVE
+                    hitbox.reset()
+                }
                 AudioManager.playJump()
                 onJump?.invoke(position.x + width / 2f, position.y)
             } else if (airJumpsRemaining > 0 && canControlMove) {
@@ -245,15 +272,27 @@ class Player(
                 airJumpsRemaining--
                 jumpBufferTimer = 0f
                 isGrounded = false
+                if (attackPhase == AttackPhase.RECOVERY) {
+                    attackPhase = AttackPhase.INACTIVE
+                    hitbox.reset()
+                }
                 AudioManager.playJump()
                 onJump?.invoke(position.x + width / 2f, position.y)
             }
         }
 
-        // 5. Gravitasi (Mendukung Low Gravity Mutator Fase 13)
-        val gravityMultiplier = if (velocity.y > 0f && !input.isJumpPressed()) 1.35f else 1f
+        // 5. Gravitasi & Kalibrasi Kurva Lompatan (Responsive Jump Curve & Apex Hang Time)
+        val isFastFalling = !isGrounded && velocity.y < 0f && input.isMoveDown()
+        val gravityMultiplier = when {
+            isFastFalling -> 1.55f // Fast Fall saat menahan bawah di udara
+            velocity.y > 0f && !input.isJumpPressed() -> 2.3f // Snappy Short-Hop Cut
+            abs(velocity.y) < 1.8f && !isGrounded -> 0.75f // Apex Hang Time di puncak busur lompatan
+            velocity.y < 0f -> 1.15f // Penurunan yang tegas & responsif
+            else -> 1.0f
+        }
+        val maxFallSpeed = if (isFastFalling) -32f else -25f
         velocity.y += GameConfig.GRAVITY * gravityMultiplier * gravityScale * delta
-        velocity.y = velocity.y.coerceAtLeast(-25f)
+        velocity.y = velocity.y.coerceAtLeast(maxFallSpeed)
 
         // 6. Resolusi Collision
         resolveCollisionX(delta, platforms)
@@ -750,6 +789,8 @@ class Player(
 
         for (platform in platforms) {
             if (platform.isOneWay) {
+                // Abaikan jika sedang dalam masa drop-through (Down + Jump)
+                if (ignoreOneWayTimer > 0f) continue
                 // One-Way Platform: Hanya mendarat jika sedang jatuh dari atas platform
                 if (velocity.y <= 0f && previousY >= platform.top - 0.20f) {
                     if (bounds.overlaps(platform.bounds)) {

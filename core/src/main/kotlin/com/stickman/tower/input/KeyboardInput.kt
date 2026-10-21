@@ -19,6 +19,11 @@ class KeyboardInput : GameInput {
         return input.isKeyPressed(Keys.D) || input.isKeyPressed(Keys.RIGHT)
     }
 
+    override fun isMoveDown(): Boolean {
+        val input = Gdx.input ?: return false
+        return input.isKeyPressed(Keys.S) || input.isKeyPressed(Keys.DOWN)
+    }
+
     override fun isJumpJustPressed(): Boolean {
         val input = Gdx.input ?: return false
         return input.isKeyJustPressed(Keys.SPACE) ||

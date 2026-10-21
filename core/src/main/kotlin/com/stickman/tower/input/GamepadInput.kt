@@ -314,6 +314,7 @@ class GamepadInput : GameInput, ControllerListener {
     // GameInput Implementation
     override fun isMoveLeft(): Boolean = moveLeftPressed
     override fun isMoveRight(): Boolean = moveRightPressed
+    override fun isMoveDown(): Boolean = downPressed
     override fun isJumpJustPressed(): Boolean = justPressedJump
     override fun isJumpPressed(): Boolean = jumpPressed
     override fun isAttackJustPressed(): Boolean = justPressedAttack

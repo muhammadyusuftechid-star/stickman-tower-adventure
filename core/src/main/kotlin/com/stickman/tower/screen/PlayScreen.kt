@@ -43,6 +43,7 @@ import com.stickman.tower.tools.DevToolsOverlay
 import com.stickman.tower.world.LoreTablet
 import com.stickman.tower.world.StoryDialogue
 import com.stickman.tower.world.TowerFloor
+import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
 import kotlin.math.sin
 
@@ -765,7 +766,8 @@ class PlayScreen(
     }
 
     private fun renderWorld(delta: Float) {
-        val targetCamX = if (isBossIntroActive && currentFloor.boss != null) currentFloor.boss!!.position.x + currentFloor.boss!!.width / 2f else player.position.x + player.width / 2f
+        val lookaheadTarget = if (abs(player.velocity.x) > 0.6f) (if (player.facingRight) 1.5f else -1.5f) else 0f
+        val targetCamX = if (isBossIntroActive && currentFloor.boss != null) currentFloor.boss!!.position.x + currentFloor.boss!!.width / 2f else player.position.x + player.width / 2f + lookaheadTarget
         val targetCamY = if (isBossIntroActive && currentFloor.boss != null) currentFloor.boss!!.position.y + 1.2f else player.position.y + player.height / 2f + 0.5f
         cameraManager.update(targetCamX, targetCamY, delta)
 
@@ -1040,6 +1042,8 @@ class PlayScreen(
                         // Sistem Perfect Parry Fase 11: Stun musuh 1.5s, netralkan damage, beri buff ATK + energy
                         enemy.stun(1.5f)
                         player.triggerParry()
+                        val parryCombo = player.comboManager.registerHit()
+                        relicManager.onComboHit(parryCombo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
                         if (talentManager.hasParryHeal()) {
                             val parryHeal = player.health.maxHp * 0.15f
                             player.health.heal(parryHeal)
@@ -1098,6 +1102,8 @@ class PlayScreen(
                     // Sistem Perfect Parry Fase 11: Stun Boss 1.5s (Guard Break!), netralkan damage
                     boss.stun(1.5f)
                     player.triggerParry()
+                    val parryCombo = player.comboManager.registerHit()
+                    relicManager.onComboHit(parryCombo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
                     if (talentManager.hasParryHeal()) {
                         val parryHeal = player.health.maxHp * 0.15f
                         player.health.heal(parryHeal)

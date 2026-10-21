@@ -39,6 +39,7 @@ class VirtualController : GameInput {
     // Status Penekanan Frame
     private var pressedLeft = false
     private var pressedRight = false
+    private var pressedDown = false
     private var pressedJump = false
     private var justPressedJump = false
     private var justPressedAttack = false
@@ -131,6 +132,7 @@ class VirtualController : GameInput {
 
         pressedLeft = false
         pressedRight = false
+        pressedDown = false
         pressedJump = false
         var curAttack = false
         var curJump = false
@@ -166,6 +168,11 @@ class VirtualController : GameInput {
                 if (isCircleTouched(btnRight, touchX, touchY, dpadPad) ||
                     (touchX > dpadMidX && touchX <= btnRight.x + 100f * sc && isDpadYRange)) {
                     pressedRight = true
+                }
+                // Deteksi Down / Geser Bawah pada D-Pad untuk Drop-through platform & Fast Fall
+                if (touchX in (btnLeft.x - 70f * sc)..(btnRight.x + 70f * sc) &&
+                    touchY in (btnLeft.y - 85f * sc)..(btnLeft.y - 12f * sc)) {
+                    pressedDown = true
                 }
 
                 // Tombol Attack Utama
@@ -209,6 +216,7 @@ class VirtualController : GameInput {
 
     override fun isMoveLeft() = pressedLeft
     override fun isMoveRight() = pressedRight
+    override fun isMoveDown() = pressedDown
     override fun isJumpJustPressed() = justPressedJump
     override fun isJumpPressed() = pressedJump
     override fun isAttackJustPressed() = justPressedAttack
