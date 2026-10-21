@@ -29,4 +29,11 @@ class KeyboardInput : GameInput {
                Gdx.input.isKeyPressed(Keys.UP) ||
                Gdx.input.isKeyPressed(Keys.K)
     }
+
+    override fun isAttackJustPressed(): Boolean {
+        return Gdx.input.isKeyJustPressed(Keys.J) ||
+               Gdx.input.isKeyJustPressed(Keys.ENTER) ||
+               Gdx.input.isKeyJustPressed(Keys.X) ||
+               Gdx.input.isButtonJustPressed(com.badlogic.gdx.Input.Buttons.LEFT)
+    }
 }

@@ -7,5 +7,7 @@ enum class CharacterState {
     IDLE,
     RUN,
     JUMP,
-    FALL
+    FALL,
+    ATTACK,
+    HURT
 }

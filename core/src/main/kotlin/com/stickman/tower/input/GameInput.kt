@@ -9,4 +9,5 @@ interface GameInput {
     fun isMoveRight(): Boolean
     fun isJumpJustPressed(): Boolean
     fun isJumpPressed(): Boolean
+    fun isAttackJustPressed(): Boolean
 }

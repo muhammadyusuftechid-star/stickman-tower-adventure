@@ -115,36 +115,37 @@ flowchart LR
 
 #### Modul 2.1: Arsitektur Hitbox vs Hurtbox
 - **Task 2.1.1: Pemisahan Bounding Box**
-  - [ ] **Collision Box:** Mengatur interaksi karakter dengan platform/lantai.
-  - [ ] **Hurtbox:** Area tubuh karakter/musuh yang dapat menerima serangan musuh.
-  - [ ] **Hitbox:** Area serangan senjata/pukulan yang aktif hanya pada frame tertentu.
+  - [x] **Collision Box:** Mengatur interaksi karakter dengan platform/lantai (`bounds`).
+  - [x] **Hurtbox:** Area tubuh karakter/dummy yang dapat menerima serangan (`Hurtbox.kt`).
+  - [x] **Hitbox:** Area serangan senjata/pukulan yang aktif pada fase tertentu dengan pelacakan exclusion multi-hit (`Hitbox.kt`).
 - **Task 2.1.2: Debug Hitbox Visualizer**
-  - [ ] Tambahkan rendering garis warna menggunakan `ShapeRenderer`:
-    - Hijau = Collision box platform.
-    - Biru = Hurtbox tubuh.
+  - [x] Tambahkan rendering garis warna menggunakan `ShapeRenderer`:
+    - Hijau = Collision box platform dan tubuh.
+    - Biru (Cyan) = Hurtbox tubuh.
     - Merah = Hitbox serangan aktif.
 
 #### Modul 2.2: Basic Attack & Frame Window Lifecycle
 - **Task 2.2.1: Attack Phase Timing**
-  - [ ] Definisikan 3 fase serangan dalam `AttackConfig.kt`:
-    - *Startup:* Waktu ancang-ancang sebelum serangan keluar (misal: 0.08 detik).
-    - *Active:* Frame di mana hitbox merah aktif dan dapat melukai musuh (misal: 0.12 detik).
-    - *Recovery:* Waktu jeda setelah memukul sebelum karakter boleh bergerak kembali (misal: 0.15 detik).
-  - [ ] Tambahkan state `ATTACK1` ke dalam State Machine karakter. Cegah pergerakan horizontal selama fase serangan kecuali serangan meluncur.
+  - [x] Definisikan 3 fase serangan dalam `Player.kt` dan `AttackPhase.kt`:
+    - *Startup:* Waktu ancang-ancang mengangkat pedang (0.08 detik).
+    - *Active:* Frame di mana hitbox merah aktif dan bilah pedang menebas ke depan (0.12 detik).
+    - *Recovery:* Waktu jeda setelah memukul sebelum karakter boleh bergerak kembali (0.15 detik).
+  - [x] Tambahkan state `ATTACK` ke dalam State Machine karakter. Batasi pergerakan horizontal selama fase serangan untuk memberi bobot tebasan.
 
 #### Modul 2.3: Damage Calculator & Health Component
 - **Task 2.3.1: Komponen Nyawa (Health)**
-  - [ ] Buat class `Health.kt` (`currentHp`, `maxHp`, `isAlive`).
-  - [ ] Buat method `takeDamage(amount: Float, knockbackDir: Vector2)`.
+  - [x] Buat class `Health.kt` (`currentHp`, `maxHp`, `isDead`, `takeDamage()`).
+  - [x] Buat entitas sasaran latihan `TrainingDummy.kt` dengan knockback physics dan mini HP bar di atas kepala.
 - **Task 2.3.2: Logika Damage & Invincibility Frame (i-Frame)**
-  - [ ] Tambahkan durasi kebal sesaat setelah terkena hit (misal: 0.25 detik) agar entitas tidak langsung mati terkena multi-hit dalam 1 serangan yang sama.
-  - [ ] Berikan dorongan fisik (*knockback*) saat terkena serangan.
+  - [x] Tambahkan durasi kebal sesaat setelah terkena hit (0.25-0.35 detik) untuk mencegah multi-hit bug pada ayunan yang sama.
+  - [x] Berikan dorongan fisik (*knockback*) searah hadap tebasan saat target terkena serangan.
 
 #### Modul 2.4: Visual Feedback & Game Juice
 - **Task 2.4.1: Hit Feedback**
-  - [ ] Implementasikan efek kedip merah (*flash white/red*) pada sprite saat menerima damage.
-  - [ ] Tambahkan efek *hit stop / frame freeze* ringan (0.05 detik) saat pukulan berhasil mengenai sasaran untuk memberikan rasa benturan yang mantap (*impact*).
-  - [ ] Buat placeholder pop-up angka damage (*floating damage text*).
+  - [x] Implementasikan efek kedip merah (*flash red*) pada stickman saat menerima damage.
+  - [x] Tambahkan efek *hit stop / micro freeze* (0.05 detik) saat tebasan mengenai sasaran via `HitStopManager.kt`.
+  - [x] Buat pop-up angka damage melayang (*FloatingText.kt*) yang meluncur ke atas dan memudar secara halus.
+  - [x] Implementasikan visual tebasan pedang sabit energi (*Slash Arc*) bercahaya emas saat tebasan aktif.
 
 ---
 
