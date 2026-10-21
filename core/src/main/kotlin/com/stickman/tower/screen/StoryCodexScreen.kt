@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.stickman.tower.StickmanGame
+import com.stickman.tower.achievement.AchievementManager
 import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.audio.HapticManager
 import com.stickman.tower.ui.FontManager
@@ -326,6 +327,13 @@ class StoryCodexScreen(
         inputCooldown = 0.25f
         selectedChapterIndex = 0
         currentPageIndex = 0
+
+        // Berikan trofi pencapaian membuka Story Codex
+        val save = com.stickman.tower.rpg.SaveManager.load()
+        AchievementManager.loadFromSave(save)
+        if (AchievementManager.onStoryCodexOpened(save)) {
+            com.stickman.tower.rpg.SaveManager.save(save)
+        }
 
         particles.clear()
         for (i in 0 until 40) {

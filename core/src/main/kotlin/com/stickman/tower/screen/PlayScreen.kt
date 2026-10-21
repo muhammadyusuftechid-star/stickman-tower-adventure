@@ -177,6 +177,10 @@ class PlayScreen(
     var nearbyTabletPrompt: LoreTablet? = null
     var nearbyDialoguePrompt: StoryDialogue? = null
 
+    // Sistem Pencapaian & Trofi (Fase 15)
+    private var activeAchievementBanner: com.stickman.tower.achievement.Achievement? = null
+    private var achievementBannerTimer: Float = 0f
+
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         AudioManager.init()
@@ -185,6 +189,7 @@ class PlayScreen(
         inputCooldown = 0.25f
         val freshSave = SaveManager.load()
         stats.loadFromSaveData(freshSave)
+        com.stickman.tower.achievement.AchievementManager.loadFromSave(freshSave)
         if (Gdx.graphics != null && Gdx.graphics.width > 0 && Gdx.graphics.height > 0) {
             uiViewport.update(Gdx.graphics.width, Gdx.graphics.height, true)
         }
@@ -538,6 +543,22 @@ class PlayScreen(
             saveNotificationTimer = (saveNotificationTimer - safeDelta).coerceAtLeast(0f)
         }
 
+        // Pembaruan Antrean Notifikasi Banner Achievement (Fase 15)
+        if (activeAchievementBanner == null) {
+            val nextAchv = com.stickman.tower.achievement.AchievementManager.pollNotification()
+            if (nextAchv != null) {
+                activeAchievementBanner = nextAchv
+                achievementBannerTimer = 3.8f
+                AudioManager.playChest()
+                HapticManager.vibrateMedium()
+            }
+        } else {
+            achievementBannerTimer -= safeDelta
+            if (achievementBannerTimer <= 0f) {
+                activeAchievementBanner = null
+            }
+        }
+
         // 1. Hit Stop Micro-Freeze Update
         val isFrozen = hitStopManager.update(safeDelta)
 
@@ -645,6 +666,7 @@ class PlayScreen(
                     particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 16, color = Color.RED)
                     grantRewards(enemy.expReward, enemy.goldReward, enemy.position.x + enemy.width / 2f, enemy.position.y + 1f)
                     relicManager.onEnemyDefeated(player, floatingTexts, particleManager)
+                    com.stickman.tower.achievement.AchievementManager.onEnemyKilled(false, currentFloorNumber, saveData = saveData)
                 }
             }
 
@@ -667,6 +689,7 @@ class PlayScreen(
                     AudioManager.playDeath()
                     particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 35, color = Color.GOLD)
                     grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
+                    com.stickman.tower.achievement.AchievementManager.onEnemyKilled(true, currentFloorNumber, boss.name, saveData = saveData)
                     floatingTexts.add(
                         FloatingText("★ BOSS DEFEATED! ★", boss.position.x, boss.position.y + 3.2f, Color.GOLD, duration = 3.5f)
                     )
@@ -840,6 +863,7 @@ class PlayScreen(
                             AudioManager.playHit()
                             particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 10, color = if (player.hitbox.isCritical) Color.GOLD else Color.WHITE)
                             relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
+                            com.stickman.tower.achievement.AchievementManager.onComboHit(combo, saveData)
 
                             // Lifesteal Mutator & Talents (Fase 13)
                             val lifesteal = activeMutator.lifestealPercent
@@ -905,6 +929,7 @@ class PlayScreen(
                         AudioManager.playHit()
                         particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 14, color = Color.ORANGE)
                         relicManager.onComboHit(combo, player, currentFloor.enemies, currentFloor.boss, floatingTexts, particleManager)
+                        com.stickman.tower.achievement.AchievementManager.onComboHit(combo, saveData)
 
                         // Lifesteal Mutator & Talents (Fase 13)
                         val lifesteal = activeMutator.lifestealPercent
@@ -1024,6 +1049,7 @@ class PlayScreen(
                         }
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
+                        com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                         HapticManager.vibrateHeavy()
                         input.gamepad.vibrate(200, 1.0f)
                         cameraManager.shake(0.5f, 0.25f)
@@ -1081,6 +1107,7 @@ class PlayScreen(
                     }
                     hitStopManager.trigger(0.08f)
                     AudioManager.playParry()
+                    com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                     HapticManager.vibrateHeavy()
                     input.gamepad.vibrate(250, 1.0f)
                     cameraManager.shake(0.8f, 0.35f)
@@ -1282,6 +1309,7 @@ class PlayScreen(
                             FloatingText("+1 TALENT POINT! ✦", player.position.x + player.width / 2f, player.position.y + player.height + 0.9f, Color.YELLOW, duration = 2.2f)
                         )
                     }
+                    com.stickman.tower.achievement.AchievementManager.onEndlessFloorReached(currentFloorNumber, saveData)
                     triggerSave("Endless Lantai $currentFloorNumber Selesai", highestFloor = currentFloorNumber + 1)
                 }
             }
@@ -1815,6 +1843,7 @@ class PlayScreen(
             }
         }
 
+        renderAchievementBanner()
         renderActBannerOverlay()
 
         batch.end()
@@ -2525,6 +2554,56 @@ class PlayScreen(
         // Center white core
         shapeRenderer.color = Color.WHITE
         shapeRenderer.circle(ariaX, hoverY, 0.10f, 10)
+    }
+
+    private fun renderAchievementBanner() {
+        val banner = activeAchievementBanner ?: return
+        val w = 1280f
+        val bw = 460f
+        val bh = 56f
+        val bx = (w - bw) / 2f
+        val by = 645f
+
+        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
+        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
+
+        batch.end()
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // Pill Latar Belakang Glassmorphism
+        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.95f)
+        shapeRenderer.rect(bx, by, bw, bh)
+
+        // Border Emas Menyala dengan Efek Denyut
+        val pulse = kotlin.math.sin(hudAnimTime.toDouble() * 6.0).toFloat() * 0.1f
+        shapeRenderer.setColor(0.95f, 0.82f, 0.25f, 0.88f + pulse)
+        shapeRenderer.rectLine(bx, by, bx + bw, by, 2f)
+        shapeRenderer.rectLine(bx, by + bh, bx + bw, by + bh, 2f)
+        shapeRenderer.rectLine(bx, by, bx, by + bh, 3f)
+        shapeRenderer.rectLine(bx + bw, by, bx + bw, by + bh, 3f)
+
+        // Badge Kotak Trofi
+        shapeRenderer.setColor(0.85f, 0.65f, 0.15f, 0.35f)
+        shapeRenderer.rect(bx + 8f, by + 8f, 40f, 40f)
+
+        shapeRenderer.end()
+
+        batch.begin()
+
+        headF.setColor(1f, 0.88f, 0.25f, 1f)
+        headF.draw(batch, "★", bx + 19f, by + 36f)
+
+        headF.setColor(1f, 0.85f, 0.3f, 1f)
+        headF.draw(batch, "PRESTASI TERBUKA!", bx + 60f, by + 44f)
+
+        regF.setColor(0.9f, 0.95f, 1f, 1f)
+        val textDesc = "${banner.title} (+${banner.goldReward} Gold)"
+        regF.draw(batch, textDesc, bx + 60f, by + 22f)
     }
 
     override fun resize(width: Int, height: Int) {

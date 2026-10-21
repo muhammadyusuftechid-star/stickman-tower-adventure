@@ -408,6 +408,7 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
 
     private fun onUpgradeSuccess(message: String) {
         saveData = stats.applyToSaveData(saveData)
+        com.stickman.tower.achievement.AchievementManager.onWeaponUpgraded(stats.weaponAtkLevel, saveData)
         SaveManager.save(saveData)
 
         hammerImpactFlash = 1.0f

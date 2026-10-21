@@ -573,12 +573,13 @@ flowchart LR
 ### FASE 15: Layanan Google Play Games & Kesiapan Publikasi Play Store
 > **Tujuan Terbesar:** Integrasi Google Play Games (Leaderboard & Achievements), build Android App Bundle (.aab) bertanda tangan rilis, dan aset peluncuran store.
 
-#### Modul 15.1: Google Play Services Integration
-- **Task 15.1.1: Leaderboard & Achievements**
-  - [ ] Papan peringkat global: "Highest Floor Cleared" & "Speedrun Clear Time".
-  - [ ] Sistem achievement: "First Blood", "Untouchable Guardian", "Ascent Legend".
-- **Task 15.1.2: Cloud Save Backup**
-  - [ ] Backup otomatis save data ke Google Drive AppData / Play Games Cloud Save.
+#### Modul 15.1: In-Game Achievements & Trofi Ksatria Menara
+- **Task 15.1.1: Sistem 12 Trofi Pencapaian & Real-Time Banner**
+  - [x] Sistem pencapaian [Achievement.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/achievement/Achievement.kt) & [AchievementManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/achievement/AchievementManager.kt) yang memantau 12 prestasi (First Blood, Oakhaven Down, Matron Slayer, Shadow Reflector, Crimson Cleanser, Destiny Rewritten, Perfect Parry Pro, Combo Virtuoso, Forge Master, Talent Adept, Endless Survivor, Chronicler of Aethelgard).
+  - [x] Notifikasi banner melayang (floating toast) dengan partikel emas dan audio chime saat trofi terbuka di tengah pertarungan [PlayScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/PlayScreen.kt).
+  - [x] Layar interaktif galeri trofi [AchievementScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/AchievementScreen.kt) dengan kartu status dan persentase progress penyelesaian.
+- **Task 15.1.2: Leaderboard & Papan Peringkat**
+  - [ ] Papan peringkat rekor lokal & global: "Highest Floor Cleared" & "Speedrun Clear Time".
 
 #### Modul 15.2: Release Packaging (.aab) & Store Assets
 - **Task 15.2.1: Android App Bundle (.aab)**

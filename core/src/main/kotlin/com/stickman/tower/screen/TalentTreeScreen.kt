@@ -173,6 +173,7 @@ class TalentTreeScreen(
                             feedbackTimer = 1.5f
                         } else if (talentManager.canUnlockTalent(talent)) {
                             talentManager.unlockTalent(talent)
+                            com.stickman.tower.achievement.AchievementManager.onTalentsUnlocked(talentManager.unlockedTalentIds.size, saveData)
                             AudioManager.playChest()
                             HapticManager.vibrateHeavy()
                             feedbackText = "Talent ${talent.name} Berhasil Dipelajari!"

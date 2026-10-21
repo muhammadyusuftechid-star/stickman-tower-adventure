@@ -78,7 +78,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "AUDIO: ON",
         "HAPTIC: ON",
         "RESET SAVE DATA",
-        "GAME CREDITS",
+        "🏆 ACHIEVEMENTS",
         "QUIT GAME"
     )
     private var selectedIndex = 0
@@ -449,9 +449,9 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
                 AudioManager.playDeath()
             }
             10 -> {
-                feedbackNotice = "Stickman Tower Adventure • Dibuat dengan LibGDX & Kotlin • Versi 1.0"
-                feedbackTimer = 3.5f
                 AudioManager.playSlashLight()
+                (game as? StickmanGame)?.preserveScreen(this)
+                game.setScreen(AchievementScreen(game, this))
             }
             11 -> {
                 Gdx.app.exit()
