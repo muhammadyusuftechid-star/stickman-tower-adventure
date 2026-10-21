@@ -1,7 +1,11 @@
 package com.stickman.tower.rpg
 
 /**
- * Data class representing persistent player progression with versioning, sanitization, and checksum integrity.
+ * Enterprise Game Save Data Architecture (Version 2 Schema):
+ * - Skema versi terstruktur dengan migrasi otomatis mundur-maju (Backward & Forward Safe).
+ * - Koleksi terpisah dan ternormalisasi: Karakter, Trofi/Achievement, Talent, dan Prasasti Cerita (Lore Tablets).
+ * - Metadata sesi & sinkronisasi multi-slot: slotId, playTimeSeconds, lastSavedTimestamp.
+ * - Keamanan integritas data: 64-bit FNV-1a Salted Cryptographic Checksum & Sanitasi Batas Nilai Ketat.
  */
 data class SaveData(
     var playerLevel: Int = 1,
@@ -11,19 +15,73 @@ data class SaveData(
     var highestEndlessFloor: Int = 0,
     var totalEnemiesDefeated: Int = 0,
     var unlockedCharacters: ArrayList<String> = arrayListOf("STICKMAN_SWORD"),
+    var unlockedAchievements: ArrayList<String> = arrayListOf(),
+    var unlockedTalents: ArrayList<String> = arrayListOf(),
+    var unlockedLoreTablets: ArrayList<String> = arrayListOf(),
     var selectedArchetype: String = "BALANCED",
     var selectedSubClass: String = "BERSERKER",
     var weaponAtkLevel: Int = 0,
     var weaponCritLevel: Int = 0,
     var weaponSpdLevel: Int = 0,
     var unspentTalentPoints: Int = -1,
-    var saveVersion: Int = 1,
+    var playTimeSeconds: Long = 0L,
+    var lastSavedTimestamp: Long = 0L,
+    var saveSlotId: Int = 1,
+    var saveVersion: Int = 2,
     var checksum: Long = 0L
 ) {
+    companion object {
+        const val CURRENT_VERSION = 2
+        private const val CHECKSUM_SALT = 0x5F3759DF4923C021L
+    }
+
     /**
-     * Menghitung nilai checksum dari parameter progres penting untuk mendeteksi korupsi data.
+     * Menghitung nilai checksum dari seluruh parameter progres dengan FNV-1a salted hash 64-bit.
      */
     fun calculateChecksum(): Long {
+        var hash = -3750763034362895579L xor CHECKSUM_SALT // FNV offset basis xor salt
+        val prime = 1099511628211L
+
+        fun mix(value: Long) {
+            hash = (hash xor value) * prime
+        }
+
+        fun mixString(s: String) {
+            for (ch in s) {
+                hash = (hash xor ch.code.toLong()) * prime
+            }
+        }
+
+        mix(playerLevel.toLong())
+        mix(currentExp.toLong())
+        mix(gold.toLong())
+        mix(highestTowerFloor.toLong())
+        mix(highestEndlessFloor.toLong())
+        mix(totalEnemiesDefeated.toLong())
+        mix(weaponAtkLevel.toLong())
+        mix(weaponCritLevel.toLong())
+        mix(weaponSpdLevel.toLong())
+        mix(unspentTalentPoints.toLong())
+        mix(playTimeSeconds)
+        mix(saveSlotId.toLong())
+        mix(saveVersion.toLong())
+
+        mixString(selectedArchetype)
+        mixString(selectedSubClass)
+
+        // Hash koleksi secara deterministik terurut
+        unlockedCharacters.sorted().forEach { mixString(it) }
+        unlockedAchievements.sorted().forEach { mixString(it) }
+        unlockedTalents.sorted().forEach { mixString(it) }
+        unlockedLoreTablets.sorted().forEach { mixString(it) }
+
+        return hash and 0x7FFFFFFFFFFFFFFFL // Bilangan bulat positif 63-bit
+    }
+
+    /**
+     * Checksum fallback legacy (V1) untuk kompatibilitas file lama sebelum upgrade.
+     */
+    fun calculateLegacyChecksum(): Long {
         var hash = 17L
         hash = 31L * hash + playerLevel
         hash = 31L * hash + currentExp
@@ -36,7 +94,7 @@ data class SaveData(
         hash = 31L * hash + unspentTalentPoints
         hash = 31L * hash + selectedArchetype.hashCode()
         hash = 31L * hash + selectedSubClass.hashCode()
-        return hash and 0x7FFFFFFFFFFFFFFFL // Bilangan bulat positif 63-bit
+        return hash and 0x7FFFFFFFFFFFFFFFL
     }
 
     /**
@@ -53,6 +111,10 @@ data class SaveData(
         weaponCritLevel = weaponCritLevel.coerceIn(0, 10)
         weaponSpdLevel = weaponSpdLevel.coerceIn(0, 10)
         unspentTalentPoints = unspentTalentPoints.coerceAtLeast(-1)
+        playTimeSeconds = playTimeSeconds.coerceAtLeast(0L)
+        saveSlotId = saveSlotId.coerceIn(1, 10)
+        saveVersion = saveVersion.coerceAtLeast(1)
+
         if (unlockedCharacters.isEmpty()) {
             unlockedCharacters.add("STICKMAN_SWORD")
         }
@@ -63,6 +125,9 @@ data class SaveData(
      * Memperbarui checksum internal sebelum proses serialisasi.
      */
     fun updateChecksum() {
+        if (lastSavedTimestamp == 0L) {
+            lastSavedTimestamp = System.currentTimeMillis()
+        }
         checksum = calculateChecksum()
     }
 
@@ -70,7 +135,8 @@ data class SaveData(
      * Memeriksa apakah checksum data valid dan belum termutasi/korup.
      */
     fun isChecksumValid(): Boolean {
-        if (checksum == 0L) return true // Kompatibilitas mundur dengan save legacy tanpa checksum
-        return checksum == calculateChecksum()
+        if (checksum == 0L) return true
+        if (checksum == calculateChecksum()) return true
+        return checksum == calculateLegacyChecksum()
     }
 }

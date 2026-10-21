@@ -27,12 +27,43 @@ object AudioManager {
     private var soundParry: Sound? = null
     private var soundBossRoar: Sound? = null
 
+    private const val PREF_AUDIO = "stickman_audio_settings"
+    private const val KEY_VOLUME = "sfx_volume"
+    private const val KEY_MUTED = "is_muted"
+
     var isMuted: Boolean = false
+        set(value) {
+            field = value
+            persistSettings()
+        }
     var sfxVolume: Float = 0.85f
+        set(value) {
+            field = value.coerceIn(0f, 1f)
+            persistSettings()
+        }
+
+    private fun persistSettings() {
+        try {
+            val prefs = Gdx.app?.getPreferences(PREF_AUDIO)
+            if (prefs != null) {
+                prefs.putFloat(KEY_VOLUME, sfxVolume)
+                prefs.putBoolean(KEY_MUTED, isMuted)
+                prefs.flush()
+            }
+        } catch (_: Exception) {}
+    }
 
     fun init() {
         if (isInitialized) return
         isInitialized = true
+
+        try {
+            val prefs = Gdx.app?.getPreferences(PREF_AUDIO)
+            if (prefs != null) {
+                if (prefs.contains(KEY_VOLUME)) sfxVolume = prefs.getFloat(KEY_VOLUME, 0.85f).coerceIn(0f, 1f)
+                if (prefs.contains(KEY_MUTED)) isMuted = prefs.getBoolean(KEY_MUTED, false)
+            }
+        } catch (_: Exception) {}
 
         try {
             val cacheDir = Gdx.files.local(".sfx_cache")

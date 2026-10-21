@@ -33,6 +33,11 @@ class TalentManager(initialArchetype: CharacterArchetype = CharacterArchetype.BA
             }
         }
         unlockedTalentIds.clear()
+        // Skema V2
+        for (id in saveData.unlockedTalents) {
+            unlockedTalentIds.add(id)
+        }
+        // Skema V1 legacy
         for (id in saveData.unlockedCharacters) {
             if (id.startsWith("TALENT_")) {
                 unlockedTalentIds.add(id.removePrefix("TALENT_"))
@@ -53,6 +58,10 @@ class TalentManager(initialArchetype: CharacterArchetype = CharacterArchetype.BA
     fun syncToSave(saveData: SaveData) {
         saveData.selectedSubClass = selectedSubClass.name
         saveData.unspentTalentPoints = talentPoints
+
+        saveData.unlockedTalents.clear()
+        saveData.unlockedTalents.addAll(unlockedTalentIds)
+
         saveData.unlockedCharacters.removeAll { it.startsWith("SUBCLASS_") || it.startsWith("TALENT_") }
         saveData.unlockedCharacters.add("SUBCLASS_${selectedSubClass.idName}")
         for (id in unlockedTalentIds) {

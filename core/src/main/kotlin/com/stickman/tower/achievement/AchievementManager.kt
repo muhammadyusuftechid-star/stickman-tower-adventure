@@ -120,6 +120,13 @@ object AchievementManager {
      */
     fun loadFromSave(saveData: SaveData) {
         unlockedAchievementIds.clear()
+        // Skema V2: Baca dari koleksi khusus
+        for (id in saveData.unlockedAchievements) {
+            if (AchievementCatalog.findById(id) != null) {
+                unlockedAchievementIds.add(id)
+            }
+        }
+        // Skema V1 legacy fallback
         for (item in saveData.unlockedCharacters) {
             if (item.startsWith("ACHV_")) {
                 val achvId = item.removePrefix("ACHV_")
@@ -134,6 +141,9 @@ object AchievementManager {
      * Menyimpan seluruh ID prestasi aktif ke dalam SaveData.
      */
     fun syncToSave(saveData: SaveData) {
+        saveData.unlockedAchievements.clear()
+        saveData.unlockedAchievements.addAll(unlockedAchievementIds)
+
         saveData.unlockedCharacters.removeAll { it.startsWith("ACHV_") }
         for (id in unlockedAchievementIds) {
             saveData.unlockedCharacters.add("ACHV_$id")

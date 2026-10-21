@@ -283,6 +283,12 @@ class PlayScreen(
         playerGhostDelay = 0f
         miasmaTimer = 0f
         bossGhostHp = currentFloor.boss?.health?.currentHp ?: 0f
+
+        for (tablet in currentFloor.loreTablets) {
+            if (saveData.unlockedLoreTablets.contains(tablet.tabletId)) {
+                tablet.isRead = true
+            }
+        }
         bossGhostDelay = 0f
         prevComboStep = ComboStep.HIT_1
         comboPopTimer = 0f
@@ -639,6 +645,10 @@ class PlayScreen(
                     if (Gdx.input.isKeyJustPressed(Keys.E)) {
                         activeLoreTablet = tablet
                         tablet.isRead = true
+                        if (!saveData.unlockedLoreTablets.contains(tablet.tabletId)) {
+                            saveData.unlockedLoreTablets.add(tablet.tabletId)
+                            SaveManager.saveAsync(saveData)
+                        }
                         AudioManager.playChest()
                         break
                     }
@@ -1922,6 +1932,10 @@ class PlayScreen(
                     if (uiTouchVec.x in px..(px + pw) && uiTouchVec.y in py..(py + ph)) {
                         activeLoreTablet = tablet
                         tablet.isRead = true
+                        if (!saveData.unlockedLoreTablets.contains(tablet.tabletId)) {
+                            saveData.unlockedLoreTablets.add(tablet.tabletId)
+                            SaveManager.saveAsync(saveData)
+                        }
                         AudioManager.playChest()
                     }
                 }

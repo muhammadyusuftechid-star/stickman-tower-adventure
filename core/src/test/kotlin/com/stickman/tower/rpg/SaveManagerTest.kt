@@ -1,5 +1,7 @@
 package com.stickman.tower.rpg
 
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -15,12 +17,14 @@ class SaveManagerTest {
     @BeforeTest
     fun setUp() {
         SaveManager.storageAdapter = testStorage
+        SaveManager.currentSlotId = 1
         testStorage.clear()
     }
 
     @AfterTest
     fun tearDown() {
         testStorage.clear()
+        SaveManager.currentSlotId = 1
         SaveManager.storageAdapter = LocalFileStorageAdapter()
     }
 
@@ -107,7 +111,6 @@ class SaveManagerTest {
         // 4. Panggil load(): SaveManager harus mendeteksi error parsing dan otomatis pulih dari .bak
         val recovered = SaveManager.load()
         assertNotNull(recovered)
-        // Data harus dipulihkan dari backup sebelumnya yang valid
         assertTrue(recovered.playerLevel in listOf(10, 12))
         assertTrue(recovered.gold >= 1000)
 
@@ -190,5 +193,139 @@ class SaveManagerTest {
         newTalentManager.respec()
         assertEquals(5, newTalentManager.talentPoints)
         assertFalse(newTalentManager.isTalentUnlocked("BS_BLOOD_RAGE"))
+    }
+
+    @Test
+    fun testSaveMigratorV1ToV2() {
+        // Data format V1 lama (achievements dan talents digabung dalam unlockedCharacters)
+        val legacyV1 = SaveData(
+            playerLevel = 8,
+            gold = 2500,
+            saveVersion = 1,
+            unlockedCharacters = arrayListOf("STICKMAN_SWORD", "ACHV_FIRST_BLOOD", "TALENT_BS_BLOOD_RAGE")
+        )
+
+        val migrated = SaveMigrator.migrate(legacyV1)
+        assertTrue(migrated, "Migrator should return true when upgrade is applied")
+        assertEquals(2, legacyV1.saveVersion, "SaveVersion should be upgraded to 2")
+        assertTrue(legacyV1.unlockedAchievements.contains("FIRST_BLOOD"), "Achievements must be migrated to dedicated list")
+        assertTrue(legacyV1.unlockedTalents.contains("BS_BLOOD_RAGE"), "Talents must be migrated to dedicated list")
+        assertTrue(legacyV1.lastSavedTimestamp > 0L, "Timestamp should be generated")
+        assertTrue(legacyV1.isChecksumValid(), "Checksum must be valid after migration")
+    }
+
+    @Test
+    fun testMultiSlotStorageAndListing() {
+        val slot1Data = SaveData(saveSlotId = 1, playerLevel = 10, gold = 1000, highestTowerFloor = 2)
+        val slot2Data = SaveData(saveSlotId = 2, playerLevel = 25, gold = 50000, highestTowerFloor = 6)
+        val slot3Data = SaveData(saveSlotId = 3, playerLevel = 45, gold = 200000, highestTowerFloor = 9)
+
+        SaveManager.saveSlot(1, slot1Data)
+        SaveManager.saveSlot(2, slot2Data)
+        SaveManager.saveSlot(3, slot3Data)
+
+        val slots = SaveManager.listSlots(3)
+        assertEquals(3, slots.size)
+
+        assertEquals(10, slots[0].playerLevel)
+        assertFalse(slots[0].isEmpty)
+
+        assertEquals(25, slots[1].playerLevel)
+        assertEquals(50000, slots[1].gold)
+        assertFalse(slots[1].isEmpty)
+
+        assertEquals(45, slots[2].playerLevel)
+        assertEquals(9, slots[2].highestTowerFloor)
+        assertFalse(slots[2].isEmpty)
+
+        // Delete slot 2 and verify isolation
+        SaveManager.deleteSlot(2)
+        val afterDelete = SaveManager.listSlots(3)
+        assertEquals(10, afterDelete[0].playerLevel)
+        assertTrue(afterDelete[1].isEmpty, "Slot 2 should now be empty")
+        assertEquals(45, afterDelete[2].playerLevel, "Slot 3 must remain intact")
+    }
+
+    @Test
+    fun testSignedTransportPayloadExportAndImport() {
+        val original = SaveData(
+            playerLevel = 30,
+            gold = 88888,
+            highestTowerFloor = 8,
+            selectedArchetype = "MAGIC",
+            unlockedAchievements = arrayListOf("FIRST_BLOOD", "MATRON_SLAYER"),
+            unlockedLoreTablets = arrayListOf("TABLET_1", "TABLET_4")
+        )
+
+        val payload = SaveManager.exportPayload(original)
+        assertTrue(payload.startsWith(SaveManager.TRANSPORT_PREFIX), "Payload must start with STK2. prefix")
+
+        // Import to Slot 2
+        val importSuccess = SaveManager.importPayload(payload, targetSlotId = 2)
+        assertTrue(importSuccess, "Valid signed payload must import successfully")
+
+        val loaded = SaveManager.loadSlot(2)
+        assertEquals(30, loaded.playerLevel)
+        assertEquals(88888, loaded.gold)
+        assertEquals("MAGIC", loaded.selectedArchetype)
+        assertTrue(loaded.unlockedAchievements.contains("MATRON_SLAYER"))
+        assertTrue(loaded.unlockedLoreTablets.contains("TABLET_4"))
+        assertTrue(loaded.isChecksumValid())
+
+        // Test tampering protection: corrupt the signature
+        val corruptedPayload = payload.substring(0, payload.length - 4) + "dead"
+        val failedImport = SaveManager.importPayload(corruptedPayload, targetSlotId = 3)
+        assertFalse(failedImport, "Corrupted payload signature must fail import")
+    }
+
+    @Test
+    fun testCloudConflictResolution3WayMerge() {
+        val local = SaveData(
+            playerLevel = 14,
+            gold = 3000,
+            highestTowerFloor = 4,
+            unlockedAchievements = arrayListOf("FIRST_BLOOD"),
+            unlockedLoreTablets = arrayListOf("TABLET_1"),
+            lastSavedTimestamp = 1000L
+        )
+
+        val remote = SaveData(
+            playerLevel = 12,
+            gold = 4500, // Remote has more gold
+            highestTowerFloor = 5, // Remote is on a higher floor
+            unlockedAchievements = arrayListOf("TOWER_GUARDIAN_DOWN"),
+            unlockedLoreTablets = arrayListOf("TABLET_2"),
+            lastSavedTimestamp = 2000L
+        )
+
+        val resolved = SaveManager.resolveConflict(local, remote)
+        assertEquals(14, resolved.playerLevel, "Should retain higher level")
+        assertEquals(4500, resolved.gold, "Should retain higher gold")
+        assertEquals(5, resolved.highestTowerFloor, "Should retain higher tower floor")
+        assertTrue(resolved.unlockedAchievements.contains("FIRST_BLOOD"))
+        assertTrue(resolved.unlockedAchievements.contains("TOWER_GUARDIAN_DOWN"))
+        assertTrue(resolved.unlockedLoreTablets.contains("TABLET_1"))
+        assertTrue(resolved.unlockedLoreTablets.contains("TABLET_2"))
+        assertTrue(resolved.isChecksumValid())
+    }
+
+    @Test
+    fun testAsyncSaveNonBlocking() {
+        val data = SaveData(playerLevel = 22, gold = 12000, highestTowerFloor = 4)
+        val latch = CountDownLatch(1)
+        var callbackSuccess = false
+
+        SaveManager.saveAsync(data) { success ->
+            callbackSuccess = success
+            latch.countDown()
+        }
+
+        val completed = latch.await(3, TimeUnit.SECONDS)
+        assertTrue(completed, "Async save must complete within timeout")
+        assertTrue(callbackSuccess, "Async save callback should report success")
+
+        val loaded = SaveManager.load()
+        assertEquals(22, loaded.playerLevel)
+        assertEquals(12000, loaded.gold)
     }
 }
