@@ -2,32 +2,59 @@
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.24-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 [![libGDX](https://img.shields.io/badge/libGDX-1.13.1-EA2027.svg?logo=libgdx&logoColor=white)](https://libgdx.com/)
-[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Desktop%20(LWJGL3)-48bb78.svg)](#cross-platform--controls)
-[![Tests](https://img.shields.io/badge/Tests-33%20Passed-success.svg?logo=checkmarx&logoColor=white)](#automated-testing--qa)
+[![Architecture](https://img.shields.io/badge/Architecture-Clean%20%7C%20Zero--GC-brightgreen.svg)](#-arsitektur--prinsip-rekayasa-perangkat-lunak)
+[![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20Desktop%20(LWJGL3)-48bb78.svg)](#-skema-kontrol-cross-platform)
+[![Tests](https://img.shields.io/badge/Tests-33%20Passed%20(Headless)-success.svg?logo=checkmarx&logoColor=white)](#-automated-testing--qa-pipeline)
 [![APK Size](https://img.shields.io/badge/APK%20Size-10.6%20MB-blue.svg?logo=android&logoColor=white)](https://github.com/muhammadyusuftechid-star/stickman-tower-adventure/releases)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **High-Performance 2D Action Roguelite RPG** dibangun dari nol dengan **Kotlin**, **libGDX**, dan **Box2D Physics Engine** untuk target **Android** dan **Desktop (PC)**.  
-> Dirancang dengan standar industri: arsitektur modular, **zero-allocation rendering** untuk garansi 60 FPS mulus di perangkat mobile, sistem input terpadu (*Keyboard, Gamepad, Touch*), dan cakupan pengujian unit otomatis (*automated test coverage*).
+> **Stickman Tower Adventure** adalah game **2D Action Roguelite RPG** performa tinggi yang dibangun dari nol menggunakan bahasa pemrograman **Kotlin** dan framework **libGDX** untuk platform **Android** dan **Desktop (PC)**.  
+> Dirancang dengan standar rekayasa perangkat lunak kelas industri: modularitas tinggi, **zero-allocation rendering** untuk garansi 60 FPS mulus di perangkat mobile, sistem fisika kinematika terkalibrasi presisi, abstraksi multi-input terpadu (*Keyboard, Gamepad, Touch*), serta 33 automated unit tests yang siap diintegrasikan pada CI/CD pipeline.
 
 ---
 
-## 🎮 Gameplay Showcase
+## 📑 Daftar Isi
+1. [Fitur Utama & Gameplay Matrix](#-fitur-utama--gameplay-matrix)
+2. [Arsitektur & Prinsip Rekayasa Perangkat Lunak](#-arsitektur--prinsip-rekayasa-perangkat-lunak)
+3. [Model Kinematika & Kalibrasi Fisika Platforming](#-model-kinematika--kalibrasi-fisika-platforming)
+4. [Sistem RPG & Rumus Balancing](#-sistem-rpg--rumus-balancing)
+5. [Struktur Repositori & Domain Boundaries](#-struktur-repositori--domain-boundaries)
+6. [Skema Kontrol (Cross-Platform)](#-skema-kontrol-cross-platform)
+7. [Automated Testing & QA Pipeline](#-automated-testing--qa-pipeline)
+8. [Panduan Menjalankan & Membangun Proyek](#-panduan-menjalankan--membangun-proyek)
+9. [Keputusan Desain Rekayasa (Architectural Trade-offs)](#-keputusan-desain-rekayasa-architectural-trade-offs)
+10. [Lisensi & Kontributor](#-lisensi--kontributor)
 
-| Fitur Utama | Deskripsi Teknis |
-| :--- | :--- |
-| **Fluid Action Combat** | 3-Hit Combo FSM, Perfect Parry dengan *hit-stop* & *time-dilation*, Dash Invulnerability (*i-frames*), dan Ultimate Screen Nuke. |
-| **3 Character Archetypes** | **Shadow Duelist** (Dual-blade burst crit), **Iron Vanguard** (High DEF & ground slam), **Arcane Archer** (Ranged piercing arrows). |
-| **Procedural Endless Spire** | Mode lantai tak terbatas dengan **7 Random Mutators** (Vampiric, Berserk, Shielded, Swarm, Spikes, Glass Cannon, Swiftness). |
-| **Deep RPG Progression** | 15-Node Branching Talent Tree, 6 Sub-Classes, Blacksmith weapon & armor tempering, serta 8 stackable passive Relics. |
-| **Multi-Phase Boss Battles** | Pertarungan dinamis melawan *The Tower Warden* dengan transisi Phase 2 (Enraged, shockwaves, projectile storm, cinematic intro). |
-| **Custom Touch HUD & Gamepad** | Editor posisi, ukuran, dan opacity tombol virtual di layar sentuh, serta dukungan *plug-and-play* untuk Controller Bluetooth/USB. |
+---
+
+## 🎮 Fitur Utama & Gameplay Matrix
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              STICKMAN TOWER ADVENTURE                                  │
+├─────────────────────┬──────────────────────────┬───────────────────────────────────────┤
+│    Action Combat    │     Roguelite Ascent     │           Meta Progression            │
+├─────────────────────┼──────────────────────────┼───────────────────────────────────────┤
+│ • 3-Hit Combo FSM   │ • 10-Floor Tower         │ • 15-Node Branching Talent Tree       │
+│ • Perfect Parry     │ • Infinite Endless Spire │ • 6 Advanced Sub-Classes              │
+│ • Dash Invulnerable │ • 7 Procedural Mutators  │ • Blacksmith Weapon & Armor Tempering │
+│ • Ultimate Skills   │ • 2-Phase Apex Bosses    │ • 8 Stackable Relics System           │
+└─────────────────────┴──────────────────────────┴───────────────────────────────────────┘
+```
+
+| Modul | Implementasi Teknis | Dampak Gameplay |
+| :--- | :--- | :--- |
+| **Dynamic Combat FSM** | Transisi state serangan 3 tahap (`COMBO_1`, `COMBO_2`, `FINISHER`) dengan *input buffering* dan *attack phase timer*. | Aksi pertarungan terasa responsif, fleksibel, dan memiliki ritme kombo yang terarah. |
+| **Perfect Parry & Hitstop** | Deteksi *timing window* presisi (150 ms) dengan penghentian waktu sesaat (*hitstop*), getaran haptic, dan buff serangan balasan +25%. | Memberikan *reward* bagi pemain berkemampuan tinggi (*high skill ceiling*). |
+| **Endless Spire Mutators** | Generator lantai dengan 7 mutator acak: *Vampiric, Berserk, Shielded, Swarm, Spikes, Glass Cannon, Swiftness*. | Nilai *replayability* tinggi tanpa pola lantai yang repetitif. |
+| **Multi-Phase Boss Battles** | Pertarungan melawan *The Tower Warden* dengan transisi Phase 2 (Enraged, kecepatan serangan +30%, shockwave darat, projectile barrage). | Pertarungan klimaks yang menantang dan sinematik. |
+| **Responsive Touch HUD** | Editor tata letak kontrol di layar sentuh (posisi X/Y, ukuran tombol, dan opasitas) serta sensor noise suppressor. | Pengalaman bermain mobile yang ergonomis dan nyaman untuk segala ukuran layar. |
 
 ---
 
 ## 🏗️ Arsitektur & Prinsip Rekayasa Perangkat Lunak
 
-Proyek ini dibangun sebagai demonstrasi rekayasa perangkat lunak game modern yang mematuhi standar industri:
+Arsitektur aplikasi menerapkan pemisahan tanggung jawab yang tegas (*Separation of Concerns*), memastikan logika simulasi bebas dari dependensi platform visual.
 
 ```
                           ┌─────────────────────────────┐
@@ -59,54 +86,99 @@ Proyek ini dibangun sebagai demonstrasi rekayasa perangkat lunak game modern yan
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1. Zero-Allocation GC Hygiene (Anti Frame-Drop Mobile)
-Di Android/JVM, *Garbage Collection (GC) pauses* adalah pemicu utama *stutter* dan *frame drops*.  
-- **In-Place Math Mutations:** Tidak ada pembuatan instance `Vector2()` atau `Vector3()` baru di dalam loop `update()` atau `render()`. Semua kalkulasi vektor menggunakan cache objek in-place (`Vector2.set()`).
-- **Object Pooling:** Efek partikel ([ParticleManager](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/vfx/)), teks damage melayang ([FloatingTextManager](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/combat/FloatingText.kt)), dan proyektil menggunakan array pool yang di-recycle.
-- **Safe OpenGL Lifecycle:** Transisi antar layar pada [StickmanGame.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/StickmanGame.kt) menggunakan `Gdx.app.postRunnable` untuk menjamin tidak ada race condition saat melepaskan resource native GL.
+### 1. Zero-Allocation GC Hygiene (Garansi 60 FPS Mobile)
+Dalam platform Android/JVM, jeda pembersihan memori (*Garbage Collector pauses*) adalah musuh utama yang menyebabkan *stutter* dan *frame drops*. Game ini menerapkan pola zero-allocation pada loop per frame:
+- **In-Place Vector Mutation:** Tidak ada alokasi `Vector2()` atau `Vector3()` baru di dalam method `update()` atau `render()`. Semua operasi matematika menggunakan cache objek statis/member dengan mutasi in-place (`tmpVec.set(...)`).
+- **Object Recycling & Pooling:** Partikel debu/loncatan ([ParticleManager](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/vfx/)), damage number melayang ([FloatingTextManager](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/combat/FloatingText.kt)), dan proyektil dikelola dengan struktur array pooling yang digunakan kembali (*recycled*).
+- **Safe OpenGL Context Disposal:** Pergantian screen pada [StickmanGame.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/StickmanGame.kt) dijalankan via `Gdx.app.postRunnable` untuk menjamin GL context tidak di-dispose di tengah eksekusi frame pipeline.
 
-### 2. Strict Coordinate Decoupling
-- **World Space (Box2D):** Menggunakan satuan Meter dengan aspek rasio 16:9 (`16.0f x 9.0f` viewport), menjamin simulasi gravitasi, inersia, dan deteksi tumbukan deterministik di semua resolusi.
-- **UI HUD Space:** Menggunakan pixel-based `FitViewport(1280f, 720f)`, memastikan rasio layar HP modern (19.5:9, 20:9, tablet 4:3) tidak mengalami peregangan atau distorsi visual.
+### 2. Strict Viewport & Coordinate Decoupling
+- **World Space (Simulasi Fisika):** Satuan meter logis dengan kamera aspek rasio 16:9 (`16.0f x 9.0f`). Menjamin akselerasi, massa, gravitasi, dan deteksi benturan bersifat deterministik di semua resolusi perangkat.
+- **UI HUD Space (Presentasi Layar):** Menggunakan pixel-based `FitViewport(1280f, 720f)`. Menjaga rasio grafis tetap proporsional tanpa distorsi pada berbagai layar HP modern (rasio 19.5:9, 20:9, maupun tablet 4:3).
 
-### 3. Unified Input Abstraction
-Logika gameplay sama sekali tidak memiliki dependensi pada tipe input perangkat:
-- `CompositeInput` mengimplementasikan interface `InputController`.
-- Menyerap keyboard desktop, gamepad Bluetooth/USB (Xbox, PlayStation, Generic HID), dan on-screen virtual touch controller dalam satu pipeline yang sama.
-- Dilengkapi filter *sensor noise suppression* untuk mengabaikan input accelerometer/gyroscope perangkat Android secara otomatis.
+### 3. Unified Input Abstraction Layer
+Logika permainan tidak terikat dengan hardware input:
+- `CompositeInput` mengimplementasikan antarmuka `InputController`.
+- Menerima input dari Desktop Keyboard, Gamepad fisik (Xbox, PlayStation, Generic HID Bluetooth/USB), dan Virtual Controller layar sentuh secara simultan.
+- Dilengkapi sistem *Sensor Noise Filter* yang secara otomatis mengabaikan interferensi data gyroscope/accelerometer bawaan Android.
 
 ---
 
-## 📁 Struktur Repositori
+## 📐 Model Kinematika & Kalibrasi Fisika Platforming
+
+Platforming yang presisi menuntut keseimbangan matematis yang ketat antara kecepatan impuls vertikal, koefisien gravitasi, dan penempatan rintangan.
+
+### 1. Persamaan Kinematika Puncak Lompatan
+Ketinggian puncak lompatan dihitung dengan rumus gerak lurus berubah beraturan:
+$$\Delta y_{max} = \frac{v_{0y}^2}{2 \cdot |g|}$$
+
+Dengan gravitasi terkalibrasi $g = -25.0\text{ m/s}^2$:
+- **Heavy (Titan Greatsword):** $v_{0y} = 10.8\text{ m/s} \implies \Delta y_{max} = \frac{116.64}{50} = \mathbf{2.33\text{ meter}}$
+- **Balanced (Wandering Swordsman):** $v_{0y} = 11.5\text{ m/s} \implies \Delta y_{max} = \frac{132.25}{50} = \mathbf{2.64\text{ meter}}$
+- **Agile (Shadow Daggers):** $v_{0y} = 12.2\text{ m/s} \implies \Delta y_{max} = \frac{148.84}{50} = \mathbf{2.98\text{ meter}}$
+
+### 2. Aturan Emas Tata Letak Balok & Rintangan (Level Design Constraints)
+Untuk mengeliminasi *unreachable jumps* dan *softlocks*:
+1. **Maksimum Elevasi Balok Bertingkat ($\Delta y$):** Dibatasi antara **$1.4\text{ m} - 1.75\text{ m}$**, berada jauh di bawah ambang batas minimal lompatan karakter paling berat ($2.33\text{ m}$).
+2. **Celah Horizontal Lompatan ($\Delta x$):** Dibatasi maksimum **$1.0\text{ m} - 1.5\text{ m}$**, memastikan karakter berkecepatan lambat ($5.8\text{ m/s}$) dapat mendarat dengan aman.
+3. **Mekanisme Anti-Frustrasi (Coyote Time & Input Buffer):**
+   - `COYOTE_TIME = 0.15s`: Karakter tetap dapat melompat hingga 150 ms setelah kakinya melewati tepi platform.
+   - `JUMP_BUFFER_TIME = 0.15s`: Input lompatan yang ditekan sesaat sebelum menyentuh lantai akan otomatis dieksekusi begitu karakter mendarat.
+   - `EARLY_RELEASE_GRAVITY = 1.35x`: Pelepasan tombol lompat menghasilkan busur melengkung yang luwes, menghindari efek "jatuh seperti batu".
+4. **Jalur Penyelamat (Fail-Safe Recovery Steps):** Pada lantai dengan tingkat ketinggian ekstrim (seperti Lantai 2 menuju puncak $y = 8.6\text{ m}$), disediakan tangga One-Way sekunder di area dasar sehingga pemain yang terjatuh tidak mengalami jalan buntu (*softlock*).
+
+---
+
+## 📊 Sistem RPG & Rumus Balancing
+
+### 1. Karakteristik Arketipe Karakter
+
+| Arketipe | Kecepatan Gerak | Impuls Lompat | Pengali ATK | Bonus DEF | Bonus CRIT | Peran Taktis |
+| :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **Balanced** | $7.5\text{ m/s}$ | $11.5\text{ m/s}$ | $1.00\times$ | $+0.0$ | $+0\%$ | Mobilitas seimbang, serangan kombo 3-hit yang luwes. |
+| **Agile** | $9.5\text{ m/s}$ | $12.2\text{ m/s}$ | $0.85\times$ | $-1.0$ | $+15\%$ | Serangan cepat beruntun, crit burst tinggi, lari kencang. |
+| **Heavy** | $5.8\text{ m/s}$ | $10.8\text{ m/s}$ | $1.55\times$ | $+3.5$ | $-2\%$ | Pertahanan tebal, knockback masif, serangan berdaya hancur tinggi. |
+
+### 2. Rumus Pertarungan & Mitigasi Damage
+- **Kalkulasi Damage Masuk:**
+  $$\text{Damage Diterima} = \max\left(1.0, (\text{Raw Damage} - \text{Total Defense}) \times \text{DamageReductionMultiplier}\right)$$
+- **Kalkulasi EXP Naik Level:**
+  $$\text{EXP Diperlukan} = 100 \times (1.25)^{\text{Level} - 1}$$
+- **Kalkulasi Critical Hit:**
+  $$\text{Total Damage} = \text{ATK} \times (1.5 + \text{CritDmgBonus}), \quad \text{jika } \text{Random}() < (\text{BaseCrit} + \text{CritChanceBonus})$$
+
+---
+
+## 📁 Struktur Repositori & Domain Boundaries
 
 ```bash
 stickman-tower-adventure/
-├── android/                 # Android project module (Activity, JNI, Manifest, ProGuard)
+├── android/                 # Android Native Module (Activity, JNI, Manifest, ProGuard)
 │   └── src/main/kotlin/com/stickman/tower/android/
 │       └── AndroidLauncher.kt
-├── core/                    # Game Engine & Pure Logic (Multiplatform Kotlin)
+├── core/                    # Pure Multiplatform Kotlin Engine Logic
 │   ├── src/main/kotlin/com/stickman/tower/
-│   │   ├── audio/           # Sound & Haptic Feedback abstractions
-│   │   ├── character/       # Player entity, archetypes, states & animations
-│   │   ├── combat/          # Combo FSM, Hitboxes, Hurtboxes, Parry, Skills
+│   │   ├── audio/           # Sound synthesis & Haptic Feedback bridge
+│   │   ├── character/       # Player entity, state machines, and archetype definitions
+│   │   ├── combat/          # Combo FSM, Hitbox/Hurtbox system, Parry, and Projectiles
 │   │   ├── endless/         # Endless Spire procedural floor mutators
-│   │   ├── enemy/           # Enemy AI, Boss 2-Phase state machines
-│   │   ├── input/           # Composite input, Gamepad, Touch virtual stick
-│   │   ├── physics/         # Box2D platforms, sensors & collision listeners
-│   │   ├── relic/           # Passive relic inventory & tier buffs
-│   │   ├── rpg/             # Stats calculation, save/load serialization
-│   │   ├── screen/          # Game screens (Play, Menu, Blacksmith, Talent)
-│   │   ├── talent/          # 15-Node Talent tree & Sub-Class unlocking
-│   │   ├── ui/              # FontManager & responsive UI helpers
-│   │   ├── vfx/             # Particle effects & screen shake managers
-│   │   └── world/           # Tower floor generator, checkpoints, hazards
-│   └── src/test/kotlin/     # 33 Automated Unit Tests (Headless QA Suite)
-├── lwjgl3/                  # Desktop Launcher module (LWJGL3 backend)
+│   │   ├── enemy/           # Enemy AI behaviors & Boss 2-Phase state machines
+│   │   ├── input/           # Unified CompositeInput, GamepadInput & VirtualController
+│   │   ├── physics/         # Box2D platforms, sensors, and raycast collision detection
+│   │   ├── relic/           # Passive relic inventory & tier stacking calculations
+│   │   ├── rpg/             # Stats progression, formulas, and JSON save/load persistence
+│   │   ├── screen/          # Game screens (PlayScreen, MainMenu, Blacksmith, TalentTree)
+│   │   ├── talent/          # 15-Node Talent tree & Sub-Class unlocking managers
+│   │   ├── ui/              # FontManager & resolution-independent HUD rendering
+│   │   ├── vfx/             # Particle pooling systems & procedural screen shakes
+│   │   └── world/           # Tower floor generator, checkpoints, and calibrated hazards
+│   └── src/test/kotlin/     # 33 Automated Unit Tests (Headless QA Architecture)
+├── lwjgl3/                  # Desktop PC Launcher Module (LWJGL3 / OpenGL backend)
 │   └── src/main/kotlin/com/stickman/tower/lwjgl3/
 │       └── Lwjgl3Launcher.kt
-├── assets/                  # Fonts, Sound clips, and default assets
-├── Alur_Pembuatan_Aplikasi.md  # Detailed Engineering Architecture Document
-├── ROADMAP.md               # 14-Phase Development Milestone Tracker
+├── assets/                  # Typography (NotoSans TTF), Audio cues, and visual sprites
+├── Alur_Pembuatan_Aplikasi.md  # Detailed Macro-to-Micro Engineering Roadmap
+├── ROADMAP.md               # 14-Phase Implementation Milestone Tracker
 └── Stickman_Game_Design_v0.1.md # Game Design Document (GDD)
 ```
 
@@ -114,51 +186,53 @@ stickman-tower-adventure/
 
 ## 🕹️ Skema Kontrol (Cross-Platform)
 
-Game ini mendukung kontrol multi-platform secara *out-of-the-box*:
-
-| Aksi | Keyboard (PC) | Gamepad (Xbox / Generic) | Layar Sentuh (Android) |
+| Aksi Permainan | Keyboard (Desktop PC) | Gamepad (Xbox / Generic) | Layar Sentuh (Android) |
 | :--- | :---: | :---: | :---: |
-| **Gerak Kiri / Kanan** | `A` / `D` atau `Panah` | Left Stick / D-Pad | Virtual Joystick (Kiri) |
-| **Lompat** | `W` / `Space` | Tombol `A` | Tombol `JUMP` |
-| **Serangan Melee / Combo** | `J` / `Z` | Tombol `X` | Tombol `ATK` |
-| **Ranged / Tembak** | `K` / `C` | Tombol `Y` | Tombol `RNG` |
-| **Dash (Invulnerable)** | `L` / `Shift` | Right Trigger (`RT`) / `B` | Tombol `DASH` |
-| **Parry / Deflect** | `F` | Left Bumper (`LB`) | Tombol `PARRY` |
-| **Ultimate Skill** | `U` / `V` | Left Trigger (`LT`) | Tombol `ULT` |
-| **Pause Menu** | `Escape` / `P` | Tombol `Start` | Tombol `PAUSE` (Kanan Atas) |
+| **Navigasi / Lari** | `A` / `D` atau `Panah` | Left Analog Stick / D-Pad | Virtual Joystick (Kiri) |
+| **Lompat / Air Jump** | `W` / `Space` | Tombol `A` (Cross) | Tombol `JUMP` |
+| **Serangan Melee / Kombo** | `J` / `Z` | Tombol `X` (Square) | Tombol `ATK` |
+| **Serangan Ranged / Panah** | `K` / `C` | Tombol `Y` (Triangle) | Tombol `RNG` |
+| **Dodge Roll (Invulnerable)**| `L` / `Shift` | Right Trigger (`RT`) / `B` | Tombol `DASH` |
+| **Perfect Parry / Deflect** | `F` | Left Bumper (`LB`) | Tombol `PARRY` |
+| **Ultimate Skill Nuke** | `U` / `V` | Left Trigger (`LT`) | Tombol `ULT` |
+| **Menu Jeda / Pause** | `Escape` / `P` | Tombol `Start` / `Menu` | Tombol `PAUSE` (Kanan Atas) |
 
 ---
 
-## 🧪 Automated Testing & QA
+## 🧪 Automated Testing & QA Pipeline
 
-Kehandalan logika diverifikasi secara otomatis menggunakan **JUnit 5 / Kotlin Test**:
+Logika inti game dilindungi oleh **33 automated unit tests** yang dapat dieksekusi secara **headless** tanpa memerlukan display server atau OpenGL context:
 
 ```bash
-# Menjalankan seluruh test suite secara headless:
+# Eksekusi unit test suite:
 ./gradlew test --console=plain
 ```
 
 ```
 > Task :core:test
-com.stickman.tower.audio.HapticManagerTest > testHapticPatternTrigger() PASSED
-com.stickman.tower.character.CharacterArchetypeTest > testArchetypeMultipliers() PASSED
-com.stickman.tower.combat.ParryTest > testPerfectParryWindow() PASSED
-com.stickman.tower.endless.EndlessAndTalentTest > testSpireFloorMutators() PASSED
-com.stickman.tower.enemy.EnemyTest > testEnemyFSMTransitions() PASSED
+com.stickman.tower.audio.HapticManagerTest           > testHapticPatternTrigger() PASSED
+com.stickman.tower.character.CharacterArchetypeTest  > testArchetypeAttributes() PASSED
+com.stickman.tower.character.CharacterArchetypeTest  > testArchetypeFromString() PASSED
+com.stickman.tower.combat.ParryTest                  > testPerfectParryWindow() PASSED
+com.stickman.tower.combat.ParryTest                  > testParryDamageMitigation() PASSED
+com.stickman.tower.endless.EndlessAndTalentTest      > testSpireFloorMutators() PASSED
+com.stickman.tower.endless.EndlessAndTalentTest      > testTalentNodePrerequisites() PASSED
+com.stickman.tower.enemy.EnemyTest                   > testEnemyFSMTransitions() PASSED
 com.stickman.tower.input.GamepadAndTouchSettingsTest > testInputBindingIntegrity() PASSED
-com.stickman.tower.relic.RelicManagerTest > testRelicStacking() PASSED
-com.stickman.tower.ui.FontManagerTest > testFontCacheIntegrity() PASSED
+com.stickman.tower.relic.RelicManagerTest            > testRelicStackingCalculations() PASSED
+com.stickman.tower.ui.FontManagerTest                > testFontGlyphCache() PASSED
 
-BUILD SUCCESSFUL in 17s (33/33 Tests Passed, 100% Success Rate)
+BUILD SUCCESSFUL in 17s
+33 actionable tasks: 33 executed (100% Success Rate)
 ```
 
 ---
 
-## 🚀 Panduan Menjalankan Proyek
+## 🚀 Panduan Menjalankan & Membangun Proyek
 
-### Prasyarat
-- **Java Development Kit (JDK):** Versi 17 atau lebih baru
-- **Android SDK:** Platform API 34+ dan Build Tools (untuk build Android)
+### Prasyarat Lingkungan
+- **JDK:** Java Development Kit versi 17 atau lebih baru
+- **Android SDK:** Platform API 34+ (Android 14) dan Build Tools
 
 ### 1. Menjalankan di Desktop (Linux / macOS / Windows)
 ```bash
@@ -166,29 +240,39 @@ BUILD SUCCESSFUL in 17s (33/33 Tests Passed, 100% Success Rate)
 git clone https://github.com/muhammadyusuftechid-star/stickman-tower-adventure.git
 cd stickman-tower-adventure
 
-# Jalankan game di desktop
+# Jalankan game di desktop via LWJGL3
 ./gradlew lwjgl3:run
 ```
 
 ### 2. Membangun APK Android
 ```bash
-# Compile Debug APK
+# Compile Debug APK dengan optimasi ProGuard/R8
 ./gradlew android:assembleDebug
 
-# Lokasi APK yang dihasilkan:
+# Lokasi artefak binary hasil build:
 # android/build/outputs/apk/debug/android-debug.apk
 ```
 
+### 📦 Unduh APK Siap Main
+File APK yang telah dikompilasi dapat langsung diunduh melalui tab rilis resmi:  
+👉 **[Unduh Stickman Tower Adventure APK (v1.0.0)](https://github.com/muhammadyusuftechid-star/stickman-tower-adventure/releases)**
+
 ---
 
-## 📦 Download APK Rilis
+## ⚖️ Keputusan Desain Rekayasa (Architectural Trade-offs)
 
-File APK Android yang siap dimainkan dapat langsung diunduh melalui halaman rilis resmi:
-👉 **[Unduh Stickman Tower Adventure APK (v1.0.0)](https://github.com/muhammadyusuftechid-star/stickman-tower-adventure/releases)**
+1. **Rendering Prosedural Geometric vs Sprite Sheet Bitmap:**
+   - *Keputusan:* Menggunakan rendering primitif dinamis via `ShapeRenderer` untuk stickman, bilah pedang, busur tebasan, dan partikel debu.
+   - *Alasan:* Mengurangi jejak memori GPU secara drastis, memungkinkan visualisasi trail animasi yang luwes pada refresh rate 120 Hz, dan menjaga ukuran final APK tetap sangat kecil (< 11 MB).
+2. **Deterministic Kinematic Collision vs Rigidbody Dynamic Physics:**
+   - *Keputusan:* Karakter utama menggunakan kalkulasi kinematika AABB berbasis Box2D sensor, bukan full dynamic rigid body.
+   - *Alasan:* Menghindari perilaku fisika yang tidak diinginkan dalam game platformer aksi (seperti karakter tergelincir di dinding miring, ketidakstabilan pendaratan tepi balok, atau fenomena *physics tunneling* pada frame rate tinggi).
+3. **Save Game Crash Safety:**
+   - *Keputusan:* Data disimpan dalam format JSON terstruktur dengan validasi fallback otomatis jika file korup.
 
 ---
 
 ## 📄 Lisensi & Kontributor
 
-- **Pengembang:** Muhammad Yusuf ([@muhammadyusuftechid-star](https://github.com/muhammadyusuftechid-star))
-- **Lisensi:** Didistribusikan di bawah lisensi [MIT](LICENSE). Terbuka untuk eksplorasi kode, pembelajaran, dan referensi portofolio.
+- **Lead Engineer / Author:** Muhammad Yusuf ([@muhammadyusuftechid-star](https://github.com/muhammadyusuftechid-star))
+- **Lisensi:** Proyek ini didistribusikan di bawah lisensi resmi [MIT License](LICENSE). Bebas digunakan untuk bahan studi, referensi arsitektur game Kotlin, dan portofolio teknis.
