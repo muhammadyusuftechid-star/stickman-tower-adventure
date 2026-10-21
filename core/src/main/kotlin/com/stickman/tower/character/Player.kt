@@ -75,7 +75,8 @@ class Player(
     private var dodgeTimer = 0f
     var dodgeCooldown = 0f
         private set
-    private val afterimages = mutableListOf<Vector2>()
+    private val afterimagePool = Array(4) { Vector2() }
+    private var afterimageCount = 0
 
     // Parameter Skill 1 (Dash Strike)
     var isSkillStriking = false
@@ -239,7 +240,7 @@ class Player(
             dodgeCooldown = DODGE_COOLDOWN * cooldownMultiplier
             attackPhase = AttackPhase.INACTIVE
             hitbox.reset()
-            afterimages.clear()
+            afterimageCount = 0
             // Berikan i-Frames kebal penuh selama dodge
             health.takeDamage(0f)
             AudioManager.playDodge()
@@ -338,14 +339,16 @@ class Player(
             velocity.x = dashDir * DODGE_SPEED
             velocity.y = 0f // Meluncur lurus
 
-            // Simpan jejak afterimage
-            if (afterimages.size < 4) {
-                afterimages.add(Vector2(position.x, position.y))
+            // Simpan jejak afterimage (Zero-allocation pool)
+            if (afterimageCount < afterimagePool.size) {
+                afterimagePool[afterimageCount].set(position.x, position.y)
+                afterimageCount++
             }
 
             if (dodgeTimer >= DODGE_DURATION) {
                 isDodging = false
                 velocity.x *= 0.3f
+                afterimageCount = 0
             }
             return
         }
@@ -554,6 +557,46 @@ class Player(
         ultimate.reset()
     }
 
+    /**
+     * Mereset status karakter secara lengkap saat respawn di checkpoint.
+     * Mengatur ulang HP, energi, bounds, hurtbox, dan membersihkan seluruh status tempur aktif.
+     */
+    fun respawn(spawnX: Float, spawnY: Float) {
+        position.set(spawnX, spawnY)
+        velocity.set(0f, 0f)
+        bounds.setPosition(spawnX, spawnY)
+        hurtbox.set(spawnX, spawnY, width, height)
+        hitbox.reset()
+
+        isGrounded = false
+        coyoteTimer = 0f
+        jumpBufferTimer = 0f
+        airJumpsRemaining = maxAirJumps
+
+        isDodging = false
+        dodgeTimer = 0f
+        dodgeCooldown = 0f
+        afterimageCount = 0
+
+        isSkillStriking = false
+        skillTimer = 0f
+
+        isUlting = false
+        ultTimer = 0f
+
+        attackPhase = AttackPhase.INACTIVE
+        attackTimer = 0f
+        comboManager.resetToHit1()
+
+        hasParryBuff = false
+        parryBuffTimer = 0f
+        undyingWillUsed = false
+
+        health.maxHp = stats.maxHp
+        health.reset()
+        ultimate.reset()
+    }
+
     fun render(shapeRenderer: ShapeRenderer) {
         val centerX = position.x + width / 2f
         val footY = position.y
@@ -564,9 +607,10 @@ class Player(
         val shoulderY = neckY - 0.15f
         val lookDir = if (facingRight) 1f else -1f
 
-        // 1. Gambar Afterimages (Jejak Bayangan saat Dodge Roll)
+        // 1. Gambar Afterimages (Jejak Bayangan saat Dodge Roll - Zero Allocation)
         if (isDodging) {
-            for ((idx, ghost) in afterimages.withIndex()) {
+            for (idx in 0 until afterimageCount) {
+                val ghost = afterimagePool[idx]
                 val alpha = (0.2f * (idx + 1)).coerceIn(0.1f, 0.6f)
                 val ghostColor = if (isParrying) Color(1f, 0.9f, 0.3f, alpha) else Color(0.3f, 0.7f, 1f, alpha)
                 shapeRenderer.color = ghostColor

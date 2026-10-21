@@ -113,6 +113,7 @@ class Enemy(
                 val proj = it.next()
                 proj.update(delta)
                 for (platform in platforms) {
+                    if (platform.isOneWay) continue // Proyektil panah melesat menembus platform one-way
                     if (!proj.isDestroyed && proj.bounds.overlaps(platform.bounds)) {
                         proj.isDestroyed = true
                         break
@@ -325,6 +326,8 @@ class Enemy(
         bounds.setPosition(position.x, position.y)
 
         for (platform in platforms) {
+            if (platform.isOneWay) continue // Abaikan tabrakan horizontal pada One-Way Platform
+
             if (bounds.overlaps(platform.bounds)) {
                 if (velocity.x > 0f) {
                     position.x = platform.left - width
@@ -339,11 +342,25 @@ class Enemy(
         }
 
         // Sumbu Y
+        val previousY = position.y
         isGrounded = false
         position.y += velocity.y * delta
         bounds.setPosition(position.x, position.y)
 
         for (platform in platforms) {
+            if (platform.isOneWay) {
+                // Hanya mendarat jika sedang jatuh dari atas platform
+                if (velocity.y <= 0f && previousY >= platform.top - 0.20f) {
+                    if (bounds.overlaps(platform.bounds)) {
+                        position.y = platform.top
+                        velocity.y = 0f
+                        isGrounded = true
+                        bounds.setPosition(position.x, position.y)
+                    }
+                }
+                continue
+            }
+
             if (bounds.overlaps(platform.bounds)) {
                 if (velocity.y <= 0f) {
                     position.y = platform.top

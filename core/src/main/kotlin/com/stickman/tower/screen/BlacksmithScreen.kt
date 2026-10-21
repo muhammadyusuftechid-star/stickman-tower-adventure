@@ -372,7 +372,7 @@ class BlacksmithScreen(private val game: StickmanGame) : Screen {
     }
 
     private fun onUpgradeSuccess(message: String) {
-        saveData = stats.toSaveData(saveData.highestTowerFloor, saveData.selectedArchetype)
+        saveData = stats.applyToSaveData(saveData)
         SaveManager.save(saveData)
 
         hammerImpactFlash = 1.0f

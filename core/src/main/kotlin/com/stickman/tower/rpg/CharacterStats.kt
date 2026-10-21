@@ -107,17 +107,38 @@ class CharacterStats(
         return Pair(finalDmg, isCrit)
     }
 
-    fun toSaveData(highestFloor: Int = 1, selectedArchetype: String = "BALANCED"): SaveData {
+    fun toSaveData(
+        highestFloor: Int = 1,
+        selectedArchetype: String = "BALANCED",
+        selectedSubClass: String = "BERSERKER",
+        unlockedCharacters: List<String> = listOf("STICKMAN_SWORD")
+    ): SaveData {
         return SaveData(
             playerLevel = level,
             currentExp = currentExp,
             gold = gold,
             highestTowerFloor = highestFloor,
             selectedArchetype = selectedArchetype,
+            selectedSubClass = selectedSubClass,
+            unlockedCharacters = ArrayList(unlockedCharacters),
             weaponAtkLevel = weaponAtkLevel,
             weaponCritLevel = weaponCritLevel,
             weaponSpdLevel = weaponSpdLevel
         )
+    }
+
+    /**
+     * Memperbarui data RPG pada objek SaveData yang sudah ada tanpa menimpa data sub-class atau karakter terbuka.
+     */
+    fun applyToSaveData(existing: SaveData): SaveData {
+        return existing.apply {
+            playerLevel = level
+            currentExp = this@CharacterStats.currentExp
+            gold = this@CharacterStats.gold
+            weaponAtkLevel = this@CharacterStats.weaponAtkLevel
+            weaponCritLevel = this@CharacterStats.weaponCritLevel
+            weaponSpdLevel = this@CharacterStats.weaponSpdLevel
+        }
     }
 
     fun loadFromSaveData(data: SaveData) {

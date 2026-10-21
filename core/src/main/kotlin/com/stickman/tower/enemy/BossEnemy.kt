@@ -78,6 +78,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
     }
 
     val projectiles = mutableListOf<Projectile>()
+    private var hasFiredWindSlash = false
 
     companion object {
         const val BASE_SPEED = 3.2f
@@ -104,6 +105,13 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
         while (it.hasNext()) {
             val p = it.next()
             p.update(delta)
+            for (platform in platforms) {
+                if (platform.isOneWay) continue // Proyektil angin bos menembus platform one-way
+                if (!p.isDestroyed && p.bounds.overlaps(platform.bounds)) {
+                    p.isDestroyed = true
+                    break
+                }
+            }
             if (p.isDestroyed) it.remove()
         }
 
@@ -166,6 +174,7 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
                         // Fase 2: Luncurkan Wind Slash dari Jarak Jauh
                         state = BossState.WIND_SLASH
                         actionTimer = 0f
+                        hasFiredWindSlash = false
                         velocity.x = 0f
                     } else if (absDist > 3.0f && MathUtils.randomBoolean(0.5f)) {
                         // Ground Slam Melompat Menghantam Tanah
@@ -246,7 +255,8 @@ class BossEnemy(spawnX: Float = 14f, spawnY: Float = 2.5f) {
             BossState.WIND_SLASH -> {
                 actionTimer += delta
                 velocity.x = 0f
-                if (actionTimer >= 0.25f && projectiles.isEmpty()) {
+                if (actionTimer >= 0.25f && !hasFiredWindSlash) {
+                    hasFiredWindSlash = true
                     // Tembakkan Proyektil Wind Slash ke Arah Pemain
                     val projVx = if (facingRight) 14f else -14f
                     val projStartX = if (facingRight) position.x + width else position.x - 0.8f

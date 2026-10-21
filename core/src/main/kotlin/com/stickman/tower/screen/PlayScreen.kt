@@ -239,7 +239,10 @@ class PlayScreen(
 
     private fun triggerSave(reason: String, highestFloor: Int = currentFloorNumber) {
         val saveFloor = kotlin.math.max(saveData.highestTowerFloor, highestFloor)
-        SaveManager.save(player.stats.toSaveData(highestFloor = saveFloor, selectedArchetype = archetype.name))
+        saveData.highestTowerFloor = saveFloor
+        saveData.selectedArchetype = archetype.name
+        val updatedSave = player.stats.applyToSaveData(saveData)
+        SaveManager.save(updatedSave)
         saveNotificationText = "Progress Tersimpan ($reason)"
         saveNotificationTimer = 2.5f
     }
@@ -399,6 +402,11 @@ class PlayScreen(
             val activeInput = if (isBossIntroActive) noInput else input
             player.update(updateDelta, activeInput, currentFloor.platforms)
             particleManager.update(updateDelta)
+
+            // Cek Batas Jurang / Out of Bounds (Mencegah karakter jatuh ke jurang hampa tanpa batas)
+            if (player.position.y < currentFloor.mapBounds.y - 3.5f && !player.health.isDead) {
+                player.health.takeDamage(9999f)
+            }
 
             // Cek Rintangan Duri Lantai (Spikes)
             for (spike in currentFloor.spikes) {
@@ -1044,9 +1052,12 @@ class PlayScreen(
             }
 
             if (keyRespawn || touchRespawn) {
-                player.position.set(activeCheckpointPos.x, activeCheckpointPos.y)
-                player.velocity.set(0f, 0f)
-                player.resetToStats()
+                player.respawn(activeCheckpointPos.x, activeCheckpointPos.y)
+                currentFloor.boss?.let { b ->
+                    if (!b.health.isDead) {
+                        b.projectiles.clear()
+                    }
+                }
                 gameStatus = GameStatus.PLAYING
                 AudioManager.playSlashLight()
             }
