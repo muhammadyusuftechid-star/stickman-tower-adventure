@@ -10,4 +10,7 @@ interface GameInput {
     fun isJumpJustPressed(): Boolean
     fun isJumpPressed(): Boolean
     fun isAttackJustPressed(): Boolean
+    fun isDodgeJustPressed(): Boolean
+    fun isSkillJustPressed(): Boolean
+    fun isUltimateJustPressed(): Boolean
 }

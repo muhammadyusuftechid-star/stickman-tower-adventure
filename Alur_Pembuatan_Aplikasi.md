@@ -191,38 +191,38 @@ flowchart LR
 
 #### Modul 4.1: Sistem Serangan Combo (3-Hit Combo Chain)
 - **Task 4.1.1: Buffer Input & Combo Window Timer**
-  - [ ] Buat `ComboManager.kt` dengan state: `ATTACK_1`, `ATTACK_2`, `ATTACK_3`.
-  - [ ] Buat timer *combo window* (misal: 0.3 detik setelah hit selesai): jika tombol serang ditekan sebelum timer habis, sambung ke attack berikutnya.
-  - [ ] Konfigurasikan pukulan ke-3 memiliki damage terbesar dan knockback lebih jauh.
+  - [x] Buat `ComboManager.kt` dengan state: `ATTACK_1`, `ATTACK_2`, `ATTACK_3`.
+  - [x] Buat timer *combo window* (misal: 0.3 detik setelah hit selesai): jika tombol serang ditekan sebelum timer habis, sambung ke attack berikutnya.
+  - [x] Konfigurasikan pukulan ke-3 memiliki damage terbesar dan knockback lebih jauh.
 
 #### Modul 4.2: Mekanik Dash / Dodge (Menghindar)
 - **Task 4.2.1: Dodge Roll / Dash Kinematics**
-  - [ ] Berikan dorongan kecepatan horizontal tinggi instan selama 0.2 detik.
-  - [ ] Aktifkan status `isInvulnerable = true` (kebal damage) selama durasi dodge.
-  - [ ] Berikan cooldown singkat (misal: 0.6 detik) agar pemain tidak melakukan *spam* dodge tanpa batas.
+  - [x] Berikan dorongan kecepatan horizontal tinggi instan selama 0.2 detik.
+  - [x] Aktifkan status `isInvulnerable = true` (kebal damage) selama durasi dodge.
+  - [x] Berikan cooldown singkat (misal: 0.6 detik) agar pemain tidak melakukan *spam* dodge tanpa batas.
 
 #### Modul 4.3: Hybrid Skill System (Cooldown + Ultimate Energy)
 - **Task 4.3.1: Skill Biasa (Cooldown-Based)**
-  - [ ] Buat class `Skill.kt` dengan properti `cooldownTime` dan `remainingCooldown`.
-  - [ ] Implementasikan Skill 1: Serangan tebasan meluncur (*Dash Strike* / AoE).
-  - [ ] Buat logika aktivasi: jika cooldown == 0, aktifkan skill dan set cooldown timer.
+  - [x] Buat class `Skill.kt` dengan properti `cooldownTime` dan `remainingCooldown`.
+  - [x] Implementasikan Skill 1: Serangan tebasan meluncur (*Dash Strike* / AoE).
+  - [x] Buat logika aktivasi: jika cooldown == 0, aktifkan skill dan set cooldown timer.
 - **Task 4.3.2: Ultimate Skill (Energy-Based)**
-  - [ ] Buat komponen `UltimateEnergy.kt` (`currentEnergy`, `maxEnergy = 100`).
-  - [ ] Tambahkan akumulasi energi: setiap serangan dasar atau combo yang berhasil mendarat menambah +5 hingga +10 energi.
-  - [ ] Tombol ultimate hanya aktif saat energi mencapai 100%.
-  - [ ] Saat aktif: luncurkan serangan dahsyat berarea luas, kurangi energi menjadi 0.
+  - [x] Buat komponen `UltimateEnergy.kt` (`currentEnergy`, `maxEnergy = 100`).
+  - [x] Tambahkan akumulasi energi: setiap serangan dasar atau combo yang berhasil mendarat menambah +5 hingga +10 energi.
+  - [x] Tombol ultimate hanya aktif saat energi mencapai 100%.
+  - [x] Saat aktif: luncurkan serangan dahsyat berarea luas, kurangi energi menjadi 0.
 
 #### Modul 4.4: On-Screen Touch Controls (Virtual Buttons Android)
 - **Task 4.4.1: Virtual D-Pad / Touch Buttons**
-  - [ ] Gunakan `Touchpad` bawaan libGDX (scene2d.ui) untuk analog kiri-kanan ATAU buat dua tombol sentuh panah Kiri dan Kanan.
-  - [ ] Buat tombol aksi di sisi kanan layar:
+  - [x] Gunakan `Touchpad` bawaan libGDX (scene2d.ui) untuk analog kiri-kanan ATAU buat dua tombol sentuh panah Kiri dan Kanan (`VirtualController.kt`).
+  - [x] Buat tombol aksi di sisi kanan layar:
     - Tombol `Attack` (ukuran terbesar)
     - Tombol `Jump`
     - Tombol `Dodge`
     - Tombol `Skill 1` (dengan overlay lingkaran cooldown)
     - Tombol `Ultimate` (dengan indikator glow/nyala saat energi penuh)
 - **Task 4.4.2: Dual-Input Layer Abstraction**
-  - [ ] Integrasikan `InputProcessor` sehingga sistem membaca input dari keyboard (desktop) dan tombol layar (Android) tanpa mengubah logika karakter `Player.kt`.
+  - [x] Integrasikan `InputProcessor` sehingga sistem membaca input dari keyboard (desktop) dan tombol layar (Android) tanpa mengubah logika karakter `Player.kt` (`CompositeInput.kt`).
 
 ---
 
