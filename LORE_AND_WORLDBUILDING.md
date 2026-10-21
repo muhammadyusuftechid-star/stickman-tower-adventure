@@ -960,7 +960,105 @@ Perburuan varian monster mutasi langka yang berkeliaran di lantai menara:
 
 ---
 
-*Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Quest Designer, Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+## ⏳ BAGIAN 19: KRONOLOGI GARIS WAKTU LENGKAP AETHELGARD (THE GRAND CHRONOLOGY)
+
+*Garis waktu resmi sejarah semesta Aethelgard, terbagi ke dalam empat era kosmis agung yang dipelihara oleh para pencatat Ordo Calligraphica.*
+
+```
+[ERA I: PRISMATIC DAWN] ──────> [ERA II: THE INKING] ──────> [ERA III: SILENT AGE] ──────> [ERA IV: MARKED AWAKENING]
+Tahun Purba s/d Thn 0           Tahun 1 s/d Thn 50          Tahun 51 s/d Thn 450         Tahun 451 / Era Sekarang
+Keemasan Warna & Bangsa         Kataklisme Reduksi Garis     Gugurnya Ekspedisi & Menara  Patahnya Pena & Endless Loop
+```
+
+### 19.1 Era I: Fajar Penuh Spektrum (*The Prismatic Dawn — Pra-Tahun 0*)
+* **Tahun Purba -5000:** Para Dewan Calligrapher membentangkan *The Cosmic Parchment*. Tiga zat esensial pertama—Cahaya Merah Vitalitas, Biru Ketenangan, dan Emas Kesadaran—ditiupkan ke tanah Aethelgard. Makhluk biologis fana pertama lahir dari pertemuan pigmen kosmis.
+* **Tahun Purba -2400:** Berdirinya **Tiga Kerajaan Warna Agung**:
+  1. *Kekaisaran Solaria:* Bangsa kesatria marmer putih yang memuja matahari keemasan.
+  2. *Republik Amethyst:* Pusat ilmu pengetahuan dan alkimia kaca kristal ungu yang meneliti rahasia energi partikel.
+  3. *Konfederasi Paron Vulcanus:* Serikat pandai besi bawah tanah yang menguasai seni penempaan baja meteorit bintang jatuh.
+* **Tahun Purba -300:** *The Great Discordance (Perselisihan Spektrum)*. Manusia mulai memanipulasi warna untuk memicu perang saudara. Alkemis Amethyst hampir merumuskan rahasia *The Golden Anima* (keabadian tanpa izin dewa). Para Calligrapher menganggap keanekaragaman warna telah menodai kesucian kanvas.
+
+### 19.2 Era II: Kataklisme Tinta Agung (*The Great Inking — Tahun 1 s/d 50*)
+* **Tahun 1 (Malam Tanpa Fajar):** The Grand Calligrapher menumpahkan cawan Tinta Primordial. Warna dihisap lenyap dalam satu malam. Daging biologis manusia terlarut; organ dalam dan wajah terkikis menjadi garis hitam murni. Kelahiran Kaum Siluet (*The Stickmen*).
+* **Tahun 3:** Penanaman pasak gravitasi tektonik ($g = -28.0\text{ m/s}^2$) dari langit ke tanah. Fenomena mematikan *The Dissolution (Penyusutan Jiwa)* mulai memakan korban: ribuan siluet yang diam di tanah mencair kembali menjadi genangan tinta hitam mati.
+* **Tahun 12:** Kaum Siluet mendirikan doktrin bela diri *"Bilah Sebelum Nafas"*. Pangeran Valtheor dari Solaria menolak larut dan memimpin pasukannya meminum tinta darah demi keabadian, memicu mutasi kuil gerhana di lantai 9.
+* **Tahun 35:** Berdirinya **The Obsidian Spire (Menara Bayang)** setinggi 10 tingkat kosmis oleh para pelayan dewa untuk mengunci sisa-sisa pigmen warna di luar jangkauan kaum siluet.
+
+### 19.3 Era III: Abad Kehampaan & Ekspedisi Terkutuk (*The Silent Age — Tahun 51 s/d 450*)
+* **Tahun 110:** *Ekspedisi Legiun Pertama*. Kapten Valerius memimpin 100 prajurit elit menyerbu gerbang bawah menara. Mereka tertahan di Lantai 1 dan 2 akibat jurang duri; Valerius gugur seraya memahatkan *Tablet I*.
+* **Tahun 220:** Jenderal Oakhaven, pahlawan Solaria yang tersisa, mengambil sumpah abadi di Lantai 3 untuk menjadi penjaga gerbang benteng bawah, memastikan hanya pendekar dengan tekad baja yang diizinkan mendaki ke lantai atas.
+* **Tahun 310:** Cendekiawan Amethyst menyegel diri di Lantai 4 (*The Sunken Archives*). Eksperimen vaksin penawar tinta gagal dan bermutasi menjadi racun *Toxic Miasma*. Ratu Busur Amethyst menguasai kawah alkimia Lantai 5.
+* **Tahun 400:** Vulcanus membarikade bengkel tempanya di Lantai 6 (*The Iron Foundry*), menyalakan api tungku meteorit emas sebagai satu-satunya suaka peristirahatan aman di dalam menara.
+* **Tahun 449:** Jiwa Aria terlepas dari tubuhnya yang larut, bermutasi menjadi *Gema Cahaya Terakhir* yang mengembara di kaki menara menanti kedatangan sang pendekar takdir.
+
+### 19.4 Era IV: Kebangkitan Siluet Bernisan (*The Marked Awakening — Tahun 451 / Masa Kini*)
+* **Tahun 451 (Hari Ini):** Kaelen The Bladeweaver terbangun di kaki menara dengan tanda rune emas menyala di dadanya.
+* **Kampanye 10 Lantai:** Kaelen menumbangkan Jenderal Oakhaven, Amethyst Matron, menolak keraguan Doppelgänger, menumpas Crimson Sovereign, dan tiba di hadapan The Grand Calligrapher.
+* **Patahnya Pena Semesta:** *The Primordial Stylus* hancur terbelah dua. Warna meledak kembali ke langit semesta Aethelgard.
+* **Terbukanya Paradoks Endless Spire:** Hancurnya poros dewa memicu *The Temporal Fracture* (pecahnya garis waktu), mengubah Lantai 11 ke atas menjadi lingkaran waktu tanpa batas (*Infinite Time-Loop*) tempat para pejuang siluet bertarung abadi menjaga keseimbangan semesta.
+
+---
+
+## 🏛️ BAGIAN 20: GEOPOLITIK PURBA, FAKSI & ORDO TERLUPAKAN (ANCIENT FACTIONS)
+
+```
+                       [STRUKTUR FRAKSI KANONIKAL AETHELGARD]
+                                         │
+        ┌────────────────────────────────┼────────────────────────────────┐
+        ▼                                ▼                                ▼
+[ORDO CALLIGRAPHICA]            [LEGIUN BENTENG BAWAH]          [PERSAUDARAAN PARON]
+Penjaga Pena & Kanvas           Ksatria Sumpah Mati (Oakhaven)  Pandai Besi Surya (Vulcanus)
+Hukum Mutlak Monokrom           Pelindung Gerbang Bawah         Penempa Logam Meteorit
+```
+
+### 20.1 Ordo Calligraphica (*Para Penjaga Pena & Kanvas*)
+* **Doktrin Faksi:** *"Kanvas yang sunyi adalah kesempurnaan mutlak; warna adalah noda ego fana."*
+* **Struktur & Anggota:** Entitas bayangan dimensi tinggi yang mengenakan jubah jalinan galaksi malam. Bertindak sebagai algojo kehendak para dewa di puncak menara. Merekalah yang mengatur mutasi lingkungan *Toxic Miasma*, *Low Gravity*, dan *Berserk Surge*.
+* **Sikap Terhadap Pemain:** Menganggap protagonis sebagai "setitik tinta kotor yang merayap di atas meja kerja tuannya" dan berupaya menghapus eksistensi pemain melalui proyektil sabit kosmis.
+
+### 20.2 Legiun Benteng Bawah (*The Lower Bastion Vanguard*)
+* **Doktrin Faksi:** *"Baja kita tumpul oleh waktu, namun sumpah kehormatan ksatria takkan pernah terhapus."*
+* **Tokoh Utama:** Jenderal Oakhaven, Kapten Valerius, Mayor Thorne.
+* **Sejarah:** Sisa-sisa divisi militer Kerajaan Solaria yang selamat dari kataklisme. Mereka memilih mengorbankan akal budi biologis demi mempertahankan postur tubuh garis yang kokoh dan menjaga gerbang masuk menara.
+
+### 20.3 Kultus Alkimia Kaca Amethyst (*The Weavers of the Sunken Glass*)
+* **Doktrin Faksi:** *"Jika dewa mencuri warna dari darah kita, maka kita akan menciptakan racun ungu dari kristal mereka sendiri."*
+* **Tokoh Utama:** The Amethyst Matron, Peneliti Tertua Vael.
+* **Karakteristik:** Sarjana dan pemanah yang mengisolasi diri di Lantai 4 dan 5. Mengembangkan taktik pertempuran jarak jauh, perangkap gas beracun, dan busur kaca tembus pandang.
+
+### 20.4 Persaudaraan Paron Abadi (*The Anvil Brotherhood*)
+* **Doktrin Faksi:** *"Api tungku adalah darah matahari; palu godam adalah detak jantung kita."*
+* **Tokoh Utama:** Vulcanus Sang Penempa Jiwa.
+* **Peran Dunia:** Menyediakan perlindungan bagi para pendaki yang selamat di Lantai 6. Mengumpulkan kepingan Pecahan Aethel (emas) dan menempa ulang senjata siluet agar memiliki resonansi kinetik yang sanggup merobek kanvas para dewa.
+
+### 20.5 Sekte Gesso Kuno (*The Cult of the Blank Canvas*)
+* **Doktrin Faksi:** *"Hapus seluruh garis, ratakan seluruh relief; biarkan putih mutlak menelan semesta."*
+* **Karakteristik Faksi Rahasia:** Kelompok nihilistik garis keras yang meyakini bahwa bahkan wujud siluet stickman pun masih merupakan bentuk eksistensi yang berdosa. Merekalah yang memasang jebakan duri obsidian di Lantai 2 dan 7 untuk mempercepat pelarutan jiwa saudara-saudara mereka.
+
+---
+
+## ⚛️ BAGIAN 21: METAFISIKA ANIMA, ALKIMIA TINTA & GEOGRAFI LUAR (METAPHYSICS)
+
+### 21.1 Struktur & Anatomi Tubuh Siluet (Anatomy of the Inked Form)
+Tubuh seorang pejuang stickman pasca-kataklisme bukanlah daging berdaging tipis, melainkan struktur fisik yang menakjubkan:
+1. **The Inked Hull (Garis Siluet Luar):** Lapisan terluar tersusun dari *Tinta Primordial Terkompresi* dengan kerapatan molekuler ekstrem ($1.850\text{ kg/m}^3$). Tidak memiliki pori-pori kulit, pembuluh darah, atau persendian rapuh. Mampu menyerap benturan kinetik hingga ribuan joule.
+2. **The Anima Core (Inti Jiwa Bersinar):** Terletak tepat di tengah rongga dada siluet. Berwujud pendaran cahaya putih-keemasan seukuran kepalan tangan yang berputar pada frekuensi tinggi. Inti inilah yang memproyeksikan gaya elektromagnetik untuk mengikat garis-garis tubuh stickman agar tidak mencair.
+3. **The Dissolution Boundary (Batas Pelarutan):** Jika energi kinetik habis (berdiam diri di tanah tanpa bertarung) atau HP mencapai 0, ikatan medan Anima Core putus. Garis siluet luruh menjadi genangan cairan hidrokarbon hitam dingin (*Dead Dross*).
+
+### 21.2 Mekanika Kinetik Hitstop & Resonansi Bilah (The Physics of the Parry)
+* **Hitstop Micro-Freeze (80 Milidetik):** Bukan jeda buatan, melainkan fenomena fisika in-universe: saat dua bilah baja meteorit bertumbukan tepat pada sudut $90^\circ$ di bawah momentum tinggi, tegangan permukaan Tinta Primordial di sekitar area kontak mengalami *Quantum Solidification* sesaat. Waktu lokal melambat hingga gravitasi terhenti selama 0.08 detik.
+* **Lifesteal Alchemical Exchange:** Tinta darah pada relik *Vampiric Fang* bekerja melalui osmosis kinetik: luka yang dirobek pada musuh melepaskan partikel *Anima bebas* yang langsung tertarik oleh medan magnetis Anima Core pemain.
+
+### 21.3 Geografi Dunia Luar Menara (*The Desolation of Outer Aethelgard*)
+Apa yang terbentang di luar The Obsidian Spire?
+* **The Dead Parchment Plains (Hamparan Kertas Kering):** Padang pasir putih pucat sejauh mata memandang di sekeliling kaki menara. Dahulu merupakan ladang gandum Solaria yang subur, kini membeku menjadi lapisan selulosa putih tanpa kehidupan rumput sehelai pun.
+* **The Lake of Stagnant Ink (Danau Tinta Mati):** Samudra hitam pekat di barat daya menara tempat berkumpulnya sisa-sisa miliaran makhluk biologis yang larut saat kataklisme. Dari danau ini, uap dingin naik membentuk awan hitam pekat tanpa hujan air.
+* **The Celestial Spire Axis:** Menara Bayang adalah satu-satunya struktur vertikal yang berdiri di seluruh semesta Aethelgard, bertindak sebagai paku raksasa yang menahan kanvas langit agar tidak runtuh menimpa tanah.
+
+---
+
+*Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Loremaster, Quest Designer, Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+
 
 
 

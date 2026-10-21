@@ -412,6 +412,84 @@ Papan pengumuman obsidian di dekat tungku tempa yang menerbitkan kontrak harian:
 
 ---
 
+## 🏛️ 15. Pedoman Penceritaan Lingkungan & Arsitektur Menara (Environmental Storytelling)
+
+Untuk menjamin bahwa setiap level bukan sekadar tumpukan balok platforming mekanis melainkan situs sejarah peradaban yang bernyawa, Level Designer wajib menerapkan pedoman visual dan penempatan prop berikut:
+
+```
+                  [ARSITEKTUR VERTIKAL MENARA DARI BAWAH KE ATAS]
+┌───────────────┬───────────────────────────┬─────────────────────────────────────────────────┐
+│ Babak Menara  │ Palet Visual & Tekstur    │ Prop & Elemen Penceritaan Lingkungan            │
+├───────────────┼───────────────────────────┼─────────────────────────────────────────────────┤
+│ Act I (L1-3)  │ Abu-abu Obsidian & Karat  │ Rantai putus raksasa, patung Solaria terpenggal,│
+│               │ Duri Hitam Lancip         │ genangan noda tinta mati, prasasti batu nisan.  │
+├───────────────┼───────────────────────────┼─────────────────────────────────────────────────┤
+│ Act II (L4-6) │ Ungu Gelap & Jingga Tempa │ Rak buku kaca retak, tabung alkimia bocor,      │
+│               │ Kristal Amethyst Transparan│ paron meteorit raksasa, bara api emas berhamburan│
+├───────────────┼───────────────────────────┼─────────────────────────────────────────────────┤
+│ Act III (L7-9)│ Hitam Indigo & Merah Darah│ Dinding robek berlubang ke jurang kosmis hampa, │
+│               │ Bebatuan Melayang Astral  │ altar marmer berlumur darah, gerhana bulan merah│
+├───────────────┼───────────────────────────┼─────────────────────────────────────────────────┤
+│ Act IV (L10)  │ Putih Marmer Primordial   │ Platform putih tanpa retakan, kuas emas raksasa │
+│               │ Nirbatas Monokrom         │ membeku di udara, samudra tinta kosmis di bawah │
+└───────────────┴───────────────────────────┴─────────────────────────────────────────────────┘
+```
+
+### 15.1 Hierarki Penceritaan Visual (Visual Narrative Hierarchy)
+1. **Latar Belakang (Layer Background Parallax):** Menampilkan siluet reruntuhan kota marmer masa lalu di lantai bawah yang perlahan berganti menjadi pemandangan jurang bintang mati dan angkasa hampa saat mendaki ke atas.
+2. **Platform & Rintangan (Midground Gameplay):** Kerapatan materi platform merefleksikan usia geologis menara: balok batu kasar berlumut hitam di Lantai 1, kristal kaca ungu tipis di Lantai 4, batuan mengambang melayang di Lantai 7, dan marmer suci putih sempurna di Lantai 10.
+3. **Pencahayaan & Atmosfer Partikel (Foreground Lighting):** Partikel kabut hitam debu tinta di Lantai 1-2, uap racun hijau-ungu di Lantai 5, percikan api tempa di Lantai 6, dan kilatan neon keemasan saat memicu checkpoint prasasti gema.
+
+---
+
+## ⚖️ 16. Matriks Konsistensi Kanon Sistem Permainan (System-to-Lore Cohesion Rules)
+
+Setiap parameter gameplay, formula numerik, dan batasan mekanik memiliki pembenaran ontologis yang tidak terbantahkan di dalam fiksi Aethelgard:
+
+| Mekanik Teknis Game | Parameter Sistem | Penjelasan Ontologis Kanonikal (Loremaster Mandate) |
+| :--- | :--- | :--- |
+| **Batas Tinggi Lompat** | $H_{jump} \approx 2.36 - 2.65$m | Pasak gravitasi tektonik Calligrapher ($g = -28.0\text{ m/s}^2$) menekan siluet agar tidak terbang bebas. |
+| **Jendela Perfect Parry**| 120 milidetik (7 frame) | Frekuensi resonansi alami baja meteorit saat memicu pemadatan kuantum tegangan permukaan tinta. |
+| **Hitstop Micro-Freeze** | 80 milidetik | Waktu lokal membeku sesaat di sekitar titik benturan akibat pelepasan energi kinetik murni tanpa perantara massa biologis. |
+| **Dodge Roll I-Frames** | 200 milidetik invulnerable| Karakter mengurai kerapatan garis siluetnya sesaat (*Phase Shift*) sehingga proyektil dan tebasan menembus kehampaan. |
+| **EXP Level-up Curve** | $\text{EXP} = \lfloor 50 \times L^{1.4} \rfloor$ | Semakin tebal garis siluet, semakin banyak energi rekoleksi memori masa lalu yang dibutuhkan untuk memadatkan inti jiwa. |
+| **Endless Spire Mutator**| Toxic, Low Grav, Berserk | Pecahnya *The Primordial Stylus* merobek tatanan hukum fisika menara menjadi paradoks dimensi yang berputar tanpa kendali. |
+| **Save Checksum FNV-1a**| 64-bit Salted Hash | "Segel Takdir" spiritual yang memastikan catatan jiwa pengelana tidak dirusak oleh korupsi tinta liar. |
+
+---
+
+## 📚 17. Spesifikasi Teknis Sistem Story Codex (Interactive Story Codex Architecture)
+
+Diimplementasikan pada [StoryCodexScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/StoryCodexScreen.kt), fitur ini bertindak sebagai ensiklopedia interaktif in-game yang dibuka setelah pemain mengalahkan The Grand Calligrapher di Lantai 10:
+
+```
+[TAMAT LANTAI 10] ──> [FLAG UNLOCKED DI SAVEDATA] ──> [STORY CODEX SCREEN TERBUKA DI MAIN MENU]
+                                                                  │
+              ┌───────────────────────────────────────────────────┼───────────────────────────────────────────────────┐
+              ▼                                                   ▼                                                   ▼
+     [9 BAB KANONIKAL]                                   [PAGINASI PER HALAMAN]                              [SISTEM AUDIO BARK]
+  Prolog s/d Epilog Endless                           Tipografi FreeType Lembut                           Denting Lonceng & Haptik
+```
+
+### 17.1 Struktur Data & Navigasi 9 Bab Kanonikal
+* **Bab 0:** Prolog & Kosmologi Aethelgard (*Zaman Keemasan, The Great Inking, Kutukan Gravitasi*).
+* **Bab 1:** Babak I: Ujian Inisiasi (*Benteng Bawah & Duel Kehormatan Jenderal Oakhaven*).
+* **Bab 2:** Babak II: Rahasia Kaca Hitam (*Arsip Tenggelam & Kawah Racun Ratu Busur Amethyst*).
+* **Bab 3:** Babak II: Suaka Penempa Logam (*Tungku Api Emas Vulcanus & Rahasia Besi Meteorit*).
+* **Bab 4:** Babak III: Pendakian Astral (*Tebing Angkasa Retak & Anomali Gravitasi Rendah*).
+* **Bab 5:** Babak III: Balairung Cermin Bayang (*Konfrontasi Melawan The Shadow Doppelgänger*).
+* **Bab 6:** Babak III: Kuil Gerhana Darah (*Tragedi Pangeran Belati Darah The Crimson Sovereign*).
+* **Bab 7:** Babak IV: Puncak Kanvas Takdir (*Konfrontasi Pamungkas Melawan The Grand Calligrapher*).
+* **Bab 8:** Epilog & Paradoks Abadi (*Patahnya Pena Semesta & Terbukanya Endless Spire*).
+
+### 17.2 Spesifikasi Teknis Rendering & Tipografi
+* **Viewport Adaptif:** FitViewport $1280 \times 720$ yang diskalakan secara presisi untuk semua rasio layar smartphone (16:9, 18:9, 20:9).
+* **Tipografi Lembut Anti-Aliased:** Font FreeType definisi tinggi [FontManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/ui/FontManager.kt) dengan perataan teks kiri-kanan (*word wrap* pada lebar 780px).
+* **Audio & Haptic Feedback:** Efek audio denting lonceng emas (*Parry Bell SFX*) saat membalik bab, dan getaran haptic mikro 25ms di perangkat Android untuk memberikan sensasi fisik membuka lembaran kitab kuno.
+
+---
+
 *Dokumen Game Design Document (GDD) v1.0 ini merupakan spesifikasi desain resmi dan kanon final untuk pengembangan dan produksi game **Stickman Tower Adventure**.*
+
 
 
