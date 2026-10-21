@@ -11,8 +11,10 @@ class AndroidLauncher : AndroidApplication() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initialize(StickmanGame(), AndroidApplicationConfiguration().apply {
-            // Configure your application here.
-            useImmersiveMode = true // Recommended, but not required.
+            useImmersiveMode = true
+            useWakelock = true
+            useAccelerometer = false
+            useCompass = false
         })
     }
 }

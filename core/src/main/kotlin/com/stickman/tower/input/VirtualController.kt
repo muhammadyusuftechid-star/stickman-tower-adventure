@@ -208,7 +208,8 @@ class VirtualController : GameInput {
             font.draw(batch, "SKILL", btnSkill.x - 18f, btnSkill.y + 6f)
         } else {
             font.color = Color.YELLOW
-            font.draw(batch, String.format("%.1fs", skill.remainingCooldown), btnSkill.x - 14f, btnSkill.y + 6f)
+            val tenths = (skill.remainingCooldown * 10).toInt().coerceAtLeast(0)
+            font.draw(batch, "${tenths / 10}.${tenths % 10}s", btnSkill.x - 16f, btnSkill.y + 6f)
             font.color = Color.WHITE
         }
 

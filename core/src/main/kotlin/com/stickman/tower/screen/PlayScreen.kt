@@ -675,11 +675,17 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         // Skill & Dodge Status
         font.color = if (player.skill1.isReady) Color(0.85f, 0.45f, 1f, 1f) else Color.GRAY
-        val skillStatus = if (player.skill1.isReady) "READY" else String.format("%.1fs", player.skill1.remainingCooldown)
+        val skillStatus = if (player.skill1.isReady) "READY" else {
+            val t = (player.skill1.remainingCooldown * 10).toInt().coerceAtLeast(0)
+            "${t / 10}.${t % 10}s"
+        }
         font.draw(batch, "Skill [U]: $skillStatus", 320f, h - 45f)
 
         font.color = if (player.dodgeCooldown <= 0f) Color(0.3f, 0.8f, 1f, 1f) else Color.GRAY
-        val dodgeStatus = if (player.dodgeCooldown <= 0f) "READY" else String.format("%.1fs", player.dodgeCooldown)
+        val dodgeStatus = if (player.dodgeCooldown <= 0f) "READY" else {
+            val t = (player.dodgeCooldown * 10).toInt().coerceAtLeast(0)
+            "${t / 10}.${t % 10}s"
+        }
         font.draw(batch, "Dodge [L/Shift]: $dodgeStatus", 450f, h - 45f)
 
         // Teks Tombol Pause
