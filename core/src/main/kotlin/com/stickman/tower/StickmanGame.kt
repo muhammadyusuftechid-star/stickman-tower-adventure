@@ -20,7 +20,16 @@ class StickmanGame : Game() {
     override fun setScreen(screen: Screen?) {
         val oldScreen = this.screen
         super.setScreen(screen)
-        oldScreen?.dispose()
+        if (oldScreen != null && oldScreen !== screen) {
+            val app = com.badlogic.gdx.Gdx.app
+            if (app != null) {
+                app.postRunnable {
+                    runCatching { oldScreen.dispose() }
+                }
+            } else {
+                runCatching { oldScreen.dispose() }
+            }
+        }
     }
 
     override fun dispose() {

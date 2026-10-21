@@ -34,6 +34,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
     private val glyphLayout = GlyphLayout()
+    private val touchVec = Vector3()
 
     // Partikel Latar Belakang (Recycled in-place, zero GC allocation)
     private class MenuParticle(
@@ -101,6 +102,8 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         }
 
         handleInput()
+        if (game.screen !== this) return
+
         updateParticles(delta)
 
         ScreenUtils.clear(0.04f, 0.05f, 0.09f, 1f)
@@ -276,8 +279,9 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
         // Deteksi Hover & Klik Mouse
         if (Gdx.input.isTouched) {
-            val touchPoint = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f), viewport.screenX.toFloat(), viewport.screenY.toFloat(), viewport.screenWidth.toFloat(), viewport.screenHeight.toFloat())
-            val buttonWidth = 420f
+            touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+            viewport.unproject(touchVec)
+            val buttonWidth = 440f
             val buttonHeight = 48f
             val startY = 460f
             val spacingY = 62f
@@ -285,7 +289,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
 
             for (i in menuItems.indices) {
                 val btnY = startY - (i * spacingY)
-                if (touchPoint.x in btnX..(btnX + buttonWidth) && touchPoint.y in btnY..(btnY + buttonHeight)) {
+                if (touchVec.x in btnX..(btnX + buttonWidth) && touchVec.y in btnY..(btnY + buttonHeight)) {
                     selectedIndex = i
                     if (Gdx.input.justTouched()) {
                         executeSelection()

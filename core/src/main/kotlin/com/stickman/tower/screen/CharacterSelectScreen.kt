@@ -33,6 +33,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     private val shapeRenderer = ShapeRenderer()
     private val batch = SpriteBatch()
     private val glyphLayout = GlyphLayout()
+    private val touchVec = Vector3()
 
     private val archetypes = CharacterArchetype.entries.toTypedArray()
     private var selectedIndex = 0
@@ -49,6 +50,7 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     override fun render(delta: Float) {
         animTime += delta
         handleInput()
+        if (game.screen !== this) return
 
         ScreenUtils.clear(0.06f, 0.08f, 0.14f, 1f)
         camera.update()
@@ -416,24 +418,25 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
 
         // Klik Mouse & Layar Sentuh
         if (Gdx.input.justTouched()) {
-            val touch = camera.unproject(Vector3(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f), viewport.screenX.toFloat(), viewport.screenY.toFloat(), viewport.screenWidth.toFloat(), viewport.screenHeight.toFloat())
+            touchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+            viewport.unproject(touchVec)
 
             // Panah Kiri Podium
-            if (touch.x in 80f..160f && touch.y in 310f..390f) {
+            if (touchVec.x in 80f..160f && touchVec.y in 310f..390f) {
                 selectedIndex = (selectedIndex - 1 + archetypes.size) % archetypes.size
                 AudioManager.playJump()
             }
             // Panah Kanan Podium
-            if (touch.x in 520f..600f && touch.y in 310f..390f) {
+            if (touchVec.x in 520f..600f && touchVec.y in 310f..390f) {
                 selectedIndex = (selectedIndex + 1) % archetypes.size
                 AudioManager.playJump()
             }
             // Tombol Confirm & Play
-            if (touch.x in 720f..980f && touch.y in 45f..97f) {
+            if (touchVec.x in 720f..980f && touchVec.y in 45f..97f) {
                 confirmSelection()
             }
             // Tombol Back
-            if (touch.x in 300f..520f && touch.y in 45f..97f) {
+            if (touchVec.x in 300f..520f && touchVec.y in 45f..97f) {
                 AudioManager.playDodge()
                 game.setScreen(MainMenuScreen(game))
             }

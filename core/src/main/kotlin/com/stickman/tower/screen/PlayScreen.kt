@@ -204,6 +204,7 @@ class PlayScreen(private val game: StickmanGame? = null) : Screen {
 
         if (isPaused) {
             handlePauseInput()
+            if (game != null && game.screen !== this) return
             renderWorld(0f)
             uiViewport.apply()
             shapeRenderer.projectionMatrix = uiCamera.combined
