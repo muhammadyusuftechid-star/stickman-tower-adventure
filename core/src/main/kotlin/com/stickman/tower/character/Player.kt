@@ -204,7 +204,7 @@ class Player(
         }
 
         // 5. Gravitasi (Mendukung Low Gravity Mutator Fase 13)
-        val gravityMultiplier = if (velocity.y > 0f && !input.isJumpPressed()) 1.8f else 1f
+        val gravityMultiplier = if (velocity.y > 0f && !input.isJumpPressed()) 1.35f else 1f
         velocity.y += GameConfig.GRAVITY * gravityMultiplier * gravityScale * delta
         velocity.y = velocity.y.coerceAtLeast(-25f)
 

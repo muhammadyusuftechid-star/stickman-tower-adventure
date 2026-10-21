@@ -32,27 +32,27 @@ object TowerLevelBuilder {
         platforms.add(Platform(x = -10f, y = 1f, width = 1f, height = 13f, color = Color(0.14f, 0.18f, 0.24f, 1f)))
         platforms.add(Platform(x = 31f, y = 1f, width = 1f, height = 13f, color = Color(0.14f, 0.18f, 0.24f, 1f)))
 
-        // Platform Bertingkat
-        platforms.add(Platform(x = 2.5f, y = 2.4f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
-        platforms.add(Platform(x = 8.5f, y = 4.3f, width = 3.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
-        platforms.add(Platform(x = 13.5f, y = 6.2f, width = 5.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
-        platforms.add(Platform(x = 21f, y = 3.5f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
+        // Platform Bertingkat (Tinggi lompatan terkalibrasi aman: kenaikan 1.6m - 1.7m)
+        platforms.add(Platform(x = 2.0f, y = 2.2f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
+        platforms.add(Platform(x = 8.0f, y = 3.8f, width = 4.0f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
+        platforms.add(Platform(x = 13.5f, y = 5.4f, width = 5.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
+        platforms.add(Platform(x = 20.5f, y = 3.6f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.35f, 0.48f, 1f)))
 
-        // One-Way Platform
-        platforms.add(Platform(x = 13.5f, y = 3.0f, width = 4.0f, height = 0.35f, isOneWay = true))
+        // One-Way Stepping Platform (Penyelamat jika jatuh dari platform atas)
+        platforms.add(Platform(x = 13.5f, y = 2.4f, width = 4.5f, height = 0.35f, isOneWay = true))
 
         val spikes = listOf(
-            SpikeHazard(x = 10.5f, y = 1.0f, width = 2.5f, height = 0.5f)
+            SpikeHazard(x = 9.0f, y = 1.0f, width = 2.5f, height = 0.5f)
         )
 
         val chests = listOf(
-            TreasureChest(x = 15.5f, y = 6.7f)
+            TreasureChest(x = 15.5f, y = 5.9f)
         )
 
         val enemies = listOf(
-            Enemy(spawnX = 5.0f, spawnY = 1.2f, type = EnemyType.MELEE),
-            Enemy(spawnX = 15.0f, spawnY = 7.0f, type = EnemyType.RANGED),
-            Enemy(spawnX = 23.5f, spawnY = 1.2f, type = EnemyType.MELEE)
+            Enemy(spawnX = 4.0f, spawnY = 2.7f, type = EnemyType.MELEE),
+            Enemy(spawnX = 15.5f, spawnY = 5.9f, type = EnemyType.RANGED),
+            Enemy(spawnX = 23.0f, spawnY = 1.2f, type = EnemyType.MELEE)
         )
 
         return TowerFloor(
@@ -79,31 +79,35 @@ object TowerLevelBuilder {
         platforms.add(Platform(x = -8f, y = 1f, width = 1f, height = 17f, color = Color(0.12f, 0.15f, 0.20f, 1f)))
         platforms.add(Platform(x = 30f, y = 1f, width = 1f, height = 17f, color = Color(0.12f, 0.15f, 0.20f, 1f)))
 
-        // Rute Panjatan Vertikal via One-Way Platform & Solid Block
-        platforms.add(Platform(x = 1.5f, y = 2.6f, width = 3.5f, height = 0.35f, isOneWay = true))
-        platforms.add(Platform(x = 6.5f, y = 4.8f, width = 3.5f, height = 0.35f, isOneWay = true))
-        platforms.add(Platform(x = 12.0f, y = 6.2f, width = 5.0f, height = 0.5f, color = Color(0.22f, 0.30f, 0.42f, 1f)))
-        platforms.add(Platform(x = 18.0f, y = 3.2f, width = 4.5f, height = 0.5f, color = Color(0.22f, 0.30f, 0.42f, 1f)))
-        platforms.add(Platform(x = 19.0f, y = 7.8f, width = 3.5f, height = 0.35f, isOneWay = true))
-        platforms.add(Platform(x = 23.5f, y = 9.5f, width = 6.0f, height = 0.5f, color = Color(0.26f, 0.36f, 0.50f, 1f)))
+        // Rute Panjatan Vertikal Berkelanjutan (Kenaikan 1.4m s/d 1.75m per anak tangga)
+        platforms.add(Platform(x = 1.5f, y = 2.4f, width = 3.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 6.0f, y = 4.0f, width = 3.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 11.0f, y = 5.6f, width = 4.5f, height = 0.5f, color = Color(0.22f, 0.30f, 0.42f, 1f)))
+        platforms.add(Platform(x = 16.5f, y = 7.0f, width = 4.0f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 22.0f, y = 8.6f, width = 7.0f, height = 0.5f, color = Color(0.26f, 0.36f, 0.50f, 1f)))
 
-        // Duri Lantai yang Mematikan di Bawah Rute Panjatan
+        // Tangga Penyelamat (Mencegah Deadlock / Softlock jika pemain jatuh ke bawah)
+        platforms.add(Platform(x = 16.5f, y = 3.8f, width = 4.0f, height = 0.5f, color = Color(0.22f, 0.30f, 0.42f, 1f)))
+        platforms.add(Platform(x = 23.0f, y = 3.4f, width = 3.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 23.5f, y = 6.0f, width = 3.5f, height = 0.35f, isOneWay = true))
+
+        // Duri Lantai yang Terisolasi Aman di Area Bawah
         val spikes = listOf(
-            SpikeHazard(x = 4.0f, y = 1.0f, width = 3.0f, height = 0.5f),
-            SpikeHazard(x = 10.5f, y = 1.0f, width = 3.5f, height = 0.5f),
-            SpikeHazard(x = 22.0f, y = 1.0f, width = 4.0f, height = 0.5f)
+            SpikeHazard(x = 4.0f, y = 1.0f, width = 2.0f, height = 0.5f),
+            SpikeHazard(x = 10.0f, y = 1.0f, width = 2.5f, height = 0.5f),
+            SpikeHazard(x = 18.0f, y = 1.0f, width = 2.5f, height = 0.5f)
         )
 
         val chests = listOf(
-            TreasureChest(x = 13.5f, y = 6.7f),
-            TreasureChest(x = 28.0f, y = 10.0f) // Hadiah puncak
+            TreasureChest(x = 12.5f, y = 6.1f),
+            TreasureChest(x = 24.5f, y = 9.1f) // Hadiah puncak
         )
 
         val enemies = listOf(
             Enemy(spawnX = 7.5f, spawnY = 1.2f, type = EnemyType.MELEE),
-            Enemy(spawnX = 13.5f, spawnY = 6.8f, type = EnemyType.RANGED),
-            Enemy(spawnX = 19.5f, spawnY = 1.2f, type = EnemyType.MELEE),
-            Enemy(spawnX = 25.0f, spawnY = 10.1f, type = EnemyType.RANGED)
+            Enemy(spawnX = 13.5f, spawnY = 6.1f, type = EnemyType.RANGED),
+            Enemy(spawnX = 18.0f, spawnY = 4.3f, type = EnemyType.MELEE),
+            Enemy(spawnX = 26.0f, spawnY = 9.1f, type = EnemyType.RANGED)
         )
 
         return TowerFloor(
@@ -117,8 +121,8 @@ object TowerLevelBuilder {
             chests = chests,
             enemies = enemies,
             boss = null,
-            checkpoint = Checkpoint(x = 14.0f, y = 6.7f),
-            exitPortal = StageExit(x = 28.0f, y = 10.0f),
+            checkpoint = Checkpoint(x = 13.5f, y = 6.1f),
+            exitPortal = StageExit(x = 27.5f, y = 9.1f),
             isBossFloor = false
         )
     }
@@ -130,9 +134,10 @@ object TowerLevelBuilder {
         platforms.add(Platform(x = -4f, y = 1.2f, width = 1.2f, height = 15f, color = Color(0.14f, 0.08f, 0.12f, 1f)))
         platforms.add(Platform(x = 26.8f, y = 1.2f, width = 1.2f, height = 15f, color = Color(0.14f, 0.08f, 0.12f, 1f)))
 
-        // Platform Loncatan Tempur Udara
-        platforms.add(Platform(x = 3.5f, y = 4.5f, width = 4.0f, height = 0.35f, isOneWay = true))
-        platforms.add(Platform(x = 16.5f, y = 4.5f, width = 4.0f, height = 0.35f, isOneWay = true))
+        // Platform Loncatan Tempur Udara (Ketinggian 2.05m dari lantai, dapat dicapai dengan 1x lompatan)
+        platforms.add(Platform(x = 3.5f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 16.5f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 9.5f, y = 4.6f, width = 5.0f, height = 0.35f, isOneWay = true))
 
         val chests = listOf(
             TreasureChest(x = 0.5f, y = 1.2f) // Peti Potion Darurat
@@ -174,9 +179,9 @@ object TowerLevelBuilder {
             platforms.add(Platform(x = -5f, y = 1.2f, width = 1.2f, height = 16f, color = Color(0.12f, 0.06f, 0.16f, 1f)))
             platforms.add(Platform(x = 27.8f, y = 1.2f, width = 1.2f, height = 16f, color = Color(0.12f, 0.06f, 0.16f, 1f)))
 
-            platforms.add(Platform(x = 2.5f, y = 4.5f, width = 4.5f, height = 0.35f, isOneWay = true))
-            platforms.add(Platform(x = 16.5f, y = 4.5f, width = 4.5f, height = 0.35f, isOneWay = true))
-            platforms.add(Platform(x = 9.5f, y = 7.5f, width = 5.0f, height = 0.35f, isOneWay = true))
+            platforms.add(Platform(x = 2.5f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+            platforms.add(Platform(x = 16.5f, y = 2.9f, width = 4.5f, height = 0.35f, isOneWay = true))
+            platforms.add(Platform(x = 9.5f, y = 4.8f, width = 5.0f, height = 0.35f, isOneWay = true))
 
             chests.add(TreasureChest(x = 0.5f, y = 1.2f))
 
@@ -212,53 +217,54 @@ object TowerLevelBuilder {
 
         when (variant) {
             0 -> {
-                // Vertical Ascent Spire
-                platforms.add(Platform(x = 2f, y = 2.6f, width = 4.0f, height = 0.35f, isOneWay = true))
-                platforms.add(Platform(x = 7.5f, y = 4.8f, width = 4.5f, height = 0.5f, color = Color(0.22f, 0.28f, 0.38f, 1f)))
-                platforms.add(Platform(x = 13.5f, y = 7.0f, width = 4.0f, height = 0.35f, isOneWay = true))
-                platforms.add(Platform(x = 19.0f, y = 4.2f, width = 5.0f, height = 0.5f, color = Color(0.22f, 0.28f, 0.38f, 1f)))
-                platforms.add(Platform(x = 25.5f, y = 6.8f, width = 4.5f, height = 0.35f, isOneWay = true))
+                // Vertical Ascent Spire (Kenaikan bertahap 1.45m - 1.75m)
+                platforms.add(Platform(x = 2f, y = 2.4f, width = 4.0f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 7.0f, y = 4.0f, width = 4.5f, height = 0.5f, color = Color(0.22f, 0.28f, 0.38f, 1f)))
+                platforms.add(Platform(x = 12.5f, y = 5.6f, width = 4.0f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 17.5f, y = 4.0f, width = 4.5f, height = 0.5f, color = Color(0.22f, 0.28f, 0.38f, 1f)))
+                platforms.add(Platform(x = 23.0f, y = 5.6f, width = 4.5f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 28.5f, y = 3.8f, width = 3.5f, height = 0.35f, isOneWay = true))
 
-                spikes.add(SpikeHazard(x = 5.0f, y = 1.0f, width = 2.5f, height = 0.5f))
-                spikes.add(SpikeHazard(x = 15.0f, y = 1.0f, width = 3.5f, height = 0.5f))
-                chests.add(TreasureChest(x = 14.5f, y = 7.4f))
+                spikes.add(SpikeHazard(x = 4.5f, y = 1.0f, width = 2.0f, height = 0.5f))
+                spikes.add(SpikeHazard(x = 14.5f, y = 1.0f, width = 2.5f, height = 0.5f))
+                chests.add(TreasureChest(x = 13.5f, y = 6.0f))
             }
             1 -> {
                 // Gauntlet of Peril
-                platforms.add(Platform(x = 3.0f, y = 3.2f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
-                platforms.add(Platform(x = 9.5f, y = 3.2f, width = 3.5f, height = 0.35f, isOneWay = true))
-                platforms.add(Platform(x = 15.0f, y = 5.5f, width = 5.0f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
-                platforms.add(Platform(x = 22.0f, y = 3.5f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
-                platforms.add(Platform(x = 28.0f, y = 6.0f, width = 4.0f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 2.5f, y = 2.4f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
+                platforms.add(Platform(x = 8.5f, y = 3.8f, width = 4.0f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 14.0f, y = 5.4f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
+                platforms.add(Platform(x = 20.0f, y = 4.0f, width = 4.5f, height = 0.5f, color = Color(0.24f, 0.32f, 0.44f, 1f)))
+                platforms.add(Platform(x = 26.0f, y = 5.6f, width = 4.5f, height = 0.35f, isOneWay = true))
 
-                spikes.add(SpikeHazard(x = 8.0f, y = 1.0f, width = 4.0f, height = 0.5f))
-                spikes.add(SpikeHazard(x = 20.0f, y = 1.0f, width = 4.0f, height = 0.5f))
-                chests.add(TreasureChest(x = 16.5f, y = 6.0f))
+                spikes.add(SpikeHazard(x = 7.5f, y = 1.0f, width = 2.5f, height = 0.5f))
+                spikes.add(SpikeHazard(x = 19.0f, y = 1.0f, width = 2.5f, height = 0.5f))
+                chests.add(TreasureChest(x = 15.5f, y = 6.0f))
             }
             else -> {
-                // Tiered Colosseum
-                platforms.add(Platform(x = 2.5f, y = 3.0f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
-                platforms.add(Platform(x = 9.5f, y = 5.5f, width = 6.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
-                platforms.add(Platform(x = 17.5f, y = 5.5f, width = 6.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
-                platforms.add(Platform(x = 25.5f, y = 3.0f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+                // Tiered Colosseum (Puncak tengah dapat diakses dari kedua sisi)
+                platforms.add(Platform(x = 2.5f, y = 2.4f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+                platforms.add(Platform(x = 9.0f, y = 4.2f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+                platforms.add(Platform(x = 18.0f, y = 4.2f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
+                platforms.add(Platform(x = 24.5f, y = 2.4f, width = 5.0f, height = 0.5f, color = Color(0.26f, 0.35f, 0.48f, 1f)))
 
-                platforms.add(Platform(x = 13.5f, y = 8.5f, width = 4.0f, height = 0.35f, isOneWay = true))
+                platforms.add(Platform(x = 13.5f, y = 6.0f, width = 5.0f, height = 0.35f, isOneWay = true))
 
-                spikes.add(SpikeHazard(x = 11.5f, y = 1.0f, width = 4.0f, height = 0.5f))
-                chests.add(TreasureChest(x = 14.5f, y = 9.0f))
+                spikes.add(SpikeHazard(x = 14.5f, y = 1.0f, width = 3.0f, height = 0.5f))
+                chests.add(TreasureChest(x = 15.5f, y = 6.5f))
             }
         }
 
         if (mutator == FloorMutator.SPIKE_FRENZY) {
             spikes.add(SpikeHazard(x = 1.0f, y = 1.0f, width = 2.0f, height = 0.5f))
-            spikes.add(SpikeHazard(x = 25.0f, y = 1.0f, width = 3.0f, height = 0.5f))
+            spikes.add(SpikeHazard(x = 25.0f, y = 1.0f, width = 2.5f, height = 0.5f))
         }
 
         // Spawn scaled enemies
         enemies.add(Enemy(spawnX = 5.0f, spawnY = 1.2f, type = EnemyType.MELEE))
-        enemies.add(Enemy(spawnX = 11.0f, spawnY = 6.0f, type = EnemyType.RANGED))
+        enemies.add(Enemy(spawnX = 11.0f, spawnY = 5.0f, type = EnemyType.RANGED))
         enemies.add(Enemy(spawnX = 17.0f, spawnY = 1.2f, type = EnemyType.MELEE))
-        enemies.add(Enemy(spawnX = 23.0f, spawnY = 6.0f, type = EnemyType.RANGED))
+        enemies.add(Enemy(spawnX = 23.0f, spawnY = 5.0f, type = EnemyType.RANGED))
         enemies.add(Enemy(spawnX = 27.0f, spawnY = 1.2f, type = EnemyType.MELEE))
 
         for (enemy in enemies) {
