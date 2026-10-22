@@ -57,6 +57,8 @@ class BossRushScreen(
     private var saveData: SaveData = SaveManager.load()
     private var animTime = 0f
     private var inputCooldown = 0.25f
+    private var feedbackNotice = ""
+    private var feedbackTimer = 0f
 
     // Tombol Aksi Bawah
     private val btnStart = Rectangle(840f, 40f, 340f, 55f)
@@ -69,11 +71,17 @@ class BossRushScreen(
     override fun show() {
         saveData = SaveManager.load()
         inputCooldown = 0.25f
+        feedbackNotice = ""
+        feedbackTimer = 0f
         AudioManager.playFloorBgm(10, isBossFloor = true)
     }
 
     override fun render(delta: Float) {
         animTime += delta
+        if (feedbackTimer > 0f) {
+            feedbackTimer -= delta
+            if (feedbackTimer <= 0f) feedbackNotice = ""
+        }
         if (inputCooldown > 0f) {
             inputCooldown = (inputCooldown - delta).coerceAtLeast(0f)
         } else {
@@ -207,22 +215,33 @@ class BossRushScreen(
         headF.setColor(0.95f, 0.75f, 0.25f, 1f)
         headF.draw(batch, "HALL OF LEGENDS: REKOR WAKTU", 700f, 550f)
 
-        val bestTime = BossRushManager.getBestTime(currentArchetype.name, saveData)
-        val bestRank = BossRushManager.getBestRank(currentArchetype.name, saveData)
+        val archetypes = listOf(
+            CharacterArchetype.BALANCED,
+            CharacterArchetype.AGILE,
+            CharacterArchetype.HEAVY
+        )
 
-        regF.setColor(Color.WHITE)
-        regF.draw(batch, "Ksatria Aktif: ${currentArchetype.characterName}", 700f, 510f)
+        var recordY = 516f
+        for (arch in archetypes) {
+            val bTime = BossRushManager.getBestTime(arch.name, saveData)
+            val bRank = BossRushManager.getBestRank(arch.name, saveData)
+            val isCurrent = (arch == currentArchetype)
+            val marker = if (isCurrent) " [AKTIF]" else ""
+            val tStr = if (bTime > 0f) "${String.format("%.2f", bTime)}s (${bRank.badgeSymbol})" else "Belum Ditaklukkan (-)"
 
-        val timeStr = if (bestTime > 0f) "${String.format("%.2f", bestTime)} Detik" else "Belum Ditaklukkan"
-        headF.setColor(bestRank.primaryColor)
-        headF.draw(batch, "Waktu Terbaik: $timeStr  (${bestRank.badgeSymbol})", 700f, 470f)
+            regF.setColor(if (isCurrent) Color(1.0f, 0.88f, 0.35f, 1f) else Color(0.85f, 0.88f, 0.95f, 0.85f))
+            regF.draw(batch, "• ${arch.characterName}$marker:", 700f, recordY)
+            regF.setColor(bRank.primaryColor)
+            regF.draw(batch, tStr, 1020f, recordY)
+            recordY -= 24f
+        }
 
         // Gelar Kehormatan Aktif
         val activeTitleMeta = BossRushManager.getTitleById(saveData.activeTitle)
         headF.setColor(activeTitleMeta.color)
-        headF.draw(batch, "Gelar Ksatria: \"${activeTitleMeta.titleName}\"", 700f, 430f)
-        smallF.setColor(0.85f, 0.85f, 0.85f, 0.85f)
-        smallF.draw(batch, activeTitleMeta.description, 700f, 405f)
+        headF.draw(batch, "Gelar Ksatria: \"${activeTitleMeta.titleName}\"", 700f, 432f)
+        smallF.setColor(0.85f, 0.88f, 0.95f, 0.90f)
+        smallF.draw(batch, activeTitleMeta.description, 700f, 408f, 460f, Align.left, true)
 
         // Text Panel Kanan Bawah: Peringkat Medali Target
         for (i in 0 until 3) {
@@ -241,6 +260,13 @@ class BossRushScreen(
                 "Hadiah: +${r.goldReward} Gold"
             }
             smallF.draw(batch, rewardDesc, 705f, my + 25f)
+        }
+
+        // Feedback Notice (Jika ada)
+        if (feedbackNotice.isNotEmpty()) {
+            regF.setColor(1.0f, 0.85f, 0.25f, 1f)
+            glyphLayout.setText(regF, feedbackNotice)
+            regF.draw(batch, feedbackNotice, (1280f - glyphLayout.width) / 2f, 108f)
         }
 
         // Teks Tombol Aksi Bawah
@@ -265,7 +291,7 @@ class BossRushScreen(
         }
 
         // Toggle / Siklus Gelar
-        if (Gdx.input.isKeyJustPressed(Keys.T)) {
+        if (Gdx.input.isKeyJustPressed(Keys.T) || Gdx.input.isKeyJustPressed(Keys.TAB)) {
             cycleTitle()
         }
 
@@ -298,10 +324,16 @@ class BossRushScreen(
 
     private fun cycleTitle() {
         val unlocked = saveData.unlockedTitles
-        if (unlocked.size <= 1) return
+        if (unlocked.size <= 1) {
+            feedbackNotice = "Selesaikan Gauntlet (Rank S/A) atau Spire F20+ untuk membuka gelar baru!"
+            feedbackTimer = 3.0f
+            AudioManager.playHit()
+            HapticManager.vibrateLight()
+            return
+        }
 
         val currentIndex = unlocked.indexOf(saveData.activeTitle)
-        val nextIndex = (currentIndex + 1) % unlocked.size
+        val nextIndex = if (currentIndex < 0) 0 else (currentIndex + 1) % unlocked.size
         BossRushManager.setActiveTitle(unlocked[nextIndex], saveData)
         SaveManager.saveAsync(saveData)
         AudioManager.playLevelUp()

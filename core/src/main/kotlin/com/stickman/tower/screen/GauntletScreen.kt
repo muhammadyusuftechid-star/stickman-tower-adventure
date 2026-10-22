@@ -12,12 +12,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.ScreenUtils
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.stickman.tower.StickmanGame
 import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.audio.HapticManager
+import com.stickman.tower.bossrush.BossRushManager
+import com.stickman.tower.bossrush.BossRushRank
 import com.stickman.tower.bounty.BountyContract
 import com.stickman.tower.bounty.BountyManager
 import com.stickman.tower.bounty.BountyRegistry
@@ -26,6 +29,7 @@ import com.stickman.tower.challenge.ChallengeDefinition
 import com.stickman.tower.challenge.ChallengeManager
 import com.stickman.tower.challenge.ChallengeMedal
 import com.stickman.tower.challenge.ChallengeRegistry
+import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.rpg.SaveManager
 import com.stickman.tower.ui.FontManager
@@ -41,6 +45,16 @@ class GauntletScreen(
     private val stats: CharacterStats? = null,
     private val returnScreen: Screen? = null
 ) : Screen {
+
+    companion object {
+        val BOSS_RUSH_STAGES_INFO = listOf(
+            Triple("Tahap 1: General Oakhaven", "Penjaga Menara • Lantai 3", "Gempa Seismik Purba & Hentakan Perisai"),
+            Triple("Tahap 2: The Amethyst Matron", "Ratu Busur Bayang • Lantai 5", "Tembakan Kipas Panah Kristal & Laser"),
+            Triple("Tahap 3: Shadow Doppelgänger", "Cermin Kegelapan • Lantai 8", "Refleksi Serangan Ksatria & Tebasan Sabit"),
+            Triple("Tahap 4: The Crimson Sovereign", "Pangeran Darah • Lantai 9", "Teleportasi Kilat & Serangan Berserk"),
+            Triple("Tahap 5: The Grand Calligrapher", "Sang Penulis Takdir • Lantai 10", "Badai Goresan Tinta & Hujan Aksara Kosmis")
+        )
+    }
 
     private val camera = OrthographicCamera()
     private val viewport: Viewport = FitViewport(1280f, 720f, camera)
@@ -117,7 +131,7 @@ class GauntletScreen(
         when (activeTab) {
             ScreenTab.GAUNTLET -> renderGauntletCardsShapes()
             ScreenTab.BOUNTY -> renderBountyCardsShapes()
-            ScreenTab.BOSS_RUSH -> renderGauntletCardsShapes()
+            ScreenTab.BOSS_RUSH -> renderBossRushCardsShapes()
         }
 
         // Render Action Button Shape
@@ -158,7 +172,8 @@ class GauntletScreen(
                 }
             }
             ScreenTab.BOSS_RUSH -> {
-                // Tampilan dialihkan ke BossRushScreen saat tab ditekan
+                renderBossRushCardsText()
+                renderBossRushDetails()
             }
         }
 
@@ -382,6 +397,120 @@ class GauntletScreen(
         smallFont.draw(batch, "🎁 Bonus: ${b.bonusRewardDesc}", startX, curY)
     }
 
+    private fun renderBossRushCardsShapes() {
+        for (i in 0 until 5) {
+            val itemY = 520f - (i * 74f)
+            val isSelected = (i == selectedIndex)
+            if (isSelected) {
+                shapeRenderer.setColor(0.28f, 0.22f, 0.14f, 0.95f)
+                shapeRenderer.rect(108f, itemY, 424f, 66f)
+                shapeRenderer.setColor(1.0f, 0.85f, 0.25f, 1f)
+                shapeRenderer.rect(108f, itemY, 4f, 66f)
+            } else {
+                shapeRenderer.setColor(0.14f, 0.16f, 0.22f, 0.70f)
+                shapeRenderer.rect(108f, itemY, 424f, 66f)
+            }
+        }
+    }
+
+    private fun renderBossRushCardsText() {
+        for (i in 0 until 5) {
+            val itemY = 520f - (i * 74f)
+            val stageInfo = BOSS_RUSH_STAGES_INFO[i]
+            val isSelected = (i == selectedIndex)
+
+            regularFont.color = if (isSelected) Color(1.0f, 0.88f, 0.35f, 1f) else Color.WHITE
+            regularFont.draw(batch, "⚔ ${stageInfo.first}", 125f, itemY + 48f)
+
+            smallFont.setColor(0.75f, 0.82f, 0.90f, 0.9f)
+            smallFont.draw(batch, stageInfo.second, 125f, itemY + 24f)
+        }
+    }
+
+    private fun renderBossRushDetails() {
+        val save = SaveManager.load()
+        val startX = 585f
+        var curY = 555f
+
+        // Header Title
+        titleFont.setColor(1.0f, 0.85f, 0.30f, 1f)
+        titleFont.draw(batch, "✦ BALAIRUNG SANG LEGENDA ✦", startX, curY)
+        curY -= 32f
+
+        regularFont.setColor(0.85f, 0.90f, 0.95f, 0.9f)
+        regularFont.draw(batch, "Gauntlet of Sovereigns: Libas 5 Bos Legendaris secara beruntun!", startX, curY)
+        curY -= 30f
+
+        // Detail Tahap Terpilih
+        if (selectedIndex in 0 until 5) {
+            val stage = BOSS_RUSH_STAGES_INFO[selectedIndex]
+            headerFont.setColor(1f, 0.82f, 0.3f, 1f)
+            headerFont.draw(batch, stage.first, startX, curY)
+            curY -= 24f
+
+            smallFont.setColor(0.70f, 0.85f, 1.0f, 1f)
+            smallFont.draw(batch, "Lokasi: ${stage.second}  |  Pola Serangan: ${stage.third}", startX, curY)
+            curY -= 28f
+        }
+
+        // Papan Rekor Waktu 3 Arketipe (Hall of Legends)
+        regularFont.setColor(0.95f, 0.75f, 0.25f, 1f)
+        regularFont.draw(batch, "━━ REKOR WAKTU KSATRIA (HALL OF LEGENDS) ━━", startX, curY)
+        curY -= 24f
+
+        val archetypes = listOf(
+            CharacterArchetype.BALANCED,
+            CharacterArchetype.AGILE,
+            CharacterArchetype.HEAVY
+        )
+        val activeArch = CharacterArchetype.fromString(save.selectedArchetype)
+
+        for (arch in archetypes) {
+            val bestTime = BossRushManager.getBestTime(arch.name, save)
+            val rank = BossRushManager.getBestRank(arch.name, save)
+            val isCurrent = (arch == activeArch)
+            val marker = if (isCurrent) " [AKTIF]" else ""
+            val timeText = if (bestTime > 0f) "${String.format("%.2f", bestTime)}s (${rank.badgeSymbol})" else "Belum Ditaklukkan (-)"
+
+            regularFont.setColor(if (isCurrent) Color(1.0f, 0.9f, 0.35f, 1f) else Color.LIGHT_GRAY)
+            regularFont.draw(batch, "• ${arch.characterName}$marker:", startX, curY)
+            regularFont.setColor(rank.primaryColor)
+            regularFont.draw(batch, timeText, startX + 320f, curY)
+            curY -= 22f
+        }
+
+        // Gelar Kehormatan Ksatria Aktif
+        curY -= 4f
+        val activeTitleMeta = BossRushManager.getTitleById(save.activeTitle)
+        regularFont.setColor(0.35f, 0.85f, 1.0f, 1f)
+        regularFont.draw(batch, "━━ GELAR KEHORMATAN AKTIF ━━", startX, curY)
+        curY -= 24f
+
+        headerFont.setColor(activeTitleMeta.color)
+        headerFont.draw(batch, "✦ \"${activeTitleMeta.titleName}\"", startX, curY)
+        curY -= 20f
+
+        smallFont.setColor(0.85f, 0.88f, 0.92f, 0.85f)
+        smallFont.draw(batch, activeTitleMeta.description, startX, curY, 570f, Align.left, true)
+        curY -= 32f
+
+        // Target Peringkat Medali
+        regularFont.setColor(0.95f, 0.75f, 0.25f, 1f)
+        regularFont.draw(batch, "━━ TARGET PERINGKAT MEDALI ━━", startX, curY)
+        curY -= 22f
+
+        smallFont.setColor(Color(1.0f, 0.85f, 0.25f, 1f))
+        smallFont.draw(batch, "★ S-Rank (< 180s): +1,000 Gold • Gelar \"Penebas Sang Waktu\"", startX, curY)
+        curY -= 18f
+
+        smallFont.setColor(Color(0.35f, 0.85f, 1.0f, 1f))
+        smallFont.draw(batch, "◆ A-Rank (< 270s): +500 Gold • Gelar \"Bencana Para Raja\"", startX, curY)
+        curY -= 18f
+
+        smallFont.setColor(Color(0.45f, 0.90f, 0.45f, 1f))
+        smallFont.draw(batch, "▲ B-Rank (Selesai): +250 Gold", startX, curY)
+    }
+
     private fun renderActionButtonShape() {
         val pulse = (sin(pulseTimer * 6f) + 1f) * 0.5f
 
@@ -424,8 +553,10 @@ class GauntletScreen(
                 }
             }
             ScreenTab.BOSS_RUSH -> {
-                shapeRenderer.setColor(0.95f, 0.75f, 0.25f, 0.95f)
+                shapeRenderer.setColor(0.85f + 0.15f * pulse, 0.50f + 0.25f * pulse, 0.12f, 0.95f)
                 shapeRenderer.rect(btnAction.x, btnAction.y, btnAction.width, btnAction.height)
+                shapeRenderer.setColor(1.0f, 0.85f, 0.35f, 0.95f)
+                shapeRenderer.rectLine(btnAction.x, btnAction.y + btnAction.height, btnAction.x + btnAction.width, btnAction.y + btnAction.height, 2.5f)
             }
         }
     }
@@ -472,15 +603,59 @@ class GauntletScreen(
             }
             ScreenTab.BOSS_RUSH -> {
                 regularFont.color = Color.WHITE
-                regularFont.draw(batch, "⚔ MASUKI ARENA BOSS RUSH", btnAction.x + 35f, btnAction.y + 35f)
+                glyphLayout.setText(regularFont, "⚔ MASUKI ARENA BOSS RUSH [ENTER]")
+                regularFont.draw(batch, "⚔ MASUKI ARENA BOSS RUSH [ENTER]", btnAction.x + (btnAction.width - glyphLayout.width) / 2f, btnAction.y + 35f)
             }
         }
     }
 
     private fun handleInput() {
-        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.B)) {
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.B)) {
             AudioManager.playSlashLight()
             goBack()
+            return
+        }
+
+        // Tab Navigation via Keys.TAB, Q, E
+        if (Gdx.input.isKeyJustPressed(Keys.TAB) || Gdx.input.isKeyJustPressed(Keys.E)) {
+            val tabs = ScreenTab.values()
+            activeTab = tabs[(activeTab.ordinal + 1) % tabs.size]
+            selectedIndex = 0
+            AudioManager.playSlashLight()
+            HapticManager.vibrateLight()
+        } else if (Gdx.input.isKeyJustPressed(Keys.Q)) {
+            val tabs = ScreenTab.values()
+            val prevOrdinal = if (activeTab.ordinal - 1 < 0) tabs.size - 1 else activeTab.ordinal - 1
+            activeTab = tabs[prevOrdinal]
+            selectedIndex = 0
+            AudioManager.playSlashLight()
+            HapticManager.vibrateLight()
+        }
+
+        // Item Navigation via UP / DOWN / W / S
+        val currentItemCount = when (activeTab) {
+            ScreenTab.GAUNTLET -> ChallengeRegistry.getAll().size
+            ScreenTab.BOUNTY -> BountyRegistry.getAll().size
+            ScreenTab.BOSS_RUSH -> BOSS_RUSH_STAGES_INFO.size
+        }
+
+        if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
+            if (selectedIndex > 0) {
+                selectedIndex--
+                AudioManager.playSlashLight()
+                HapticManager.vibrateLight()
+            }
+        } else if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
+            if (selectedIndex < currentItemCount - 1) {
+                selectedIndex++
+                AudioManager.playSlashLight()
+                HapticManager.vibrateLight()
+            }
+        }
+
+        // Action Button via ENTER / SPACE
+        if (Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE)) {
+            handleActionButtonClick()
             return
         }
 
@@ -503,11 +678,11 @@ class GauntletScreen(
                     HapticManager.vibrateLight()
                 }
             } else if (btnTabBossRush.contains(touchVec.x, touchVec.y)) {
-                AudioManager.playSlashLight()
-                HapticManager.vibrateMedium()
-                if (game != null) {
-                    (game as? StickmanGame)?.preserveScreen(this)
-                    game.setScreen(BossRushScreen(game, this))
+                if (activeTab != ScreenTab.BOSS_RUSH) {
+                    activeTab = ScreenTab.BOSS_RUSH
+                    selectedIndex = 0
+                    AudioManager.playSlashLight()
+                    HapticManager.vibrateMedium()
                 }
             } else if (btnBack.contains(touchVec.x, touchVec.y)) {
                 AudioManager.playSlashLight()
@@ -517,7 +692,11 @@ class GauntletScreen(
                 handleActionButtonClick()
             } else if (touchVec.x in 100f..540f && touchVec.y in 100f..580f) {
                 // Pilih item di panel kiri
-                val itemCount = if (activeTab == ScreenTab.GAUNTLET) ChallengeRegistry.getAll().size else BountyRegistry.getAll().size
+                val itemCount = when (activeTab) {
+                    ScreenTab.GAUNTLET -> ChallengeRegistry.getAll().size
+                    ScreenTab.BOUNTY -> BountyRegistry.getAll().size
+                    ScreenTab.BOSS_RUSH -> BOSS_RUSH_STAGES_INFO.size
+                }
                 for (i in 0 until itemCount) {
                     val itemY = 520f - (i * 74f)
                     if (touchVec.y in itemY..(itemY + 66f)) {

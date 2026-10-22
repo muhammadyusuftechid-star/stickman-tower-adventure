@@ -307,6 +307,10 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         }
         regF.draw(batch, "Hero: ${currentArchetype.characterName}", 780f, 95f)
 
+        val activeTitleMeta = com.stickman.tower.bossrush.BossRushManager.getTitleById(currentSaveData.activeTitle)
+        regF.setColor(activeTitleMeta.color)
+        regF.draw(batch, "✦ Gelar: \"${activeTitleMeta.titleName}\"", 780f, 135f)
+
         // Feedback / Notifikasi aksi
         if (feedbackNotice.isNotEmpty()) {
             regF.color = Color.GREEN

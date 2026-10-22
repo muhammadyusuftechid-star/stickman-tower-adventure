@@ -421,7 +421,7 @@ class PlayScreen(
 
         if (currentFloor.isBossFloor && lastBossIntroFloor != currentFloorNumber) {
             isBossIntroActive = true
-            bossIntroTimer = 2.8f
+            bossIntroTimer = if (gameMode == GameMode.BOSS_RUSH) 1.2f else 2.8f
             bossHpBarAnimated = 0f
             hasPlayedBossIntro = true
             lastBossIntroFloor = currentFloorNumber
@@ -1059,7 +1059,7 @@ class PlayScreen(
             }
 
             // Boss Rush Timer & Stage Transition Tracking (Fase 23)
-            if (gameMode == GameMode.BOSS_RUSH && !player.health.isDead) {
+            if (gameMode == GameMode.BOSS_RUSH && !player.health.isDead && !isBossIntroActive) {
                 bossRushTimer += updateDelta
                 if (bossRushTransitionTimer > 0f) {
                     bossRushTransitionTimer = (bossRushTransitionTimer - updateDelta).coerceAtLeast(0f)
@@ -2400,6 +2400,12 @@ class PlayScreen(
         headF.color = Color.CYAN
         headF.draw(batch, currentFloor.floorName, 320f, h - 70f)
 
+        if (saveData.activeTitle.isNotEmpty() && gameMode != GameMode.BOSS_RUSH) {
+            val knightTitle = com.stickman.tower.bossrush.BossRushManager.getTitleById(saveData.activeTitle)
+            smallF.setColor(knightTitle.color.r, knightTitle.color.g, knightTitle.color.b, 0.9f)
+            smallF.draw(batch, "✦ Gelar: \"${knightTitle.titleName}\"", 320f, h - 86f)
+        }
+
         // Combo Step Indicator dengan Pop Bounce
         val comboText = when (player.comboManager.currentStep) {
             ComboStep.HIT_1 -> "COMBO: [HIT 1]"
@@ -2497,7 +2503,8 @@ class PlayScreen(
 
             // Tombol Teks
             headF.color = Color.WHITE
-            headF.draw(batch, "BANGKIT KEMBALI (R)", w / 2f - 200f, h / 2f - 42f)
+            val respawnLabel = if (gameMode == GameMode.BOSS_RUSH) "ULANGI GAUNTLET (R)" else "BANGKIT KEMBALI (R)"
+            headF.draw(batch, respawnLabel, w / 2f - 200f, h / 2f - 42f)
             headF.setColor(0.9f, 0.95f, 1f, 1f)
             headF.draw(batch, "MENU UTAMA", w / 2f + 70f, h / 2f - 42f)
         }

@@ -131,4 +131,46 @@ class BossRushTest {
         saveData.updateChecksum()
         assertTrue(saveData.isChecksumValid())
     }
+
+    @Test
+    fun testAllThreeArchetypesIndependentRecords() {
+        // BALANCED: S-Rank (140s)
+        val (rankB, newRecB, titleB) = BossRushManager.recordCompletion("BALANCED", 140.0f, saveData)
+        assertEquals(BossRushRank.S_RANK, rankB)
+        assertTrue(newRecB)
+        assertEquals("TITEL_CHRONO_SLAYER", titleB?.id)
+
+        // AGILE: A-Rank (220s)
+        val (rankA, newRecA, titleA) = BossRushManager.recordCompletion("AGILE", 220.0f, saveData)
+        assertEquals(BossRushRank.A_RANK, rankA)
+        assertTrue(newRecA)
+        assertEquals("TITEL_SOVEREIGN_BANE", titleA?.id)
+
+        // HEAVY: B-Rank (310s)
+        val (rankH, newRecH, titleH) = BossRushManager.recordCompletion("HEAVY", 310.0f, saveData)
+        assertEquals(BossRushRank.B_RANK, rankH)
+        assertTrue(newRecH)
+        org.junit.Assert.assertNull(titleH)
+
+        // Check each best time and rank independently
+        assertEquals(140.0f, BossRushManager.getBestTime("BALANCED", saveData), 0.001f)
+        assertEquals(BossRushRank.S_RANK, BossRushManager.getBestRank("BALANCED", saveData))
+
+        assertEquals(220.0f, BossRushManager.getBestTime("AGILE", saveData), 0.001f)
+        assertEquals(BossRushRank.A_RANK, BossRushManager.getBestRank("AGILE", saveData))
+
+        assertEquals(310.0f, BossRushManager.getBestTime("HEAVY", saveData), 0.001f)
+        assertEquals(BossRushRank.B_RANK, BossRushManager.getBestRank("HEAVY", saveData))
+    }
+
+    @Test
+    fun testGauntletScreenBossRushStagesInfo() {
+        val stages = com.stickman.tower.screen.GauntletScreen.BOSS_RUSH_STAGES_INFO
+        assertEquals(5, stages.size)
+        assertTrue(stages[0].first.contains("General Oakhaven"))
+        assertTrue(stages[1].first.contains("Amethyst Matron"))
+        assertTrue(stages[2].first.contains("Shadow Doppelgänger"))
+        assertTrue(stages[3].first.contains("Crimson Sovereign"))
+        assertTrue(stages[4].first.contains("Grand Calligrapher"))
+    }
 }
