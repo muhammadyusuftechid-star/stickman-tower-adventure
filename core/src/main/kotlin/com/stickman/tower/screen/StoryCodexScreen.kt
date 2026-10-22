@@ -473,29 +473,31 @@ class StoryCodexScreen(
         val titleF = FontManager.titleFont
         val headF = FontManager.headerFont
         val regF = FontManager.regularFont
+        val smallF = FontManager.smallFont
 
-        // Judul Layar
+        // Judul Layar (H1 Display Token)
         titleF.color = Color.WHITE
-        titleF.draw(batch, "KRONIK MENARA AETHELGARD", 60f, 685f)
-        regF.color = Color.GOLD
-        regF.draw(batch, "Arsip Kisah Penuh & Rahasia Kanvas Dunia Siluet", 750f, 678f)
+        titleF.draw(batch, "KRONIK MENARA AETHELGARD", 50f, 685f)
+        smallF.setColor(1f, 0.85f, 0.35f, 0.9f)
+        smallF.draw(batch, "Arsip Kisah Penuh & Rahasia Kanvas Dunia Siluet", 740f, 678f)
 
-        // Daftar Bab di Sidebar Kiri
+        // Daftar Bab di Sidebar Kiri (List Item: 16pt Title, 13pt Tag, maxW 330f)
+        val maxSidebarTextW = 330f
         for (i in chapters.indices) {
             val ch = chapters[i]
             val itemY = chapterStartY - (i * chapterItemH)
 
             if (i == selectedChapterIndex) {
-                headF.setColor(1f, 0.85f, 0.25f, 1f)
+                regF.setColor(1f, 0.88f, 0.35f, 1f)
                 val activeTitle = "❖ ${ch.title}"
-                headF.draw(batch, activeTitle, 58f, itemY + 36f)
-                regF.setColor(0.4f, 0.85f, 1f, 0.9f)
-                regF.draw(batch, "[${ch.tag}]", 58f, itemY + 16f)
+                regF.draw(batch, activeTitle, 54f, itemY + 36f, maxSidebarTextW, Align.left, false)
+                smallF.setColor(0.35f, 0.85f, 1f, 0.95f)
+                smallF.draw(batch, "[${ch.tag}]", 54f, itemY + 16f)
             } else {
-                headF.setColor(0.75f, 0.80f, 0.90f, 0.85f)
-                headF.draw(batch, ch.title, 58f, itemY + 36f)
-                regF.setColor(0.5f, 0.55f, 0.65f, 0.7f)
-                regF.draw(batch, "[${ch.tag}]", 58f, itemY + 16f)
+                regF.setColor(0.75f, 0.80f, 0.90f, 0.85f)
+                regF.draw(batch, ch.title, 54f, itemY + 36f, maxSidebarTextW, Align.left, false)
+                smallF.setColor(0.48f, 0.52f, 0.62f, 0.75f)
+                smallF.draw(batch, "[${ch.tag}]", 54f, itemY + 16f)
             }
         }
 
@@ -510,12 +512,13 @@ class StoryCodexScreen(
         headF.draw(batch, curChapter.title, 450f, 595f)
 
         regF.setColor(0.4f, 0.85f, 1f, 1f)
-        regF.draw(batch, "✦  ${curPage.subtitle}", 450f, 568f)
+        regF.draw(batch, "✦  ${curPage.subtitle}", 450f, 566f, 760f, Align.left, true)
 
-        // Nomor Halaman
-        regF.setColor(0.8f, 0.85f, 0.95f, 0.85f)
+        // Nomor Halaman (Pojok Kanan Atas Kontainer)
         val pageNumStr = "Halaman ${currentPageIndex + 1} / $totalPages"
-        regF.draw(batch, pageNumStr, 1100f, 595f)
+        glyphLayout.setText(smallF, pageNumStr)
+        smallF.setColor(0.75f, 0.82f, 0.92f, 0.85f)
+        smallF.draw(batch, pageNumStr, 1220f - glyphLayout.width, 595f)
 
         // Paragraf Kisah (Wrapped Text)
         var cursorY = 520f
@@ -530,33 +533,29 @@ class StoryCodexScreen(
         // Prev Page
         if (currentPageIndex > 0) {
             regF.setColor(1f, 0.85f, 0.3f, 1f)
-            glyphLayout.setText(regF, "❮ SEBELUMNYA")
-            regF.draw(batch, "❮ SEBELUMNYA", 445f + (160f - glyphLayout.width) / 2f, 68f)
         } else {
             regF.setColor(0.4f, 0.45f, 0.55f, 0.5f)
-            glyphLayout.setText(regF, "❮ SEBELUMNYA")
-            regF.draw(batch, "❮ SEBELUMNYA", 445f + (160f - glyphLayout.width) / 2f, 68f)
         }
+        glyphLayout.setText(regF, "❮ SEBELUMNYA")
+        regF.draw(batch, "❮ SEBELUMNYA", 445f + (160f - glyphLayout.width) / 2f, 67f)
 
         // Next Page
         if (currentPageIndex < totalPages - 1) {
             regF.setColor(1f, 0.85f, 0.3f, 1f)
-            glyphLayout.setText(regF, "SELANJUTNYA ❯")
-            regF.draw(batch, "SELANJUTNYA ❯", 635f + (160f - glyphLayout.width) / 2f, 68f)
         } else {
             regF.setColor(0.4f, 0.45f, 0.55f, 0.5f)
-            glyphLayout.setText(regF, "SELANJUTNYA ❯")
-            regF.draw(batch, "SELANJUTNYA ❯", 635f + (160f - glyphLayout.width) / 2f, 68f)
         }
+        glyphLayout.setText(regF, "SELANJUTNYA ❯")
+        regF.draw(batch, "SELANJUTNYA ❯", 635f + (160f - glyphLayout.width) / 2f, 67f)
 
         // Kembali
         headF.setColor(1f, 0.45f, 0.45f, 1f)
-        glyphLayout.setText(headF, "🔙 KEMBALI KE MENU")
-        headF.draw(batch, "🔙 KEMBALI KE MENU", 980f + (260f - glyphLayout.width) / 2f, 68f)
+        glyphLayout.setText(headF, "KEMBALI KE MENU")
+        headF.draw(batch, "KEMBALI KE MENU", 980f + (260f - glyphLayout.width) / 2f, 67f)
 
-        // Petunjuk Tombol Keyboard
-        regF.setColor(0.55f, 0.60f, 0.70f, 0.8f)
-        regF.draw(batch, "[W/S] Pilih Bab  |  [A/D] Ganti Halaman  |  [ESC/BACK] Kembali", 45f, 62f)
+        // Petunjuk Tombol Keyboard (Ukuran 13pt ringkas di dalam sidebar kiri, zero collision dengan tombol)
+        smallF.setColor(0.55f, 0.62f, 0.72f, 0.85f)
+        smallF.draw(batch, "[W/S] Bab  •  [A/D] Halaman  •  [ESC] Menu", 48f, 64f)
 
         batch.end()
     }

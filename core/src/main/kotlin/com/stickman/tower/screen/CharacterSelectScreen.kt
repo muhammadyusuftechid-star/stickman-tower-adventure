@@ -296,16 +296,16 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         }
 
         smallF.color = Color.CYAN
-        smallF.draw(batch, "SKILL 1 [U]: ${currentArchetype.skill1Name} (${currentArchetype.skill1Cooldown.toInt()}s) - $s1Desc", 655f, 258f)
+        smallF.draw(batch, "SKILL 1 [U]: ${currentArchetype.skill1Name} (${currentArchetype.skill1Cooldown.toInt()}s) - $s1Desc", 655f, 258f, 560f, Align.left, false)
 
         smallF.color = Color(1f, 0.65f, 0.2f, 1f)
-        smallF.draw(batch, "SKILL 2 [I]: ${currentArchetype.skill2Name} (${currentArchetype.skill2Cooldown.toInt()}s) - $s2Desc", 655f, 220f)
+        smallF.draw(batch, "SKILL 2 [I]: ${currentArchetype.skill2Name} (${currentArchetype.skill2Cooldown.toInt()}s) - $s2Desc", 655f, 220f, 560f, Align.left, false)
 
         smallF.color = Color(0.85f, 0.45f, 1f, 1f)
-        smallF.draw(batch, "SKILL 3 [O]: ${currentArchetype.skill3Name} (${currentArchetype.skill3Cooldown.toInt()}s) - $s3Desc", 655f, 182f)
+        smallF.draw(batch, "SKILL 3 [O]: ${currentArchetype.skill3Name} (${currentArchetype.skill3Cooldown.toInt()}s) - $s3Desc", 655f, 182f, 560f, Align.left, false)
 
         smallF.color = Color.GOLD
-        smallF.draw(batch, "ULTIMATE [P]: ${currentArchetype.ultName} - $ultDesc", 655f, 144f)
+        smallF.draw(batch, "ULTIMATE [P]: ${currentArchetype.ultName} - $ultDesc", 655f, 144f, 560f, Align.left, false)
 
         // Teks Tombol Bawah
         headF.color = Color.WHITE

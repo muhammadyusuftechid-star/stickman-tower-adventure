@@ -16,6 +16,14 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
  * Menerapkan jaminan Zero-Allocation Fallback: Jika FreeType gagal atau dalam lingkungan headless,
  * font akan dialihkan secara transparan ke instance static cached fallback tanpa mengalokasikan
  * objek baru di setiap frame render loop.
+ *
+ * ══════════════════════════════════════════════════════════════════════════════
+ * STANDAR TOKEN TIPOGRAFI INDUSTRI (Game UI Typography Design System):
+ * 1. TOKEN_DISPLAY (titleFont: 32pt Bold)   -> H1 Judul Layar, Big Banners.
+ * 2. TOKEN_HEADING (headerFont: 22pt Bold)  -> H2 Judul Seksi/Panel, Nama Bos, Tombol CTA Utama.
+ * 3. TOKEN_BODY    (regularFont: 16pt Reg)  -> Teks Cerita, Dialog, List Item Sidebar, Tombol Standar.
+ * 4. TOKEN_CAPTION (smallFont: 13pt Reg)    -> Metadata, Tag Kategori, Tooltip Cooldown, Footer Guide.
+ * ══════════════════════════════════════════════════════════════════════════════
  */
 object FontManager {
     var isInitialized = false
