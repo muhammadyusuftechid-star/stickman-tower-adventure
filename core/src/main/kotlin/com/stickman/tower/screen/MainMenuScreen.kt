@@ -406,7 +406,11 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         when (selectedIndex) {
             0 -> {
                 AudioManager.playSlashLight()
-                game.setScreen(PlayScreen(game, 1, GameMode.STORY))
+                if (!currentSaveData.hasSeenPrologue && currentSaveData.highestTowerFloor <= 1) {
+                    game.setScreen(PrologueScreen(game))
+                } else {
+                    game.setScreen(PlayScreen(game, 1, GameMode.STORY))
+                }
             }
             1 -> {
                 AudioManager.playSlashLight()

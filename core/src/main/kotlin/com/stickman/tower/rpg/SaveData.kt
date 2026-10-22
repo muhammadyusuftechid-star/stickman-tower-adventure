@@ -44,11 +44,15 @@ data class SaveData(
     var unspentTalentPoints: Int = -1,
     var playTimeSeconds: Long = 0L,
     var lastSavedTimestamp: Long = 0L,
+    var isZephyrRescued: Boolean = false,
+    var isGorgonRescued: Boolean = false,
+    var hasSeenPrologue: Boolean = false,
     var saveSlotId: Int = 1,
     var saveVersion: Int = 2,
     var checksum: Long = 0L
 ) {
     companion object {
+        const val MAX_STORY_FLOORS = 50
         const val CURRENT_VERSION = 2
         private const val CHECKSUM_SALT = 0x5F3759DF4923C021L
     }

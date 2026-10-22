@@ -21,6 +21,7 @@ import com.stickman.tower.bounty.BountyAffix
 import com.stickman.tower.bounty.BountyManager
 import com.stickman.tower.challenge.ChallengeManager
 import com.stickman.tower.character.CharacterArchetype
+import com.stickman.tower.character.CharacterUnlockManager
 import com.stickman.tower.character.Player
 import com.stickman.tower.combat.ComboStep
 import com.stickman.tower.combat.FloatingText
@@ -44,6 +45,7 @@ import com.stickman.tower.quest.QuestManager
 import com.stickman.tower.relic.RelicManager
 import com.stickman.tower.relic.RelicType
 import com.stickman.tower.rpg.CharacterStats
+import com.stickman.tower.rpg.SaveData
 import com.stickman.tower.rpg.SaveManager
 import com.stickman.tower.talent.TalentManager
 import com.stickman.tower.ui.FontManager
@@ -353,7 +355,7 @@ class PlayScreen(
      */
     fun loadFloor(floorNumber: Int) {
         CombatDirector.reset()
-        currentFloorNumber = if (gameMode == GameMode.ENDLESS) floorNumber.coerceAtLeast(11) else floorNumber.coerceIn(1, 10)
+        currentFloorNumber = if (gameMode == GameMode.ENDLESS) floorNumber.coerceAtLeast(11) else floorNumber.coerceIn(1, SaveData.MAX_STORY_FLOORS)
         activeMutator = if (gameMode == GameMode.ENDLESS) FloorMutator.getRandomMutator(currentFloorNumber) else FloorMutator.NONE
         currentFloor = if (gameMode == GameMode.ENDLESS) TowerLevelBuilder.buildEndlessFloor(currentFloorNumber, activeMutator) else TowerLevelBuilder.buildFloor(currentFloorNumber)
 
@@ -1821,7 +1823,7 @@ class PlayScreen(
             if (!hasSavedStageClear) {
                 hasSavedStageClear = true
                 if (gameMode == GameMode.STORY) {
-                    val nextFloorNum = (currentFloorNumber + 1).coerceAtMost(10)
+                    val nextFloorNum = (currentFloorNumber + 1).coerceAtMost(SaveData.MAX_STORY_FLOORS)
                     val expReward = if (currentFloor.isBossFloor) (currentFloor.boss?.expReward ?: 250) else (100 + currentFloorNumber * 20)
                     val goldReward = if (currentFloor.isBossFloor) (currentFloor.boss?.goldReward ?: 150) else (60 + currentFloorNumber * 10)
                     grantRewards(expReward, goldReward, currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 1.5f)
@@ -1864,14 +1866,28 @@ class PlayScreen(
                         )
                     }
 
-                    if (currentFloorNumber == 10) {
-                        triggerSave("Puncak Menara Ditaklukkan! (Story Selesai)", highestFloor = 11)
+                    // Pembebasan Hero Ludonaratif (Fase 24: Hero Unlock Odyssey)
+                    if (currentFloorNumber == 10 && !saveData.isZephyrRescued) {
+                        CharacterUnlockManager.unlockZephyr(saveData)
                         saveData.highestEndlessFloor = kotlin.math.max(saveData.highestEndlessFloor, 11)
+                        floatingTexts.add(
+                            FloatingText("⚔ HERO DIBEBASKAN: ZEPHYR SANG BAYANGAN! ⚔", currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 4.5f, Color.CYAN, duration = 4.0f)
+                        )
+                    } else if (currentFloorNumber == 20 && !saveData.isGorgonRescued) {
+                        CharacterUnlockManager.unlockGorgon(saveData)
+                        floatingTexts.add(
+                            FloatingText("🛡 HERO DIBEBASKAN: GORGON BENTENG BESI! 🛡", currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 4.5f, Color.GOLD, duration = 4.0f)
+                        )
+                    }
+
+                    if (currentFloorNumber >= SaveData.MAX_STORY_FLOORS) {
+                        triggerSave("Puncak Menara 50 Lantai Ditaklukkan! (Story Selesai)", highestFloor = SaveData.MAX_STORY_FLOORS + 1)
+                        saveData.highestEndlessFloor = kotlin.math.max(saveData.highestEndlessFloor, SaveData.MAX_STORY_FLOORS + 1)
                         LeaderboardManager.addSpeedrunRecord(
                             LeaderboardEntry(
                                 playerName = "Hero",
                                 characterArchetype = archetype.name,
-                                floorReached = 10,
+                                floorReached = SaveData.MAX_STORY_FLOORS,
                                 score = (player.stats.currentExp * 15L + player.stats.gold * 10L),
                                 clearTimeSeconds = hudAnimTime.toLong()
                             )
@@ -2017,17 +2033,17 @@ class PlayScreen(
             val retryTriggered = keyRestart || touchRetry
 
             if (gameMode == GameMode.STORY) {
-                if (currentFloorNumber < 10) {
+                if (currentFloorNumber < SaveData.MAX_STORY_FLOORS) {
                     if (proceedTriggered) {
                         loadFloor(currentFloorNumber + 1)
                     } else if (retryTriggered) {
                         loadFloor(currentFloorNumber)
                     }
                 } else {
-                    // Lantai 10 Selesai (Final Story Boss Kalah) -> Buka Akses Endless Spire!
+                    // Lantai 50 Selesai (Puncak Menara Ditaklukkan) -> Buka Akses Menara Tak Berujung (Endless)!
                     if (proceedTriggered) {
                         gameMode = GameMode.ENDLESS
-                        loadFloor(11)
+                        loadFloor(SaveData.MAX_STORY_FLOORS + 1)
                     } else if (retryTriggered) {
                         loadFloor(1)
                     }

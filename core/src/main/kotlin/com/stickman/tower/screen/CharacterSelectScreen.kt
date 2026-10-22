@@ -18,7 +18,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.stickman.tower.StickmanGame
 import com.stickman.tower.audio.AudioManager
+import com.stickman.tower.audio.HapticManager
 import com.stickman.tower.character.CharacterArchetype
+import com.stickman.tower.character.CharacterUnlockManager
+import com.stickman.tower.rpg.SaveData
 import com.stickman.tower.rpg.SaveManager
 import com.stickman.tower.ui.FontManager
 import kotlin.math.sin
@@ -50,12 +53,13 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
     private var selectedIndex = 0
     private var animTime = 0f
     private var inputCooldown = 0.25f
+    private var currentSave = SaveData()
 
     override fun show() {
         Gdx.input?.setCatchKey(Keys.BACK, true)
         FontManager.init()
         inputCooldown = 0.25f
-        val currentSave = SaveManager.load()
+        currentSave = SaveManager.load()
         selectedIndex = archetypes.indexOfFirst { it.name.equals(currentSave.selectedArchetype, ignoreCase = true) }
             .coerceAtLeast(0)
     }
@@ -145,18 +149,58 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         // Gambar Karakter Stickman Preview di Podium
         renderStickmanPreview(shapeRenderer, podiumCenterX, podiumBaseY + 10f, currentArchetype)
 
+        // Jika karakter belum terbuka, gambar Rantai & Segel Runik Merah di atas Podium
+        val isCurrentUnlocked = CharacterUnlockManager.isUnlocked(currentArchetype, currentSave)
+        if (!isCurrentUnlocked) {
+            // Rantai Silang Obsidian Runic di atas Karakter
+            val pulseLock = (sin(animTime * 4f) + 1f) * 0.5f
+            shapeRenderer.setColor(0.85f, 0.15f, 0.15f, 0.75f + 0.25f * pulseLock)
+            shapeRenderer.rectLine(podiumCenterX - 110f, podiumBaseY + 20f, podiumCenterX + 110f, podiumBaseY + 230f, 4f)
+            shapeRenderer.rectLine(podiumCenterX - 110f, podiumBaseY + 230f, podiumCenterX + 110f, podiumBaseY + 20f, 4f)
+
+            // Badan Gembok Runic di Tengah Dada Karakter
+            val lockX = podiumCenterX - 22f
+            val lockY = podiumBaseY + 105f
+            shapeRenderer.setColor(0.12f, 0.05f, 0.05f, 0.95f)
+            shapeRenderer.rect(lockX, lockY, 44f, 36f)
+            shapeRenderer.setColor(1f, 0.3f, 0.2f, 0.95f)
+            shapeRenderer.rectLine(lockX, lockY, lockX + 44f, lockY, 2f)
+            shapeRenderer.rectLine(lockX, lockY + 36f, lockX + 44f, lockY + 36f, 2f)
+            shapeRenderer.rectLine(lockX, lockY, lockX, lockY + 36f, 2f)
+            shapeRenderer.rectLine(lockX + 44f, lockY, lockX + 44f, lockY + 36f, 2f)
+
+            // Lengkungan Belenggu Gembok Runic
+            shapeRenderer.circle(podiumCenterX, lockY + 36f, 14f, 16)
+            shapeRenderer.setColor(0.12f, 0.05f, 0.05f, 1f)
+            shapeRenderer.circle(podiumCenterX, lockY + 36f, 8f, 16)
+
+            // Lubang Kunci Bercahaya
+            shapeRenderer.setColor(1f, 0.85f, 0.2f, 0.95f)
+            shapeRenderer.circle(podiumCenterX, lockY + 20f, 3f, 8)
+            shapeRenderer.rectLine(podiumCenterX, lockY + 20f, podiumCenterX, lockY + 12f, 2.5f)
+        }
+
         // Stat Segmented Pip Bars & Tier Badges di Kartu Kanan
         renderStatBars(shapeRenderer, currentArchetype)
 
         // Tombol Navigasi Bawah
-        // Tombol Select & Play (Gilded Obsidian dengan Pulsing Emerald Accent)
         val btnPlayX = 720f
         val btnPlayY = 45f
         val btnPulse = (sin(animTime * 5f) + 1f) * 0.5f
-        shapeRenderer.setColor(0.10f, 0.18f, 0.14f, 0.95f)
-        shapeRenderer.rect(btnPlayX, btnPlayY, 260f, 52f)
-        shapeRenderer.setColor(0.2f + 0.15f * btnPulse, 0.85f + 0.15f * btnPulse, 0.45f, 0.92f)
-        shapeRenderer.rectLine(btnPlayX, btnPlayY + 52f, btnPlayX + 260f, btnPlayY + 52f, 3f)
+
+        if (isCurrentUnlocked) {
+            // Tombol Select & Play (Gilded Obsidian dengan Pulsing Emerald Accent)
+            shapeRenderer.setColor(0.10f, 0.18f, 0.14f, 0.95f)
+            shapeRenderer.rect(btnPlayX, btnPlayY, 260f, 52f)
+            shapeRenderer.setColor(0.2f + 0.15f * btnPulse, 0.85f + 0.15f * btnPulse, 0.45f, 0.92f)
+            shapeRenderer.rectLine(btnPlayX, btnPlayY + 52f, btnPlayX + 260f, btnPlayY + 52f, 3f)
+        } else {
+            // Tombol Locked (Crimson Obsidian dengan Pulsing Red Accent)
+            shapeRenderer.setColor(0.18f, 0.07f, 0.08f, 0.95f)
+            shapeRenderer.rect(btnPlayX, btnPlayY, 260f, 52f)
+            shapeRenderer.setColor(0.85f + 0.15f * btnPulse, 0.2f, 0.2f, 0.92f)
+            shapeRenderer.rectLine(btnPlayX, btnPlayY + 52f, btnPlayX + 260f, btnPlayY + 52f, 3f)
+        }
 
         // Tombol Back (Muted Obsidian)
         val btnBackX = 300f
@@ -209,6 +253,18 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         val titleLabel = "${currentArchetype.canonTitle} • [${currentArchetype.displayName}]"
         glyphLayout.setText(regF, titleLabel)
         regF.draw(batch, titleLabel, podiumCenterX - glyphLayout.width / 2f, 560f)
+
+        if (!isCurrentUnlocked) {
+            smallF.color = Color(1f, 0.45f, 0.45f, 1f)
+            val lockNotice = "[SEGELLAH RUNIK AKTIF - TERKUNCI]"
+            glyphLayout.setText(smallF, lockNotice)
+            smallF.draw(batch, lockNotice, podiumCenterX - glyphLayout.width / 2f, 532f)
+
+            smallF.color = Color(1f, 0.85f, 0.35f, 1f)
+            val reqNotice = CharacterUnlockManager.getUnlockRequirementText(currentArchetype)
+            glyphLayout.setText(smallF, reqNotice)
+            smallF.draw(batch, reqNotice, podiumCenterX - glyphLayout.width / 2f, 514f)
+        }
 
         // Teks Kartu Statistik (Kanan)
         headF.color = Color.WHITE
@@ -309,9 +365,15 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
         smallF.draw(batch, "ULTIMATE [P]: ${currentArchetype.ultName} - $ultDesc", 655f, 144f, 560f, Align.left, false)
 
         // Teks Tombol Bawah
-        headF.color = Color.WHITE
-        glyphLayout.setText(headF, "CONFIRM & PLAY")
-        headF.draw(batch, "CONFIRM & PLAY", btnPlayX + (260f - glyphLayout.width) / 2f, btnPlayY + 36f)
+        if (isCurrentUnlocked) {
+            headF.color = Color.WHITE
+            glyphLayout.setText(headF, "CONFIRM & PLAY")
+            headF.draw(batch, "CONFIRM & PLAY", btnPlayX + (260f - glyphLayout.width) / 2f, btnPlayY + 36f)
+        } else {
+            headF.color = Color(1f, 0.45f, 0.45f, 1f)
+            glyphLayout.setText(headF, "🔒 TERKUNCI")
+            headF.draw(batch, "🔒 TERKUNCI", btnPlayX + (260f - glyphLayout.width) / 2f, btnPlayY + 36f)
+        }
 
         regF.setColor(0.9f, 0.9f, 0.95f, 1f)
         glyphLayout.setText(regF, "< MAIN MENU")
@@ -557,12 +619,19 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
 
     private fun saveSelection() {
         val selected = archetypes[selectedIndex]
+        if (!CharacterUnlockManager.isUnlocked(selected, currentSave)) return
         val save = SaveManager.load()
         save.selectedArchetype = selected.name
         SaveManager.save(save)
     }
 
     private fun confirmSelection() {
+        val selected = archetypes[selectedIndex]
+        if (!CharacterUnlockManager.isUnlocked(selected, currentSave)) {
+            AudioManager.playDodge()
+            HapticManager.vibrateHeavy()
+            return
+        }
         saveSelection()
         AudioManager.playLevelUp()
         game.setScreen(PlayScreen(game, 1, GameMode.STORY))
