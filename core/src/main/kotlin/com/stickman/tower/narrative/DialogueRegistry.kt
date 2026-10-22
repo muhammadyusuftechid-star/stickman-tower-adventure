@@ -24,6 +24,7 @@ object DialogueRegistry {
     val COLOR_CALLIGRAPHER = Color(0.95f, 0.82f, 0.35f, 1f)   // Emas Primordial Gelap (Grand Calligrapher)
     val COLOR_CHIMERA = Color(0.70f, 0.40f, 0.90f, 1f)        // Ungu Nebula Kosmis (The Void Chimera)
     val COLOR_MALAKOR = Color(0.90f, 0.15f, 0.20f, 1f)        // Merah Darah Gelap (Malakor The Crimson Sovereign)
+    val COLOR_ARCHON = Color(0.85f, 0.95f, 1.0f, 1f)          // Putih Cyan Geometri (Archon of Pure Geometry)
 
     /**
      * SCENE 01: Prolog Gerbang Bawah (Floor 1)
@@ -460,6 +461,111 @@ object DialogueRegistry {
     )
 
     /**
+     * SCENE 17: Tangga Marmer Putih Suci (Floor 41)
+     */
+    val SCENE_17_CELESTIAL_CANVAS = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Aria",
+                title = "Peri Cahaya Menara",
+                text = "Lantai 41... marmer putih suci bermandikan aurora fajar keemasan. Kita telah menembus kegelapan menuju Kanvas Semesta!",
+                speakerColor = COLOR_ARIA
+            ),
+            DialogueLine(
+                speaker = "Zephyr",
+                title = "Sang Pengintai Bayangan",
+                text = "Lantai marmer ini begitu bersih hingga memantulkan angkasa. Tapi awas... lautan tinta hitam purba di bawah jurang bergolak ganas.",
+                speakerColor = COLOR_ZEPHYR
+            ),
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Paladin Benteng Besi",
+                text = "Pilar-pilar ini menopang kubah surga. Anima Core kita beresonansi... fajar warna yang dirampas semakin dekat!",
+                speakerColor = COLOR_GORGON
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Tetap waspada, kawan-kawan. Ini adalah babak terakhir sebelum singgasana pencipta. Terus melangkah!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
+     * SCENE 18: Balairung Malaikat Geometri (Floor 45)
+     */
+    val SCENE_18_ARCHON_GEOMETRY = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Archon of Pure Geometry",
+                title = "Malaikat Penjaga Sumbu Nol",
+                text = "BENTUK FANA KALIAN ADALAH KECACATAN SIMETRI. KANVAS INI HANYA MENERIMA PERSAMAAN KOSMIS YANG MURNI!",
+                speakerColor = COLOR_ARCHON
+            ),
+            DialogueLine(
+                speaker = "Zephyr",
+                title = "Sang Pengintai Bayangan",
+                text = "Laser putihnya membelah platform realitas! Aku akan melesat menembus bayang-bayang geometrinya!",
+                speakerColor = COLOR_ZEPHYR
+            ),
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Paladin Benteng Besi",
+                text = "Biarkan tameng bajaku menahan sinar pembelahnya! Kaelen, tebas intinya saat ia mengisi daya!",
+                speakerColor = COLOR_GORGON
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Jiwa yang bernyawa bukan sekadar rumus matematika, Archon! Hancurkan batas geometrimu!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
+     * SCENE 19: Koridor Emas & Sumpah Triad of Dawn (Floor 49)
+     */
+    val SCENE_19_DAWN_STAIRCASE = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Aria",
+                title = "Peri Cahaya Menara",
+                text = "Di balik pintu gerbang emas ini... singgasana Sang Kaligrafer Agung berdiri. Tak ada lagi jalan kembali.",
+                speakerColor = COLOR_ARIA
+            ),
+            DialogueLine(
+                speaker = "Zephyr",
+                title = "Sang Pengintai Bayangan",
+                text = "Zephyr The Shadowstalker, belati bayangan untuk membongkar dusta para dewa.",
+                speakerColor = COLOR_ZEPHYR
+            ),
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Paladin Benteng Besi",
+                text = "Gorgon The Ironbreaker, tameng baja untuk melindungi mereka yang menatap fajar.",
+                speakerColor = COLOR_GORGON
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Demi warna yang dirampas, demi jiwa yang larut, demi fajar yang merdeka: hari ini, dewa takdir akan jatuh!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
      * SCENE 50: Singgasana Kanvas Primordial (Floor 50 - Puncak Menara)
      */
     val SCENE_50_CALLIGRAPHER = StoryDialogue(
@@ -480,9 +586,21 @@ object DialogueRegistry {
                 speakerColor = COLOR_KAELEN
             ),
             DialogueLine(
+                speaker = "Zephyr",
+                title = "Sang Pengintai Bayangan",
+                text = "Tinta hitammu takkan pernah mampu lagi menggelapkan tekad kami!",
+                speakerColor = COLOR_ZEPHYR
+            ),
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Paladin Benteng Besi",
+                text = "Greatsword-ku akan meremukkan penamu menjadi serpihan debu!",
+                speakerColor = COLOR_GORGON
+            ),
+            DialogueLine(
                 speaker = "The Grand Calligrapher",
                 title = "Arsitek Tinta Primordial",
-                text = "Warna adalah kekacauan. Hitam dan putih adalah kesempurnaan abadi. Jika kau ingin menggambar ulang takdir... patahkan penaku dengan darahmu!",
+                text = "Warna adalah kekacauan. Hitam dan putih adalah kesempurnaan abadi. Jika kalian ingin menggambar ulang takdir... patahkan penaku dengan darah kalian!",
                 speakerColor = COLOR_CALLIGRAPHER
             )
         )
@@ -505,6 +623,9 @@ object DialogueRegistry {
             35 -> SCENE_14_VOID_CHIMERA
             36 -> SCENE_15_BLOOD_CATHEDRAL
             40 -> SCENE_16_MALAKOR_SHOWDOWN
+            41 -> SCENE_17_CELESTIAL_CANVAS
+            45 -> SCENE_18_ARCHON_GEOMETRY
+            49 -> SCENE_19_DAWN_STAIRCASE
             50 -> SCENE_50_CALLIGRAPHER
             else -> null
         }

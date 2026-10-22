@@ -216,18 +216,18 @@ class StoryCampaignTest {
 
     @Test
     fun testEndlessFloorTransitionAndScaling() {
-        // Lantai 41 (Endless Rank 1 setelah Saga IV)
-        val endless41 = TowerLevelBuilder.buildFloor(41, FloorMutator.NONE)
-        assertEquals(41, endless41.floorNumber)
-        assertEquals("EPILOGUE: THE ENDLESS PARADOX", endless41.actTitle)
-        assertEquals("FLOOR 41", endless41.actSubtitle)
+        // Lantai 51 (Endless Rank 1 setelah Saga V Puncak Menara)
+        val endless51 = TowerLevelBuilder.buildFloor(51, FloorMutator.NONE)
+        assertEquals(51, endless51.floorNumber)
+        assertEquals("EPILOGUE: THE ENDLESS PARADOX", endless51.actTitle)
+        assertEquals("FLOOR 51", endless51.actSubtitle)
 
-        // Lantai 45 (Endless Boss)
-        val endless45 = TowerLevelBuilder.buildFloor(45, FloorMutator.BERSERK_SURGE)
-        assertTrue(endless45.isBossFloor)
-        val boss45 = endless45.boss
-        assertNotNull(boss45)
-        assertTrue(boss45.health.maxHp > 350f, "Boss Endless harus diskalakan HP-nya!")
+        // Lantai 55 (Endless Boss)
+        val endless55 = TowerLevelBuilder.buildFloor(55, FloorMutator.BERSERK_SURGE)
+        assertTrue(endless55.isBossFloor)
+        val boss55 = endless55.boss
+        assertNotNull(boss55)
+        assertTrue(boss55.health.maxHp > 350f, "Boss Endless harus diskalakan HP-nya!")
     }
 
     @Test

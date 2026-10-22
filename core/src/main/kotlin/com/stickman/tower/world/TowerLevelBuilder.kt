@@ -61,6 +61,16 @@ object TowerLevelBuilder {
             38 -> buildFloor38()
             39 -> buildFloor39()
             40 -> buildFloor40()
+            41 -> buildFloor41()
+            42 -> buildFloor42()
+            43 -> buildFloor43()
+            44 -> buildFloor44()
+            45 -> buildFloor45()
+            46 -> buildFloor46()
+            47 -> buildFloor47()
+            48 -> buildFloor48()
+            49 -> buildFloor49()
+            50 -> buildFloor50()
             else -> buildEndlessFloor(floorNumber, mutator ?: FloorMutator.getRandomMutator(floorNumber))
         }
         return floor.copy(environmentalProps = getEnvironmentalPropsForFloor(floorNumber))
@@ -217,6 +227,26 @@ object TowerLevelBuilder {
                 EnvironmentalProp(x = 15.0f, y = 1.0f, width = 1.4f, height = 5.0f, type = PropType.PURE_CANVAS_PILLAR),
                 EnvironmentalProp(x = 55.0f, y = 4.5f, width = 1.6f, height = 2.4f, type = PropType.FROZEN_GOLDEN_BRUSH),
                 EnvironmentalProp(x = 92.0f, y = 1.0f, width = 1.4f, height = 5.0f, type = PropType.PURE_CANVAS_PILLAR)
+            )
+            41, 42, 43, 44 -> listOf(
+                EnvironmentalProp(x = 20.0f, y = 1.0f, width = 1.4f, height = 5.5f, type = PropType.PURE_CANVAS_PILLAR),
+                EnvironmentalProp(x = 65.0f, y = 4.5f, width = 1.6f, height = 2.4f, type = PropType.FROZEN_GOLDEN_BRUSH),
+                EnvironmentalProp(x = 110.0f, y = 1.0f, width = 1.4f, height = 5.5f, type = PropType.PURE_CANVAS_PILLAR)
+            )
+            45 -> listOf(
+                EnvironmentalProp(x = 18.0f, y = 1.0f, width = 1.6f, height = 6.0f, type = PropType.PURE_CANVAS_PILLAR),
+                EnvironmentalProp(x = 55.0f, y = 4.5f, width = 1.8f, height = 2.8f, type = PropType.FROZEN_GOLDEN_BRUSH),
+                EnvironmentalProp(x = 95.0f, y = 1.0f, width = 1.6f, height = 6.0f, type = PropType.PURE_CANVAS_PILLAR)
+            )
+            46, 47, 48, 49 -> listOf(
+                EnvironmentalProp(x = 25.0f, y = 1.0f, width = 1.5f, height = 5.5f, type = PropType.PURE_CANVAS_PILLAR),
+                EnvironmentalProp(x = 75.0f, y = 4.0f, width = 1.6f, height = 2.5f, type = PropType.FROZEN_GOLDEN_BRUSH),
+                EnvironmentalProp(x = 125.0f, y = 1.0f, width = 1.5f, height = 5.5f, type = PropType.PURE_CANVAS_PILLAR)
+            )
+            50 -> listOf(
+                EnvironmentalProp(x = 15.0f, y = 1.0f, width = 2.0f, height = 7.0f, type = PropType.PURE_CANVAS_PILLAR),
+                EnvironmentalProp(x = 55.0f, y = 5.0f, width = 2.4f, height = 3.5f, type = PropType.FROZEN_GOLDEN_BRUSH),
+                EnvironmentalProp(x = 95.0f, y = 1.0f, width = 2.0f, height = 7.0f, type = PropType.PURE_CANVAS_PILLAR)
             )
             else -> listOf(
                 EnvironmentalProp(x = 6.0f, y = 4.0f, width = 1.8f, height = 2.5f, type = PropType.VOID_WALL_CRACK)
@@ -3151,11 +3181,822 @@ object TowerLevelBuilder {
     }
 
     // =========================================================================
-    // POST-GAME: PARADOKS ENDLESS SPIRE (LANTAI 41 KE ATAS)
+    // SAGA V: PUNCAK KANVAS KOSMIS & THE GRAND CALLIGRAPHER (LANTAI 41 S/D 50)
+    // =========================================================================
+
+    private fun buildFloor41(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.92f, 0.94f, 0.98f, 1f)
+        val wallColor = Color(0.80f, 0.84f, 0.92f, 1f)
+        val platColor = Color(0.88f, 0.92f, 0.98f, 1f)
+        val goldColor = Color(0.95f, 0.85f, 0.40f, 1f)
+
+        // Lantai Dasar Marmer Putih Suci (145m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 155f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+        platforms.add(Platform(x = 143.8f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+
+        // Pilar & Tangga Marmer Bercahaya
+        // Sektor 1 (0m - 45m)
+        platforms.add(Platform(x = 6.0f, y = 2.6f, width = 5.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 15.0f, y = 4.4f, width = 6.0f, height = 0.5f, color = goldColor))
+        platforms.add(Platform(x = 24.5f, y = 6.2f, width = 5.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 24.5f, y = 2.8f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 33.5f, y = 4.6f, width = 6.0f, height = 0.5f, color = goldColor))
+
+        // Sektor 2 (46m - 90m)
+        platforms.add(Platform(x = 43.0f, y = 2.6f, width = 5.0f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 51.5f, y = 4.8f, width = 6.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 61.5f, y = 6.6f, width = 6.0f, height = 0.5f, color = goldColor))
+        platforms.add(Platform(x = 71.0f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 79.5f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+
+        // Sektor 3 (91m - 140m)
+        platforms.add(Platform(x = 89.0f, y = 4.6f, width = 6.0f, height = 0.5f, color = goldColor))
+        platforms.add(Platform(x = 98.5f, y = 6.4f, width = 6.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 98.5f, y = 2.8f, width = 5.0f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 108.5f, y = 4.6f, width = 6.0f, height = 0.5f, color = goldColor))
+        platforms.add(Platform(x = 118.0f, y = 3.0f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 18.0f, y = 1.2f, width = 3.5f, height = 0.5f),
+            SpikeHazard(x = 54.0f, y = 1.2f, width = 4.0f, height = 0.5f),
+            SpikeHazard(x = 92.0f, y = 1.2f, width = 4.0f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 26.5f, y = 6.7f),
+            TreasureChest(x = 64.0f, y = 7.1f),
+            TreasureChest(x = 101.5f, y = 6.9f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 17.0f, spawnY = 4.9f, type = EnemyType.FLYING),
+            Enemy(spawnX = 26.0f, spawnY = 6.7f, type = EnemyType.RANGED),
+            Enemy(spawnX = 38.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 54.0f, spawnY = 5.3f, type = EnemyType.MELEE),
+            Enemy(spawnX = 64.0f, spawnY = 7.1f, type = EnemyType.FLYING),
+            Enemy(spawnX = 82.0f, spawnY = 3.3f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 101.0f, spawnY = 6.9f, type = EnemyType.RANGED),
+            Enemy(spawnX = 120.0f, spawnY = 3.5f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 22.0f,
+                y = 4.2f,
+                tabletId = "TABLET_41",
+                title = "Tablet XLI: Tangga Marmer Putih Suci",
+                text = "Cahaya merah darah memudar, digantikan oleh kilau marmer putih bersih dan aurora keemasan. Warna-warna spektrum kuno mulai berbisik di udara menara."
+            )
+        )
+
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(41))
+
+        return TowerFloor(
+            floorNumber = 41,
+            floorName = "Lantai 41: Tangga Marmer Putih Suci",
+            mapBounds = Rectangle(-10f, -1f, 155f, 32f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 65.0f, y = 6.0f),
+            exitPortal = StageExit(x = 128.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "THE TRANSCENDENTAL MARBLE",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            prismAltar = PrismAltar(x = 8.0f, y = 1.2f)
+        )
+    }
+
+    private fun buildFloor42(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.90f, 0.93f, 0.97f, 1f)
+        val wallColor = Color(0.78f, 0.82f, 0.90f, 1f)
+        val platColor = Color(0.85f, 0.90f, 0.98f, 1f)
+        val prismColor = Color(0.75f, 0.90f, 1.0f, 1f)
+
+        platforms.add(Platform(x = -10f, y = 0f, width = 160f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+        platforms.add(Platform(x = 148.8f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+
+        // Pilar-pilar Spektrum Purba
+        platforms.add(Platform(x = 7.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 16.5f, y = 4.6f, width = 5.5f, height = 0.5f, color = prismColor))
+        platforms.add(Platform(x = 25.5f, y = 6.4f, width = 6.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 35.0f, y = 4.6f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 44.5f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 54.0f, y = 4.8f, width = 6.5f, height = 0.5f, color = prismColor))
+        platforms.add(Platform(x = 64.0f, y = 6.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 73.5f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 83.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 92.5f, y = 4.8f, width = 6.5f, height = 0.5f, color = prismColor))
+        platforms.add(Platform(x = 102.5f, y = 6.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 112.0f, y = 4.6f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 121.5f, y = 3.0f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 20.0f, y = 1.2f, width = 4.0f, height = 0.5f),
+            SpikeHazard(x = 58.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 96.0f, y = 1.2f, width = 4.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 28.0f, y = 6.9f),
+            TreasureChest(x = 66.5f, y = 7.3f),
+            TreasureChest(x = 105.0f, y = 7.3f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 18.0f, spawnY = 5.1f, type = EnemyType.RANGED),
+            Enemy(spawnX = 27.0f, spawnY = 6.9f, type = EnemyType.FLYING),
+            Enemy(spawnX = 40.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 56.0f, spawnY = 5.3f, type = EnemyType.MELEE),
+            Enemy(spawnX = 66.0f, spawnY = 7.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 86.0f, spawnY = 3.3f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 104.0f, spawnY = 7.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 124.0f, spawnY = 3.5f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 24.0f,
+                y = 4.5f,
+                tabletId = "TABLET_42",
+                title = "Tablet XLII: Pilar-Pilar Spektrum Purba",
+                text = "Di dalam pilar marmer ini terperangkap warna biru samudra dan hijau hutan. Anima Core ketiga pahlawan beresonansi menciptakan perisai fajar pelindung."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 42,
+            floorName = "Lantai 42: Pilar Spektrum Purba",
+            mapBounds = Rectangle(-10f, -1f, 160f, 32f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 70.0f, y = 6.2f),
+            exitPortal = StageExit(x = 132.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "PILLARS OF SPECTRUM",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor43(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.92f, 0.94f, 0.98f, 1f)
+        val wallColor = Color(0.80f, 0.84f, 0.92f, 1f)
+        val platColor = Color(0.88f, 0.92f, 0.98f, 1f)
+        val nonEuclidColor = Color(0.82f, 0.85f, 1.0f, 1f)
+
+        platforms.add(Platform(x = -10f, y = 0f, width = 165f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 32f, color = wallColor))
+        platforms.add(Platform(x = 153.8f, y = 1.2f, width = 1.2f, height = 32f, color = wallColor))
+
+        // Geometri Non-Euclidean Asimetris
+        platforms.add(Platform(x = 8.0f, y = 3.0f, width = 5.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 17.5f, y = 5.0f, width = 6.0f, height = 0.5f, color = nonEuclidColor))
+        platforms.add(Platform(x = 27.5f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 27.5f, y = 3.2f, width = 4.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 37.0f, y = 5.2f, width = 5.5f, height = 0.5f, color = nonEuclidColor))
+
+        platforms.add(Platform(x = 46.5f, y = 3.2f, width = 5.0f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 55.5f, y = 5.4f, width = 6.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 66.0f, y = 7.4f, width = 6.0f, height = 0.5f, color = nonEuclidColor))
+        platforms.add(Platform(x = 76.0f, y = 5.2f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 85.5f, y = 3.2f, width = 6.0f, height = 0.5f, color = platColor))
+
+        platforms.add(Platform(x = 95.5f, y = 5.2f, width = 6.5f, height = 0.5f, color = nonEuclidColor))
+        platforms.add(Platform(x = 106.0f, y = 7.2f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 116.0f, y = 5.0f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 125.5f, y = 3.2f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 22.0f, y = 1.2f, width = 4.0f, height = 0.5f),
+            SpikeHazard(x = 60.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 100.0f, y = 1.2f, width = 4.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 30.0f, y = 7.5f),
+            TreasureChest(x = 68.5f, y = 7.9f),
+            TreasureChest(x = 108.5f, y = 7.7f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 19.0f, spawnY = 5.5f, type = EnemyType.FLYING),
+            Enemy(spawnX = 29.0f, spawnY = 7.5f, type = EnemyType.RANGED),
+            Enemy(spawnX = 42.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 58.0f, spawnY = 5.9f, type = EnemyType.MELEE),
+            Enemy(spawnX = 68.0f, spawnY = 7.9f, type = EnemyType.FLYING),
+            Enemy(spawnX = 89.0f, spawnY = 3.7f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 108.0f, spawnY = 7.7f, type = EnemyType.RANGED),
+            Enemy(spawnX = 128.0f, spawnY = 3.7f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 30.0f,
+                y = 4.8f,
+                tabletId = "TABLET_43",
+                title = "Tablet XLIII: Geometri Non-Euclidean",
+                text = "Platform melayang dalam koordinat matematika empat dimensi. Pemain harus memecahkan puzzle rotasi warna primer untuk membuka gerbang surga."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 43,
+            floorName = "Lantai 43: Geometri Non-Euclidean",
+            mapBounds = Rectangle(-10f, -1f, 165f, 34f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 75.0f, y = 7.0f),
+            exitPortal = StageExit(x = 138.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "NON-EUCLIDEAN SPHERES",
+            loreTablets = loreTablets,
+            prismAltar = PrismAltar(x = 10.0f, y = 1.2f)
+        )
+    }
+
+    private fun buildFloor44(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.90f, 0.93f, 0.97f, 1f)
+        val wallColor = Color(0.78f, 0.82f, 0.90f, 1f)
+        val platColor = Color(0.85f, 0.90f, 0.98f, 1f)
+        val inkOceanColor = Color(0.20f, 0.22f, 0.30f, 1f)
+
+        platforms.add(Platform(x = -10f, y = 0f, width = 170f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 34f, color = wallColor))
+        platforms.add(Platform(x = 158.8f, y = 1.2f, width = 1.2f, height = 34f, color = wallColor))
+
+        // Jembatan Marmer di Atas Lautan Tinta Purba
+        platforms.add(Platform(x = 7.5f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 17.0f, y = 4.8f, width = 6.5f, height = 0.5f, color = inkOceanColor))
+        platforms.add(Platform(x = 27.0f, y = 6.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 36.5f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 46.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 55.5f, y = 5.0f, width = 6.5f, height = 0.5f, color = inkOceanColor))
+        platforms.add(Platform(x = 66.0f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 76.0f, y = 5.0f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 85.5f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 95.5f, y = 5.0f, width = 6.5f, height = 0.5f, color = inkOceanColor))
+        platforms.add(Platform(x = 106.0f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 116.0f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 125.5f, y = 3.0f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 21.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 60.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 100.0f, y = 1.2f, width = 4.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 29.5f, y = 7.3f),
+            TreasureChest(x = 68.5f, y = 7.5f),
+            TreasureChest(x = 108.5f, y = 7.5f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 18.5f, spawnY = 5.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 28.5f, spawnY = 7.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 41.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 57.5f, spawnY = 5.5f, type = EnemyType.MELEE),
+            Enemy(spawnX = 68.0f, spawnY = 7.5f, type = EnemyType.FLYING),
+            Enemy(spawnX = 89.0f, spawnY = 3.3f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 108.0f, spawnY = 7.5f, type = EnemyType.RANGED),
+            Enemy(spawnX = 128.0f, spawnY = 3.5f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 28.0f,
+                y = 4.5f,
+                tabletId = "TABLET_44",
+                title = "Tablet XLIV: Lautan Tinta Penciptaan",
+                text = "Di bawah jembatan marmer terhampar samudra tinta hitam murni tempat seluruh galaksi digambar. Ombak pasang tinta menyapu berkala; berpeganglah pada pilar iman!"
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 44,
+            floorName = "Lantai 44: Samudra Tinta Penciptaan",
+            mapBounds = Rectangle(-10f, -1f, 170f, 34f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 80.0f, y = 6.5f),
+            exitPortal = StageExit(x = 142.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "OCEAN OF CREATION",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor45(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.94f, 0.96f, 1.0f, 1f)
+        val wallColor = Color(0.82f, 0.86f, 0.94f, 1f)
+        val platColor = Color(0.88f, 0.92f, 0.98f, 1f)
+        val geometricColor = Color(0.78f, 0.88f, 1.0f, 1f)
+
+        // Balairung Malaikat Geometri (150m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 160f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+        platforms.add(Platform(x = 148.8f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+
+        // Platform Arena Duel Melayang
+        platforms.add(Platform(x = 8.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 18.0f, y = 4.8f, width = 6.5f, height = 0.5f, color = geometricColor))
+        platforms.add(Platform(x = 32.0f, y = 3.0f, width = 8.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 45.0f, y = 5.2f, width = 7.5f, height = 0.5f, color = geometricColor))
+        platforms.add(Platform(x = 60.0f, y = 3.2f, width = 8.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 73.0f, y = 5.4f, width = 8.5f, height = 0.5f, color = geometricColor))
+        platforms.add(Platform(x = 88.0f, y = 3.2f, width = 8.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 102.0f, y = 5.0f, width = 7.5f, height = 0.5f, color = geometricColor))
+        platforms.add(Platform(x = 115.0f, y = 3.0f, width = 7.0f, height = 0.5f, color = platColor))
+
+        val chests = listOf(
+            TreasureChest(x = 20.0f, y = 5.3f),
+            TreasureChest(x = 76.0f, y = 5.9f),
+            TreasureChest(x = 118.0f, y = 3.5f)
+        )
+
+        val boss = BossEnemy(
+            spawnX = 75.0f,
+            spawnY = 1.2f,
+            type = BossType.SHADOW_DOPPELGANGER,
+            customMaxHp = 7500f,
+            customName = "Archon of Pure Geometry"
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 15.0f,
+                y = 1.2f,
+                tabletId = "TABLET_45",
+                title = "Tablet XLV: Malaikat Geometri Suci",
+                text = "Archon tanpa wajah menghadang. Serangannya berupa garis laser putih pemotong realitas. Zephyr melesat menembus celah laser sementara Kaelen dan Gorgon meruntuhkan intinya."
+            )
+        )
+
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(45))
+
+        return TowerFloor(
+            floorNumber = 45,
+            floorName = "Lantai 45: Balairung Malaikat Geometri",
+            mapBounds = Rectangle(-10f, -1f, 160f, 32f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 5.0f, y = 1.2f),
+            exitPortal = StageExit(x = 125.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "ARCHON OF PURE GEOMETRY",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            prismAltar = PrismAltar(x = 8.0f, y = 1.2f)
+        )
+    }
+
+    private fun buildFloor46(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.92f, 0.94f, 0.98f, 1f)
+        val wallColor = Color(0.80f, 0.84f, 0.92f, 1f)
+        val platColor = Color(0.88f, 0.92f, 0.98f, 1f)
+        val harpColor = Color(0.98f, 0.92f, 0.70f, 1f)
+
+        platforms.add(Platform(x = -10f, y = 0f, width = 165f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 34f, color = wallColor))
+        platforms.add(Platform(x = 153.8f, y = 1.2f, width = 1.2f, height = 34f, color = wallColor))
+
+        // Tangga Fajar Kosmis Melayang
+        platforms.add(Platform(x = 7.5f, y = 2.6f, width = 5.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 16.5f, y = 4.4f, width = 6.0f, height = 0.5f, color = harpColor))
+        platforms.add(Platform(x = 26.0f, y = 6.4f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 35.5f, y = 4.6f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 45.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 54.5f, y = 4.8f, width = 6.5f, height = 0.5f, color = harpColor))
+        platforms.add(Platform(x = 65.0f, y = 6.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 75.0f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 84.5f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 94.0f, y = 4.8f, width = 6.5f, height = 0.5f, color = harpColor))
+        platforms.add(Platform(x = 104.5f, y = 6.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 114.5f, y = 4.6f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 124.0f, y = 3.0f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 20.0f, y = 1.2f, width = 4.0f, height = 0.5f),
+            SpikeHazard(x = 59.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 99.0f, y = 1.2f, width = 4.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 28.5f, y = 6.9f),
+            TreasureChest(x = 67.5f, y = 7.3f),
+            TreasureChest(x = 107.0f, y = 7.3f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 18.0f, spawnY = 4.9f, type = EnemyType.FLYING),
+            Enemy(spawnX = 28.0f, spawnY = 6.9f, type = EnemyType.RANGED),
+            Enemy(spawnX = 40.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 56.0f, spawnY = 5.3f, type = EnemyType.MELEE),
+            Enemy(spawnX = 67.0f, spawnY = 7.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 87.0f, spawnY = 3.3f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 106.0f, spawnY = 7.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 126.0f, spawnY = 3.5f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 25.0f,
+                y = 4.5f,
+                tabletId = "TABLET_46",
+                title = "Tablet XLVI: Tangga Fajar Kosmis",
+                text = "Setiap anak tangga yang diinjak memancarkan nada musik sakral. Menara berguncang menyambut kedatangan tiga ksatria fana di depan singgasana dewa."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 46,
+            floorName = "Lantai 46: Tangga Fajar Kosmis",
+            mapBounds = Rectangle(-10f, -1f, 165f, 34f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 75.0f, y = 6.5f),
+            exitPortal = StageExit(x = 136.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "THE DAWN HARP STAIRCASE",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor47(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.90f, 0.93f, 0.97f, 1f)
+        val wallColor = Color(0.78f, 0.82f, 0.90f, 1f)
+        val platColor = Color(0.85f, 0.90f, 0.98f, 1f)
+        val titanPillarColor = Color(0.94f, 0.90f, 0.78f, 1f)
+
+        platforms.add(Platform(x = -10f, y = 0f, width = 170f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 34f, color = wallColor))
+        platforms.add(Platform(x = 158.8f, y = 1.2f, width = 1.2f, height = 34f, color = wallColor))
+
+        // Ruang Tunggu Arsitek - Pilar-pilar Raksasa
+        platforms.add(Platform(x = 8.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 18.0f, y = 4.8f, width = 6.5f, height = 0.5f, color = titanPillarColor))
+        platforms.add(Platform(x = 28.5f, y = 6.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 38.0f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 47.5f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 57.0f, y = 5.0f, width = 6.5f, height = 0.5f, color = titanPillarColor))
+        platforms.add(Platform(x = 67.5f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 77.5f, y = 5.0f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 87.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 97.0f, y = 5.0f, width = 6.5f, height = 0.5f, color = titanPillarColor))
+        platforms.add(Platform(x = 107.5f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 117.5f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 127.0f, y = 3.0f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 22.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 62.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 102.0f, y = 1.2f, width = 4.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 31.0f, y = 7.3f),
+            TreasureChest(x = 70.0f, y = 7.5f),
+            TreasureChest(x = 110.0f, y = 7.5f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 19.5f, spawnY = 5.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 30.5f, spawnY = 7.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 43.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 59.0f, spawnY = 5.5f, type = EnemyType.MELEE),
+            Enemy(spawnX = 70.0f, spawnY = 7.5f, type = EnemyType.FLYING),
+            Enemy(spawnX = 91.0f, spawnY = 3.3f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 110.0f, spawnY = 7.5f, type = EnemyType.RANGED),
+            Enemy(spawnX = 130.0f, spawnY = 3.5f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 30.0f,
+                y = 5.0f,
+                tabletId = "TABLET_47",
+                title = "Tablet XLVII: Ruang Tunggu Para Arsitek",
+                text = "Lukisan-lukisan sejarah seluruh peradaban yang pernah diciptakan dan dihapus terpampang di dinding pilar setinggi seratus meter. Kita bukan peradaban pertama yang dihancurkan."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 47,
+            floorName = "Lantai 47: Ruang Tunggu Para Arsitek",
+            mapBounds = Rectangle(-10f, -1f, 170f, 34f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 80.0f, y = 6.5f),
+            exitPortal = StageExit(x = 142.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "ANTECHAMBER OF ARCHITECTS",
+            loreTablets = loreTablets,
+            prismAltar = PrismAltar(x = 10.0f, y = 1.2f)
+        )
+    }
+
+    private fun buildFloor48(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.94f, 0.96f, 1.0f, 1f)
+        val wallColor = Color(0.82f, 0.86f, 0.94f, 1f)
+        val platColor = Color(0.88f, 0.92f, 0.98f, 1f)
+        val thresholdColor = Color(1.0f, 0.92f, 0.75f, 1f)
+
+        platforms.add(Platform(x = -10f, y = 0f, width = 175f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 36f, color = wallColor))
+        platforms.add(Platform(x = 163.8f, y = 1.2f, width = 1.2f, height = 36f, color = wallColor))
+
+        // Ambang Kanvas Primordial
+        platforms.add(Platform(x = 8.5f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 18.5f, y = 4.8f, width = 6.5f, height = 0.5f, color = thresholdColor))
+        platforms.add(Platform(x = 29.0f, y = 6.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 38.5f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 48.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 58.0f, y = 5.0f, width = 6.5f, height = 0.5f, color = thresholdColor))
+        platforms.add(Platform(x = 68.5f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 78.5f, y = 5.0f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 88.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 98.0f, y = 5.0f, width = 6.5f, height = 0.5f, color = thresholdColor))
+        platforms.add(Platform(x = 108.5f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 118.5f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 128.5f, y = 3.0f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 22.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 62.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 102.0f, y = 1.2f, width = 4.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 31.5f, y = 7.3f),
+            TreasureChest(x = 71.0f, y = 7.5f),
+            TreasureChest(x = 111.0f, y = 7.5f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 20.0f, spawnY = 5.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 31.0f, spawnY = 7.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 44.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 60.0f, spawnY = 5.5f, type = EnemyType.MELEE),
+            Enemy(spawnX = 71.0f, spawnY = 7.5f, type = EnemyType.FLYING),
+            Enemy(spawnX = 92.0f, spawnY = 3.3f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 111.0f, spawnY = 7.5f, type = EnemyType.RANGED),
+            Enemy(spawnX = 132.0f, spawnY = 3.5f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 25.0f,
+                y = 4.8f,
+                tabletId = "TABLET_48",
+                title = "Tablet XLVIII: Ambang Kanvas Primordial",
+                text = "Aria memancarkan cahaya pendar terangnya: 'Kaelen, Zephyr, Gorgon... saat kalian melangkah menembus pintu ini, tidak ada lagi jalan kembali. Takdir seluruh Aethelgard ada di tangan kalian.'"
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 48,
+            floorName = "Lantai 48: Ambang Kanvas Primordial",
+            mapBounds = Rectangle(-10f, -1f, 175f, 36f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 85.0f, y = 6.5f),
+            exitPortal = StageExit(x = 146.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "PRIMORDIAL THRESHOLD",
+            loreTablets = loreTablets,
+            bloodAltar = BloodAltar(x = 70.0f, y = 1.2f),
+            prismAltar = PrismAltar(x = 8.0f, y = 1.2f)
+        )
+    }
+
+    private fun buildFloor49(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.96f, 0.96f, 1.0f, 1f)
+        val wallColor = Color(0.85f, 0.88f, 0.95f, 1f)
+        val platColor = Color(0.90f, 0.94f, 1.0f, 1f)
+        val goldenColonnadeColor = Color(1.0f, 0.88f, 0.45f, 1f)
+
+        platforms.add(Platform(x = -10f, y = 0f, width = 180f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 36f, color = wallColor))
+        platforms.add(Platform(x = 168.8f, y = 1.2f, width = 1.2f, height = 36f, color = wallColor))
+
+        // Kolonade Emas Sumpah Triad
+        platforms.add(Platform(x = 9.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 19.5f, y = 4.8f, width = 6.5f, height = 0.5f, color = goldenColonnadeColor))
+        platforms.add(Platform(x = 30.5f, y = 6.8f, width = 6.5f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 40.5f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 50.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 60.5f, y = 5.0f, width = 6.5f, height = 0.5f, color = goldenColonnadeColor))
+        platforms.add(Platform(x = 71.5f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 81.5f, y = 5.0f, width = 5.5f, height = 0.35f, isOneWay = true))
+
+        platforms.add(Platform(x = 91.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 101.5f, y = 5.0f, width = 6.5f, height = 0.5f, color = goldenColonnadeColor))
+        platforms.add(Platform(x = 112.5f, y = 7.0f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 122.5f, y = 4.8f, width = 5.5f, height = 0.35f, isOneWay = true))
+        platforms.add(Platform(x = 132.5f, y = 3.0f, width = 6.5f, height = 0.5f, color = platColor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 24.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 65.0f, y = 1.2f, width = 4.5f, height = 0.5f),
+            SpikeHazard(x = 106.0f, y = 1.2f, width = 4.5f, height = 0.5f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 33.0f, y = 7.3f),
+            TreasureChest(x = 74.0f, y = 7.5f),
+            TreasureChest(x = 115.0f, y = 7.5f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 21.0f, spawnY = 5.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 33.0f, spawnY = 7.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 46.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 63.0f, spawnY = 5.5f, type = EnemyType.MELEE),
+            Enemy(spawnX = 74.0f, spawnY = 7.5f, type = EnemyType.FLYING),
+            Enemy(spawnX = 95.0f, spawnY = 3.3f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 115.0f, spawnY = 7.5f, type = EnemyType.RANGED),
+            Enemy(spawnX = 136.0f, spawnY = 3.5f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 35.0f,
+                y = 5.2f,
+                tabletId = "TABLET_49",
+                title = "Tablet XLIX: Sumpah Triad of Dawn",
+                text = "Ketiga pahlawan menyatukan bilah senjata mereka di ambang gerbang emas: 'Demi warna yang dirampas, demi jiwa yang larut, demi fajar yang merdeka: hari ini, dewa takdir akan jatuh!'"
+            )
+        )
+
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(49))
+
+        return TowerFloor(
+            floorNumber = 49,
+            floorName = "Lantai 49: Kolonade Emas Sumpah Triad",
+            mapBounds = Rectangle(-10f, -1f, 180f, 36f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            boss = null,
+            checkpoint = Checkpoint(x = 85.0f, y = 6.5f),
+            exitPortal = StageExit(x = 150.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "VOW OF THE TRIAD OF DAWN",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
+        )
+    }
+
+    private fun buildFloor50(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val baseColor = Color(0.98f, 0.98f, 1.0f, 1f)
+        val wallColor = Color(0.88f, 0.90f, 0.98f, 1f)
+        val platColor = Color(0.92f, 0.95f, 1.0f, 1f)
+        val divineGold = Color(1.0f, 0.90f, 0.50f, 1f)
+
+        // Singgasana Kanvas Primordial - Piringan Cakrawala Melayang (120m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 130f, height = 1.2f, color = baseColor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+        platforms.add(Platform(x = 118.8f, y = 1.2f, width = 1.2f, height = 30f, color = wallColor))
+
+        // Panggung Singgasana Dewa Bertingkat
+        platforms.add(Platform(x = 8.0f, y = 2.8f, width = 6.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 18.0f, y = 4.8f, width = 6.5f, height = 0.5f, color = divineGold))
+        platforms.add(Platform(x = 32.0f, y = 3.2f, width = 8.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 45.0f, y = 5.4f, width = 8.0f, height = 0.5f, color = divineGold))
+        platforms.add(Platform(x = 58.0f, y = 3.2f, width = 8.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 71.0f, y = 5.4f, width = 8.5f, height = 0.5f, color = divineGold))
+        platforms.add(Platform(x = 85.0f, y = 3.2f, width = 8.0f, height = 0.5f, color = platColor))
+        platforms.add(Platform(x = 98.0f, y = 5.0f, width = 7.5f, height = 0.5f, color = divineGold))
+
+        val chests = listOf(
+            TreasureChest(x = 20.0f, y = 5.3f),
+            TreasureChest(x = 74.0f, y = 5.9f),
+            TreasureChest(x = 101.0f, y = 5.5f)
+        )
+
+        val boss = BossEnemy(
+            spawnX = 70.0f,
+            spawnY = 1.2f,
+            type = BossType.GRAND_CALLIGRAPHER,
+            customMaxHp = 15000f,
+            customName = "The Grand Calligrapher"
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 15.0f,
+                y = 1.2f,
+                tabletId = "TABLET_50",
+                title = "Tablet L: Patahnya Pena Takdir Semesta",
+                text = "Bilah pedang Kaelen, belati Zephyr, dan godam Gorgon menghantam tepat di tengah batang The Primordial Stylus. KRAAAAKKK! Pena terbelah dua. Cawan tinta meledak. Fajar kosmis merekah. Kita bukan lagi coretan dewa; kita adalah pelukis dari hidup kita sendiri!"
+            )
+        )
+
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(50))
+
+        return TowerFloor(
+            floorNumber = 50,
+            floorName = "Lantai 50: The Zenith of Destiny - The Grand Calligrapher",
+            mapBounds = Rectangle(-10f, -1f, 130f, 32f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 4.0f, y = 1.2f),
+            exitPortal = StageExit(x = 105.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "SAGA V: THE CELESTIAL CANVAS & PRIMORDIAL ZENITH",
+            actSubtitle = "THE ZENITH OF DESTINY",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            prismAltar = PrismAltar(x = 6.0f, y = 1.2f)
+        )
+    }
+
+    // =========================================================================
+    // POST-GAME: PARADOKS ENDLESS SPIRE (LANTAI 51 KE ATAS)
     // =========================================================================
 
     fun buildEndlessFloor(floorNumber: Int, mutator: FloorMutator): TowerFloor {
-        val endlessRank = (floorNumber - 40).coerceAtLeast(1)
+        val endlessRank = (floorNumber - 50).coerceAtLeast(1)
         val hpScale = 1.0f + endlessRank * 0.15f
         val dmgScale = (1.0f + endlessRank * 0.12f) * mutator.enemyDamageMultiplier
         val isBossFloor = (floorNumber % 5 == 0)
