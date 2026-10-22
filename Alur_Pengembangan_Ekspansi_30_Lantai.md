@@ -195,5 +195,111 @@ flowchart TD
   - [ ] Jalankan `./gradlew android:assembleRelease --console=plain` untuk menghasilkan APK rilis master 30 lantai.
   - [ ] Salin file APK ke root workspace: `StickmanTowerAdventure_30Floors_Master.apk`.
 
+
+## 4. Arsitektur Class Diagram & Blueprint Komponen Teknis
+
+Untuk memandu implementasi kode yang bersih, modular, dan sesuai prinsip SOLID:
+
+```mermaid
+classDiagram
+    class TowerLevelBuilder {
+        +buildFloor(floorIndex: Int): LevelData
+        -buildAct1Bastion(floor: Int): LevelData
+        -buildAct2Archives(floor: Int): LevelData
+        -buildAct3Foundry(floor: Int): LevelData
+        -buildAct4Astral(floor: Int): LevelData
+        -buildAct5Eclipse(floor: Int): LevelData
+        -buildAct6Zenith(floor: Int): LevelData
+        -injectRunicBarriers(level: LevelData, floor: Int)
+        -injectLoreTablets(level: LevelData, floor: Int)
+    }
+
+    class PrologueScreen {
+        -kaelenSilhouette: Vector2
+        -ariaCompanion: Vector2
+        -dissolutionAlpha: Float
+        -dialogueIndex: Int
+        +render(delta: Float)
+        +advanceDialogue()
+        +transitionToStoryFloor1()
+    }
+
+    class RunicBarrierSystem {
+        -barriers: Array<RunicBarrier>
+        -keys: Array<RuneKey>
+        +onPlayerCollectKey(key: RuneKey)
+        +canPassBarrier(player: Player, barrier: RunicBarrier): Boolean
+        +unlockBarrier(barrier: RunicBarrier)
+    }
+
+    class LevelReachabilityGraph {
+        -nodes: Array<PlatformNode>
+        -edges: Array<JumpEdge>
+        +buildGraphFromLevel(level: LevelData): Graph
+        +validatePathToExit(level: LevelData): Boolean
+        +findSoftlockDeadEnds(): List<PlatformNode>
+    }
+
+    class BossEncounterManager {
+        -currentBoss: BossEntity
+        -currentPhase: Int
+        -arenaBounds: Rectangle
+        +update(delta: Float)
+        +onBossPhaseTransition(newPhase: Int)
+        +triggerVictoryCinematic()
+    }
+
+    TowerLevelBuilder --> RunicBarrierSystem : Injects entities
+    TowerLevelBuilder --> LevelReachabilityGraph : Validates geometry
+    PrologueScreen --> TowerLevelBuilder : Loads Floor 1 after Intro
+    BossEncounterManager --> TowerLevelBuilder : Instantiates Apex Bosses
+```
+
+---
+
+## 5. Matriks Manajemen Risiko & Strategi Mitigasi Senior Dev
+
+| Kategori Risiko | Potensi Dampak | Kemungkinan | Strategi Mitigasi Arsitektural (Senior Dev) |
+| :--- | :---: | :---: | :--- |
+| **Out of Memory (OOM) Android** | Kritis (Crash di HP) | Sedang | Terapkan **Frustum Bounding Box Culling**. Hanya objek dalam rentang $[-2\text{m}, +26\text{m}]$ dari kamera yang di-render. Gunakan *Object Pooling* (`Pool<Particle>`, `Pool<DamageText>`) untuk mencegah alokasi GC di render loop 60 FPS. |
+| **Softlock Desain Level** | Tinggi (Pemain terjebak) | Rendah | Jalankan **Automated Reachability BFS Unit Test** pada seluruh 30 lantai di CI/CD. Larang celah jurang horizontal $> 4.0\text{ meter}$ tanpa platform perantara satu arah. |
+| **Save Data Corruption** | Kritis (Progres hilang) | Sangat Rendah | Gunakan skema **Salted FNV-1a Checksum 64-bit** dan mekanisme *atomic file write* (`saveData.json.tmp` $\rightarrow$ `saveData.json`) dengan *defensive in-memory fallback*. |
+| **Tumpang Tindih UI (Text Clutter)** | Sedang (UX buruk) | Sangat Rendah | Terapkan pola **Thematic Ink Capsule Pills** (padding $14\text{px}$, margin $10\text{px}$, vertical spacing safe-zone) yang telah terbukti 10/10 pada perbaikan tipografi sebelumnya. |
+| **Spike Drop Frame pada Boss Fase 3** | Sedang (Lag combat) | Sedang | Pisahkan partikel visual ke dalam batch vertex statis; batasi jumlah proyektil aktif maksimum 24 proyektil pada saat bersamaan di arena bos. |
+
+---
+
+## 6. Kriteria Kualitas & Definition of Done (DoD) Per Fase
+
+Sebuah fase dinyatakan **SELESAI (100% DONE)** hanya jika memenuhi seluruh pintu kelulusan (*Quality Gates*) berikut:
+1. **Zero Compilation Warnings & Errors:** Kode Kotlin terkompilasi bersih tanpa *deprecated API* atau *type-unsafe casts*.
+2. **100% Passing Unit Test Suite:** Seluruh unit test (termasuk verifikasi reachability 30 lantai dan integritas checksum save) lulus hijau (`BUILD SUCCESSFUL`).
+3. **Zero Allocation in 60 FPS Render Loop:** Tidak ada instansiasi objek (`new` / alokasi memori heap) di dalam metode `render()` atau `update()` entitas gameplay.
+4. **Zero-Softlock Guarantee:** Seluruh 30 lantai telah divalidasi oleh algoritma BFS bahwa pintu keluar (*StageExit*) dapat dicapai dari titik *Spawn* oleh karakter dengan jangkauan terpendek (Gorgon).
+5. **Ergonomic & Non-Overlapping UI:** Tidak ada teks yang menumpuk, saling dempet, atau terpotong pada berbagai rasio layar Android (16:9, 18:9, 19.5:9, 20:9).
+6. **Physical Android Device Verification:** APK rilis dapat diinstal dan berjalan mulus 60 FPS stabil pada perangkat Android fisik.
+
+---
+
+## 7. Rencana Sprint & Panduan Lingkungan Dev (Laptop Linux Mint, 12 GB RAM)
+
+### 7.1 Estimasi Sprint Eksekusi (Sprint Breakdown)
+* **Sprint 1 (Fase 24):** 2 Hari Kerja — Migrasi skema SaveData 30 lantai & Sequence Prologue Padang Abu.
+* **Sprint 2 (Fase 25):** 3 Hari Kerja — Generator Map Luas Act I & II (Lantai 1-10) + Bos Oakhaven & Vespera.
+* **Sprint 3 (Fase 26):** 3 Hari Kerja — Generator Map Luas Act III & IV (Lantai 11-20) + Suaka Vulcanus & Bos Ignis/Doppelgänger.
+* **Sprint 4 (Fase 27):** 3 Hari Kerja — Generator Map Luas Act V & VI (Lantai 21-30) + Bos Malakor & The Grand Calligrapher (3 Fase).
+* **Sprint 5 (Fase 28):** 2 Hari Kerja — Integrasi 30 Lore Tablets & Modernisasi Story Codex Screen 30 Bab.
+* **Sprint 6 (Fase 29):** 2 Hari Kerja — BFS Graph Reachability Suite 30 Lantai & Penyeimbangan RPG Level 60.
+* **Sprint 7 (Fase 30):** 1 Hari Kerja — Profiling Android, Frustum Culling & Build Release Master APK.
+
+### 7.2 Tips Efisiensi Eksekusi Khusus Lingkungan Dev 12 GB RAM
+1. **Prioritaskan Testing Desktop LWJGL3:**
+   * Eksekusi `./gradlew lwjgl3:run` memakan waktu $< 3$ detik dan menggunakan RAM $\le 350\text{ MB}$, menghemat 95% waktu iterasi platforming dan combat.
+2. **Uji Langsung ke HP Fisik via ADB (Hindari Android Studio Emulator):**
+   * Menggunakan HP fisik via kabel USB (`adb install -r ...`) menghemat 6 GB RAM dan 12 GB disk space laptop.
+3. **Pembersihan Cache Berkala:**
+   * Jalankan `./gradlew clean` saat beralih antar sprint untuk menjaga sisa storage laptop tetap aman di atas 20 GB.
+
 ---
 *Dokumen ini merupakan Panduan Resmi Fase Pengembangan Ekspansi 30 Lantai untuk Stickman Tower Adventure. Setiap modul wajib diimplementasikan sesuai urutan hierarkis dan kriteria Definition of Done (DoD).*
+

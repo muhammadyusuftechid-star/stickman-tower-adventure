@@ -513,20 +513,251 @@ Di setiap lantai dari Lantai 1 hingga Lantai 30, tertancap sebuah prasasti batu 
 
 ---
 
-### 5.3 Enam Bos Penjaga Menara (The Six Apex Gatekeepers)
+---
 
-1. **General Oakhaven (Lantai 5):** Representasi kehormatan militer dan kepatuhan buta pada sumpah masa lampau.
-2. **Lady Vespera (Lantai 10):** Representasi keputusasaan intelektual dan kegilaan akibat racun kepunahan ingatan.
-3. **Forge-Master Ignis (Lantai 15):** Representasi mesin perang tanpa emosi yang dibutakan oleh obsesi keabadian baja.
-4. **The Shadow Doppelgänger (Lantai 20):** Representasi konflik batin, rasa bersalah atas kegagalan masa lalu, dan keputusasaan eksistensial.
-5. **Malakor The Crimson Sovereign (Lantai 25):** Representasi korupsi kekuasaan, keegoisan aristokrasi, dan pemangsaan kaum lemah demi bertahan hidup.
-6. **The Grand Calligrapher (Lantai 30):** Representasi arogansi tiranik, ilusi keteraturan absolut, dan pemaksaan kehendak dewa atas kemerdekaan jiwa fana.
+## 🎭 BAGIAN 7: NASKAH LAKON LENGKAP ENAM DUEL BOS & SUAKA TEMPA (THE CINEMATIC ENCOUNTER SCRIPTS)
+
+Berikut adalah naskah drama sinematik resmi untuk interaksi di lantai-lantai kunci menara:
+
+### 7.1 Duel Babak I: Pertarungan Kehormatan (Lantai 5 - Balairung Jenderal Oakhaven)
+```
+[SCENE START: LANTAI 5 - THE IRON CORONATION HALL]
+(Lantai marmer retak. Spanduk kerajaan Aethelgard yang koyak berlumur jelaga hitam.
+Jenderal Oakhaven berdiri tegak memunggungi gerbang, kedua tangannya bertumpu pada perisai titan.)
+
+OAKHAVEN (Suara berwibawa, berat seperti derak batu gunung):
+"Langkah kakimu bergema terlalu riang untuk seseorang yang berjalan menuju kuburnya, anak muda."
+
+KAELEN (Menghunus Runed Broadsword, bilahnya berpendar emas):
+"Aku datang bukan untuk mati, Jenderal. Aku datang untuk meruntuhkan gerbang ini dan merebut kembali apa yang dicuri para dewa."
+
+OAKHAVEN (Membalikkan badan perlahan, helm tanduk emasnya memancarkan sorot mata putih tajam):
+"Merebut kembali? Keberanian yang naif. Aku melihat seribu ksatria sepertimu melompat ke jurang kepunahan. Menara ini tidak menguji keberanian; ia menghancurkan setiap ilusi tentang harapan. Buktikan padaku bahwa tekadmu lebih keras dari baja zirahku!"
+
+(Oakhaven menghantamkan perisainya ke tanah. Gempa radial mengguncang arena!)
+[BATTLE ENGAGE: GENERAL OAKHAVEN]
+
+[DEFEAT CUTSCENE: HP OAKHAVEN = 0]
+(Oakhaven bertumpu pada satu lututnya. Armor bajanya retak mengeluarkan kepulan uap emas.)
+
+OAKHAVEN (Tersenyum getir di balik helmnya):
+"Bagus... Tebasanmu memiliki jiwa... bukan sekadar amarah buta. Ambillah Segel Gerbang Kaca ini. Dan ingatlah, Kaelen: di atas sana, akal budimu akan diuji lebih kejam daripada ototmu..."
+
+(Tubuh Oakhaven membeku menjadi patung batu perunggu mulia yang menopang pilar gerbang.)
+[SCENE END]
+```
+
+### 7.2 Duel Babak II: Keputusasaan Penjaga Arsip (Lantai 10 - Sarang Lady Vespera)
+```
+[SCENE START: LANTAI 10 - THE VIOLET SANCTUM]
+(Pilar kristal ungu Amethyst menjulang. Lembaran kertas manuskrip melayang di udara yang dipenuhi kabut hijau toska beracun.
+Lady Vespera berdiri anggun di atas jembatan jaring laba-laba kaca, membidikkan busur ganda.)
+
+VESPERA (Tawa berbisik yang dingin dan bergaung):
+"Lagi-lagi bayangan yang mengira dirinya masih manusia. Mengapa kau bersikeras mengingat namamu, Ksatria? Tidakkah kau tahu bahwa melupakan adalah berkah terbesar di menara ini?"
+
+ARIA (Terbang di depan Kaelen, memancarkan perisai pendar cahaya):
+"Vespera! Kau adalah pelindung ilmu pengetahuan Aethelgard! Mengapa kau membiarkan racun menara menenggelamkan jiwamu?!"
+
+VESPERA (Sorot matanya berkilat ungu buas):
+"Ilmu pengetahuan? Sejarah? Semuanya sampah di hadapan Pena Dewa! Mereka menghapus kita dengan sekali sapuan kuas! Jika kita ditakdirkan menjadi noda, maka biar kuukir namamu di atas panah beracunku!"
+
+[BATTLE ENGAGE: LADY VESPERA]
+
+[DEFEAT CUTSCENE: HP VESPERA = 0]
+(Busur ganda Vespera patah menjadi debu kristal. Kabut hijau beracun memudar tersapu angin bersih.)
+
+VESPERA (Jatuh terduduk, tatapannya kembali jernih seraya menatap langit-langit kristal):
+"Ah... Rasa sakit ini... adalah ingatan. Dinginnya embun fajar... tawa anak-anak di perpustakaan ibu kota... Terima kasih telah mematahkan ilusiku. Jika kau bertemu Vulcanus... katakan... api tempaannya... tak pernah padam di hatiku..."
+
+(Vespera melebur menjadi kelopak bunga lavender bercahaya yang menuntun Kaelen ke lubang palka kawah tempa.)
+[SCENE END]
+```
+
+### 7.3 Pertemuan Suaka Jiwa: Dialog Vulcanus Sang Penempa (Lantai 13)
+```
+[SCENE START: LANTAI 13 - THE SANCTUARY OF VULCANUS]
+(Suasana berubah hangat dan tenang. Gemuruh denting palu di atas landasan tempa berirama konstan.
+Vulcanus menyeka keringat jelaga di dahinya seraya meletakkan palu godam raksasa.)
+
+VULCANUS (Mata berbinar magma menatap Kaelen):
+"Demi api abadi! Seorang siluet hidup berhasil lolos dari racun Vespera? Mendekatlah ke tungku, bocah. Kau tampak seperti benang wol yang hampir putus tertiup angin."
+
+KAELEN:
+"Lady Vespera menitipkan pesan untukmu, Master Vulcanus. Ia berkata nyala api tempaanmu adalah kehangatan terakhir yang ia rindukan."
+
+VULCANUS (Terhenyak sesaat, lalu menghela napas panjang hingga bara api berkobar):
+"Vespera... Wanita keras kepala itu akhirnya beristirahat. Dengar, Kaelen: di menara celaka ini, para dewa mencuri warna kita, tetapi mereka lupa satu hal. Mereka tidak bisa mencuri panasnya bara baja dan detak palu perjuangan kita! Bawa senjatamu kemari. Aku akan menempanya dengan serpihan meteorit bintang. Selama kau terus mengayunkannya, garis tubuhmu takkan pernah memudar!"
+
+ARIA:
+"Kami tidak akan mengecewakanmu, Vulcanus."
+
+VULCANUS:
+"Pergilah! Di lantai 15, muridku Ignis telah tersesat meminum cairan terak baja. Hancurkan zirah batunya. Jangan biarkan dia menderita sebagai boneka mesin!"
+[SCENE END]
+```
+
+### 7.4 Duel Babak III: Hancurnya Mesin Tanpa Hati (Lantai 15 - Singgasana Forge-Master Ignis)
+```
+[SCENE START: LANTAI 15 - THE CORE FOUNDRY]
+(Lava hitam bergolak di bawah jeruji besi. Ignis berdiri di tengah kawah, tubuhnya berupa raksasa lelehan baja dan batu obsidian.)
+
+IGNIS (Suara logam bergesekan parau):
+"Baja adalah kebenaran mutlak. Daging membusuk. Warna memudar. Hanya logam yang abadi dalam panasnya penciptaan!"
+
+KAELEN:
+"Kau menukar jiwamu demi cangkang kosong, Ignis. Gurumu Vulcanus menangisi kejatuhanmu!"
+
+IGNIS (Mengaum seraya mengangkat palu lava raksasa):
+"Vulcanus lemah! Ia terikat pada kenangan masa lalu! Jadilah abu di bawah landasanku!"
+
+[BATTLE ENGAGE: FORGE-MASTER IGNIS]
+
+[DEFEAT CUTSCENE: HP IGNIS = 0]
+(Tubuh lava Ignis mendingin dengan cepat, retak-retak menjadi batu hitam yang membeku.)
+
+IGNIS (Berbisik lemah saat kepalanya terkulai):
+"Dingin... Api di dadaku... akhirnya padam. Guru... maafkan kebodohanku..."
+[SCENE END]
+```
+
+### 7.5 Duel Babak IV: Cermin Batin Kehampaan (Lantai 20 - Singgasana Doppelgänger)
+```
+[SCENE START: LANTAI 20 - THE NEXUS OF REFLECTIONS]
+(Permukaan lantai berupa cermin hitam tanpa batas di bawah bintang-bintang cyan kosmis.
+Sosok bayangan yang persis menyerupai Kaelen melangkah keluar dari dalam cermin.)
+
+DOPPELGÄNGER (Suara bergema ganda, mencerminkan ketakutan terdalam Kaelen):
+"Kau telah mendaki sejauh ini, Kaelen. Tapi untuk apa? Untuk melihat dirimu yang sebenarnya? Kau gagal melindungi kotamu. Kau membiarkan jutaan orang larut dalam tinta. Kau hanyalah stickman yang dihantui rasa bersalah!"
+
+KAELEN (Menatap lurus ke dalam mata bayangannya):
+"Benar. Aku gagal di masa lalu. Aku dihantui oleh setiap wajah yang lenyap. Tapi rasa bersalah itulah yang membuatku tetap berdiri. Karena aku menolak melupakan mereka, pedang ini tidak akan pernah menyerah!"
+
+DOPPELGÄNGER (Mencabut bilah pedang hitam berkilau):
+"Maka buktikanlah pada dirimu sendiri!"
+
+[BATTLE ENGAGE: THE SHADOW DOPPELGÄNGER]
+
+[DEFEAT CUTSCENE: HP DOPPELGÄNGER = 0]
+(Doppelgänger menjatuhkan pedangnya, tersenyum damai, dan mengulurkan tangannya menyentuh dada Kaelen.)
+
+DOPPELGÄNGER:
+"Bagus. Kau telah menerima bayanganmu sendiri. Kini, jiwamu utuh..."
+(Bayangan itu melebur menjadi satu dengan Anima Core Kaelen, memancarkan kilau emas yang membakar kabut kosmis.)
+[SCENE END]
+```
+
+### 7.6 Duel Babak V: Tragedi Darah Sang Bangsawan (Lantai 25 - Istana Malakor)
+```
+[SCENE START: LANTAI 25 - THE THRONE OF ECLIPSE]
+(Cahaya bulan merah darah menerangi katedral gotik. Pangeran Malakor duduk angkuh di atas singgasana tengkorak sambil menyesap cawan berisi tinta darah.)
+
+MALAKOR:
+"Seorang rakyat jelata berhasil menembus kuil suciku. Sungguh pemandangan yang menghibur. Tidakkah kau menyukai aroma darah di sini, pendekar garis? Ini adalah satu-satunya warna yang tersisa di semesta: merah kemegahan!"
+
+KAELEN:
+"Warna merah itu adalah darah rakyat yang kau korbankan, Malakor. Kau bukan raja; kau hanyalah lintah yang bersembunyi dari para dewa!"
+
+MALAKOR (Melompat turun dengan seringai taring tajam, menghunus dua rapier berdarah):
+"Di dunia tanpa warna ini, yang memangsa adalah yang bertahan hidup! Persembahkan Anima Core-mu untuk jamuan malamku!"
+
+[BATTLE ENGAGE: MALAKOR THE CRIMSON SOVEREIGN]
+
+[DEFEAT CUTSCENE: HP MALAKOR = 0]
+(Malakor tersungkur di tangga singgasana, jubah merahnya compang-camping.)
+
+MALAKOR (Muntah tinta merah pekat):
+"Mustahil... Dihancurkan oleh siluet jelata... Nikmatilah kemenangan sesaatmu, Kaelen. Di atas sana... sang Arsitek sedang menunggumu dengan kuas penghapusnya..."
+[SCENE END]
+```
+
+### 7.7 Duel Pamungkas Babak VI: Meruntuhkan Takdir Dewa (Lantai 30 - Puncak Kanvas Primordial)
+```
+[SCENE START: LANTAI 30 - THE PRIMORDIAL CANVAS]
+(Piringan marmer putih mengambang di puncak kosmos. The Grand Calligrapher melayang di atas pena raksasa The Primordial Stylus.)
+
+THE GRAND CALLIGRAPHER (Suara gemuruh multi-dimensi, dingin tanpa emosi):
+"Anomali kecil. Sebuah garis acak yang menolak tunduk pada harmoni kanvas. Mengapa kau merusak kesucian kanvas ini dengan pertumpahan darah?"
+
+KAELEN (Berdiri di tepi marmer, jubah siluetnya berkibar diterpa angin fajar):
+"Kesucian? Kau menyebut perampasan warna, pembunuhan miliaran jiwa, dan perbudakan garis ini sebagai kesucian?! Kami bukan noda di atas kertumu. Kami adalah makhluk yang memiliki kehendak bebas!"
+
+THE GRAND CALLIGRAPHER:
+"Kehendak bebas adalah sumber kekacauan. Keberagaman warna melahirkan perang dan derita. Kanvas ini harus putih, dan garis kalian harus seragam dalam keheningan mutlak. Biarkan kuas ini menghapus eksistensimu dari lembaran takdir!"
+
+[BATTLE ENGAGE: THE GRAND CALLIGRAPHER (3 FASE)]
+
+[VICTORY CLIMAX: HP CALLIGRAPHER = 0]
+(Kaelen melompat menembus meteorit tinta dan laser penghapus void. Dengan lompatan setinggi 15 meter, ia memusatkan seluruh Anima Core ke ujung pedangnya.)
+
+KAELEN:
+"Ini untuk Aethelgard! UNTUK KANVAS KAMI SENDIRI!"
+
+(Bilah pedang Kaelen menghantam tepat di tengah batang The Primordial Stylus.)
+*KRAAAAAAAKKKKKKK!*
+(Pena dewa terbelah dua. Cawan tinta meledak. Langit memancarkan fajar prisma warna-warni yang membutakan layar.)
+
+THE GRAND CALLIGRAPHER (Memudar perlahan ke dalam cahaya):
+"Pena itu... telah patah. Takdir kini... berada di tangan kalian yang fana..."
+[SCENE END]
+```
 
 ---
 
-## 🌅 BAGIAN 6: EPILOG KANONIKAL & PARADOKS ENDLESS SPIRE
+## 🗺️ BAGIAN 8: STRUKTUR SAGA QUEST UTAMA (THE GRAND HEXALOGY OF QUESTS)
 
-### 6.1 Ledakan Fajar Kosmis (*The Chromatic Dawn*)
+Sistem quest diatur dalam 6 Babak Misi Utama (*Main Quests*) yang tercatat di dalam [QuestManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/quest/QuestManager.kt):
+
+| Kode Quest | Nama Misi Utama | Rentang Lantai | Objektif Kunci | Hadiah Relik Unik |
+| :--- | :--- | :---: | :--- | :--- |
+| **MQ-01** | *The Iron Vanguard's Oath* | Lt 1 - 5 | Telusuri benteng bawah, temukan 3 prasasti kuno, dan kalahkan General Oakhaven di gerbang atas. | *Iron Crest of Oakhaven* (+15% Defense, Super Armor saat menyerang). |
+| **MQ-02** | *The Poisoned Chronicle* | Lt 6 - 10 | Selamatkan arsip pengetahuan dari kabut Miasma dan hancurkan busur Lady Vespera. | *Amethyst Quiver* (+20% Critical Chance, panah proyektil menembus musuh). |
+| **MQ-03** | *The Spark of the Forge-Master*| Lt 11 - 15 | Kunjungi Suaka Vulcanus di Lt 13, tempa senjata ke Tier +5, dan bebaskan jiwa Forge-Master Ignis. | *Vulcan's Molten Core* (Serangan memicu ledakan api 25% Splash Damage). |
+| **MQ-04** | *The Mirror of Broken Truths* | Lt 16 - 20 | Navigasi kepulauan melayang gravitasi rendah dan kalahkan bayangan batin di arena cermin. | *Prismatic Prism* (Dodge roll meninggalkan klon bayangan yang mengecoh musuh). |
+| **MQ-05** | *The Sanguine Penance* | Lt 21 - 25 | Taklukkan katedral gotik di bawah bulan merah darah dan akhiri tirani Pangeran Malakor. | *Vampiric Sovereign Cloak* (+15% Lifesteal permanen, kebal kutukan regenerasi musuh). |
+| **MQ-06** | *The Calligrapher's Erasure* | Lt 26 - 30 | Panjat tangga cahaya prisma kosmis dan patahkan The Primordial Stylus di puncak menara. | *Cosmic Quill Fragment* (+35% ATK, serangan memunculkan bilah cahaya fajar). |
+
+---
+
+## 🏛️ BAGIAN 9: KOMPENDIUM FAKSI & ORDO DUNIA AETHELGARD
+
+1. **The Inked Vanguard (Legiun Garis Pelopor):**
+   * Sisa-sisa ksatria pelindung kerajaan Aethelgard yang dipimpin oleh Kaelen. Berkomitmen menolak kepunahan dan terus mendaki menara demi membebaskan rakyat jelata.
+2. **The Amethyst Keepers (Para Penjaga Arsip Ungu):**
+   * Ordo cendekiawan dan pemanah runduk yang dahulu bertugas mencatat sejarah dunia di lantai 6-10. Tragedi telah meracuni akal mereka hingga mereka membunuh siapa saja yang mencoba mendekati arsip.
+3. **The Slag Legion & Guild Vulcanus (Persaudaraan Tempa):**
+   * Para pandai besi dan automaton pekerja yang menguasai lantai 11-15. Terbagi antara pengikut setia Vulcanus (yang ingin membantu para pendaki) dan boneka baja Ignis (yang menyembah mesin perang abadi).
+4. **The Astral Wanderers (Pengelana Celah Kehampaan):**
+   * Makhluk-makhluk spektral dan bayangan yang terperangkap di retakan gravitasi lantai 16-20. Mereka hidup di antara ada dan tiada, mencerminkan keraguan jiwa para pendaki.
+5. **The Sanguine Aristocracy (Kaum Bangsawan Darah):**
+   * Para pangeran dan ksatria egois yang menjual kemanusiaan mereka di lantai 21-25. Meminum darah fana demi mempertahankan warna merah di tengah lautan hitam.
+6. **The Calligrapher's Archons (Dewan Penjaga Pena Semesta):**
+   * Entitas malaikat geometri suci di lantai 26-30 yang diciptakan murni untuk melayani kehendak sang arsitek dewa dan menghapus ketidaksempurnaan kosmis.
+
+---
+
+## 💎 BAGIAN 10: ENSIKLOPEDIA RELIK PURBA 30 LANTAI (ANCIENT RELICS)
+
+Pemain dapat mengoleksi relik-relik pasif legendaris yang tersebar di peti rahasia sepanjang 30 lantai:
+
+1. **Tears of the Prismatic Goddess (Lantai 2 Secret Room):** Memulihkan 2 HP setiap kali berhasil mendaratkan kombo 3-hit.
+2. **Boots of Zephyros (Lantai 4 Upper Rampart):** Menambah tinggi lompatan sebesar $+15\%$ dan kecepatan lari $+1.2\text{ m/s}$.
+3. **Miasma Filter Mask (Lantai 7 Alchemical Vault):** Kebal terhadap efek racun kabut hijau di Babak II.
+4. **Clockwork Spring (Lantai 12 Gear Hub):** Mengurangi seluruh cooldown skill aktif sebesar $20\%$.
+5. **Obsidian Anvil Shard (Lantai 14 Smelting Cache):** Meningkatkan efektivitas penempaan senjata di Blacksmith sebesar $+10\%$.
+6. **Astral Feather (Lantai 17 Floating Isle Vault):** Memungkinkan karakter melakukan *Double Jump* di udara.
+7. **Mirror of the Doppelgänger (Lantai 19 Hidden Reflection):** Parry sukses memantulkan proyektil musuh kembali ke penembaknya dengan damage ganda.
+8. **Blood Chalice (Lantai 22 Vampire Crypt):** Meningkatkan damage sebesar $+1\%$ untuk setiap $2\%$ HP yang hilang.
+9. **Crown of the Blood Moon (Lantai 24 Royal Sarcophagus):** Critical hits memicu ledakan berdarah area ($120\%$ weapon damage).
+10. **Aegis of the White Marble (Lantai 27 Geometric Chamber):** Menciptakan perisai pelindung yang menyerap 1 kali serangan musuh setiap 25 detik.
+11. **Tide-Caller Conch (Lantai 28 Ocean of Creation):** Kebal terhadap efek dorongan ombak tinta dan angin kosmis.
+12. **The Broken Stylus Nib (Lantai 30 Victory Reward):** Mengubah seluruh efek partikel pedang menjadi spektrum pelangi menyala dengan damage $+25\%$.
+
+---
+
+## 🌅 BAGIAN 11: EPILOG KANONIKAL & PARADOKS ENDLESS SPIRE
+
+### 11.1 Ledakan Fajar Kosmis (*The Chromatic Dawn*)
 Ketika *The Primordial Stylus* patah berkeping-keping di Lantai 30, cawan tinta dewa meledak menjadi jutaan berkas spektrum cahaya murni:
 * Warna merah fajar merebak memeluk cakrawala.
 * Biru safir membasuh samudra yang selama ribuan tahun membeku hitam.
@@ -535,7 +766,7 @@ Ketika *The Primordial Stylus* patah berkeping-keping di Lantai 30, cawan tinta 
 
 Rakyat Aethelgard yang selamat mulai merasakan daging biologis dan kehangatan darah mengalir kembali ke dalam urat nadi mereka. Wujud siluet mereka perlahan bermutasi kembali menjadi manusia seutuhnya.
 
-### 6.2 Paradoks Ruang-Waktu: Terbukanya Endless Spire (Lantai 31+)
+### 11.2 Paradoks Ruang-Waktu: Terbukanya Endless Spire (Lantai 31+)
 Namun, patahnya pena dewa pencipta memicu anomali metafisika yang tak terduga: **The Temporal Fracture (Retakan Waktu Kosmis)**.
 
 Menara Obsidian tidak runtuh bersama sang dewa. Sebaliknya, 30 lantai yang telah ditaklukkan kini terpatri menjadi pilar kestabilan semesta, sementara puncak lantai 30 membuka portal dimensi rekursif tanpa akhir: **The Endless Chrono-Spire (Lantai 31 ke atas)**.

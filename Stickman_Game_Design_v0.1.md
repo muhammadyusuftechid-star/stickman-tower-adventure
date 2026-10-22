@@ -150,4 +150,144 @@ Setiap lantai kampanye memuat 1 buah Prasasti Kuno interaktif (*LoreTablet*):
 4. **Pemberian Hadiah:** Membaca setiap tablet memberikan bonus instan $+50\text{ Gold}$ dan $+25\text{ EXP}$. Mengumpulkan ke-30 tablet membuka achievement legendaris **"Arsiparis Sejati Aethelgard"** dan gelar kehormatan *The Grand Loremaster*.
 
 ---
+
+## 7. Matematika Platforming & Kinematika Fisika (Physics & Navigation Equations)
+
+Untuk menjamin kontrol terasa presisi, responsif, dan bebas *floaty*, pergerakan karakter diimplementasikan menggunakan integrasi Euler semi-implisit:
+
+### 7.1 Formula Integrasi Kinematika Gerak
+$$\Delta t = \min(\text{Gdx.graphics.deltaTime}, 0.033\text{s})$$
+$$v_{y, t+1} = \max(v_{y, t} + g \cdot \Delta t, v_{terminal})$$
+$$x_{t+1} = x_t + v_x \cdot \Delta t$$
+$$y_{t+1} = y_t + v_{y, t+1} \cdot \Delta t$$
+
+* Gravitasi Standar Menara: $g = -28.0\text{ m/s}^2$
+* Gravitasi Rendah (Babak IV Astral): $g = -14.0\text{ m/s}^2$
+* Batas Kecepatan Jatuh Maksimum (*Terminal Velocity*): $v_{terminal} = -24.0\text{ m/s}$
+
+### 7.2 Amplop Jangkauan Lompatan (Jump Reach Envelope)
+Berdasarkan parameter kecepatan lompat awal ($v_{jump}$) dan kecepatan lari horizontal ($v_{run}$):
+
+* **Waktu Melayang di Udara (*Air Time*):**
+  $$t_{air} = \frac{2 \times v_{jump}}{|g|}$$
+* **Tinggi Lompatan Maksimum ($H_{max}$):**
+  $$H_{max} = \frac{v_{jump}^2}{2|g|}$$
+* **Jarak Tempuh Horizontal Lompatan Maksimum ($D_{reach}$):**
+  $$D_{reach} = v_{run} \times t_{air}$$
+
+| Karakter | $v_{run}$ | $v_{jump}$ | $t_{air}$ (Standar) | $H_{max}$ (Tinggi) | $D_{reach}$ (Jarak Tempuh) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Kaelen (Balanced)** | $7.5\text{ m/s}$ | $11.5\text{ m/s}$ | $0.82\text{ detik}$ | **$2.36\text{ meter}$** | **$6.16\text{ meter}$** |
+| **Zephyr (Agile)** | $9.5\text{ m/s}$ | $12.2\text{ m/s}$ | $0.87\text{ detik}$ | **$2.65\text{ meter}$** | **$8.28\text{ meter}$** |
+| **Gorgon (Heavy)** | $5.8\text{ m/s}$ | $10.8\text{ m/s}$ | $0.77\text{ detik}$ | **$2.08\text{ meter}$** | **$4.47\text{ meter}$** |
+
+> **Prinsip Level Design Map Luas:** Seluruh celah jurang wajib berada di bawah batas minimum karakter terberat ($D_{gap} \le 4.0\text{ meter}$ untuk jalur utama, atau $D_{gap} \le 6.0\text{ meter}$ jika disediakan platform gantung perantara).
+
+### 7.3 Logika Platform Satu Arah (One-Way Stepping Platforms)
+Karakter dapat melompat menembus platform dari bawah dan mendarat di atasnya jika:
+1. `player.bounds.y >= platform.y + platform.height - 0.25f` (Kaki berada di dekat atau di atas permukaan atas platform).
+2. `player.velocityY <= 0` (Karakter sedang bergerak turun atau diam di puncak parabola).
+3. Jika tombol `[DOWN] + [JUMP]` ditekan, platform diabaikan selama $0.25$ detik untuk memungkinkan *drop-down*.
+
+---
+
+## 8. Bestiarium Komprehensif 18 Tipe Musuh & AI FSM (Enemy Bestiary)
+
+Setiap bioma dihuni oleh 3 tipe musuh unik dengan pola perilaku Finite State Machine (FSM): `IDLE` $\rightarrow$ `PATROL` $\rightarrow$ `CHASE` $\rightarrow$ `ATTACK` $\rightarrow$ `STAGGER` $\rightarrow$ `DEAD`.
+
+| ID | Nama Musuh | Bioma | HP Base | ATK | DEF | Speed | Range | Pola Serangan & Ciri Khas AI |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
+| **E01** | *Crimson Grunt* | Act I | 45 | 6 | 0 | 3.2 m/s | 1.2 m | Ayunan pedang tumpul 1-2 hit, mundur saat di-parry. |
+| **E02** | *Amethyst Sniper* | Act I & II | 35 | 9 | 0 | 2.5 m/s | 9.0 m | Membidik 1.2 detik sebelum menembakkan panah ungu; lari jika pemain mendekat. |
+| **E03** | *Crimson Berserker* | Act I | 80 | 14 | 2 | 2.8 m/s | 1.8 m | Ayunan kapak lambat ber-super armor; tidak bisa di-stagger serangan biasa. |
+| **E04** | *Corrupted Scribe* | Act II | 70 | 12 | 1 | 3.0 m/s | 7.5 m | Melemparkan bola tinta pelacak (*Homing Orb*); teleportasi jika terkena kombo. |
+| **E05** | *Amethyst Stalker* | Act II | 60 | 16 | 0 | 5.5 m/s | 1.4 m | Menghilang transparan selama 3 detik, menusuk dari belakang pemain (*Backstab*). |
+| **E06** | *Venom Spitter* | Act II | 55 | 10 | 1 | 2.0 m/s | 6.0 m | Menyemburkan genangan racun di platform (memberikan Poison DoT). |
+| **E07** | *Obsidian Golem* | Act III | 220 | 22 | 6 | 1.8 m/s | 2.0 m | Kebal knockback; hantaman tinju gempa radial (*Ground Smash*). |
+| **E08** | *Clockwork Automaton*| Act III | 140 | 18 | 3 | 4.2 m/s | 1.5 m | Memutar gergaji dada beruntun 4-hit; meluncur cepat ke arah pemain. |
+| **E09** | *Slag Brute* | Act III | 180 | 25 | 4 | 2.2 m/s | 2.2 m | Melemparkan bongkahan batu magma mendidih ke arah pemain. |
+| **E10** | *Void Phantom* | Act IV | 160 | 28 | 2 | 4.5 m/s | 2.5 m | Monster terbang nirkaki; menyerang menukik tajam dari sudut buta atas. |
+| **E11** | *Astral Archer* | Act IV | 120 | 32 | 1 | 3.5 m/s | 11.0 m | Menembakkan 2 anak panah bintang beruntun berkecepatan $18\text{ m/s}$. |
+| **E12** | *Echo Stalker* | Act IV | 200 | 30 | 3 | 5.0 m/s | 1.8 m | Meniru gerakan tebasan dan dodge roll pemain; mampu melakukan parry balik. |
+| **E13** | *Sanguine Zealot* | Act V | 240 | 38 | 3 | 4.8 m/s | 1.6 m | Serangan tusukan rapier beruntun; darahnya meledak saat mati (*Death Burst*). |
+| **E14** | *Crimson Vampire Bat*| Act V | 110 | 26 | 0 | 6.0 m/s | 1.2 m | Kelelawar terbang lincah; setiap gigitan memulihkan 50% HP yang dicuri. |
+| **E15** | *Bloodblade Knight* | Act V | 380 | 48 | 7 | 3.0 m/s | 2.4 m | Ksatria berpedang eksekusi dua tangan; tebasan gelombang darah horizontal. |
+| **E16** | *Celestial Sentry* | Act VI | 450 | 55 | 8 | 4.0 m/s | 2.0 m | Prajurit siluet putih bercahaya; mampu memblokir 3 serangan pertama pemain. |
+| **E17** | *Temporal Archon* | Act VI | 380 | 50 | 5 | 3.2 m/s | 8.0 m | Memancarkan aura gelembung waktu (*Time Slow Field*); proyektil laser geometris. |
+| **E18** | *Primordial Shadow* | Act VI | 550 | 65 | 6 | 4.6 m/s | 2.2 m | Makhluk tinta murni; membelah menjadi 2 bayangan kecil jika HP $< 30\%$. |
+
+---
+
+## 9. Arsitektur Runic Barrier, Procedural Map Chunks & BFS Reachability Guarantee
+
+### 9.1 Data Structure & Entity Modeling
+```kotlin
+data class RunicBarrier(
+    val id: String,
+    val bounds: Rectangle,
+    val requiredRuneType: RuneColor, // RED, BLUE, GOLD
+    var isUnlocked: Boolean = false
+)
+
+data class RuneKey(
+    val id: String,
+    val position: Vector2,
+    val runeType: RuneColor,
+    var isCollected: Boolean = false
+)
+
+enum class RuneColor { RED, BLUE, GOLD }
+```
+
+### 9.2 Zero-Softlock Mathematical Proof (Algoritma Graf BFS 30 Lantai)
+Untuk memastikan tidak ada pemain yang terperangkap pada peta luas:
+1. Setiap lantai direpresentasikan sebagai graf berarah berbobot $G = (V, E)$, di mana $V$ adalah platform dan $E$ adalah lompatan yang valid secara kinematika ($D \le D_{reach}, H \le H_{max}$).
+2. Node Kunci Rune ($K$) dan Node Pintu Segel ($D$) disimulasikan:
+   $$\text{Path}(S \rightarrow K) \land \text{Path}(K \rightarrow D) \land \text{Path}(D \rightarrow \text{Exit})$$
+3. Jika unit test `Campaign30FloorsReachabilityTest` menemukan simpul $v$ yang tidak dapat mencapai *Exit* setelah $K$ terambil, build akan gagal secara otomatis (*Fail-Fast Pipeline*).
+
+---
+
+## 10. Sistem Bakat RPG 60 Level (Talent Tree Specifications)
+
+Pemain memperoleh **1 Talent Point per Kenaikan Level** (Total 59 poin pada Level 60) yang dialokasikan di [TalentManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/talent/TalentManager.kt):
+
+```mermaid
+graph TD
+    subgraph Offense["Path of the Blade (Jalur Penyerangan)"]
+        O1["Tier 1: Keen Edge (+10% Basic Attack DMG)"] --> O2["Tier 2: Critical Mastery (+8% CRIT Chance)"]
+        O2 --> O3["Tier 3: Executioner (+20% DMG pada musuh HP < 30%)"]
+        O3 --> O4["Tier 4: Bloodflow Cleave (Tebasan menimbulkan pendarahan DoT)"]
+        O4 --> O5["Tier 5 Apex: God of Blades (Finisher kombo mereset 50% Cooldown Skill)"]
+    end
+
+    subgraph Defense["Path of the Aegis (Jalur Pertahanan)"]
+        D1["Tier 1: Iron Skin (+15 Max HP, +2 Base DEF)"] --> D2["Tier 2: Parry Fortitude (Parry memulihkan 4% Max HP)"]
+        D2 --> D3["Tier 3: Unyielding Stance (Kebal stagger saat melancarkan Skill)"]
+        D3 --> D4["Tier 4: Guardian Shield (Mendapat barrier 15% HP saat HP kritis)"]
+        D4 --> D5["Tier 5 Apex: Titan Immortal (Mencegah kematian 1x per lantai, revive 30% HP)"]
+    end
+
+    subgraph Mobility["Path of the Phantom (Jalur Kelincahan & Utilitas)"]
+        M1["Tier 1: Swift Steps (+12% Movement Speed)"] --> M2["Tier 2: Shadow Dash (Cooldown Dodge berkurang 25%)"]
+        M2 --> M3["Tier 3: Soul Harvester (+25% EXP & Gold dari musuh)"]
+        M3 --> M4["Tier 4: Phantom Surge (Dodge melewati musuh memberikan debuff Armor Break)"]
+        M4 --> M5["Tier 5 Apex: Chrono Warp (Parry sempurna memicu Slow-Motion dunia 2 detik)"]
+    end
+```
+
+---
+
+## 11. Arsitektur Dynamic BGM & Audio Synthesis
+
+* Game menggunakan arsitektur audio adaptif berdasarkan state pertarungan dan bioma saat ini:
+  * **Exploration State:** Musik atmosferik berirama rendah ($60 - 75\text{ BPM}$) dengan denting harpa kesepian dan desau angin.
+  * **Combat State (Ketika Musuh Mendeteksi Pemain):** Perkusi drum perang intens ($125 - 140\text{ BPM}$) menyatu mulus tanpa henti (*Cross-Fade Duration 1.2 detik*).
+  * **Boss Encounter State:** Orkestrasi epik dengan paduan suara vokal sintetis dan ritme menegangkan ($150\text{ BPM}$).
+* Efek suara (*Sound FX*) procedural osilator:
+  * `PARRY_SUCCESS`: Frekuensi $1,760\text{ Hz}$ (A6) modulasi sinus meluruh selama $0.4\text{ detik}$.
+  * `CRITICAL_HIT`: Suara retakan kaca berfrekuensi tinggi ($2,400\text{ Hz}$) berpadu getaran sub-bass ($55\text{ Hz}$).
+
+---
 *GDD v2.0 ini mengikat seluruh implementasi teknis kode, generator level, aset visual, audio, dan sistem data game Stickman Tower Adventure.*
+
