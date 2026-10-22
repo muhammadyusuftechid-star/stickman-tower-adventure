@@ -1,12 +1,12 @@
-# 🚀 Alur & Rencana Kerja Pengembangan: Ekspansi 30 Lantai Menara Aethelgard
-### *Master Production Roadmap — The 30-Floor Megastructure & Explorable Vast Maps*
+# 🚀 Alur & Rencana Kerja Pengembangan: Ekspansi 50 Lantai Menara Aethelgard
+### *Master Production Roadmap — The 50-Floor Canonical Megastructure & Hero Odyssey Pipeline*
 
 > **Dokumen Rujukan Desain & Narasi:**
-> - 📜 **Kanon Cerita & Saga 30 Lantai:** [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md)
-> - 📄 **Spesifikasi Game Design v2.0:** [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md)
+> - 📜 **Kanon Cerita & Saga 50 Lantai:** [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md)
+> - 📄 **Spesifikasi Game Design v3.0:** [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md)
 > - 📚 **Alur Fondasi Sebelumnya (F0 - F23):** [Alur_Pembuatan_Aplikasi.md](file:///home/yusuf/projekan/game/game1/Alur_Pembuatan_Aplikasi.md)
 >
-> **Target Proyek:** Mengembangkan ekspansi kampanye menara dari 10 lantai menjadi **30 lantai terkurasi penuh**, memperluas dimensi map horizontal dan vertikal ($110\text{m} - 160\text{m} \times 22\text{m} - 38\text{m}$), mengimplementasikan sequence Prologue awal yang mendalam, menghadirkan 6 bos legendaris penjaga babak (*Apex Gatekeepers*), 30 Prasasti Batu Hitam (*The 30 Lore Tablets*), serta menjamin bebas *softlock* dengan validasi graf BFS matematis.
+> **Target Proyek:** Mengembangkan kampanye menara menjadi **50 lantai terkurasi penuh**, mengimplementasikan sistem penemuan dan pembukaan karakter in-game (Kaelen awal $\rightarrow$ Zephyr di Lt 10 $\rightarrow$ Gorgon di Lt 20), sequence Prologue Padang Abu (*The Ashen Threshold*), penugasan karakter spesifik per bioma, 18+ varian musuh dengan latar belakang naratif, 50 Prasasti Batu Hitam (*The 50 Lore Tablets*), validasi graf BFS matematis bebas *softlock*, serta optimasi memori Android 60 FPS stabil.
 
 ---
 
@@ -14,32 +14,34 @@
 
 ```mermaid
 graph TD
-    L1["<b>LEVEL 1: FASE UTAMA (Makro)</b><br/>Tahapan milestone besar ekspansi 30 lantai"]
-    L2["<b>LEVEL 2: MODUL & FITUR (Meso)</b><br/>Kelompok fungsional level design luas, bioma, prolog, & bos"]
-    L3["<b>LEVEL 3: KOMPONEN & TASK TEKNIS (Mikro)</b><br/>Class, algoritma builder, hitbox, AI bos, & integrasi UI"]
-    L4["<b>LEVEL 4: ATOMIC CHECKLIST (Terkecil)</b><br/>Tugas atomik, kriteria kelulusan DoD, & unit test"]
+    L1["<b>LEVEL 1: FASE UTAMA (Makro)</b><br/>Tahapan milestone besar ekspansi 50 lantai (Fase 24 s/d 32)"]
+    L2["<b>LEVEL 2: MODUL & FITUR (Meso)</b><br/>Kelompok fungsional level design luas, bioma 5 saga, unlock hero, & bos"]
+    L3["<b>LEVEL 3: KOMPONEN & TASK TEKNIS (Mikro)</b><br/>Class, algoritma builder, sistem tag-team, AI bos, & integrasi UI"]
+    L4["<b>LEVEL 4: ATOMIC CHECKLIST (Terkecil)</b><br/>Tugas atomik, kriteria kelulusan DoD, & automated unit test"]
 
     L1 --> L2 --> L3 --> L4
 ```
 
 ---
 
-## 2. Roadmap Visual Keseluruhan (30-Floor Pipeline)
+## 2. Roadmap Visual Keseluruhan (50-Floor Hero Pipeline)
 
 ```mermaid
 flowchart TD
     subgraph FondasiLama["Status Fondasi Sebelumnya (Selesai 100%)"]
-        Old["Fase 0 - 23: Core Engine, Combat, 10-Floor Prototype, Boss Rush, & UI Polish"]
+        Old["Fase 0 - 23: Core Engine, Combat, Prototype 10 Lantai, Boss Rush, & UI Polish"]
     end
 
-    subgraph Ekspansi30Lantai["Pipeline Eksekusi Ekspansi 30 Lantai (Fase 24 - 30)"]
-        Old --> F24["FASE 24: Fondasi Arsitektur 30 Lantai & Sequence Prolog Padang Abu"]
-        F24 --> F25["FASE 25: Level Design Peta Luas & Panjang (Act I & II: Lantai 1 - 10)"]
-        F25 --> F26["FASE 26: Ekspansi Bioma Tengah & Suaka Vulcanus (Act III & IV: Lantai 11 - 20)"]
-        F26 --> F27["FASE 27: Ekspansi Bioma Puncak & Duel Sang Penulis Takdir (Act V & VI: Lantai 21 - 30)"]
-        F27 --> F28["FASE 28: Integrasi 30 Lore Tablets & Modernisasi Story Codex 30 Bab"]
-        F28 --> F29["FASE 29: Verifikasi Matematis Reachability (BFS Graph 30 Lantai) & Balancing Level 60"]
-        F29 --> F30["FASE 30: Optimasi Memori Android, Rilis Master APK & Dokumentasi Akhir"]
+    subgraph Ekspansi50Lantai["Pipeline Eksekusi Ekspansi 50 Lantai (Fase 24 - 32)"]
+        Old --> F24["FASE 24: Fondasi Arsitektur 50 Lantai & Prolog Padang Abu (Kaelen Solo)"]
+        F24 --> F25["FASE 25: Saga I (Lantai 1-10) & Penyelamatan Zephyr di Lantai 10 (Co-op Boss Vespera)"]
+        F25 --> F26["FASE 26: Saga II (Lantai 11-20) Infiltrasi Zephyr & Pembebasan Gorgon di Lantai 20"]
+        F26 --> F27["FASE 27: Saga III (Lantai 21-30) Penetrasi Dinding Batu Titan oleh Gorgon"]
+        F27 --> F28["FASE 28: Saga IV (Lantai 31-40) Retakan Astral & Kuil Gerhana Darah Malakor"]
+        F28 --> F29["FASE 29: Saga V (Lantai 41-50) Puncak Kanvas Kosmis & The Grand Calligrapher (3-Fase Dewa)"]
+        F29 --> F30["FASE 30: Integrasi 50 Lore Tablets & Modernisasi Story Codex 50 Bab"]
+        F30 --> F31["FASE 31: Verifikasi Matematis Reachability (BFS Graph 50 Lantai) & Balancing Level 80"]
+        F31 --> F32["FASE 32: Profiling Memori Android, Frustum Culling, Build Master APK & Dokumentasi Final"]
     end
 ```
 
@@ -49,169 +51,176 @@ flowchart TD
 
 ---
 
-### FASE 24: Fondasi Arsitektur 30 Lantai & Sequence Prologue Padang Abu
-> **Tujuan Makro:** Menyesuaikan arsitektur sistem save, logika transisi lantai, dan memperkenalkan sequence Prologue interaktif di luar menara (*The Ashen Threshold*) yang menjelaskan mengapa ksatria harus menjelajahi menara.
+### FASE 24: Fondasi Arsitektur 50 Lantai & Sequence Prologue Padang Abu
+> **Tujuan Makro:** Menyesuaikan skema persistensi data untuk menampung batas 50 lantai, sistem penguncian karakter progresif (hanya Kaelen yang terbuka di awal), dan mengimplementasikan sequence Prologue interaktif di Padang Abu (*The Ashen Threshold*).
 
 #### Modul 24.1: Migrasi Skema Data & Manajemen Batas Lantai
-- **Task 24.1.1: Pembaruan SaveData & Konstanta Batas Lantai**
-  - [ ] Perbarui konstanta `MAX_STORY_FLOORS = 30` di seluruh modul sistem (menggantikan batasan lama 10 lantai).
-  - [ ] Perbarui `SaveData.kt` untuk menyimpan progres hingga Lantai 30, termasuk koleksi 30 tablet dan rekor tiap babak.
-  - [ ] Pastikan algoritma checksum 64-bit Salted FNV-1a tetap kompatibel dengan save data versi sebelumnya.
-- **Task 24.1.2: Pengujian Migrasi Save State**
-  - [ ] Buat unit test `SaveDataMigration30FloorsTest` untuk memvalidasi bahwa pemain dengan progres lama tidak mengalami crash atau kehilangan item.
+- **Task 24.1.1: Pembaruan SaveData & Konstanta Batas 50 Lantai**
+  - [ ] Perbarui konstanta `MAX_STORY_FLOORS = 50` di seluruh modul sistem (menggantikan batasan lama).
+  - [ ] Perbarui `SaveData.kt` versi 3: inisialisasi default `unlockedCharacters = arrayListOf("STICKMAN_SWORD")` (Kaelen).
+  - [ ] Tambahkan status pelacakan event cerita: `isZephyrRescued: Boolean`, `isGorgonRescued: Boolean`.
+  - [ ] Pertahankan kompatibilitas Salted FNV-1a Checksum 64-bit agar save data pemain lama tidak rusak.
+- **Task 24.1.2: UI Gembok Runic di CharacterSelectScreen**
+  - [ ] Jika `save.highestTowerFloor < 10` dan `STICKMAN_DAGGER` belum ada di save, tampilkan overlay gembok runik transparan pada slot Zephyr dengan teks `[TERKUNCI - CAPAI & SELESAIKAN LANTAI 10]`.
+  - [ ] Jika `save.highestTowerFloor < 20` dan `STICKMAN_HEAVY` belum ada di save, tampilkan overlay gembok runik pada slot Gorgon dengan teks `[TERKUNCI - CAPAI & SELESAIKAN LANTAI 20]`.
 
-#### Modul 24.2: Sequence Prologue Interaktif (The Ashen Threshold)
-- **Task 24.2.1: Pembuatan Level Prologue Khusus (Floor 0 / Tutorial)**
-  - [ ] Buat builder `buildPrologueFloor()` di `TowerLevelBuilder.kt` dengan latar belakang Padang Pasir Abu di luar gerbang menara ($90\text{m} \times 18\text{m}$).
-  - [ ] Tambahkan properti visual: patung ksatria yang larut menjadi genangan tinta, badai partikel abu kelabu, dan gerbang menara tertutup rantai purba.
-- **Task 24.2.2: Implementasi Naskah Dialog & Lentera Roh Aria**
-  - [ ] Integrasikan naskah dialog interaktif Aria saat Kaelen pertama kali terbangun di Padang Abu.
-  - [ ] Tambahkan tutorial kinetik di Prolog:
-    - *Langkah 1:* Menggerakkan karakter untuk melawan pelarutan tinta (*The Dissolution*).
-    - *Langkah 2:* Melakukan tebasan kombo pada rantai gerbang untuk membebaskan jalur masuk.
-    - *Langkah 3:* Melompat menembus ambang pintu Lantai 1 dengan suara dentang judul game yang megah.
+#### Modul 24.2: Pembuatan Sequence Prologue Interaktif
+- **Task 24.2.1: Pembuatan PrologueScreen.kt**
+  - [ ] Tampilkan layar kegelapan total dengan audio tetesan tinta meluruh (*Drip... Drip... Drip...*).
+  - [ ] Animasi bangkitnya Kaelen di atas pasir abu dengan tubuh siluet yang berkedip transparan akibat gravitasi kutukan *Dissolution*.
+  - [ ] Animasi melayang turunnya lentera Aria dengan dialog dramatis dan tutorial kombo tebasan memecahkan rantai gerbang menara.
+  - [ ] Transisi mulus ke Lantai 1 setelah adegan pembuka selesai.
 
 ---
 
-### FASE 25: Level Design Peta Luas & Panjang (Act I & II: Lantai 1 - 10)
-> **Tujuan Makro:** Merekonstruksi Lantai 1 s/d 10 menjadi bentangan map luas ($110\text{m} - 150\text{m}$), menghadirkan sistem pintu segel runik, rute bercabang, dan pertarungan klimaks melawan Jenderal Oakhaven (Lt 5) dan Lady Vespera (Lt 10).
+### FASE 25: Saga I (Lantai 1-10) & Penyelamatan Zephyr di Lantai 10
+> **Tujuan Makro:** Membangun bentangan peta luas Lantai 1 s/d 10 dipimpin oleh Kaelen, duel kehormatan melawan General Oakhaven di Lantai 5, serta cutscene dramatis penyelamatan Zephyr dan duel co-op melawan Lady Vespera di Lantai 10.
 
-#### Modul 25.1: Rekonstruksi Act I — Benteng Bawah (Lantai 1 - 5)
-- **Task 25.1.1: Perluasan Skala Map & Rute Bercabang Lantai 1 - 4**
-  - [ ] **Lantai 1 (Ambang Besi):** Perluas menjadi $110\text{m} \times 22\text{m}$. Rute atas (menara jaga) vs rute bawah.
-  - [ ] **Lantai 2 (Pelataran Duri):** Perluas menjadi $125\text{m} \times 25\text{m}$. Jurang duri panjang dengan platform bertingkat aman.
-  - [ ] **Lantai 3 (Gudang Senjata):** Perluas menjadi $130\text{m} \times 28\text{m}$. Implementasi pintu segel *Runic Barrier* pertama yang membutuhkan penemuan *Rune Key* di ruang bawah tanah.
-  - [ ] **Lantai 4 (Benteng Runtuh):** Perluas menjadi $140\text{m} \times 30\text{m}$. Platform batu yang runtuh (*crumbling platforms*) dengan lompatan akrobatik beruntun.
-- **Task 25.1.2: Penyesuaian Arena Bos Lantai 5 (General Oakhaven)**
-  - [ ] Desain arena colosseum megah berukuran $95\text{m} \times 24\text{m}$ berpilar emas.
-  - [ ] Kalibrasi ulang stat HP Oakhaven ($850\text{ HP}$) dan AI Enrage Cross Wind Slash.
+#### Modul 25.1: Level Design Peta Luas Saga I (Lantai 1 - 9)
+- **Task 25.1.1: Pembuatan Map Benteng Bawah ($110\text{m} - 140\text{m}$)**
+  - [ ] **Lantai 1-4:** Koridor batu berlumur tinta beku, tutorial platform satu arah (*one-way drop*), duri obsidian, dan peti rahasia.
+  - [ ] **Lantai 5 (Arena Jenderal Oakhaven):** Arena colosseum berpilar emas $95\text{m} \times 24\text{m}$, implementasi AI 2-fase Oakhaven (*Shield Shockwave* & *Cross Wind Slash*).
+  - [ ] **Lantai 6-9:** Reruntuhan tembok luar benteng dengan platform runtuh (*crumbling platforms*) dan gerombolan Crimson Grunt serta Amethyst Sniper.
+- **Task 25.1.2: Mekanisme Runic Barrier Pertama**
+  - [ ] Implementasikan pintu segel runik merah di Lantai 3 dan 8 yang menuntut pemain mencari kunci *Rune Key* di cabang lorong samping.
 
-#### Modul 25.2: Rekonstruksi Act II — Makam Warna & Arsip Amethyst (Lantai 6 - 10)
-- **Task 25.2.1: Perluasan Skala Map & Mekanik Miasma Lantai 6 - 9**
-  - [ ] **Lantai 6 (Perpustakaan Tinta):** Perluas menjadi $135\text{m} \times 26\text{m}$. Platform rak buku bergerak (*moving shelves*).
-  - [ ] **Lantai 7 (Laboratorium Alkimia):** Perluas menjadi $145\text{m} \times 30\text{m}$. Mutator kabut racun *Toxic Miasma* dan zona pembersih *Cleansing Totems*.
-  - [ ] **Lantai 8 (Kawah Pelarut):** Perluas menjadi $150\text{m} \times 32\text{m}$. Danau asam tinta hitam dengan jembatan rantai berayun.
-  - [ ] **Lantai 9 (Menara Pemburu):** Perluas menjadi $140\text{m} \times 34\text{m}$ bertingkat vertikal tinggi dengan angin dorong horizontal.
-- **Task 25.2.2: Penyesuaian Arena Bos Lantai 10 (Lady Vespera)**
-  - [ ] Arena sarang kristal ungu berukuran $100\text{m} \times 26\text{m}$.
-  - [ ] Kalibrasi stat Lady Vespera ($1,800\text{ HP}$), serangan panah hujan racun, dan balok laser *Void Piercer*.
+#### Modul 25.2: Sarang Lady Vespera & Co-op Unlock Zephyr di Lantai 10
+- **Task 25.2.1: Pembuatan Event Penyelamatan di Lantai 10**
+  - [ ] Render kepompong sutra ungu kristal tempat Zephyr disekap di atas sarang laba-laba.
+  - [ ] Tombol interaksi kombo tebasan Kaelen untuk memotong jaring dan membebaskan Zephyr.
+  - [ ] Implementasikan mode **Co-op Companion AI / Tag-Team**: Zephyr bertarung bersama Kaelen mengalihkan perhatian dan memotong tali busur Vespera saat bos melancarkan hujan panah racun.
+- **Task 25.2.2: Unlock Kemenangan Zephyr**
+  - [ ] Saat Lady Vespera gugur, simpan `unlockedCharacters.add("STICKMAN_DAGGER")` ke `SaveData`.
+  - [ ] Munculkan banner perayaan legendaris: **"PAHLAWAN BARU BERGABUNG: ZEPHYR THE SHADOWSTALKER!"**.
 
 ---
 
-### FASE 26: Ekspansi Bioma Tengah & Suaka Vulcanus (Act III & IV: Lantai 11 - 20)
-> **Tujuan Makro:** Membangun 10 lantai baru untuk Bioma Kawah Tempa Vulcanus (Lantai 11-15) dan Retakan Astral Nirbobot (Lantai 16-20), termasuk hub peristirahatan Suaka Vulcanus di Lantai 13.
+### FASE 26: Saga II (Lantai 11-20) Infiltrasi Zephyr & Pembebasan Gorgon di Lantai 20
+> **Tujuan Makro:** Menugaskan Zephyr memimpin infiltrasi lorong sempit perpustakaan dan saluran roda gigi kawah tempa, memperkenalkan Suaka Tempa Vulcanus di Lantai 13, duel Forge-Master Ignis di Lantai 15, serta pembebasan Gorgon dari pilar kawah di Lantai 20.
 
-#### Modul 26.1: Konstruksi Act III — Kawah Tempa & Katakomba Baja (Lantai 11 - 15)
-- **Task 26.1.1: Pembuatan Level Map Industri Magma (Lantai 11 - 14)**
-  - [ ] **Lantai 11 (Pintu Air Magma):** Map $130\text{m} \times 24\text{m}$ dengan jebakan semburan api berkala (*Flame Jets*).
-  - [ ] **Lantai 12 (Labirin Roda Gigi):** Map $155\text{m} \times 32\text{m}$ dengan platform roda gigi berputar berdiameter 10 meter.
-  - [ ] **Lantai 13 (Suaka Vulcanus - Hub Safe Zone):** Map $90\text{m} \times 20\text{m}$ bebas monster dengan tungku emas menyala, interaksi dialog ramah Vulcanus & Aria, serta akses penempaan senjata.
-  - [ ] **Lantai 14 (Kawah Peleburan Titan):** Map $145\text{m} \times 30\text{m}$ dengan platform baja melayang dan semburan uap pendorong (*thermal lifts*).
-- **Task 26.1.2: Pembuatan Bos Lantai 15 (Forge-Master Ignis)**
-  - [ ] Desain bos baru: **Forge-Master Ignis (The Slag Colossus)** setinggi 3.5m berlapis pelat baja tembaga ($3,500\text{ HP}$).
-  - [ ] Implementasikan serangan palu gempa bumi (*Earthshaker Slam*) dan fase 2 menyerap magma cair (*Molten Core Enrage*).
+#### Modul 26.1: Level Design Saga II Khusus Kelincahan Zephyr (Lantai 11 - 19)
+- **Task 26.1.1: Platforming Celah Sempit & Saluran Pipa Uap**
+  - [ ] **Lantai 11-12:** Lorong roda gigi berputar dan pipa sempit ventilasi yang membutuhkan kecepatan lari $9.5\text{ m/s}$ dan double dagger Zephyr.
+  - [ ] **Lantai 13 (Suaka Vulcanus - Safe Hub):** Arena peristirahatan bebas monster, dialog mendalam Vulcanus, akses Blacksmith penempaan hingga Tier +6.
+  - [ ] **Lantai 14-19:** Jembatan baja tipis melintasi tungku lahar, jebakan pisau pendulum, semburan api berkala, dan musuh Corrupted Scribe serta Automaton.
+  - [ ] **Lantai 15 (Singgasana Ignis):** Bos raksasa lelehan baja dan palu lava dengan fase *Earthshaker Slam* dan *Molten Core*.
 
-#### Modul 26.2: Konstruksi Act IV — Retakan Astral Nirbobot (Lantai 16 - 20)
-- **Task 26.2.1: Pembuatan Level Map Kosmis Nirbobot (Lantai 16 - 19)**
-  - [ ] **Lantai 16 (Tebing Kehampaan):** Map $140\text{m} \times 35\text{m}$ dengan mutator *Low Gravity* ($g = -14.0\text{ m/s}^2$).
-  - [ ] **Lantai 17 (Kepulauan Melayang):** Map $160\text{m} \times 38\text{m}$ dengan kepulauan batu mengapung dan pusaran angin gravitasi.
-  - [ ] **Lantai 18 (Singularitas Gravitasi):** Map $135\text{m} \times 30\text{m}$ dengan kristal pengubah gravitasi terbalik periodik.
-  - [ ] **Lantai 19 (Lorong Cermin Jiwa):** Map $145\text{m} \times 28\text{m}$ dengan dinding cermin kaca hitam yang merefleksikan gerakan pemain.
-- **Task 26.2.2: Pembuatan Bos Lantai 20 (The Shadow Doppelgänger)**
-  - [ ] Arena cermin hitam datar tanpa batas berukuran $105\text{m} \times 24\text{m}$.
-  - [ ] Logika AI cermin: Meniru senjata, kombo, jurus Ultimate, dan tangkisan parry pemain secara presisi ($6,200\text{ HP}$).
+#### Modul 26.2: Ambang Tungku Titan & Pembebasan Gorgon di Lantai 20
+- **Task 26.2.1: Event Penyelamatan Pilar Titan Lantai 20**
+  - [ ] Tampilkan animasi Gorgon menahan pilar seberat ratusan ton dengan pundaknya di atas ruang pengungsi.
+  - [ ] Zephyr memotong tuas rantai lava dan Kaelen mengalihkan *The Slag Colossus*.
+  - [ ] Co-op Finishing: Gorgon melepaskan pundaknya, mengambil pedang raksasanya, dan membelah Slag Colossus menjadi dua!
+- **Task 26.2.2: Unlock Kemenangan Gorgon**
+  - [ ] Simpan `unlockedCharacters.add("STICKMAN_HEAVY")` ke `SaveData`.
+  - [ ] Munculkan banner perayaan legendaris: **"PAHLAWAN BARU BERGABUNG: GORGON THE IRONBREAKER!"**.
 
 ---
 
-### FASE 27: Ekspansi Bioma Puncak & Duel Sang Penulis Takdir (Act V & VI: Lantai 21 - 30)
-> **Tujuan Makro:** Membangun 10 lantai puncak untuk Bioma Kuil Gerhana Darah (Lantai 21-25) dan Puncak Kanvas Primordial (Lantai 26-30), menghadirkan duel melawan Pangeran Malakor (Lt 25) dan pertarungan pamungkas melawan The Grand Calligrapher 3-Fase (Lt 30).
+### FASE 27: Saga III (Lantai 21-30) Penetrasi Dinding Batu Titan oleh Gorgon
+> **Tujuan Makro:** Menugaskan Gorgon memimpin penembusan kawah basalt dan bendungan lahar menggunakan Super Armor dan Greatsword raksasa, mengalahkan Golem King di Lantai 25, serta menghadapi duel cermin di Lantai 30.
 
-#### Modul 27.1: Konstruksi Act V — Kuil Gerhana Bulan Merah (Lantai 21 - 25)
-- **Task 27.1.1: Pembuatan Level Map Gotik Vampirik (Lantai 21 - 24)**
-  - [ ] **Lantai 21 (Gerbang Bulan Darah):** Map $135\text{m} \times 26\text{m}$ dengan mutator regenerasi HP musuh di bawah sinar bulan merah.
-  - [ ] **Lantai 22 (Koridor Biara):** Map $150\text{m} \times 30\text{m}$ dengan pisau pendulum raksasa berayun (*Pendulum Blades*).
-  - [ ] **Lantai 23 (Altar Pengorbanan):** Map $140\text{m} \times 32\text{m}$ dengan fitur interaktif *Blood Altar* (tukar HP dengan buff lifesteal).
-  - [ ] **Lantai 24 (Katakomba Darah):** Map $155\text{m} \times 34\text{m}$ dengan puzzle pintu gerbang segel ganda (*Dual Blood Orbs*).
-- **Task 27.1.2: Pembuatan Bos Lantai 25 (Malakor The Crimson Sovereign)**
-  - [ ] Arena katedral gotik berjendela kaca patri merah berukuran $110\text{m} \times 28\text{m}$.
-  - [ ] Logika AI Malakor: Kecepatan tinggi, rapier thrust flurry, teleportasi kabut darah, lifesteal 20%, dan sayap kelelawar bayangan ($9,800\text{ HP}$).
-
-#### Modul 27.2: Konstruksi Act VI — Puncak Kanvas Primordial (Lantai 26 - 30)
-- **Task 27.2.1: Pembuatan Level Map Surga Marmer Putih (Lantai 26 - 29)**
-  - [ ] **Lantai 26 (Tangga Cahaya Prisma):** Map $145\text{m} \times 32\text{m}$ dengan platform cahaya ritmis yang muncul-hilang mengikuti tempo musik.
-  - [ ] **Lantai 27 (Geometri Temporal):** Map $155\text{m} \times 36\text{m}$ dengan puzzle portal rotasi warna dan musuh pemanipulasi waktu.
-  - [ ] **Lantai 28 (Lautan Tinta Purba):** Map $160\text{m} \times 34\text{m}$ dengan jembatan marmer dan gelombang pasang ombak tinta.
-  - [ ] **Lantai 29 (Ambang Sang Arsitek):** Map $130\text{m} \times 30\text{m}$ lorong pilar titan dengan gelombang musuh penjaga terakhir.
-- **Task 27.2.2: Pembuatan Bos Pamungkas Lantai 30 (The Grand Calligrapher)**
-  - [ ] Arena piringan marmer kosmis berukuran $120\text{m} \times 30\text{m}$ menghadap cakrawala Aethelgard.
-  - [ ] Implementasikan 3 Fase Pertarungan Dewa:
-    - *Fase 1 (100% - 70%):* Sapuan kuas pedang cahaya dan meteorit tinta.
-    - *Fase 2 (70% - 35%):* Penghapusan platform arena menjadi kehampaan (*The Void Eraser*).
-    - *Fase 3 (< 35%):* Wujud avatar dewa bertangan enam bersenjatakan *The Primordial Stylus* ($16,500\text{ HP}$).
-  - [ ] Cutscene interaktif patahnya pena dewa dan ledakan fajar spektrum warna (*The Chromatic Dawn*).
+#### Modul 27.1: Level Design Saga III Khusus Daya Hancur Gorgon (Lantai 21 - 29)
+- **Task 27.1.1: Rintangan Dinding Batu Titan & Lava Panas**
+  - [ ] **Lantai 21-24:** Dinding batu tebal yang hanya dapat diruntuhkan dengan kombo 3-hit atau skill Greatsword Gorgon. Musuh berpelat batu tebal (*Obsidian Golems* & *Slag Brutes*).
+  - [ ] **Lantai 25 (Raja Golem Magma):** Bos titan setinggi 4 meter berlapis magma cair; menuntut peremukan pelindung dengan *Guard Break*.
+  - [ ] **Lantai 26-29:** Ambang retakan angkasa; dinding menara mulai pecah memperlihatkan jurang kosmos berbintang cyan.
+- **Task 27.1.2: Duel Cermin Tiga Bayangan di Lantai 30**
+  - [ ] **Lantai 30 (The Nexus of Reflections):** Arena cermin obsidian hitam. Bos *The Shadow Doppelgänger* mencerminkan karakter yang sedang dimainkan pemain dan menguji penguasaan batin.
 
 ---
 
-### FASE 28: Integrasi 30 Lore Tablets & Modernisasi Story Codex 30 Bab
-> **Tujuan Makro:** Mengintegrasikan 30 entri Prasasti Batu Hitam interaktif di setiap lantai, serta memperbarui `StoryCodexScreen.kt` agar mampu menampilkan 30 bab kanonikal dengan mulus, bersih, dan bebas dempet.
+### FASE 28: Saga IV (Lantai 31-40) Retakan Astral & Kuil Gerhana Darah Malakor
+> **Tujuan Makro:** Mengimplementasikan mode sinergi Triad Tag-Team (pemain bebas berganti ketiga hero di Altar Prisma), navigasi kepulauan melayang gravitasi rendah, serta menembus katedral vampir Malakor di Lantai 40.
 
-#### Modul 28.1: Integrasi 30 Lore Tablets di TowerLevelBuilder
-- **Task 28.1.1: Pembuatan Data Model 30 Lore Tablets**
-  - [ ] Daftarkan 30 tablet dari `TABLET_1` hingga `TABLET_30` di `TowerLevelBuilder.kt` sesuai transkrip resmi pada [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md).
-  - [ ] Posisikan masing-masing tablet pada lokasi yang menantang dan relevan secara lingkungan di setiap lantai.
-
-#### Modul 28.2: Pembaruan Story Codex Screen (Arsitektur 30 Bab)
-- **Task 28.2.1: Dukungan Scrolling / Paginasi Bab Sidebar**
-  - [ ] Perbarui `StoryCodexScreen.kt` agar sidebar daftar bab mendukung scrolling mulus atau paginasi per babak (Act I s/d VI) untuk menampung 30 bab tanpa tumpang tindih.
-  - [ ] Pertahankan *Thematic Ink Capsule Pills* anti-dempet dengan jarak aman $8\text{px}$ dan palet warna tematik per bioma.
+#### Modul 28.1: Anomali Gravitasi Rendah & Kepulauan Melayang (Lantai 31 - 39)
+- **Task 28.1.1: Mutator Low Gravity ($g = -14.0\text{ m/s}^2$)**
+  - [ ] **Lantai 31-35:** Lompatan melayang 2x lebih tinggi, pusaran angin kosmis (*Gravitational Jump Vents*), pulau-pulau obsidian melayang bebas, musuh *Void Phantoms* dan *Astral Archers*. Bos Lantai 35: *The Void Chimera*.
+  - [ ] **Lantai 36-39:** Katedral gotik berdarah di bawah gerhana bulan merah darah (*Blood Moon*); musuh meregenerasi HP di bawah sinar bulan. Fitur interaktif *Blood Altar* pengorbanan.
+- **Task 28.1.2: Pertarungan Melawan Malakor The Crimson Sovereign di Lantai 40**
+  - [ ] Balairung katedral berjendela kaca patri merah. Duel 2-fase Malakor (*Rapier Thrust Flurry, Blood Mist Blink, Sayap Bayangan*).
 
 ---
 
-### FASE 29: Verifikasi Matematis Reachability (BFS Graph 30 Lantai) & Balancing Level 60
-> **Tujuan Makro:** Memverifikasi secara matematis bahwa seluruh 30 lantai dapat diselesaikan tanpa *softlock* menggunakan algoritma BFS graph solver, serta menyeimbangkan kurva progresi RPG pemain hingga Level 60.
+### FASE 29: Saga V (Lantai 41-50) Puncak Kanvas Kosmis & The Grand Calligrapher
+> **Tujuan Makro:** Membangun babak marmer putih suci transendental, tangga fajar prisma kosmis, serta pertarungan klimaks pamungkas 3-fase melawan The Grand Calligrapher di Lantai 50.
 
-#### Modul 29.1: Ekstensi LevelReachabilityGraph & Sanity Validator
-- **Task 29.1.1: Validasi Matematis 30 Lantai Menara**
-  - [ ] Perbarui `LevelReachabilityGraph.kt` untuk menguji ketercapaian portal keluar pada seluruh 30 lantai berdasarkan amplop kinematika karakter ($H_{jump} \approx 4.5$m, $D_{reach} \approx 8.5$m).
-  - [ ] Pastikan tidak ada platform buntu yang memerangkap pemain (*Zero Softlock Guarantee*).
-- **Task 29.1.2: Unit Test Suite Reachability Otomatis**
-  - [ ] Buat unit test `Campaign30FloorsReachabilityTest` yang mengeksekusi validasi 30 lantai secara otomatis pada `./gradlew test`.
-
-#### Modul 29.2: Balancing Kurva RPG & Ekonomi Emas
-- **Task 29.2.1: Penyesuaian Formula EXP & Talent Points**
-  - [ ] Uji formula $\text{EXP}(L) = 100 \times L^{1.35}$ untuk memastikan pemain mencapai Level $55 - 60$ saat tiba di Lantai 30.
-  - [ ] Pastikan perolehan koin emas dari peti dan musuh mencukupi untuk penempaan senjata hingga Tier +10 Primordial di Suaka Vulcanus.
+#### Modul 29.1: Arsitektur Marmer Putih Surga (Lantai 41 - 49)
+- **Task 29.1.1: Geometri Non-Euclidean & Lautan Tinta Purba**
+  - [ ] **Lantai 41-44:** Platform marmer putih bercahaya ritmis, aurora keemasan meliuk di angkasa, ombak pasang tinta (*Tidal Ink Waves*), musuh malaikat putih *Celestial Sentries*.
+  - [ ] **Lantai 45 (Archon of Pure Geometry):** Bos geometri malaikat tanpa wajah berlaser pembelah realitas.
+  - [ ] **Lantai 46-49:** Lorong pilar titan bertuliskan sejarah peradaban masa lalu, altar terakhir pengisian Anima Flask sebelum gerbang dewa.
+- **Task 29.1.2: Pertarungan Dewa Pamungkas Lantai 50 (The Grand Calligrapher)**
+  - [ ] Piringan marmer kosmis melayang menghadap cakrawala semesta.
+  - [ ] **Fase 1 (100% - 70%):** Sapuan kuas cahaya (*Slash Creation*) & hujan meteorit tinta.
+  - [ ] **Fase 2 (70% - 35%):** Penghapusan lantai arena menjadi kehampaan (*The Void Eraser*).
+  - [ ] **Fase 3 (< 35%):** Avatar dewa bertangan enam bersenjatakan *The Primordial Stylus* ($25,000\text{ HP}$).
+  - [ ] Cutscene kemenangan: Ketiga pahlawan melompat menyatukan bilah senjata mematahkan pena dewa, memicu ledakan Fajar Kosmis (*The Chromatic Dawn*).
 
 ---
 
-### FASE 30: Optimasi Memori Android, Rilis Master APK & Dokumentasi Akhir
-> **Tujuan Makro:** Memastikan performa rendering tetap stabil 60 FPS pada peta-peta luas tanpa *memory leak* atau alokasi objek berlebih (*zero allocation in render loop*), serta mem-build APK rilis master 30 lantai.
+### FASE 30: Integrasi 50 Lore Tablets & Modernisasi Story Codex 50 Bab
+> **Tujuan Makro:** Mendaftarkan 50 prasasti batu hitam interaktif di generator level dan merestrukturisasi `StoryCodexScreen.kt` dengan sistem tab 5 Saga agar mampu menampung 50 bab secara bersih, elegan, dan anti-dempet.
 
-#### Modul 30.1: Profiling Memori & Kamera Viewport Culling
-- **Task 30.1.1: Frustum Culling untuk Peta Panjang**
-  - [ ] Pastikan platform, duri, dan partikel di luar bidang pandang kamera viewport tidak di-render (*Frustum Bounding Box Culling*) guna menghemat GPU fillrate di perangkat mobile Android.
-- **Task 30.1.2: Build Rilis Master APK**
-  - [ ] Jalankan `./gradlew test --console=plain` dan pastikan seluruh test lulus 100%.
-  - [ ] Jalankan `./gradlew android:assembleRelease --console=plain` untuk menghasilkan APK rilis master 30 lantai.
-  - [ ] Salin file APK ke root workspace: `StickmanTowerAdventure_30Floors_Master.apk`.
+#### Modul 30.1: Registrasi 50 Tablet di TowerLevelBuilder
+- **Task 30.1.1: Pemasangan Data Model 50 Tablet**
+  - [ ] Daftarkan `TABLET_1` hingga `TABLET_50` sesuai transkrip kanonikal pada [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md).
+  - [ ] Tempatkan prasasti pada posisi yang diegetik dan relevan di setiap lantai dari Lantai 1 s/d 50.
 
+#### Modul 30.2: Redesain Story Codex Screen (Paginasi 5 Saga)
+- **Task 30.2.1: Tab Bar Navigasi 5 Saga di Sidebar**
+  - [ ] Implementasikan 5 tombol tab saga di sidebar: `[Saga I]`, `[Saga II]`, `[Saga III]`, `[Saga IV]`, `[Saga V]`.
+  - [ ] Masing-masing tab menampilkan 10 kapsul bab bertema bioma (*Thematic Ink Capsule Pills*) dengan jarak aman $10\text{px}$ bebas tumpang tindih.
+
+---
+
+### FASE 31: Verifikasi Matematis Reachability (BFS Graph 50 Lantai) & Balancing Level 80
+> **Tujuan Makro:** Memverifikasi secara matematis bahwa seluruh 50 lantai dapat diselesaikan tanpa *softlock* menggunakan algoritma BFS graph solver, serta menyeimbangkan kurva progresi RPG pemain hingga Level 80.
+
+#### Modul 31.1: Ekstensi LevelReachabilityGraph 50 Lantai
+- **Task 31.1.1: Automated BFS Reachability Test Suite**
+  - [ ] Perbarui `LevelReachabilityGraph.kt` untuk menguji amplop kinematika karakter terberat Gorgon ($D_{gap} \le 4.0\text{m}$) di seluruh 50 lantai.
+  - [ ] Buat unit test `Campaign50FloorsReachabilityTest` yang berjalan otomatis pada `./gradlew test`.
+
+#### Modul 31.2: Balancing Kurva EXP & Alokasi Talent Point 80 Level
+- **Task 31.2.1: Penyesuaian Formula EXP**
+  - [ ] Validasi formula $\text{EXP}(L) = 100 \times L^{1.35}$ untuk memastikan pemain mencapai Level $75 - 80$ di lantai puncak.
+  - [ ] Seimbangkan perolehan koin emas untuk penempaan senjata hingga Tier +10 Primordial di Suaka Vulcanus.
+
+---
+
+### FASE 32: Profiling Memori Android, Frustum Culling, Build Master APK & Dokumentasi Final
+> **Tujuan Makro:** Memastikan rendering tetap stabil 60 FPS pada peta-peta luas tanpa *memory leak* menggunakan frustum culling, mem-build APK rilis master 50 lantai, serta menyinkronkan seluruh dokumentasi.
+
+#### Modul 32.1: Optimasi Viewport Frustum Culling & Zero Allocation
+- **Task 32.1.1: Kamera Bounding Box Culling**
+  - [ ] Pastikan platform, duri, dan partikel di luar rentang $[-2\text{m}, +26\text{m}]$ dari kamera diabaikan dari pipeline render OpenGL ES.
+- **Task 32.1.2: Build Rilis Master APK 50 Lantai**
+  - [ ] Jalankan `./gradlew test --console=plain` (100% Passing).
+  - [ ] Jalankan `./gradlew android:assembleRelease --console=plain`.
+  - [ ] Salin output ke root workspace: `StickmanTowerAdventure_50Floors_Master.apk`.
+
+---
 
 ## 4. Arsitektur Class Diagram & Blueprint Komponen Teknis
-
-Untuk memandu implementasi kode yang bersih, modular, dan sesuai prinsip SOLID:
 
 ```mermaid
 classDiagram
     class TowerLevelBuilder {
         +buildFloor(floorIndex: Int): LevelData
-        -buildAct1Bastion(floor: Int): LevelData
-        -buildAct2Archives(floor: Int): LevelData
-        -buildAct3Foundry(floor: Int): LevelData
-        -buildAct4Astral(floor: Int): LevelData
-        -buildAct5Eclipse(floor: Int): LevelData
-        -buildAct6Zenith(floor: Int): LevelData
+        -buildSaga1Bastion(floor: Int): LevelData
+        -buildSaga2Foundry(floor: Int): LevelData
+        -buildSaga3Basalt(floor: Int): LevelData
+        -buildSaga4Astral(floor: Int): LevelData
+        -buildSaga5Zenith(floor: Int): LevelData
         -injectRunicBarriers(level: LevelData, floor: Int)
         -injectLoreTablets(level: LevelData, floor: Int)
+    }
+
+    class CharacterUnlockManager {
+        +isUnlocked(archetype: CharacterArchetype, save: SaveData): Boolean
+        +triggerFloor10RescueZephyr(save: SaveData)
+        +triggerFloor20RescueGorgon(save: SaveData)
+        +getHeroAssignmentForFloor(floor: Int): CharacterArchetype?
     }
 
     class PrologueScreen {
@@ -229,77 +238,54 @@ classDiagram
         -keys: Array<RuneKey>
         +onPlayerCollectKey(key: RuneKey)
         +canPassBarrier(player: Player, barrier: RunicBarrier): Boolean
-        +unlockBarrier(barrier: RunicBarrier)
     }
 
     class LevelReachabilityGraph {
-        -nodes: Array<PlatformNode>
-        -edges: Array<JumpEdge>
-        +buildGraphFromLevel(level: LevelData): Graph
         +validatePathToExit(level: LevelData): Boolean
         +findSoftlockDeadEnds(): List<PlatformNode>
     }
 
-    class BossEncounterManager {
-        -currentBoss: BossEntity
-        -currentPhase: Int
-        -arenaBounds: Rectangle
-        +update(delta: Float)
-        +onBossPhaseTransition(newPhase: Int)
-        +triggerVictoryCinematic()
-    }
-
-    TowerLevelBuilder --> RunicBarrierSystem : Injects entities
+    TowerLevelBuilder --> CharacterUnlockManager : Queries hero unlocks
+    TowerLevelBuilder --> RunicBarrierSystem : Injects barriers & keys
     TowerLevelBuilder --> LevelReachabilityGraph : Validates geometry
     PrologueScreen --> TowerLevelBuilder : Loads Floor 1 after Intro
-    BossEncounterManager --> TowerLevelBuilder : Instantiates Apex Bosses
 ```
 
 ---
 
-## 5. Matriks Manajemen Risiko & Strategi Mitigasi Senior Dev
+## 5. Matriks Manajemen Risiko & Mitigasi Senior Dev
 
-| Kategori Risiko | Potensi Dampak | Kemungkinan | Strategi Mitigasi Arsitektural (Senior Dev) |
+| Kategori Risiko | Dampak | Kemungkinan | Strategi Mitigasi Arsitektural (Senior Dev) |
 | :--- | :---: | :---: | :--- |
-| **Out of Memory (OOM) Android** | Kritis (Crash di HP) | Sedang | Terapkan **Frustum Bounding Box Culling**. Hanya objek dalam rentang $[-2\text{m}, +26\text{m}]$ dari kamera yang di-render. Gunakan *Object Pooling* (`Pool<Particle>`, `Pool<DamageText>`) untuk mencegah alokasi GC di render loop 60 FPS. |
-| **Softlock Desain Level** | Tinggi (Pemain terjebak) | Rendah | Jalankan **Automated Reachability BFS Unit Test** pada seluruh 30 lantai di CI/CD. Larang celah jurang horizontal $> 4.0\text{ meter}$ tanpa platform perantara satu arah. |
-| **Save Data Corruption** | Kritis (Progres hilang) | Sangat Rendah | Gunakan skema **Salted FNV-1a Checksum 64-bit** dan mekanisme *atomic file write* (`saveData.json.tmp` $\rightarrow$ `saveData.json`) dengan *defensive in-memory fallback*. |
-| **Tumpang Tindih UI (Text Clutter)** | Sedang (UX buruk) | Sangat Rendah | Terapkan pola **Thematic Ink Capsule Pills** (padding $14\text{px}$, margin $10\text{px}$, vertical spacing safe-zone) yang telah terbukti 10/10 pada perbaikan tipografi sebelumnya. |
-| **Spike Drop Frame pada Boss Fase 3** | Sedang (Lag combat) | Sedang | Pisahkan partikel visual ke dalam batch vertex statis; batasi jumlah proyektil aktif maksimum 24 proyektil pada saat bersamaan di arena bos. |
+| **OOM Android di Peta $160\text{m}$** | Kritis | Sedang | **Frustum Bounding Box Culling**: Hanya objek dalam rentang $[-2\text{m}, +26\text{m}]$ dari kamera yang diproses GPU. Gunakan *Object Pooling* untuk partikel dan floating text guna mencegah GC stutter di 60 FPS. |
+| **Softlock Desain Level 50 Lantai** | Tinggi | Rendah | Jalankan **Automated Reachability BFS Unit Test** pada seluruh 50 lantai di CI/CD. Jarak lompatan horizontal celah dibatasi $\le 4.0\text{m}$. |
+| **Kerusakan Save Data Progresif** | Kritis | Sangat Rendah | **Salted FNV-1a Checksum 64-bit** dan penulisan berkas atomik (`saveData.json.tmp` $\rightarrow$ `saveData.json`). |
+| **UI Dempet di Codex 50 Bab** | Sedang | Sangat Rendah | Paginasi 5 Tab Saga di `StoryCodexScreen.kt`, masing-masing 10 kapsul dengan vertical safe-padding $10\text{px}$. |
 
 ---
 
 ## 6. Kriteria Kualitas & Definition of Done (DoD) Per Fase
 
-Sebuah fase dinyatakan **SELESAI (100% DONE)** hanya jika memenuhi seluruh pintu kelulusan (*Quality Gates*) berikut:
-1. **Zero Compilation Warnings & Errors:** Kode Kotlin terkompilasi bersih tanpa *deprecated API* atau *type-unsafe casts*.
-2. **100% Passing Unit Test Suite:** Seluruh unit test (termasuk verifikasi reachability 30 lantai dan integritas checksum save) lulus hijau (`BUILD SUCCESSFUL`).
-3. **Zero Allocation in 60 FPS Render Loop:** Tidak ada instansiasi objek (`new` / alokasi memori heap) di dalam metode `render()` atau `update()` entitas gameplay.
-4. **Zero-Softlock Guarantee:** Seluruh 30 lantai telah divalidasi oleh algoritma BFS bahwa pintu keluar (*StageExit*) dapat dicapai dari titik *Spawn* oleh karakter dengan jangkauan terpendek (Gorgon).
-5. **Ergonomic & Non-Overlapping UI:** Tidak ada teks yang menumpuk, saling dempet, atau terpotong pada berbagai rasio layar Android (16:9, 18:9, 19.5:9, 20:9).
-6. **Physical Android Device Verification:** APK rilis dapat diinstal dan berjalan mulus 60 FPS stabil pada perangkat Android fisik.
+1. **Zero Warnings & Errors:** Kode Kotlin terkompilasi bersih tanpa *deprecated API*.
+2. **100% Passing Unit Test Suite:** Seluruh unit test (termasuk verifikasi reachability 50 lantai dan integritas save) lulus hijau.
+3. **Zero Allocation di 60 FPS Render Loop:** Tidak ada pembuatan objek baru di memori heap saat gameplay berjalan.
+4. **Zero-Softlock Guarantee:** Seluruh 50 lantai divalidasi oleh algoritma BFS bahwa pintu keluar dapat dicapai oleh karakter terberat (Gorgon).
+5. **Ergonomic & Non-Overlapping UI:** Desain antarmuka rapi dan terbaca jelas di seluruh aspek rasio layar Android.
+6. **Physical Android Device Verification:** APK rilis terpasang dan berjalan lancar 60 FPS di perangkat fisik Android.
 
 ---
 
 ## 7. Rencana Sprint & Panduan Lingkungan Dev (Laptop Linux Mint, 12 GB RAM)
 
-### 7.1 Estimasi Sprint Eksekusi (Sprint Breakdown)
-* **Sprint 1 (Fase 24):** 2 Hari Kerja — Migrasi skema SaveData 30 lantai & Sequence Prologue Padang Abu.
-* **Sprint 2 (Fase 25):** 3 Hari Kerja — Generator Map Luas Act I & II (Lantai 1-10) + Bos Oakhaven & Vespera.
-* **Sprint 3 (Fase 26):** 3 Hari Kerja — Generator Map Luas Act III & IV (Lantai 11-20) + Suaka Vulcanus & Bos Ignis/Doppelgänger.
-* **Sprint 4 (Fase 27):** 3 Hari Kerja — Generator Map Luas Act V & VI (Lantai 21-30) + Bos Malakor & The Grand Calligrapher (3 Fase).
-* **Sprint 5 (Fase 28):** 2 Hari Kerja — Integrasi 30 Lore Tablets & Modernisasi Story Codex Screen 30 Bab.
-* **Sprint 6 (Fase 29):** 2 Hari Kerja — BFS Graph Reachability Suite 30 Lantai & Penyeimbangan RPG Level 60.
-* **Sprint 7 (Fase 30):** 1 Hari Kerja — Profiling Android, Frustum Culling & Build Release Master APK.
-
-### 7.2 Tips Efisiensi Eksekusi Khusus Lingkungan Dev 12 GB RAM
-1. **Prioritaskan Testing Desktop LWJGL3:**
-   * Eksekusi `./gradlew lwjgl3:run` memakan waktu $< 3$ detik dan menggunakan RAM $\le 350\text{ MB}$, menghemat 95% waktu iterasi platforming dan combat.
-2. **Uji Langsung ke HP Fisik via ADB (Hindari Android Studio Emulator):**
-   * Menggunakan HP fisik via kabel USB (`adb install -r ...`) menghemat 6 GB RAM dan 12 GB disk space laptop.
-3. **Pembersihan Cache Berkala:**
-   * Jalankan `./gradlew clean` saat beralih antar sprint untuk menjaga sisa storage laptop tetap aman di atas 20 GB.
+* **Sprint 1 (Fase 24):** 2 Hari — SaveData V3 50 lantai, gembok runic di CharacterSelect, & Sequence Prologue Padang Abu.
+* **Sprint 2 (Fase 25):** 3 Hari — Saga I (Lantai 1-10) + Bos Oakhaven + Event Penyelamatan Zephyr di Lantai 10.
+* **Sprint 3 (Fase 26):** 3 Hari — Saga II (Lantai 11-20) Infiltrasi Zephyr + Suaka Vulcanus + Pembebasan Gorgon di Lantai 20.
+* **Sprint 4 (Fase 27):** 3 Hari — Saga III (Lantai 21-30) Penetrasi Gorgon + Golem King & Doppelgänger.
+* **Sprint 5 (Fase 28):** 3 Hari — Saga IV (Lantai 31-40) Retakan Astral & Kuil Gerhana Darah Malakor.
+* **Sprint 6 (Fase 29):** 3 Hari — Saga V (Lantai 41-50) Puncak Kanvas Kosmis & The Grand Calligrapher 3-Fase.
+* **Sprint 7 (Fase 30):** 2 Hari — Integrasi 50 Lore Tablets & Modernisasi Story Codex 50 Bab (Tab 5 Saga).
+* **Sprint 8 (Fase 31):** 2 Hari — BFS Graph Reachability Suite 50 Lantai & Penyeimbangan RPG Level 80.
+* **Sprint 9 (Fase 32):** 1 Hari — Profiling Android, Frustum Culling & Build Master APK 50 Lantai.
 
 ---
-*Dokumen ini merupakan Panduan Resmi Fase Pengembangan Ekspansi 30 Lantai untuk Stickman Tower Adventure. Setiap modul wajib diimplementasikan sesuai urutan hierarkis dan kriteria Definition of Done (DoD).*
-
+*Dokumen ini merupakan Panduan Resmi Fase Pengembangan Ekspansi 50 Lantai untuk Stickman Tower Adventure. Setiap modul wajib diimplementasikan sesuai urutan hierarkis dan kriteria Definition of Done (DoD).*

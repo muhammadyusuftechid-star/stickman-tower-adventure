@@ -1,9 +1,9 @@
 # Alur dan Rencana Kerja Pembuatan Aplikasi: Stickman Tower Adventure
 
 > **Dokumen Rujukan Utama:**
-> - 📄 Desain Mekanik & Arsitektur (GDD v2.0): [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md)
-> - 📜 Kanon Cerita, Worldbuilding & 30-Floor Master Chronicle: [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md)
-> - 🚀 Roadmap Lanjutan Fase 24 - 30 (Ekspansi Megastruktur 30 Lantai & Peta Luas): [Alur_Pengembangan_Ekspansi_30_Lantai.md](file:///home/yusuf/projekan/game/game1/Alur_Pengembangan_Ekspansi_30_Lantai.md)
+> - 📄 Desain Mekanik & Arsitektur (GDD v3.0): [Stickman_Game_Design_v0.1.md](file:///home/yusuf/projekan/game/game1/Stickman_Game_Design_v0.1.md)
+> - 📜 Kanon Cerita, Worldbuilding & 50-Floor Master Chronicle: [LORE_AND_WORLDBUILDING.md](file:///home/yusuf/projekan/game/game1/LORE_AND_WORLDBUILDING.md)
+> - 🚀 Roadmap Lanjutan Fase 24 - 32 (Ekspansi Megastruktur 50 Lantai & Hero Odyssey): [Alur_Pengembangan_Ekspansi_30_Lantai.md](file:///home/yusuf/projekan/game/game1/Alur_Pengembangan_Ekspansi_30_Lantai.md)
 > 
 > **Tech Stack:** Kotlin, libGDX, Gradle, Tiled Map Editor, Target Android & Desktop (LWJGL3)  
 > **Metode Pembagian:** Dekomposisi Bertingkat — dari Makro (Fase Utama), Meso (Modul Fungsional), Mikro (Komponen/Task), hingga Terkecil (Atomic Checklist & Kriteria Selesai).
@@ -876,7 +876,7 @@ flowchart TD
 | **P11 (Companion)**| Fase 21 | Sistem Pendamping Roh Tinta (Aria, Vulcanus, Phantom) | Follow kinematics, Prismatic Spark, Molten Burn & Echo Slash [SELESAI] |
 | **P12 (Alchemy)** | Fase 22 | Sistem Soket Rune & Altar Pengorbanan Anima | 4 Tipe Rune Senjata, 3 Pakta Temporal Darah, Altar Prosedural [SELESAI] |
 | **P13 (Boss Rush)**| Fase 23 | Mode Gauntlet Para Raja & Balairung Sang Legenda | Gauntlet 5 Bos, Peringkat S/A/B, 4 Gelar Kehormatan & Hall of Legends [SELESAI] |
-| **P14 (Megastruktur)**| Fase 24 - 30 | Ekspansi 30 Lantai, Peta Luas, Prolog Padang Abu, 6 Apex Bos & 30 Tablets | Dokumentasi Master terperinci di [Alur_Pengembangan_Ekspansi_30_Lantai.md](file:///home/yusuf/projekan/game/game1/Alur_Pengembangan_Ekspansi_30_Lantai.md) [TERENCANA] |
+| **P14 (Megastruktur)**| Fase 24 - 32 | Ekspansi 50 Lantai, Hero Unlock Odyssey (Zephyr Lt 10, Gorgon Lt 20), Bestiarium 18 Musuh & 50 Tablets | Dokumentasi Master terperinci di [Alur_Pengembangan_Ekspansi_30_Lantai.md](file:///home/yusuf/projekan/game/game1/Alur_Pengembangan_Ekspansi_30_Lantai.md) [TERENCANA] |
 
 
 ---
