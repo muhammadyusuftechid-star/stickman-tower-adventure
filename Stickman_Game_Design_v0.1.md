@@ -218,8 +218,8 @@ Diimplementasikan pada [VirtualController.kt](file:///home/yusuf/projekan/game/g
 
 ## 8. Verifikasi Kualitas & Standar Rilis (Quality Assurance & Production Sign-off)
 
-* **Unit Test Automation:** Seluruh modul inti memiliki cakupan pengujian komprehensif sebanyak **92/92 Unit Tests lolos (100% Pass Rate)** pada engine Gradle test runner.
-* **Target Build Android:** Kompilasi bersih tanpa *warning* kritis dengan output APK mandiri [StickmanTowerAdventure.apk](file:///home/yusuf/projekan/game/game1/StickmanTowerAdventure.apk).
+* **Unit Test Automation:** Seluruh modul inti memiliki cakupan pengujian komprehensif sebanyak **149/149 Unit Tests lolos (100% Pass Rate)** pada engine Gradle test runner.
+* **Target Build Android:** Kompilasi bersih tanpa *warning* kritis dengan output APK mandiri [StickmanTowerAdventure.apk](file:///home/yusuf/projekan/game/game1/StickmanTowerAdventure.apk) dan Android App Bundle (`.aab`) untuk Google Play Store.
 * **Integritas Versi:** Kode sumber dan dokumen desain tersinkronisasi penuh pada branch utama Git repository (`origin/main`).
 
 ---
@@ -555,7 +555,116 @@ Saat berinteraksi dengan NPC di Suaka Vulcanus (Lantai 6), pemain disajikan pili
 
 ---
 
+## 🎵 20. Arsitektur Audio Master BGM Prosedural & Pipeline Post-Processing VFX (Fase 20)
+
+Untuk memperkuat imersi atmosferik dunia monokrom Aethelgard tanpa membebani ukuran file instalasi dengan rekaman WAV/MP3 raksasa, seluruh lanskap audio latar dan efek visual post-processing diproses secara dinamis di [ProceduralMusicEngine.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/audio/ProceduralMusicEngine.kt) dan [PlayScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/PlayScreen.kt):
+
+### 20.1 Sintesis Musik Latar Dinamis (Dynamic Adaptive Soundtrack)
+Engine audio menyintesis gelombang frekuensi osilator multi-channel secara real-time yang berevolusi mengikuti tahapan pendakian:
+1. **Act I: Benteng Bawah (Lantai 1-3):** Deringan bas rendah dan ritme perkusi terisolasi, mencerminkan reruntuhan kota kuno yang beku.
+2. **Act II: Arsip Alkimia Kaca (Lantai 4-6):** Harmoni kristal nada tinggi bergaung misterius dengan efek modulasi frekuensi mirip desis uap racun.
+3. **Act III: Tebing Astral & Gerhana (Lantai 7-9):** Ritme tempo cepat dengan disonansi nada kosmis yang memicu ketegangan psikologis.
+4. **Act IV: Singgasana Kanvas Primordial (Lantai 10):** Komposisi orkestra megah bertempo penuh saat konfrontasi melawan Sang Kaligrafer Agung.
+5. **Endless Spire:** Aransemen poliritmik prosedural paradoks waktu yang tidak pernah berulang sama.
+6. **Boss Rush Mode (Gauntlet of Sovereigns):** Ketukan perkusi perang intensif tanpa henti yang memompa adrenalin pemain.
+7. **Suaka Vulcanus (Lantai 6 & Hub):** Irama hangat melankolis berpadu dengan dentingan paron pelan di kejauhan.
+
+### 20.2 Pipeline Post-Processing Visual Effects
+* **Hitstop Micro-Freeze (80ms):** Menghentikan pembaruan posisi aktor selama 80 milidetik saat *Perfect Parry* atau tebasan finisher mendarat, memberikan bobot kinetik yang kuat (*juiciness*).
+* **Screen Flash (0.15s):** Kilatan layar putih monokrom sesaat yang memudar halus saat skill pemungkas dilepaskan.
+* **Critical Anima Vignette:** Gradasi bayangan merah pekat berdenyut di keempat sudut layar ketika HP ksatria berada di bawah $25\%$.
+* **Kinetic Camera Shake:** Amplitudo getaran kamera proporsional dengan besaran damage yang diterima atau dampak tumbukan meteorit.
+
+---
+
+## 🕊️ 21. Sistem Roh Pendamping Tinta / Ink Familiar Companions (Fase 21)
+
+Diimplementasikan pada [InkFamiliar.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/companion/InkFamiliar.kt) dan [FamiliarType.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/companion/FamiliarType.kt), fitur ini memberikan pendamping spiritual terbang yang melayang di samping bahu ksatria dengan kinematika pegas peredam (*Spring-Damper Kinematics*, $k = 6.5\text{ m/s}$):
+
+```
+       [KSATRIA BERGERAK] ──> [TARGET KINEMATIKA POSISI BAHU]
+                                       │
+                                       ▼
+                     [INTERPOLASI LERP SPRING-DAMPER]
+                                       │
+                ┌──────────────────────┴──────────────────────┐
+                ▼                                             ▼
+       [AURA PASIF AKTIF]                            [TRIGGER SERANGAN SPESIAL]
+     Bonus Stat & Magnetik                       Kombo 10x / Tebasan / Parry
+```
+
+### 21.1 Tiga Roh Pendamping Kanonikal
+1. **Gema Lentera Aria (`ARIA_WISP`):**
+   * *Syarat Buka:* Terbuka sejak awal pendakian (Lantai 1).
+   * *Kemampuan Pasif:* Magnetik emas Aethel (+20% radius daya tarik dan perolehan koin).
+   * *Serangan Spesial:* Menembakkan proyektil *Prismatic Spark* (16 DMG) ke musuh terdekat setiap kelipatan 10 kombo.
+   * *Palet Visual:* Pendar Cyan Kristal (`#59F2D9`) berpadu Emas Suci (`#FFD94D`).
+2. **Bara Suci Vulcanus (`VULCAN_SPARK`):**
+   * *Syarat Buka:* Terbuka setelah mengunjungi Suaka Vulcanus di Lantai 6.
+   * *Kemampuan Pasif:* Memberikan peluang 25% pembakaran bara api (*Molten Burn*, +14 DMG biasa / +20 DMG bos) pada setiap serangan tebasan pedang.
+   * *Palet Visual:* Kobaran Jingga Api (`#FF611F`) dan Kuning Bara (`#FFE040`).
+3. **Bayangan Hantu Astral (`PHANTOM_SHADOW`):**
+   * *Syarat Buka:* Terbuka setelah menundukkan Doppelgänger di Lantai 8.
+   * *Kemampuan Pasif:* Memicu tebasan bayangan radial *Echo Slash* (+24 AoE DMG) seketika saat pemain berhasil melakukan *Perfect Parry*.
+   * *Palet Visual:* Ungu Mistis Astral (`#AD38F2`) dan Merah Delima (`#F22E47`).
+
+### 21.2 Quick Selector & Integrasi HUD
+Pemain dapat beralih di antara roh yang telah terbuka kapan saja melalui menu jeda (*Pause Menu Quick Selector*) tanpa kehilangan progres pertarungan. Status roh aktif ditampilkan di pojok kiri atas HUD di bawah bilah status karakter.
+
+---
+
+## 🔮 22. Sistem Transmutasi Rune Kuno & Altar Pengorbanan Anima (Fase 22)
+
+### 22.1 Soket Rune Senjata di Suaka Vulcanus
+Setiap senjata ksatria memiliki **2 Soket Rune Kuno** yang dapat dipasang di [BlacksmithScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/BlacksmithScreen.kt) menggunakan batu rune yang dijatuhkan oleh para bos menara di [RuneType.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rune/RuneType.kt):
+
+| Tipe Rune | Simbol | Asal Drop Bos | Efek Stat Ksatria |
+| :--- | :---: | :--- | :--- |
+| **Rune Surya Vulcanus** (`RUNE_SOLAR`) | `☼` | Penempaan Awal | +8 Bonus ATK Senjata Langsung |
+| **Rune Rembulan Aria** (`RUNE_LUNAR`) | `☽` | Bos Tower Guardian (L3) | +10% Damage Taken Reduction (Maksimal Cap 40%) |
+| **Rune Badai Kael** (`RUNE_TEMPEST`) | `⚡` | Bos Amethyst Matron (L5) | +15% Cooldown Reduction Skill & Dodge (Cap 45%) |
+| **Rune Palung Obsidian** (`RUNE_ABYSS`) | `☯` | Bos Grand Calligrapher (L10) | +8% Critical Chance & +4% Vampiric Lifesteal |
+
+### 22.2 Altar Pengorbanan Anima (Blood Altar)
+Monolit obsidian kuno setinggi 2.4 meter yang muncul secara prosedural di Lantai 4, Lantai 7, dan setiap kelipatan 3 lantai di Endless Spire melalui [BloodAltar.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/world/BloodAltar.kt):
+* **Biaya Pengorbanan:** Pemain harus mempersembahkan **25% Anima HP saat ini** (dijamin aman anti-kill, minimal tersisa 1 HP).
+* **Pilihan Tiga Pakta Temporal Eksklusif:**
+  1. *Pakta Pembantaian (`CARNAGE`):* +40% Critical Damage, namun pertahanan fisik ksatria berkurang 15%.
+  2. *Pakta Ketamakan (`GREED`):* +60% Pecahan Aethel Gold dari musuh, namun musuh bergerak 20% lebih agresif.
+  3. *Pakta Kecepatan Jiwa (`SWIFTNESS`):* +35% CDR skill & dodge, namun seluruh pemulihan HP (lifesteal, parry heal) diblokir selama berada di lantai aktif.
+
+---
+
+## 👑 23. Mode Gauntlet Para Raja (Boss Rush) & Balairung Sang Legenda (Fase 23)
+
+Diakses melalui [GauntletScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/GauntletScreen.kt) atau tombol pintas di menu utama, mode ini menghadirkan ujian murni keterampilan bertarung menghadapi kelima penguasa menara secara beruntun tanpa henti di [BossRushManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/bossrush/BossRushManager.kt):
+
+### 23.1 Alur Gauntlet 5 Bos Maraton
+1. **Tahap 1:** Jenderal Oakhaven (Benteng Bawah — Lantai 3)
+2. **Tahap 2:** The Amethyst Matron (Kawah Alkimia Kaca — Lantai 5)
+3. **Tahap 3:** The Shadow Doppelgänger (Balairung Cermin Bayang — Lantai 8)
+4. **Tahap 4:** The Crimson Sovereign (Kuil Gerhana Darah — Lantai 9)
+5. **Tahap 5:** The Grand Calligrapher (Singgasana Kanvas Primordial — Lantai 10)
+
+*Pemulihan Parsial:* Setelah tiap bos dikalahkan, transisi jeda 2.5 detik memulihkan $+35\%$ Anima HP pemain sebelum bos berikutnya diterjunkan ke arena.
+
+### 23.2 Sistem Evaluasi Waktu & Medali Peringkat (BossRushRank)
+Waktu tempuh dihitung menggunakan timer stopwatch presisi millidetik zero-heap:
+* **Rank S (Grandmaster Kinetik):** Waktu $\le 180$ detik ($3:00$) $\rightarrow$ Hadiah 1.000 Gold + Gelar Kehormatan `TITEL_CHRONO_SLAYER` (*Simbol: ★ S ★*, Emas Bercahaya).
+* **Rank A (Veteran Penantang Menara):** Waktu $\le 270$ detik ($4:30$) $\rightarrow$ Hadiah 500 Gold + Gelar Kehormatan `TITEL_SOVEREIGN_BANE` (*Simbol: ◆ A ◆*, Cyan Kristal).
+* **Rank B (Ksatria Penyintas):** Berhasil menamatkan seluruh 5 bos $\rightarrow$ Hadiah 250 Gold (*Simbol: ▲ B ▲*, Hijau Zamrud).
+
+### 23.3 Empat Gelar Kehormatan Ksatria Aethelgard (Knight Titles)
+Gelar yang terbuka dapat dipasang pemain melalui layar [BossRushScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/BossRushScreen.kt) dan akan dipajang dengan warna khas di atas kepala siluet ksatria pada HUD gameplay:
+1. `TITEL_NOVICE` — **"Pendaki Pemula"** (Gelar bawaan bagi seluruh ksatria siluet).
+2. `TITEL_SOVEREIGN_BANE` — **"Bencana Para Raja"** (Diberikan atas kemenangan Gauntlet dengan Peringkat A).
+3. `TITEL_CHRONO_SLAYER` — **"Penebas Sang Waktu"** (Dianugerahkan kepada petarung agung berperingkat S di bawah 3 menit).
+4. `TITEL_SPIRE_CONQUEROR` — **"Penakluk Puncak Menara"** (Dianugerahkan kepada penyintas lantai 20+ Endless Spire).
+
+---
+
 *Dokumen Game Design Document (GDD) v1.0 ini merupakan spesifikasi desain resmi dan kanon final untuk pengembangan dan produksi game **Stickman Tower Adventure**.*
+
 
 
 

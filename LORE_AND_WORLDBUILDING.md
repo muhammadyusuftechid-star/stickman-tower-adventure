@@ -1206,10 +1206,112 @@ Ketika pemain berdiri diam tanpa melakukan aksi input (*Idle State* $> 4.0\text{
 ### 23.4 Bisikan Babak IV & Endless Spire (Lantai 10+)
 * *"Kanvas ini terlalu putih... terlalu hening... robeklah keheningannya!"*
 * *"Waktu telah patah... setiap langkah ke atas adalah tarian tanpa akhir."*
+* *"Mangkuk altar berlumur darah menuntut persembahan... apakah kau berani mengorbankan jiwamu?"*
+* *"Arwah para raja berdiri di balik kabut... mereka menunggu ujian ketangkasanmu."*
+
+---
+
+## 🕊️ BAGIAN 24: MITOLOGI ROH PENDAMPING TINTA (THE INK FAMILIARS)
+
+Ketika semesta Aethelgard diserap oleh *The Great Inking*, tidak semua jiwa manusia luruh sepenuhnya menjadi tinta mati tanpa bentuk. Sebagian percikan emosi yang paling murni memadat menjadi entitas spiritual penolong yang dikenal sebagai **Roh Pendamping Tinta (*The Ink Familiars*)**. Entitas ini tidak memiliki tubuh biologis, melainkan melayang di udara menyerupai kunang-kunang siluet bercahaya yang setia menuntun ksatria pengelana:
+
+### 24.1 Gema Lentera Aria (Aria's Wisp — `ARIA_WISP`)
+> *"Lentera ini tidak dinyalakan oleh minyak atau lilin fana, melainkan oleh kerinduan seorang gadis yang menolak melupakan hangatnya pelangi."*
+
+* **Kanon Penciptaan:**  
+  Ketika Aria ditawan dan diseret oleh rantai takdir menuju lantai atas menara, ia memecahkan lentera kaca kecil miliknya di gerbang Lantai 1. Pecahan kaca tersebut menyatu dengan tetesan pigmen cyan dan emas terakhir di kantong jubahnya. Percikan lentera ini menolak padam; ia melayang di samping bahu ksatria, berdenyut lembut bagaikan detak jantung kedua.
+* **Resonansi Spiritual:**  
+  *Gema Lentera Aria* memiliki afinitas alami terhadap cahaya surya. Kehadirannya menarik kepingan-kepingan emas Aethel yang berserak di lantai menara bagaikan magnet spiritual (+20% radius daya tarik). Ketika ksatria melancarkan tarian kombo tanpa cela (kelipatan 10 tebasan), lentera ini melepaskan proyektil suci *Prismatic Spark* yang menembus pertahanan musuh dengan kilatan cahaya pelangi.
+
+### 24.2 Bara Suci Vulcanus (Vulcan's Spark — `VULCAN_SPARK`)
+> *"Sebuah percikan api yang lahir dari kemarahan seorang penempa terhadap dewa yang mencuri warna dunianya."*
+
+* **Kanon Penciptaan:**  
+  Selama tiga ratus tahun di Lantai 6, Vulcanus memukulkan palu godamnya ke atas paron meteorit raksasa. Dari puluhan ribu benturan baja panas itu, ada satu percikan api yang tidak mendingin menjadi abu hitam. Percikan itu melompat dari paron dan mulai mengorbit di sekeliling sang pandai besi, menyerap tekad pantang menyerah sang raksasa. Vulcanus menghadiahkan bara hidup ini kepada ksatria yang berani melangkah melampaui bengkel tempa miliknya.
+* **Resonansi Spiritual:**  
+  *Bara Suci Vulcanus* menyelimuti senjata ksatria dengan panas membara. Setiap kali pedang, belati, atau gada ksatria mengenai musuh, terdapat peluang 25% bara ini menyulut luka musuh dengan api pembakar (*Molten Burn*), mengubah tinta tubuh lawan menjadi abu yang menguap ke udara.
+
+### 24.3 Bayangan Hantu Astral (Phantom Shadow — `PHANTOM_SHADOW`)
+> *"Hanya mereka yang sanggup menatap ketakutan tergelapnya tanpa berkedip yang berhak memerintah bayangannya sendiri."*
+
+* **Kanon Penciptaan:**  
+  Di Balairung Cermin Lantai 8, The Shadow Doppelgänger tercipta dari keraguan dan trauma masa lalu sang ksatria. Ketika bayangan cermin itu akhirnya tumbang di bawah tebasan penolakan takdir, esensi gelapnya tidak musnah begitu saja. Sebagian bayangan itu bersujud di hadapan tuannya, mengakui bahwa kehendak jiwa ksatria jauh lebih kokoh daripada keputusasaan.
+* **Resonansi Spiritual:**  
+  *Bayangan Hantu Astral* adalah wujud bayangan batin yang telah ditundukkan. Ia bersembunyi di balik jubah siluet ksatria hingga saat yang tepat tiba. Ketika ksatria mengeksekusi *Dentang Penolakan Takdir (Perfect Parry)*, hantu astral ini meledak keluar dari bayangan dan melancarkan tebasan sabit radial gelap (*Echo Slash*) yang meremukkan musuh di sekitar area benturan.
+
+---
+
+## 🔮 BAGIAN 25: ALKIMIA RUNE PURBA & PAKTA DARAH ALTAR ANIMA
+
+Di kedalaman menara tersembunyi peninggalan ordo para sarjana alkimia kuno yang mencoba memanipulasi hukum penciptaan kanvas sebelum kejatuhan peradaban:
+
+### 25.1 Empat Rune Primordial Menara (The Ancient Runes)
+Rune kuno adalah lempengan batu hitam seukuran telapak tangan yang diukir dengan simbol kosmis purba. Di bengkel Vulcanus, lempengan ini dapat dipahat ke dalam dua soket senjata ksatria:
+1. **Rune Surya Vulcanus (`RUNE_SOLAR` — `☼`):**  
+   Dipahat dari serpihan inti meteorit yang jatuh dari langit sebelum matahari padam. Mengalirkan kekuatan destruktif murni yang menambah ketajaman bilah senjata (+8 Base Attack Power).
+2. **Rune Rembulan Aria (`RUNE_LUNAR` — `☽`):**  
+   Ditemukan setelah menumbangkan sang Tower Guardian di Lantai 3. Kristalisasi dari air mata perak yang membungkus tubuh ksatria dalam selimut perlindungan mistis (-10% Damage Taken).
+3. **Rune Badai Kael (`RUNE_TEMPEST` — `⚡`):**  
+   Djarah dari busur kaca The Amethyst Matron di Lantai 5. Mengandung desau angin kinetik puncak menara yang mempercepat siklus aliran energi jurus dan manuver elakan (+15% Cooldown Reduction).
+4. **Rune Palung Obsidian (`RUNE_ABYSS` — `☯`):**  
+   Batu legendaris yang ditinggalkan oleh sang Kaligrafer Agung di Lantai 10. Diukir dari materi kehampaan kosmis yang menuntut konsentrasi batin tinggi demi tebasan mematikan dan kemampuan menyerap intisari kehidupan lawan (+8% Critical Chance & +4% Lifesteal).
+
+### 25.2 Doktrin Altar Pengorbanan Anima (The Blood Altars)
+Di Lantai 4 (Reruntuhan Akropolis Kuno) dan Lantai 7 (Koridor Kristal Aethel), serta di setiap lekukan paradoks Endless Spire, berdirilah pilar obsidian setinggi 2.4 meter yang dikenal sebagai **Altar Pengorbanan Anima**:
+* **Ritual Pengorbanan Darah:**  
+  Altar ini tidak menerima emas atau doa; ia hanya merespon tumpahan garis jiwa (*Anima Integrity*). Ksatria harus menorehkan bilah senjatanya ke dadanya sendiri, mempersembahkan **25% dari total HP saat ini** ke dalam mangkuk sesaji yang menyala merah darah.
+* **Tiga Pakta Temporal Terlarang:**
+  1. **Pakta Pembantaian (*Carnage Pact*):** Jiwa ksatria diliputi kegilaan perang; serangan kritikal meningkat drastis (+40% Crit Damage), namun pertahanan siluetnya melemah akibat luka ritual (-15% DEF).
+  2. **Pakta Ketamakan (*Greed Pact*):** Mangkuk sesaji memancarkan aroma emas hitam; musuh yang tumbang menjatuhkan limpahan Pecahan Aethel (+60% Gold), namun musuh di lantai tersebut bergerak dengan keganasan yang tak wajar (+20% Speed).
+  3. **Pakta Kecepatan Jiwa (*Swiftness Pact*):** Tubuh ksatria seringan kabut hampa; jeda pemulihan seluruh skill dan elakan berkurang drastis (+35% CDR), namun hukum darah menuntut puasa total: seluruh bentuk pemulihan HP terkunci dan tidak dapat diakses selama berada di lantai tersebut.
+
+---
+
+## 👑 BAGIAN 26: KANON GAUNTLET PARA RAJA & BALAIRUNG SANG LEGENDA
+
+Di luar aliran waktu sepuluh lantai kampanye utama, retakan kosmis menara membuka akses menuju dimensi misterius yang disebut **Balairung Sang Legenda (*Hall of Legends*)**:
+
+```
+                       [BALAIRUNG SANG LEGENDA]
+      Tempat Seluruh Pahlawan & Bos Bertemu di Luar Batas Waktu
+                                 │
+        ┌────────────────────────┴────────────────────────┐
+        ▼                                                 ▼
+[GAUNTLET OF SOVEREIGNS]                        [PRASASTI GELAR KEHORMATAN]
+Ujian Maraton 5 Bos Besar                       Pengukiran Nama di Batu Abadi
+```
+
+### 26.1 Alasan Spiritual Gauntlet of Sovereigns
+Mengapa kelima penguasa menara yang telah dikalahkan bersatu kembali di arena yang sama?  
+Di dalam kanon Aethelgard, kematian sebuah entitas berinti jiwa kuat di dalam Menara Obsidian tidaklah melenyapkan arwah mereka ke ketiadaan mutlak. Arwah *Jenderal Oakhaven*, *The Amethyst Matron*, *The Shadow Doppelgänger*, *The Crimson Sovereign*, dan bayangan gema *The Grand Calligrapher* terjebak di dalam sisa-sisa tinta kanvas purba.
+
+Ketika seorang ksatria melangkah ke dalam Gauntlet, kelima arwah ini terbangun secara serempak. Ini bukanlah pertarungan dendam pribadi, melainkan **Ujian Kelayakan Kosmis (*The Sovereign's Ordeal*)**. Mereka ingin memastikan apakah ksatria yang berdiri di hadapan mereka benar-benar layak memegang takdir Aethelgard, ataukah ia sekadar kebetulan yang beruntung.
+
+Pertarungan maraton ini menuntut penguasaan mutlak atas setiap ritme serangan bos tanpa jeda istirahat panjang. Hanya tetesan $+35\%$ Anima sisa yang dipulihkan di antara pergantian arena, menguji ketahanan mental dan ketepatan refleks sang ksatria hingga ke batas tertingginya.
+
+### 26.2 Empat Gelar Kehormatan Ksatria Aethelgard (The Knight Titles)
+Setiap pencapaian di dalam Balairung Sang Legenda diabadikan dalam prasasti marmer hitam berupa gelar kehormatan diegetik:
+
+1. **"Pendaki Pemula" (`TITEL_NOVICE`):**  
+   *"Setiap legenda besar selalu diawali oleh sepasang kaki yang berdebu dan tangan gemetar yang mencengkeram gagang pedang di gerbang bawah."*  
+   Gelar dasar bagi setiap siluet yang menolak tunduk pada pelarutan jiwa.
+
+2. **"Bencana Para Raja" (`TITEL_SOVEREIGN_BANE`):**  
+   *"Mahkota mereka telah jatuh, takhta mereka telah runtuh; bilah bajamu adalah badai yang menyapu kesombongan para penguasa menara."*  
+   Dianugerahkan kepada ksatria yang berhasil menumbangkan seluruh kelima bos dalam waktu di bawah 4.5 menit (Peringkat A).
+
+3. **"Penebas Sang Waktu" (`TITEL_CHRONO_SLAYER`):**  
+   *"Ketika jarum jam mencoba mengurung langkahmu, kau membelah sang waktu itu sendiri sebelum detiknya sempat berdentang."*  
+   Gelar sakral tertinggi bagi master kinetik yang meremukkan seluruh kelima bos dalam waktu di bawah 3 menit (Peringkat S).
+
+4. **"Penakluk Puncak Menara" (`TITEL_SPIRE_CONQUEROR`):**  
+   *"Bahkan ketika lantai menara telah runtuh ke dalam jurang ketiadaan tanpa akhir, bayanganmu tetap tegak berdiri menari di antara bintang-bintang."*  
+   Dianugerahkan kepada petarung gigih yang berhasil menembus lantai 20 ke atas di mode Endless Spire.
 
 ---
 
 *Dokumen Kronik Kanonikal Aethelgard ini resmi disahkan oleh Dialogue & Script Writer, Loremaster, Quest Designer, Lead Writer & Narrative Director untuk [Stickman Tower Adventure](file:///home/yusuf/projekan/game/game1/README.md).*
+
 
 
 
