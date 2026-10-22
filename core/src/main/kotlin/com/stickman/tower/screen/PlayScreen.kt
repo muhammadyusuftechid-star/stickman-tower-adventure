@@ -160,6 +160,7 @@ class PlayScreen(
     private var pauseSelectedIndex: Int = 0
     private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "BESTIARIUM", "ROH PENDAMPING", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "DEVELOPER TOOLS", "MAIN MENU")
     val devTools = DevToolsOverlay()
+    private var wasThreeFingerTouched: Boolean = false
 
     // Sistem Bestiarium Lapangan (Fase 19)
     var isViewingBestiary: Boolean = false
@@ -369,6 +370,30 @@ class PlayScreen(
             com.stickman.tower.rpg.SaveManager.saveAsync(saveData)
             floatingTexts.add(FloatingText("DEV: ALL TITLES UNLOCKED", player.position.x, player.position.y + 2.5f, Color.GOLD))
         }
+        devTools.dispatcher.onUnlockAllContent = {
+            saveData.highestTowerFloor = 50
+            saveData.highestEndlessFloor = 50
+            saveData.playerLevel = 80
+            saveData.gold = 999999
+            saveData.isZephyrRescued = true
+            saveData.isGorgonRescued = true
+            if (!saveData.unlockedCharacters.contains("STICKMAN_DAGGER")) saveData.unlockedCharacters.add("STICKMAN_DAGGER")
+            if (!saveData.unlockedCharacters.contains("STICKMAN_AXE")) saveData.unlockedCharacters.add("STICKMAN_AXE")
+            for (i in 1..50) {
+                val tabId = "TABLET_$i"
+                if (!saveData.unlockedLoreTablets.contains(tabId)) saveData.unlockedLoreTablets.add(tabId)
+            }
+            saveData.sanitize()
+            saveData.updateChecksum()
+            com.stickman.tower.rpg.SaveManager.saveAsync(saveData)
+            floatingTexts.add(FloatingText("DEV: ALL CONTENT UNLOCKED (50F & HEROES)", player.position.x, player.position.y + 2.5f, Color.GOLD))
+        }
+        devTools.dispatcher.onResetSave = {
+            saveData.resetToDefaults()
+            saveData.updateChecksum()
+            com.stickman.tower.rpg.SaveManager.saveAsync(saveData)
+            floatingTexts.add(FloatingText("DEV: SAVE DATA RESET TO DEFAULT", player.position.x, player.position.y + 2.5f, Color.RED))
+        }
 
         if (isFirstShow) {
             isFirstShow = false
@@ -540,8 +565,12 @@ class PlayScreen(
     }
 
     override fun render(delta: Float) {
-        // Hotkey DevTools Console & Profiler (F1/F3/~) dan Bounding Boxes (TAB)
-        if (Gdx.input.isKeyJustPressed(Keys.F1) || Gdx.input.isKeyJustPressed(Keys.F3) || Gdx.input.isKeyJustPressed(Keys.GRAVE)) {
+        val isThreeFingerPressed = Gdx.input.isTouched(2)
+        val justThreeFingerTapped = isThreeFingerPressed && !wasThreeFingerTouched
+        wasThreeFingerTouched = isThreeFingerPressed
+
+        // Hotkey DevTools Console & Profiler (F1/F3/~ dan 3-Finger Tap Mobile) dan Bounding Boxes (TAB)
+        if (Gdx.input.isKeyJustPressed(Keys.F1) || Gdx.input.isKeyJustPressed(Keys.F3) || Gdx.input.isKeyJustPressed(Keys.GRAVE) || justThreeFingerTapped) {
             devTools.toggle()
             if (devTools.isVisible) AudioManager.playSlashLight()
         }

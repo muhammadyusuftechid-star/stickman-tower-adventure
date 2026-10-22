@@ -36,6 +36,8 @@ class DevCommandDispatcher {
     var onWarpBossRushStage: ((Int) -> Unit)? = null
     var onSetBossRushTimer: ((Float) -> Unit)? = null
     var onUnlockAllTitles: (() -> Unit)? = null
+    var onUnlockAllContent: (() -> Unit)? = null
+    var onResetSave: (() -> Unit)? = null
     var getCurrentFloor: (() -> TowerFloor?)? = null
 
     // Riwayat Log Konsol
@@ -102,6 +104,9 @@ class DevCommandDispatcher {
                 "bossrush", "gauntlet" -> handleBossRush(args)
                 "bossrush_time", "br_time" -> handleBossRushTime(args)
                 "unlock_titles", "titles" -> handleUnlockTitles()
+                "unlock_all", "unlockall" -> handleUnlockAll()
+                "reset_save", "resetsave" -> handleResetSave()
+                "metrics", "stats", "mem" -> handleMetrics()
                 else -> DevCommandResult(false, "Perintah '$cmd' tidak dikenali. Ketik 'help' untuk daftar perintah.")
             }
         } catch (t: Throwable) {
@@ -137,6 +142,9 @@ class DevCommandDispatcher {
             - bossrush <1..5>        : Lompat langsung ke tahap Boss Rush
             - bossrush_time <detik>  : Set timer Boss Rush untuk uji rank
             - unlock_titles          : Buka seluruh gelar ksatria untuk QA
+            - unlock_all             : Buka 50 lantai, seluruh hero, relik & lore
+            - reset_save             : Reset save data ke kondisi awal onboarding
+            - metrics / stats        : Tampilkan info JVM heap & floor entities
         """.trimIndent()
         return DevCommandResult(true, helpText)
     }
@@ -273,5 +281,31 @@ class DevCommandDispatcher {
             return DevCommandResult(true, "Seluruh gelar ksatria siluet telah dibuka untuk inspeksi visual.")
         }
         return DevCommandResult(false, "Handler unlock titles belum terhubung.")
+    }
+
+    private fun handleUnlockAll(): DevCommandResult {
+        if (onUnlockAllContent != null) {
+            onUnlockAllContent?.invoke()
+            return DevCommandResult(true, "Seluruh konten (50 Lantai, Semua Pahlawan, Relik, & Lore) telah dibuka untuk pengujian.")
+        }
+        return DevCommandResult(false, "Handler unlock all content belum terhubung.")
+    }
+
+    private fun handleResetSave(): DevCommandResult {
+        if (onResetSave != null) {
+            onResetSave?.invoke()
+            return DevCommandResult(true, "Save data telah direset ke kondisi awal untuk QA onboarding.")
+        }
+        return DevCommandResult(false, "Handler reset save belum terhubung.")
+    }
+
+    private fun handleMetrics(): DevCommandResult {
+        val runtime = Runtime.getRuntime()
+        val usedMB = (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024)
+        val totalMB = runtime.totalMemory() / (1024 * 1024)
+        val maxMB = runtime.maxMemory() / (1024 * 1024)
+        val floor = getCurrentFloor?.invoke()
+        val mobCount = floor?.enemies?.count { !it.health.isDead } ?: 0
+        return DevCommandResult(true, "Metrics: Heap $usedMB/$totalMB MB (Max $maxMB MB) | Floor: ${floor?.floorNumber ?: 0} | Active Mobs: $mobCount")
     }
 }

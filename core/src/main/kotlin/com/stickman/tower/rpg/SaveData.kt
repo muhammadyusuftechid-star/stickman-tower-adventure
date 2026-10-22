@@ -222,4 +222,76 @@ data class SaveData(
         if (checksum == calculateChecksum()) return true
         return checksum == calculateLegacyChecksum()
     }
+
+    /**
+     * Menyalin seluruh field dari objek SaveData lain secara in-place tanpa mengubah referensi memori.
+     */
+    fun copyFrom(source: SaveData): SaveData {
+        this.playerLevel = source.playerLevel
+        this.currentExp = source.currentExp
+        this.gold = source.gold
+        this.highestTowerFloor = source.highestTowerFloor
+        this.highestEndlessFloor = source.highestEndlessFloor
+        this.totalEnemiesDefeated = source.totalEnemiesDefeated
+        this.unlockedCharacters.clear()
+        this.unlockedCharacters.addAll(source.unlockedCharacters)
+        this.unlockedAchievements.clear()
+        this.unlockedAchievements.addAll(source.unlockedAchievements)
+        this.unlockedTalents.clear()
+        this.unlockedTalents.addAll(source.unlockedTalents)
+        this.unlockedLoreTablets.clear()
+        this.unlockedLoreTablets.addAll(source.unlockedLoreTablets)
+        this.activeQuestId = source.activeQuestId
+        this.completedQuests.clear()
+        this.completedQuests.addAll(source.completedQuests)
+        this.questProgressMap.clear()
+        this.questProgressMap.putAll(source.questProgressMap)
+        this.challengeMedals.clear()
+        this.challengeMedals.putAll(source.challengeMedals)
+        this.acceptedBounties.clear()
+        this.acceptedBounties.addAll(source.acceptedBounties)
+        this.completedBounties.clear()
+        this.completedBounties.addAll(source.completedBounties)
+        this.claimedBounties.clear()
+        this.claimedBounties.addAll(source.claimedBounties)
+        this.bestiaryKills.clear()
+        this.bestiaryKills.putAll(source.bestiaryKills)
+        this.bgmVolume = source.bgmVolume
+        this.sfxVolume = source.sfxVolume
+        this.isAudioMuted = source.isAudioMuted
+        this.selectedArchetype = source.selectedArchetype
+        this.selectedSubClass = source.selectedSubClass
+        this.selectedFamiliar = source.selectedFamiliar
+        this.unlockedFamiliars.clear()
+        this.unlockedFamiliars.addAll(source.unlockedFamiliars)
+        this.equippedRunes.clear()
+        this.equippedRunes.addAll(source.equippedRunes)
+        this.unlockedRunes.clear()
+        this.unlockedRunes.addAll(source.unlockedRunes)
+        this.bossRushBestTimes.clear()
+        this.bossRushBestTimes.putAll(source.bossRushBestTimes)
+        this.unlockedTitles.clear()
+        this.unlockedTitles.addAll(source.unlockedTitles)
+        this.activeTitle = source.activeTitle
+        this.weaponAtkLevel = source.weaponAtkLevel
+        this.weaponCritLevel = source.weaponCritLevel
+        this.weaponSpdLevel = source.weaponSpdLevel
+        this.unspentTalentPoints = source.unspentTalentPoints
+        this.playTimeSeconds = source.playTimeSeconds
+        this.lastSavedTimestamp = source.lastSavedTimestamp
+        this.isZephyrRescued = source.isZephyrRescued
+        this.isGorgonRescued = source.isGorgonRescued
+        this.hasSeenPrologue = source.hasSeenPrologue
+        this.saveSlotId = source.saveSlotId
+        this.saveVersion = source.saveVersion
+        this.checksum = source.checksum
+        return this
+    }
+
+    /**
+     * Mereset seluruh parameter progres kembali ke nilai default onboarding awal.
+     */
+    fun resetToDefaults(): SaveData {
+        return copyFrom(SaveData().sanitize())
+    }
 }

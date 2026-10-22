@@ -88,17 +88,20 @@ class DevToolsOverlay {
     private val btnPauseToggle = Rectangle(750f, 235f, 135f, 34f)
     private val btnStepFrame = Rectangle(895f, 235f, 135f, 34f)
 
-    // Tombol TAB 2: WARP & SPAWN
-    private val btnWarpF1 = Rectangle(250f, 390f, 140f, 34f)
-    private val btnWarpF2 = Rectangle(400f, 390f, 140f, 34f)
-    private val btnWarpF3 = Rectangle(550f, 390f, 140f, 34f)
-    private val btnWarpF5 = Rectangle(700f, 390f, 140f, 34f)
-    private val btnWarpF10 = Rectangle(850f, 390f, 180f, 34f)
+    // Tombol TAB 2: WARP 5 SAGA (50 LANTAI) & SPAWN
+    private val btnWarpF1 = Rectangle(250f, 390f, 125f, 34f)
+    private val btnWarpF10 = Rectangle(385f, 390f, 125f, 34f)
+    private val btnWarpF20 = Rectangle(520f, 390f, 125f, 34f)
+    private val btnWarpF30 = Rectangle(655f, 390f, 125f, 34f)
+    private val btnWarpF40 = Rectangle(790f, 390f, 125f, 34f)
+    private val btnWarpF50 = Rectangle(925f, 390f, 125f, 34f)
 
-    private val btnWarpEndless5 = Rectangle(250f, 340f, 180f, 34f)
-    private val btnWarpEndless10 = Rectangle(445f, 340f, 180f, 34f)
-    private val btnWarpEndless20 = Rectangle(640f, 340f, 180f, 34f)
-    private val btnWarpEndless50 = Rectangle(835f, 340f, 195f, 34f)
+    private val btnWarpF5 = Rectangle(250f, 340f, 125f, 34f)
+    private val btnWarpF15 = Rectangle(385f, 340f, 125f, 34f)
+    private val btnWarpF25 = Rectangle(520f, 340f, 125f, 34f)
+    private val btnWarpF35 = Rectangle(655f, 340f, 125f, 34f)
+    private val btnWarpF45 = Rectangle(790f, 340f, 125f, 34f)
+    private val btnWarpEndless50 = Rectangle(925f, 340f, 125f, 34f)
 
     private val btnSpawnMelee = Rectangle(250f, 235f, 180f, 36f)
     private val btnSpawnRanged = Rectangle(445f, 235f, 180f, 36f)
@@ -118,6 +121,8 @@ class DevToolsOverlay {
     private val btnCliGold = Rectangle(640f, 390f, 130f, 34f)
     private val btnCliSim = Rectangle(780f, 390f, 125f, 34f)
     private val btnCliReach = Rectangle(915f, 390f, 115f, 34f)
+    private val btnCliUnlockAll = Rectangle(250f, 340f, 380f, 34f)
+    private val btnCliReset = Rectangle(640f, 340f, 390f, 34f)
 
     private val touchPoint = Vector3()
 
@@ -218,13 +223,17 @@ class DevToolsOverlay {
             }
             DevTab.WARP_SPAWN -> {
                 if (btnWarpF1.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(1); AudioManager.playSlashLight(); return true }
-                if (btnWarpF2.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(2); AudioManager.playSlashLight(); return true }
-                if (btnWarpF3.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(3); AudioManager.playSlashLight(); return true }
-                if (btnWarpF5.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(5); AudioManager.playSlashLight(); return true }
                 if (btnWarpF10.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(10); AudioManager.playSlashLight(); return true }
-                if (btnWarpEndless5.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(5); AudioManager.playSlashLight(); return true }
-                if (btnWarpEndless10.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(10); AudioManager.playSlashLight(); return true }
-                if (btnWarpEndless20.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(20); AudioManager.playSlashLight(); return true }
+                if (btnWarpF20.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(20); AudioManager.playSlashLight(); return true }
+                if (btnWarpF30.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(30); AudioManager.playSlashLight(); return true }
+                if (btnWarpF40.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(40); AudioManager.playSlashLight(); return true }
+                if (btnWarpF50.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(50); AudioManager.playSlashLight(); return true }
+
+                if (btnWarpF5.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(5); AudioManager.playSlashLight(); return true }
+                if (btnWarpF15.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(15); AudioManager.playSlashLight(); return true }
+                if (btnWarpF25.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(25); AudioManager.playSlashLight(); return true }
+                if (btnWarpF35.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(35); AudioManager.playSlashLight(); return true }
+                if (btnWarpF45.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(45); AudioManager.playSlashLight(); return true }
                 if (btnWarpEndless50.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(50); AudioManager.playSlashLight(); return true }
 
                 if (btnSpawnMelee.containsPoint(tx, ty, 4f)) { onSpawnEnemy?.invoke(EnemyType.MELEE); AudioManager.playDodge(); return true }
@@ -265,6 +274,8 @@ class DevToolsOverlay {
                 if (btnCliGold.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("gold 5000"); AudioManager.playChest(); return true }
                 if (btnCliSim.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("simulate 20"); AudioManager.playSlashLight(); return true }
                 if (btnCliReach.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("reachability"); AudioManager.playSlashLight(); return true }
+                if (btnCliUnlockAll.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("unlock_all"); AudioManager.playLevelUp(); return true }
+                if (btnCliReset.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("reset_save"); AudioManager.playHit(); return true }
             }
         }
 
@@ -345,21 +356,24 @@ class DevToolsOverlay {
                 renderButtonShape(shapeRenderer, btnStepFrame, Color(0.2f, 0.5f, 0.6f, 1f))
             }
             DevTab.WARP_SPAWN -> {
-                renderButtonShape(shapeRenderer, btnWarpF1, Color(0.2f, 0.3f, 0.4f, 1f))
-                renderButtonShape(shapeRenderer, btnWarpF2, Color(0.2f, 0.3f, 0.4f, 1f))
-                renderButtonShape(shapeRenderer, btnWarpF3, Color(0.6f, 0.2f, 0.2f, 1f))
-                renderButtonShape(shapeRenderer, btnWarpF5, Color(0.6f, 0.2f, 0.2f, 1f))
-                renderButtonShape(shapeRenderer, btnWarpF10, Color(0.7f, 0.1f, 0.1f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF1, Color(0.2f, 0.4f, 0.5f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF10, Color(0.6f, 0.2f, 0.2f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF20, Color(0.7f, 0.25f, 0.1f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF30, Color(0.5f, 0.1f, 0.6f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF40, Color(0.2f, 0.5f, 0.7f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF50, Color(0.8f, 0.65f, 0.1f, 1f))
 
-                renderButtonShape(shapeRenderer, btnWarpEndless5, Color(0.4f, 0.2f, 0.5f, 1f))
-                renderButtonShape(shapeRenderer, btnWarpEndless10, Color(0.5f, 0.1f, 0.6f, 1f))
-                renderButtonShape(shapeRenderer, btnWarpEndless20, Color(0.6f, 0.1f, 0.7f, 1f))
-                renderButtonShape(shapeRenderer, btnWarpEndless50, Color(0.7f, 0.1f, 0.8f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF5, Color(0.3f, 0.3f, 0.4f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF15, Color(0.4f, 0.2f, 0.3f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF25, Color(0.4f, 0.3f, 0.2f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF35, Color(0.2f, 0.3f, 0.5f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpF45, Color(0.3f, 0.4f, 0.5f, 1f))
+                renderButtonShape(shapeRenderer, btnWarpEndless50, Color(0.6f, 0.1f, 0.6f, 1f))
 
                 renderButtonShape(shapeRenderer, btnSpawnMelee, Color(0.6f, 0.25f, 0.25f, 1f))
                 renderButtonShape(shapeRenderer, btnSpawnRanged, Color(0.3f, 0.25f, 0.6f, 1f))
-                renderButtonShape(shapeRenderer, btnSpawnFlying, Color(0.25f, 0.5f, 0.6f, 1f))
-                renderButtonShape(shapeRenderer, btnSpawnShield, Color(0.3f, 0.5f, 0.3f, 1f))
+                renderButtonShape(shapeRenderer, btnSpawnFlying, Color(0.2f, 0.55f, 0.45f, 1f))
+                renderButtonShape(shapeRenderer, btnSpawnShield, Color(0.4f, 0.4f, 0.2f, 1f))
             }
             DevTab.PROFILER_AUDIT -> {
                 renderButtonShape(shapeRenderer, btnRunSanity, Color.ROYAL)
@@ -374,6 +388,8 @@ class DevToolsOverlay {
                 renderButtonShape(shapeRenderer, btnCliGold, Color.DARK_GRAY)
                 renderButtonShape(shapeRenderer, btnCliSim, Color.DARK_GRAY)
                 renderButtonShape(shapeRenderer, btnCliReach, Color.DARK_GRAY)
+                renderButtonShape(shapeRenderer, btnCliUnlockAll, Color(0.2f, 0.5f, 0.3f, 1f))
+                renderButtonShape(shapeRenderer, btnCliReset, Color(0.55f, 0.15f, 0.15f, 1f))
             }
         }
 
@@ -443,18 +459,24 @@ class DevToolsOverlay {
             }
             DevTab.WARP_SPAWN -> {
                 regF.setColor(0.9f, 0.7f, 0.3f, 1f)
-                regF.draw(batch, "Story Campaign Floor Warper:", 250f, 430f)
+                regF.draw(batch, "5 Saga Zenith Floor Warper (50 Floors):", 250f, 435f)
 
-                renderButtonText(batch, regF, btnWarpF1, "WARP F1")
-                renderButtonText(batch, regF, btnWarpF2, "WARP F2")
-                renderButtonText(batch, regF, btnWarpF3, "WARP BOSS 3")
-                renderButtonText(batch, regF, btnWarpF5, "WARP BOSS 5")
-                renderButtonText(batch, regF, btnWarpF10, "WARP FINAL BOSS 10")
+                renderButtonText(batch, regF, btnWarpF1, "F1 INTRO")
+                renderButtonText(batch, regF, btnWarpF10, "F10 ZEPHYR")
+                renderButtonText(batch, regF, btnWarpF20, "F20 GORGON")
+                renderButtonText(batch, regF, btnWarpF30, "F30 MIRROR")
+                renderButtonText(batch, regF, btnWarpF40, "F40 TRIAD")
+                renderButtonText(batch, regF, btnWarpF50, "F50 ZENITH")
 
-                renderButtonText(batch, regF, btnWarpEndless5, "WARP ENDLESS 5")
-                renderButtonText(batch, regF, btnWarpEndless10, "WARP ENDLESS 10")
-                renderButtonText(batch, regF, btnWarpEndless20, "WARP ENDLESS 20")
-                renderButtonText(batch, regF, btnWarpEndless50, "WARP ENDLESS 50")
+                regF.setColor(0.7f, 0.7f, 0.7f, 1f)
+                regF.draw(batch, "Mid-Saga Checkpoints & Endless Spire:", 250f, 375f)
+
+                renderButtonText(batch, regF, btnWarpF5, "F5 MATRON")
+                renderButtonText(batch, regF, btnWarpF15, "F15 FOUNDRY")
+                renderButtonText(batch, regF, btnWarpF25, "F25 BASALT")
+                renderButtonText(batch, regF, btnWarpF35, "F35 ASTRAL")
+                renderButtonText(batch, regF, btnWarpF45, "F45 ARCHON")
+                renderButtonText(batch, regF, btnWarpEndless50, "ENDLESS 50")
 
                 regF.setColor(0.4f, 0.8f, 1.0f, 1f)
                 regF.draw(batch, "Live Enemy Spawner (Spawns at Player Position):", 250f, 290f)
@@ -492,13 +514,15 @@ class DevToolsOverlay {
                 renderButtonText(batch, regF, btnCliGold, "gold 5k")
                 renderButtonText(batch, regF, btnCliSim, "sim 20")
                 renderButtonText(batch, regF, btnCliReach, "reach")
+                renderButtonText(batch, regF, btnCliUnlockAll, "★ UNLOCK ALL 50F & HEROES ★")
+                renderButtonText(batch, regF, btnCliReset, "⚠ RESET ONBOARDING ⚠")
 
                 regF.setColor(0.3f, 0.8f, 1.0f, 1f)
-                regF.draw(batch, "Recent Console Log:", 250f, 340f)
+                regF.draw(batch, "Recent Console Log:", 250f, 320f)
 
                 regF.setColor(0.85f, 0.85f, 0.85f, 1f)
-                val logs = dispatcher.consoleLog.takeLast(7)
-                var yPos = 310f
+                val logs = dispatcher.consoleLog.takeLast(6)
+                var yPos = 295f
                 for (l in logs) {
                     regF.draw(batch, l.take(85), 250f, yPos)
                     yPos -= 22f

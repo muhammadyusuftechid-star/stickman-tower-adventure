@@ -117,9 +117,57 @@ class ToolsProgrammerTestSuite {
         val assetRes = dispatcher.dispatch("validate_assets")
         assertTrue(assetRes.success)
 
-        // 15. Invalid command handling
+        // 15. Enterprise QA Commands (unlock_all, reset_save, metrics)
+        var unlockAllInvoked = false
+        var resetSaveInvoked = false
+        dispatcher.onUnlockAllContent = { unlockAllInvoked = true }
+        dispatcher.onResetSave = { resetSaveInvoked = true }
+
+        val unlockRes = dispatcher.dispatch("unlock_all")
+        assertTrue(unlockRes.success)
+        assertTrue(unlockAllInvoked)
+
+        val resetRes = dispatcher.dispatch("reset_save")
+        assertTrue(resetRes.success)
+        assertTrue(resetSaveInvoked)
+
+        val metricsRes = dispatcher.dispatch("metrics")
+        assertTrue(metricsRes.success)
+        assertTrue(metricsRes.message.contains("Heap"))
+
+        // 16. Invalid command handling
         val invalidRes = dispatcher.dispatch("unknown_command_xyz")
         assertFalse(invalidRes.success)
+    }
+
+    @Test
+    fun testSaveDataResetAndCopyInPlace() {
+        val original = com.stickman.tower.rpg.SaveData(
+            playerLevel = 50,
+            gold = 99999,
+            highestTowerFloor = 50,
+            isZephyrRescued = true,
+            isGorgonRescued = true
+        ).sanitize()
+        original.unlockedLoreTablets.add("TABLET_1")
+
+        val target = com.stickman.tower.rpg.SaveData().sanitize()
+        assertEquals(1, target.playerLevel)
+        assertEquals(1, target.highestTowerFloor)
+
+        target.copyFrom(original)
+        assertEquals(50, target.playerLevel)
+        assertEquals(99999, target.gold)
+        assertEquals(50, target.highestTowerFloor)
+        assertTrue(target.isZephyrRescued)
+        assertTrue(target.unlockedLoreTablets.contains("TABLET_1"))
+
+        target.resetToDefaults()
+        assertEquals(1, target.playerLevel)
+        assertEquals(0, target.gold)
+        assertEquals(1, target.highestTowerFloor)
+        assertFalse(target.isZephyrRescued)
+        assertFalse(target.isGorgonRescued)
     }
 
     @Test
