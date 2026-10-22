@@ -12,7 +12,7 @@ fun main() {
     if (StartupHelper.startNewJvmIfRequired())
       return
     Lwjgl3Application(StickmanGame(), Lwjgl3ApplicationConfiguration().apply {
-        setTitle("Stickman Tower Adventure - Phase 1")
+        setTitle("Stickman Tower Adventure")
         //// Vsync limits the frames per second to what your hardware can display, and helps eliminate
         //// screen tearing. This setting doesn't always work on Linux, so the line after is a safeguard.
         useVsync(true)
