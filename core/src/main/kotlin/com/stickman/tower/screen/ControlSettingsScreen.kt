@@ -70,16 +70,16 @@ class ControlSettingsScreen(
     private var initialActionX = 0f
     private var initialActionY = 0f
 
-    // Tombol-tombol Pengaturan Atas
-    private val btnScaleMinus = Rectangle(350f, 600f, 44f, 34f)
-    private val btnScalePlus = Rectangle(490f, 600f, 44f, 34f)
-    private val btnOpacityMinus = Rectangle(650f, 600f, 44f, 34f)
-    private val btnOpacityPlus = Rectangle(790f, 600f, 44f, 34f)
+    // Tombol-tombol Pengaturan Atas (Tata Letak Terstruktur Anti-Tumpang Tindih)
+    private val btnScaleMinus = Rectangle(560f, 608f, 36f, 32f)
+    private val btnScalePlus = Rectangle(602f, 608f, 36f, 32f)
+    private val btnOpacityMinus = Rectangle(770f, 608f, 36f, 32f)
+    private val btnOpacityPlus = Rectangle(812f, 608f, 36f, 32f)
 
-    private val btnToggleAutoHide = Rectangle(880f, 600f, 220f, 34f)
-    private val btnTestRumble = Rectangle(350f, 550f, 180f, 34f)
-    private val btnResetDefaults = Rectangle(560f, 550f, 180f, 34f)
-    private val btnSaveExit = Rectangle(770f, 550f, 180f, 34f)
+    private val btnToggleAutoHide = Rectangle(880f, 608f, 220f, 32f)
+    private val btnTestRumble = Rectangle(470f, 538f, 180f, 36f)
+    private val btnResetDefaults = Rectangle(670f, 538f, 180f, 36f)
+    private val btnSaveExit = Rectangle(880f, 538f, 220f, 36f)
 
     private var rumbleFeedbackTimer = 0f
     private var inputCooldown = 0.25f
@@ -292,83 +292,107 @@ class ControlSettingsScreen(
         val smallF = FontManager.smallFont
         val titleF = FontManager.titleFont
 
-        // Header Panel Glassmorphism
+        // Header Panel Glassmorphism (Tinggi 185f dari 520f s/d 705f)
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.95f)
-        shapeRenderer.rect(40f, 530f, w - 80f, 170f)
+        shapeRenderer.setColor(0.06f, 0.08f, 0.14f, 0.96f)
+        shapeRenderer.rect(40f, 520f, w - 80f, 185f)
 
-        // Gold border accent
+        // Gold border accent bawah
         shapeRenderer.setColor(0.92f, 0.78f, 0.28f, 0.9f)
-        shapeRenderer.rectLine(40f, 530f, w - 40f, 530f, 2.5f)
+        shapeRenderer.rectLine(40f, 520f, w - 40f, 520f, 2.5f)
 
-        // Tombol-tombol Panel Atas
+        // Separator garis horizontal antar-baris panel
+        shapeRenderer.setColor(0.18f, 0.24f, 0.35f, 0.40f)
+        shapeRenderer.rectLine(50f, 652f, w - 50f, 652f, 1f)
+        shapeRenderer.rectLine(50f, 592f, w - 50f, 592f, 1f)
+
+        // Status Gamepad Pill Container (Kanan Atas)
+        val hasGamepad = gamepadInput.hasActiveGamepad()
+        val gamepadPillX = 770f
+        val gamepadPillY = 662f
+        val gamepadPillW = 450f
+        val gamepadPillH = 28f
+        shapeRenderer.setColor(0.04f, 0.06f, 0.10f, 0.85f)
+        shapeRenderer.rect(gamepadPillX, gamepadPillY, gamepadPillW, gamepadPillH)
+        shapeRenderer.setColor(if (hasGamepad) COLOR_GAMEPAD_ONLINE else Color.GRAY)
+        shapeRenderer.rectLine(gamepadPillX, gamepadPillY, gamepadPillX + gamepadPillW, gamepadPillY, 1f)
+        shapeRenderer.rectLine(gamepadPillX, gamepadPillY + gamepadPillH, gamepadPillX + gamepadPillW, gamepadPillY + gamepadPillH, 1f)
+        shapeRenderer.rectLine(gamepadPillX, gamepadPillY, gamepadPillX, gamepadPillY + gamepadPillH, 1f)
+        shapeRenderer.rectLine(gamepadPillX + gamepadPillW, gamepadPillY, gamepadPillX + gamepadPillW, gamepadPillY + gamepadPillH, 1f)
+
+        // Tombol-tombol Baris 2: Scale, Opacity, Auto-Hide
         drawButtonCard(btnScaleMinus, COLOR_BTN_BG_CYAN, Color.CYAN)
         drawButtonCard(btnScalePlus, COLOR_BTN_BG_CYAN, Color.CYAN)
         drawButtonCard(btnOpacityMinus, COLOR_BTN_BG_CYAN, Color.CYAN)
         drawButtonCard(btnOpacityPlus, COLOR_BTN_BG_CYAN, Color.CYAN)
-
         drawButtonCard(btnToggleAutoHide, COLOR_BTN_BG_AUTOHIDE, if (settings.autoHideOnGamepad) Color.GREEN else Color.LIGHT_GRAY)
+
+        // Tombol-tombol Baris 3: Test Rumble, Reset Default, Save & Exit
         drawButtonCard(btnTestRumble, COLOR_BTN_BG_RUMBLE, if (rumbleFeedbackTimer > 0f) Color.GOLD else Color.MAGENTA)
         drawButtonCard(btnResetDefaults, COLOR_BTN_BG_RESET, Color.ORANGE)
         drawButtonCard(btnSaveExit, COLOR_BTN_BG_SAVE, Color.GREEN)
 
         shapeRenderer.end()
 
-        // Gambar Teks
+        // Gambar Teks Terstruktur Tanpa Tabrakan
         batch.begin()
 
+        // Baris 1: Judul Layar & Status Gamepad
         titleF.color = Color.GOLD
-        titleF.draw(batch, "🎮 CONTROL SETTINGS & ERGONOMICS", 60f, 680f)
+        titleF.draw(batch, "🎮 PENGATURAN KONTROL & ERGONOMI", 60f, 688f)
 
-        regF.setColor(0.85f, 0.90f, 1f, 0.9f)
-        regF.draw(batch, "Drag the highlighted D-Pad and Action button clusters to customize your layout.", 60f, 642f)
+        val gamepadName = gamepadInput.activeController?.name ?: "Unknown Controller"
+        val statusText = if (hasGamepad) "● GAMEPAD: CONNECTED ($gamepadName)" else "○ GAMEPAD: TIDAK TERDETEKSI (Touch / Keyboard Aktif)"
+        smallF.color = if (hasGamepad) COLOR_GAMEPAD_ONLINE else Color.LIGHT_GRAY
+        glyphLayout.setText(smallF, statusText)
+        smallF.draw(batch, statusText, gamepadPillX + (gamepadPillW - glyphLayout.width) / 2f, gamepadPillY + 19f)
 
-        // Teks Pengaturan Skala
+        // Baris 2: Slider Touch Cluster
+        smallF.setColor(0.75f, 0.85f, 0.95f, 0.95f)
+        smallF.draw(batch, "PENGATURAN SENTUH:", 60f, 629f)
+
+        // Nilai Skala & Tombol [-] [+]
         regF.color = Color.WHITE
-        regF.draw(batch, "SCALE: ${(settings.scale * 100).toInt()}%", 400f, 624f)
+        regF.draw(batch, "SKALA: ${(settings.scale * 100).toInt()}%", 440f, 630f)
         headF.color = Color.CYAN
-        headF.draw(batch, "-", btnScaleMinus.x + 16f, btnScaleMinus.y + 26f)
-        headF.draw(batch, "+", btnScalePlus.x + 14f, btnScalePlus.y + 26f)
+        headF.draw(batch, "-", btnScaleMinus.x + 13f, btnScaleMinus.y + 24f)
+        headF.draw(batch, "+", btnScalePlus.x + 11f, btnScalePlus.y + 24f)
 
-        // Teks Pengaturan Opasitas
+        // Nilai Opasitas & Tombol [-] [+]
         regF.color = Color.WHITE
-        regF.draw(batch, "OPACITY: ${(settings.opacity * 100).toInt()}%", 698f, 624f)
+        regF.draw(batch, "OPASITAS: ${(settings.opacity * 100).toInt()}%", 655f, 630f)
         headF.color = Color.CYAN
-        headF.draw(batch, "-", btnOpacityMinus.x + 16f, btnOpacityMinus.y + 26f)
-        headF.draw(batch, "+", btnOpacityPlus.x + 14f, btnOpacityPlus.y + 26f)
+        headF.draw(batch, "-", btnOpacityMinus.x + 13f, btnOpacityMinus.y + 24f)
+        headF.draw(batch, "+", btnOpacityPlus.x + 11f, btnOpacityPlus.y + 24f)
 
-        // Teks Auto-Hide on Gamepad
+        // Tombol Auto-Hide on Gamepad
         val autoHideText = if (settings.autoHideOnGamepad) "AUTO-HIDE: ON" else "AUTO-HIDE: OFF"
         regF.color = if (settings.autoHideOnGamepad) Color.GREEN else Color.LIGHT_GRAY
         glyphLayout.setText(regF, autoHideText)
-        regF.draw(batch, autoHideText, btnToggleAutoHide.x + (btnToggleAutoHide.width - glyphLayout.width) / 2f, btnToggleAutoHide.y + 23f)
+        regF.draw(batch, autoHideText, btnToggleAutoHide.x + (btnToggleAutoHide.width - glyphLayout.width) / 2f, btnToggleAutoHide.y + 22f)
 
-        // Teks Baris Tombol Aksi Bawah
-        val rumbleText = if (rumbleFeedbackTimer > 0f) "RUMBLING! ✨" else "TEST RUMBLE"
+        // Baris 3: Presets & Tindakan
+        smallF.setColor(0.75f, 0.85f, 0.95f, 0.95f)
+        smallF.draw(batch, "TATA LETAK & SIMPAN:", 60f, 562f)
+
+        val rumbleText = if (rumbleFeedbackTimer > 0f) "GETARAN AKTIF! ✨" else "UJI GETARAN"
         regF.color = Color.WHITE
         glyphLayout.setText(regF, rumbleText)
-        regF.draw(batch, rumbleText, btnTestRumble.x + (btnTestRumble.width - glyphLayout.width) / 2f, btnTestRumble.y + 23f)
+        regF.draw(batch, rumbleText, btnTestRumble.x + (btnTestRumble.width - glyphLayout.width) / 2f, btnTestRumble.y + 24f)
 
         val resetText = "RESET DEFAULT"
-        regF.setColor(1f, 0.8f, 0.8f, 1f)
+        regF.setColor(1f, 0.85f, 0.85f, 1f)
         glyphLayout.setText(regF, resetText)
-        regF.draw(batch, resetText, btnResetDefaults.x + (btnResetDefaults.width - glyphLayout.width) / 2f, btnResetDefaults.y + 23f)
+        regF.draw(batch, resetText, btnResetDefaults.x + (btnResetDefaults.width - glyphLayout.width) / 2f, btnResetDefaults.y + 24f)
 
-        val saveText = "✓ SAVE & EXIT"
+        val saveText = "✓ SIMPAN & KELUAR"
         regF.color = Color.WHITE
         glyphLayout.setText(regF, saveText)
-        regF.draw(batch, saveText, btnSaveExit.x + (btnSaveExit.width - glyphLayout.width) / 2f, btnSaveExit.y + 23f)
+        regF.draw(batch, saveText, btnSaveExit.x + (btnSaveExit.width - glyphLayout.width) / 2f, btnSaveExit.y + 24f)
 
-        // Status Gamepad Fisik (Kiri Bawah Header)
-        val hasGamepad = gamepadInput.hasActiveGamepad()
-        val gamepadName = gamepadInput.activeController?.name ?: "Unknown Controller"
-        val statusText = if (hasGamepad) "● GAMEPAD: CONNECTED ($gamepadName)" else "○ GAMEPAD: NOT DETECTED (Touch / Keyboard Ready)"
-        smallF.color = if (hasGamepad) COLOR_GAMEPAD_ONLINE else Color.LIGHT_GRAY
-        smallF.draw(batch, statusText, 60f, 572f)
-
-        // Hint Petunjuk di Bagian Bawah Layar
-        smallF.setColor(0.7f, 0.75f, 0.85f, 0.7f)
-        val dragHint = "DRAG D-PAD OR ACTION CLUSTER ANYWHERE ON SCREEN  •  [ESC / BACK] TO RETURN"
+        // Petunjuk Dragging di Footer Layar
+        smallF.setColor(0.7f, 0.78f, 0.90f, 0.8f)
+        val dragHint = "DRAG D-PAD ATAU TOMBOL AKSI DI LAYAR UNTUK MENGATUR POSISI  •  [ESC / BACK] UNTUK KEMBALI"
         glyphLayout.setText(smallF, dragHint)
         smallF.draw(batch, dragHint, (w - glyphLayout.width) / 2f, 25f)
 

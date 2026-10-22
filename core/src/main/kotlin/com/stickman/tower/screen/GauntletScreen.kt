@@ -398,6 +398,7 @@ class GauntletScreen(
     }
 
     private fun renderBossRushCardsShapes() {
+        // Daftar Tahap di Panel Kiri
         for (i in 0 until 5) {
             val itemY = 520f - (i * 74f)
             val isSelected = (i == selectedIndex)
@@ -411,6 +412,43 @@ class GauntletScreen(
                 shapeRenderer.rect(108f, itemY, 424f, 66f)
             }
         }
+
+        // Sub-Cards Terstruktur di Panel Kanan (Anti-Dempet Visual Grouping)
+        val subCardX = 575f
+        val subCardW = 590f
+
+        // Sub-Card 1: Rekor Ksatria (Hall of Legends)
+        shapeRenderer.setColor(0.07f, 0.10f, 0.16f, 0.88f)
+        shapeRenderer.rect(subCardX, 365f, subCardW, 128f)
+        shapeRenderer.setColor(0.22f, 0.32f, 0.46f, 0.65f)
+        shapeRenderer.rectLine(subCardX, 365f, subCardX + subCardW, 365f, 1f)
+        shapeRenderer.rectLine(subCardX, 493f, subCardX + subCardW, 493f, 1f)
+        shapeRenderer.rectLine(subCardX, 365f, subCardX, 493f, 1f)
+        shapeRenderer.rectLine(subCardX + subCardW, 365f, subCardX + subCardW, 493f, 1f)
+        shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.85f)
+        shapeRenderer.rectLine(subCardX, 493f, subCardX + subCardW, 493f, 2f)
+
+        // Sub-Card 2: Gelar Kehormatan Aktif
+        shapeRenderer.setColor(0.09f, 0.08f, 0.15f, 0.88f)
+        shapeRenderer.rect(subCardX, 250f, subCardW, 102f)
+        shapeRenderer.setColor(0.30f, 0.22f, 0.45f, 0.65f)
+        shapeRenderer.rectLine(subCardX, 250f, subCardX + subCardW, 250f, 1f)
+        shapeRenderer.rectLine(subCardX, 352f, subCardX + subCardW, 352f, 1f)
+        shapeRenderer.rectLine(subCardX, 250f, subCardX, 352f, 1f)
+        shapeRenderer.rectLine(subCardX + subCardW, 250f, subCardX + subCardW, 352f, 1f)
+        shapeRenderer.setColor(0.40f, 0.85f, 1.0f, 0.85f)
+        shapeRenderer.rectLine(subCardX, 352f, subCardX + subCardW, 352f, 2f)
+
+        // Sub-Card 3: Target Peringkat Medali
+        shapeRenderer.setColor(0.10f, 0.09f, 0.07f, 0.88f)
+        shapeRenderer.rect(subCardX, 135f, subCardW, 102f)
+        shapeRenderer.setColor(0.40f, 0.32f, 0.18f, 0.65f)
+        shapeRenderer.rectLine(subCardX, 135f, subCardX + subCardW, 135f, 1f)
+        shapeRenderer.rectLine(subCardX, 237f, subCardX + subCardW, 237f, 1f)
+        shapeRenderer.rectLine(subCardX, 135f, subCardX, 237f, 1f)
+        shapeRenderer.rectLine(subCardX + subCardW, 135f, subCardX + subCardW, 237f, 1f)
+        shapeRenderer.setColor(0.95f, 0.75f, 0.25f, 0.85f)
+        shapeRenderer.rectLine(subCardX, 237f, subCardX + subCardW, 237f, 2f)
     }
 
     private fun renderBossRushCardsText() {
@@ -430,33 +468,24 @@ class GauntletScreen(
     private fun renderBossRushDetails() {
         val save = SaveManager.load()
         val startX = 585f
-        var curY = 555f
 
-        // Header Title
+        // 1. Header Section
         titleFont.setColor(1.0f, 0.85f, 0.30f, 1f)
-        titleFont.draw(batch, "✦ BALAIRUNG SANG LEGENDA ✦", startX, curY)
-        curY -= 32f
+        titleFont.draw(batch, "✦ BALAIRUNG SANG LEGENDA ✦", startX, 562f)
 
         regularFont.setColor(0.85f, 0.90f, 0.95f, 0.9f)
-        regularFont.draw(batch, "Gauntlet of Sovereigns: Libas 5 Bos Legendaris secara beruntun!", startX, curY)
-        curY -= 30f
+        regularFont.draw(batch, "Gauntlet of Sovereigns: Libas 5 Bos Legendaris secara beruntun!", startX, 536f)
 
         // Detail Tahap Terpilih
         if (selectedIndex in 0 until 5) {
             val stage = BOSS_RUSH_STAGES_INFO[selectedIndex]
-            headerFont.setColor(1f, 0.82f, 0.3f, 1f)
-            headerFont.draw(batch, stage.first, startX, curY)
-            curY -= 24f
-
             smallFont.setColor(0.70f, 0.85f, 1.0f, 1f)
-            smallFont.draw(batch, "Lokasi: ${stage.second}  |  Pola Serangan: ${stage.third}", startX, curY)
-            curY -= 28f
+            smallFont.draw(batch, "Tahap ${selectedIndex + 1}: ${stage.first}  •  Lokasi: ${stage.second}", startX, 514f)
         }
 
-        // Papan Rekor Waktu 3 Arketipe (Hall of Legends)
-        regularFont.setColor(0.95f, 0.75f, 0.25f, 1f)
-        regularFont.draw(batch, "━━ REKOR WAKTU KSATRIA (HALL OF LEGENDS) ━━", startX, curY)
-        curY -= 24f
+        // 2. Sub-Card 1: Papan Rekor Waktu 3 Arketipe (Hall of Legends)
+        regularFont.setColor(0.95f, 0.78f, 0.25f, 1f)
+        regularFont.draw(batch, "🏆 REKOR WAKTU KSATRIA (HALL OF LEGENDS)", startX + 5f, 474f)
 
         val archetypes = listOf(
             CharacterArchetype.BALANCED,
@@ -465,6 +494,7 @@ class GauntletScreen(
         )
         val activeArch = CharacterArchetype.fromString(save.selectedArchetype)
 
+        var recordRowY = 444f
         for (arch in archetypes) {
             val bestTime = BossRushManager.getBestTime(arch.name, save)
             val rank = BossRushManager.getBestRank(arch.name, save)
@@ -473,42 +503,37 @@ class GauntletScreen(
             val timeText = if (bestTime > 0f) "${String.format("%.2f", bestTime)}s (${rank.badgeSymbol})" else "Belum Ditaklukkan (-)"
 
             regularFont.setColor(if (isCurrent) Color(1.0f, 0.9f, 0.35f, 1f) else Color.LIGHT_GRAY)
-            regularFont.draw(batch, "• ${arch.characterName}$marker:", startX, curY)
+            regularFont.draw(batch, "• ${arch.characterName}$marker:", startX + 15f, recordRowY)
+
+            // Kolom waktu disejajarkan di x = startX + 310f
             regularFont.setColor(rank.primaryColor)
-            regularFont.draw(batch, timeText, startX + 320f, curY)
-            curY -= 22f
+            regularFont.draw(batch, timeText, startX + 310f, recordRowY)
+            recordRowY -= 24f
         }
 
-        // Gelar Kehormatan Ksatria Aktif
-        curY -= 4f
+        // 3. Sub-Card 2: Gelar Kehormatan Ksatria Aktif
         val activeTitleMeta = BossRushManager.getTitleById(save.activeTitle)
-        regularFont.setColor(0.35f, 0.85f, 1.0f, 1f)
-        regularFont.draw(batch, "━━ GELAR KEHORMATAN AKTIF ━━", startX, curY)
-        curY -= 24f
+        regularFont.setColor(0.40f, 0.85f, 1.0f, 1f)
+        regularFont.draw(batch, "🎖️ GELAR KEHORMATAN AKTIF", startX + 5f, 334f)
 
         headerFont.setColor(activeTitleMeta.color)
-        headerFont.draw(batch, "✦ \"${activeTitleMeta.titleName}\"", startX, curY)
-        curY -= 20f
+        headerFont.draw(batch, "✦ \"${activeTitleMeta.titleName}\"", startX + 15f, 308f)
 
         smallFont.setColor(0.85f, 0.88f, 0.92f, 0.85f)
-        smallFont.draw(batch, activeTitleMeta.description, startX, curY, 570f, Align.left, true)
-        curY -= 32f
+        smallFont.draw(batch, activeTitleMeta.description, startX + 15f, 282f, 540f, Align.left, true)
 
-        // Target Peringkat Medali
-        regularFont.setColor(0.95f, 0.75f, 0.25f, 1f)
-        regularFont.draw(batch, "━━ TARGET PERINGKAT MEDALI ━━", startX, curY)
-        curY -= 22f
+        // 4. Sub-Card 3: Target Peringkat Medali
+        regularFont.setColor(0.95f, 0.78f, 0.25f, 1f)
+        regularFont.draw(batch, "🎯 TARGET PERINGKAT MEDALI GAUNTLET", startX + 5f, 218f)
 
         smallFont.setColor(Color(1.0f, 0.85f, 0.25f, 1f))
-        smallFont.draw(batch, "★ S-Rank (< 180s): +1,000 Gold • Gelar \"Penebas Sang Waktu\"", startX, curY)
-        curY -= 18f
+        smallFont.draw(batch, "★ S-Rank (< 180s) : +1,000 Gold • Gelar \"Penebas Sang Waktu\"", startX + 15f, 194f)
 
         smallFont.setColor(Color(0.35f, 0.85f, 1.0f, 1f))
-        smallFont.draw(batch, "◆ A-Rank (< 270s): +500 Gold • Gelar \"Bencana Para Raja\"", startX, curY)
-        curY -= 18f
+        smallFont.draw(batch, "◆ A-Rank (< 270s) : +500 Gold • Gelar \"Bencana Para Raja\"", startX + 15f, 172f)
 
         smallFont.setColor(Color(0.45f, 0.90f, 0.45f, 1f))
-        smallFont.draw(batch, "▲ B-Rank (Selesai): +250 Gold", startX, curY)
+        smallFont.draw(batch, "▲ B-Rank (Selesai) : +250 Gold • Hadiah Standar Gauntlet", startX + 15f, 150f)
     }
 
     private fun renderActionButtonShape() {

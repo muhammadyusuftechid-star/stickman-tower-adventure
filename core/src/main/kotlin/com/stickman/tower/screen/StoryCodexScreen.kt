@@ -392,8 +392,8 @@ class StoryCodexScreen(
         shapeRenderer.setColor(0.18f, 0.24f, 0.35f, 0.75f)
         shapeRenderer.rectLine(400f, 100f, 400f, 620f, 2f)
 
-        // Highlight & Daftar Bab (Chapter Sidebar Items)
-        val chapterItemH = 54f
+        // Highlight & Daftar Bab (Chapter Sidebar Items - Anti-Dempet Spacing)
+        val chapterItemH = 57f
         val chapterStartY = 620f - chapterItemH
         for (i in chapters.indices) {
             val ch = chapters[i]
@@ -401,18 +401,18 @@ class StoryCodexScreen(
             if (i == selectedChapterIndex) {
                 val pulse = sin(animTime * 5f) * 0.08f
                 shapeRenderer.setColor(0.10f, 0.15f, 0.24f, 0.95f)
-                shapeRenderer.rect(45f, itemY + 4f, 350f, chapterItemH - 8f)
+                shapeRenderer.rect(45f, itemY + 3f, 350f, chapterItemH - 6f)
                 // Ornamen Bingkai Emas Kaligrafi di Tepi Kiri Bab Aktif
                 shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.90f + pulse)
-                shapeRenderer.rectLine(45f, itemY + 4f, 45f, itemY + chapterItemH - 4f, 4f)
-                shapeRenderer.rectLine(45f, itemY + 4f, 395f, itemY + 4f, 1.2f)
-                shapeRenderer.rectLine(45f, itemY + chapterItemH - 4f, 395f, itemY + chapterItemH - 4f, 1.2f)
+                shapeRenderer.rectLine(45f, itemY + 3f, 45f, itemY + chapterItemH - 3f, 4f)
+                shapeRenderer.rectLine(45f, itemY + 3f, 395f, itemY + 3f, 1.2f)
+                shapeRenderer.rectLine(45f, itemY + chapterItemH - 3f, 395f, itemY + chapterItemH - 3f, 1.2f)
             } else {
                 shapeRenderer.setColor(0.06f, 0.09f, 0.15f, 0.60f)
-                shapeRenderer.rect(45f, itemY + 4f, 350f, chapterItemH - 8f)
+                shapeRenderer.rect(45f, itemY + 3f, 350f, chapterItemH - 6f)
             }
 
-            // Kapsul Tinta Tematik Kategori (Thematic Ink Capsule Pill - Anti AI Slop)
+            // Kapsul Tinta Tematik Kategori (Thematic Ink Capsule Pill - Posisikan Terpisah di Bawah Judul)
             val isLantai = ch.tag.startsWith("LANTAI")
             val pillColors = when {
                 ch.tag == "KOSMOLOGI" -> floatArrayOf(0.06f, 0.18f, 0.28f, 0.25f, 0.75f, 0.95f)
@@ -424,9 +424,9 @@ class StoryCodexScreen(
                 else -> floatArrayOf(0.12f, 0.16f, 0.22f, 0.40f, 0.50f, 0.65f)
             }
             val pillW = if (isLantai) 90f else 84f
-            val pillH = 17f
+            val pillH = 16f
             val pillX = 54f
-            val pillY = itemY + 8f
+            val pillY = itemY + 7f
 
             shapeRenderer.setColor(pillColors[0], pillColors[1], pillColors[2], 0.92f)
             shapeRenderer.rect(pillX, pillY, pillW, pillH)
@@ -547,10 +547,10 @@ class StoryCodexScreen(
             if (i == selectedChapterIndex) {
                 regF.setColor(1f, 0.88f, 0.35f, 1f)
                 val activeTitle = "◆ ${ch.title}"
-                regF.draw(batch, activeTitle, 54f, itemY + 37f, maxSidebarTextW, Align.left, false)
+                regF.draw(batch, activeTitle, 54f, itemY + 44f, maxSidebarTextW, Align.left, false)
             } else {
                 regF.setColor(0.75f, 0.80f, 0.90f, 0.85f)
-                regF.draw(batch, ch.title, 54f, itemY + 37f, maxSidebarTextW, Align.left, false)
+                regF.draw(batch, ch.title, 54f, itemY + 44f, maxSidebarTextW, Align.left, false)
             }
 
             // Render Teks Kapsul Pill Kategori
@@ -566,9 +566,9 @@ class StoryCodexScreen(
             }
             val pillW = if (isLantai) 90f else 84f
             val pillX = 54f
-            val pillY = itemY + 8f
+            val pillY = itemY + 7f
             smallF.color = pillTextColor
-            smallF.draw(batch, ch.tag, pillX, pillY + 13f, pillW, Align.center, false)
+            smallF.draw(batch, ch.tag, pillX, pillY + 12f, pillW, Align.center, false)
         }
 
         // Konten Bab yang Sedang Dipilih
@@ -658,7 +658,7 @@ class StoryCodexScreen(
             viewport.unproject(touchVec)
 
             // Klik Sidebar Bab Kiri
-            val chapterItemH = 54f
+            val chapterItemH = 57f
             val chapterStartY = 620f - chapterItemH
             for (i in chapters.indices) {
                 val itemY = chapterStartY - (i * chapterItemH)

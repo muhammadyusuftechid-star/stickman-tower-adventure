@@ -1990,16 +1990,16 @@ class PlayScreen(
                 val tx = uiTouchVec.x
                 val ty = uiTouchVec.y
 
-                val btnYMin = h / 2f - 75f
-                val btnYMax = h / 2f - 15f
-                val menu3YMin = h / 2f - 135f
-                val menu3YMax = h / 2f - 80f
+                val btnYMin = h / 2f - 45f
+                val btnYMax = h / 2f + 15f
+                val menu3YMin = h / 2f - 115f
+                val menu3YMax = h / 2f - 60f
 
-                if (tx in (w / 2f - 275f)..(w / 2f - 10f) && ty in btnYMin..btnYMax) {
+                if (tx in (w / 2f - 295f)..(w / 2f - 15f) && ty in btnYMin..btnYMax) {
                     touchProceed = true
-                } else if (tx in (w / 2f + 10f)..(w / 2f + 275f) && ty in btnYMin..btnYMax) {
+                } else if (tx in (w / 2f + 15f)..(w / 2f + 295f) && ty in btnYMin..btnYMax) {
                     touchRetry = true
-                } else if (tx in (w / 2f - 150f)..(w / 2f + 150f) && ty in menu3YMin..menu3YMax) {
+                } else if (tx in (w / 2f - 165f)..(w / 2f + 165f) && ty in menu3YMin..menu3YMax) {
                     touchMenu = true
                 }
             }
@@ -2266,35 +2266,70 @@ class PlayScreen(
         }
 
         if (gameStatus == GameStatus.STAGE_CLEAR) {
-            shapeRenderer.setColor(0f, 0f, 0f, 0.70f)
+            shapeRenderer.setColor(0f, 0f, 0f, 0.75f)
             shapeRenderer.rect(0f, 0f, w, h)
 
-            val cardW = 600f
-            val cardH = 280f
+            val cardW = 720f
+            val cardH = 340f
             val cardX = w / 2f - cardW / 2f
             val cardY = h / 2f - cardH / 2f
-            shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.96f)
-            shapeRenderer.rect(cardX, cardY, cardW, cardH)
-            shapeRenderer.setColor(0.95f, 0.75f, 0.25f, 0.95f)
-            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
-            // Tombol 1: Lanjut Menara (Glowing Emerald / Gold)
-            shapeRenderer.setColor(0.16f, 0.36f, 0.20f, 0.95f)
-            shapeRenderer.rect(w / 2f - 270f, h / 2f - 70f, 250f, 48f)
-            shapeRenderer.setColor(0.3f, 0.95f, 0.45f, 0.95f)
-            shapeRenderer.rectLine(w / 2f - 270f, h / 2f - 22f, w / 2f - 20f, h / 2f - 22f, 2.5f)
+            // Card Body (Dark Obsidian Slate)
+            shapeRenderer.setColor(0.07f, 0.09f, 0.14f, 0.96f)
+            shapeRenderer.rect(cardX, cardY, cardW, cardH)
+
+            // Outer Slate Border & Top Gold Line
+            shapeRenderer.setColor(0.20f, 0.28f, 0.40f, 0.85f)
+            shapeRenderer.rectLine(cardX, cardY, cardX + cardW, cardY, 1.5f)
+            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 2f)
+            shapeRenderer.rectLine(cardX, cardY, cardX, cardY + cardH, 1.5f)
+            shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW, cardY + cardH, 1.5f)
+
+            shapeRenderer.setColor(0.92f, 0.76f, 0.25f, 0.95f)
+            shapeRenderer.rectLine(cardX + 20f, cardY + cardH - 2f, cardX + cardW - 20f, cardY + cardH - 2f, 3f)
+
+            // Calligraphic Corner Notches
+            val notch = 12f
+            shapeRenderer.setColor(0.95f, 0.80f, 0.30f, 0.95f)
+            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + notch, cardY + cardH, 2.5f)
+            shapeRenderer.rectLine(cardX, cardY + cardH, cardX, cardY + cardH - notch, 2.5f)
+            shapeRenderer.rectLine(cardX + cardW, cardY + cardH, cardX + cardW - notch, cardY + cardH, 2.5f)
+            shapeRenderer.rectLine(cardX + cardW, cardY + cardH, cardX + cardW, cardY + cardH - notch, 2.5f)
+            shapeRenderer.rectLine(cardX, cardY, cardX + notch, cardY, 2.5f)
+            shapeRenderer.rectLine(cardX, cardY, cardX, cardY + notch, 2.5f)
+            shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW - notch, cardY, 2.5f)
+            shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW, cardY + notch, 2.5f)
+
+            // Eyebrow Header Capsule Pill di Atas
+            val pillW = 280f
+            val pillH = 24f
+            val pillX = w / 2f - pillW / 2f
+            val pillY = h / 2f + 112f
+            shapeRenderer.setColor(0.18f, 0.14f, 0.05f, 0.85f)
+            shapeRenderer.rect(pillX, pillY, pillW, pillH)
+            shapeRenderer.setColor(0.90f, 0.75f, 0.25f, 0.90f)
+            shapeRenderer.rectLine(pillX, pillY, pillX + pillW, pillY, 1f)
+            shapeRenderer.rectLine(pillX, pillY + pillH, pillX + pillW, pillY + pillH, 1f)
+            shapeRenderer.rectLine(pillX, pillY, pillX, pillY + pillH, 1f)
+            shapeRenderer.rectLine(pillX + pillW, pillY, pillX + pillW, pillY + pillH, 1f)
+
+            // Tombol 1: Lanjut Menara (Glowing Emerald)
+            shapeRenderer.setColor(0.12f, 0.30f, 0.18f, 0.95f)
+            shapeRenderer.rect(w / 2f - 290f, h / 2f - 40f, 270f, 50f)
+            shapeRenderer.setColor(0.30f, 0.95f, 0.45f, 0.95f)
+            shapeRenderer.rectLine(w / 2f - 290f, h / 2f + 10f, w / 2f - 20f, h / 2f + 10f, 2.5f)
 
             // Tombol 2: Main Ulang (Cyan Slate)
-            shapeRenderer.setColor(0.14f, 0.20f, 0.30f, 0.95f)
-            shapeRenderer.rect(w / 2f + 20f, h / 2f - 70f, 250f, 48f)
-            shapeRenderer.setColor(0.35f, 0.85f, 1f, 0.9f)
-            shapeRenderer.rectLine(w / 2f + 20f, h / 2f - 22f, w / 2f + 270f, h / 2f - 22f, 2.5f)
+            shapeRenderer.setColor(0.12f, 0.20f, 0.32f, 0.95f)
+            shapeRenderer.rect(w / 2f + 20f, h / 2f - 40f, 270f, 50f)
+            shapeRenderer.setColor(0.35f, 0.85f, 1f, 0.90f)
+            shapeRenderer.rectLine(w / 2f + 20f, h / 2f + 10f, w / 2f + 290f, h / 2f + 10f, 2.5f)
 
             // Tombol 3: Menu Utama (Dark Slate with Gold line)
-            shapeRenderer.setColor(0.12f, 0.16f, 0.24f, 0.95f)
-            shapeRenderer.rect(w / 2f - 140f, h / 2f - 128f, 280f, 44f)
-            shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.9f)
-            shapeRenderer.rectLine(w / 2f - 140f, h / 2f - 84f, w / 2f + 140f, h / 2f - 84f, 2.5f)
+            shapeRenderer.setColor(0.14f, 0.12f, 0.18f, 0.95f)
+            shapeRenderer.rect(w / 2f - 160f, h / 2f - 110f, 320f, 45f)
+            shapeRenderer.setColor(0.90f, 0.75f, 0.25f, 0.90f)
+            shapeRenderer.rectLine(w / 2f - 160f, h / 2f - 65f, w / 2f + 160f, h / 2f - 65f, 2.5f)
         }
 
         // Kotak Prompt Prasasti (Dipindahkan ke Shape Pass agar tidak menginterupsi Batch Pass)
@@ -2516,39 +2551,50 @@ class PlayScreen(
         if (gameStatus == GameStatus.STAGE_CLEAR) {
             val isStory = gameMode == GameMode.STORY
             val isBossRush = gameMode == GameMode.BOSS_RUSH
+
+            // 1. Eyebrow Tag Pill Text (Kapsul Header di Atas)
+            val eyebrowTag = when {
+                isBossRush -> "✦ GAUNTLET DITAKLUKKAN ✦"
+                isStory -> if (currentFloorNumber < 10) "✦ LANTAI $currentFloorNumber SELESAI ✦" else "✦ TOWER CONQUERED ✦"
+                else -> "✦ ENDLESS TOWER CLEARED ✦"
+            }
+            smallF.setColor(1f, 0.85f, 0.30f, 1f)
+            smallF.draw(batch, eyebrowTag, w / 2f - 140f, h / 2f + 129f, 280f, Align.center, false)
+
+            // 2. Main Title (Nama Tahap / Lantai Mewah)
             headF.color = Color.GOLD
-            val bannerTitle = when {
+            val mainTitle = when {
                 isBossRush -> {
                     val rank = BossRushRank.fromTime(bossRushTimer)
-                    "★ GAUNTLET DITAKLUKKAN! [RANK: ${rank.badgeSymbol}] ★"
+                    "BALAIRUNG LEGENDA: RANK [${rank.badgeSymbol}]"
                 }
                 isStory -> {
-                    if (currentFloorNumber < 10) "★ KEBANGKITAN KANVAS: ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! KANVAS SEMESTA TERBEBASKAN! ★"
+                    if (currentFloorNumber < 10) currentFloor.floorName.uppercase()
+                    else "KANVAS SEMESTA TERBEBASKAN!"
                 }
-                else -> "★ KEBANGKITAN KANVAS: ENDLESS FLOOR $currentFloorNumber CLEARED! ★"
+                else -> "ENDLESS FLOOR $currentFloorNumber"
             }
-            glyphLayout.setText(headF, bannerTitle)
-            headF.draw(batch, bannerTitle, (w - glyphLayout.width) / 2f, h / 2f + 75f)
+            headF.draw(batch, mainTitle, w / 2f - 330f, h / 2f + 92f, 660f, Align.center, false)
 
-            regF.color = Color.WHITE
+            // 3. Subtitle / Deskripsi Hasil Pertarungan
+            regF.setColor(0.88f, 0.92f, 0.98f, 1f)
             val subText = when {
                 isBossRush -> {
                     val rank = BossRushRank.fromTime(bossRushTimer)
                     val titleName = if (rank.titleRewardId != null) BossRushManager.getTitleById(rank.titleRewardId).titleName else "Pejuang Menara"
                     val rankReward = if (rank.goldReward > 0) " | +${rank.goldReward} GOLD" else ""
-                    "Waktu: ${String.format("%.2f", bossRushTimer)}s | Gelar: \"$titleName\"$rankReward"
+                    "Waktu: ${String.format("%.2f", bossRushTimer)}s • Gelar: \"$titleName\"$rankReward"
                 }
                 isStory -> {
-                    if (currentFloorNumber < 10) "Musuh telah dibersihkan! Bersiap untuk lantai berikutnya."
-                    else "Sang Penulis Takdir tumbang! Pecahnya pena takdir membuka dimensi Endless Spire."
+                    if (currentFloorNumber < 10) "Musuh telah dibersihkan! Bersiap untuk pendakian lantai berikutnya."
+                    else "Sang Penulis Takdir tumbang! Pecahnya pena membuka dimensi Endless Spire."
                 }
                 else -> {
                     val talentPtText = if (currentFloorNumber % 2 == 0) " | +1 TALENT POINT!" else ""
-                    "Kills: $endlessEnemiesKilled | Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText"
+                    "Kills: $endlessEnemiesKilled • Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText"
                 }
             }
-            glyphLayout.setText(regF, subText)
-            regF.draw(batch, subText, (w - glyphLayout.width) / 2f, h / 2f + 25f)
+            regF.draw(batch, subText, w / 2f - 330f, h / 2f + 48f, 660f, Align.center, false)
 
             val nextFloorNumber = if (isStory && currentFloorNumber >= 10) 11 else currentFloorNumber + 1
             val nextFloorLabel = when {
@@ -2557,12 +2603,17 @@ class PlayScreen(
                 else -> "LANTAI $nextFloorNumber"
             }
 
+            // 4. Tombol Baris 1: Lanjut Menara
             headF.color = Color.WHITE
-            headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 240f, h / 2f - 40f)
+            headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 290f, h / 2f - 8f, 270f, Align.center, false)
+
+            // 5. Tombol Baris 1: Main Ulang
             headF.setColor(0.85f, 0.95f, 1f, 1f)
-            headF.draw(batch, "MAIN ULANG (R)", w / 2f + 55f, h / 2f - 40f)
-            headF.setColor(0.9f, 0.75f, 0.25f, 1f)
-            headF.draw(batch, "MENU UTAMA (ESC)", w / 2f - 105f, h / 2f - 98f)
+            headF.draw(batch, "MAIN ULANG (R)", w / 2f + 20f, h / 2f - 8f, 270f, Align.center, false)
+
+            // 6. Tombol Baris 2: Menu Utama
+            headF.setColor(0.95f, 0.80f, 0.30f, 1f)
+            headF.draw(batch, "MENU UTAMA (ESC)", w / 2f - 160f, h / 2f - 80f, 320f, Align.center, false)
         }
 
         if (gameStatus == GameStatus.PLAYING) {
