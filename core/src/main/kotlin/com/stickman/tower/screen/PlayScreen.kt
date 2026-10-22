@@ -1329,26 +1329,61 @@ class PlayScreen(
             currentFloor.mapBounds.width
         )
 
-        for (platform in currentFloor.platforms) platform.render(shapeRenderer)
+        // Frustum Bounding Box Horizontal Culling [-2.0m, +26.0m] (Task 32.1.1)
+        val camX = cameraManager.camera.position.x
+        val minCullX = camX - 2.0f
+        val maxCullX = camX + 26.0f
+
+        for (platform in currentFloor.platforms) {
+            if (platform.bounds.x + platform.bounds.width >= minCullX && platform.bounds.x <= maxCullX) {
+                platform.render(shapeRenderer)
+            }
+        }
 
         // 1.5 Render Environmental Storytelling Props (Fase 19)
         for (prop in currentFloor.environmentalProps) {
             prop.update(delta)
-            prop.render(shapeRenderer)
+            if (prop.x + prop.width >= minCullX && prop.x <= maxCullX) {
+                prop.render(shapeRenderer)
+            }
         }
 
-        for (spike in currentFloor.spikes) spike.render(shapeRenderer)
-        for (chest in currentFloor.chests) chest.render(shapeRenderer)
-        for (tablet in currentFloor.loreTablets) tablet.render(shapeRenderer)
+        for (spike in currentFloor.spikes) {
+            if (spike.bounds.x + spike.bounds.width >= minCullX && spike.bounds.x <= maxCullX) {
+                spike.render(shapeRenderer)
+            }
+        }
+        for (chest in currentFloor.chests) {
+            if (chest.bounds.x + chest.bounds.width >= minCullX && chest.bounds.x <= maxCullX) {
+                chest.render(shapeRenderer)
+            }
+        }
+        for (tablet in currentFloor.loreTablets) {
+            if (tablet.bounds.x + tablet.bounds.width >= minCullX && tablet.bounds.x <= maxCullX) {
+                tablet.render(shapeRenderer)
+            }
+        }
         currentFloor.bloodAltar?.update(delta, particleManager)
-        currentFloor.bloodAltar?.render(shapeRenderer)
-        currentFloor.checkpoint?.render(shapeRenderer)
-        currentFloor.exitPortal.render(shapeRenderer)
+        currentFloor.bloodAltar?.let {
+            if (it.bounds.x + it.bounds.width >= minCullX && it.bounds.x <= maxCullX) it.render(shapeRenderer)
+        }
+        currentFloor.checkpoint?.let {
+            if (it.bounds.x + it.bounds.width >= minCullX && it.bounds.x <= maxCullX) it.render(shapeRenderer)
+        }
+        if (currentFloor.exitPortal.bounds.x + currentFloor.exitPortal.bounds.width >= minCullX && currentFloor.exitPortal.bounds.x <= maxCullX) {
+            currentFloor.exitPortal.render(shapeRenderer)
+        }
 
         // Render Runic Barriers, Keys, Cocoon, Titan Pillar, Basalt Walls & Co-op Allies (Fase 25, 26, & 27)
-        for (barrier in currentFloor.runicBarriers) barrier.render(shapeRenderer)
-        for (key in currentFloor.runicKeys) key.render(shapeRenderer)
-        for (wall in currentFloor.basaltWalls) wall.render(shapeRenderer)
+        for (barrier in currentFloor.runicBarriers) {
+            if (barrier.bounds.x + barrier.bounds.width >= minCullX && barrier.bounds.x <= maxCullX) barrier.render(shapeRenderer)
+        }
+        for (key in currentFloor.runicKeys) {
+            if (key.bounds.x + key.bounds.width >= minCullX && key.bounds.x <= maxCullX) key.render(shapeRenderer)
+        }
+        for (wall in currentFloor.basaltWalls) {
+            if (wall.bounds.x + wall.bounds.width >= minCullX && wall.bounds.x <= maxCullX) wall.render(shapeRenderer)
+        }
         currentFloor.zephyrCocoon?.render(shapeRenderer)
         currentFloor.titanPillar?.render(shapeRenderer)
         currentFloor.prismAltar?.render(shapeRenderer)
@@ -1362,14 +1397,18 @@ class PlayScreen(
             renderAriaNPC(shapeRenderer)
         }
 
-        for (enemy in currentFloor.allEnemies) enemy.render(shapeRenderer)
+        for (enemy in currentFloor.allEnemies) {
+            if (enemy.position.x + enemy.width >= minCullX && enemy.position.x <= maxCullX) {
+                enemy.render(shapeRenderer)
+            }
+        }
         currentFloor.boss?.render(shapeRenderer)
         player.render(shapeRenderer)
         inkFamiliar.render(shapeRenderer)
         player.renderProjectiles(shapeRenderer)
 
-        // Render Efek Partikel VFX
-        particleManager.render(shapeRenderer)
+        // Render Efek Partikel VFX dengan Frustum Bounding Box Culling [-2m, +26m]
+        particleManager.render(shapeRenderer, minCullX, maxCullX)
 
         // Render Radial Shockwave Super Finish Boss (Fase 11)
         if (isBossShockwaveActive && shockwaveRadius > 0f) {

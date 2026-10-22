@@ -131,9 +131,10 @@ class ParticleManager {
         }
     }
 
-    fun render(shapeRenderer: ShapeRenderer) {
-        // Render Partikel tanpa alokasi Color baru
+    fun render(shapeRenderer: ShapeRenderer, minX: Float = Float.NEGATIVE_INFINITY, maxX: Float = Float.POSITIVE_INFINITY) {
+        // Render Partikel tanpa alokasi Color baru dengan Frustum Bounding Box Culling
         for (p in activeParticles) {
+            if (p.position.x < minX || p.position.x > maxX) continue
             val alpha = (1f - (p.life / p.maxLife)).coerceIn(0f, 1f)
             shapeRenderer.setColor(p.color.r, p.color.g, p.color.b, alpha)
             shapeRenderer.circle(p.position.x, p.position.y, p.size, 8)
@@ -141,6 +142,7 @@ class ParticleManager {
 
         // Render Garis Lengkung Tebasan (Slash Arcs) tanpa alokasi Color baru
         for (s in activeSlashes) {
+            if (s.centerX + s.radius < minX || s.centerX - s.radius > maxX) continue
             val alpha = (1f - (s.life / s.maxLife)).coerceIn(0f, 1f)
             shapeRenderer.setColor(s.color.r, s.color.g, s.color.b, alpha * 0.8f)
 
