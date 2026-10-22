@@ -190,3 +190,7 @@ captures/
 .gemini/
 scratch/
 
+## Markdown Documentation (Local Only, Exclude from Git except README):
+*.md
+!README.md
+!readme.md
