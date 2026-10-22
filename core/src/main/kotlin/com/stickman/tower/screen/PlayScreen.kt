@@ -2787,26 +2787,77 @@ class PlayScreen(
         shapeRenderer.setColor(0f, 0f, 0f, 0.75f)
         shapeRenderer.rect(0f, 0f, w, h)
 
-        // Pause Menu Card (Dark Obsidian with Gold Accent)
+        // Pause Menu Card (Dark Obsidian with Gold Calligraphic Accents)
         val cardW = 390f
         val cardH = 540f
         val cardX = (w - cardW) / 2f
         val cardY = (h - cardH) / 2f
-        shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.95f)
-        shapeRenderer.rect(cardX, cardY, cardW, cardH)
-        shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.9f)
-        shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
-        // Selected button highlight
+        // Card Main Body
+        shapeRenderer.setColor(0.07f, 0.09f, 0.14f, 0.96f)
+        shapeRenderer.rect(cardX, cardY, cardW, cardH)
+
+        // Card Outer Border (Subtle Slate Blue)
+        shapeRenderer.setColor(0.20f, 0.28f, 0.40f, 0.85f)
+        shapeRenderer.rectLine(cardX, cardY, cardX + cardW, cardY, 1.5f)
+        shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 2f)
+        shapeRenderer.rectLine(cardX, cardY, cardX, cardY + cardH, 1.5f)
+        shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW, cardY + cardH, 1.5f)
+
+        // Gilded Top Header Line
+        shapeRenderer.setColor(0.92f, 0.76f, 0.25f, 0.95f)
+        shapeRenderer.rectLine(cardX + 20f, cardY + cardH - 3f, cardX + cardW - 20f, cardY + cardH - 3f, 3f)
+
+        // Calligraphic Corner Notches (Artisanal Gold Accents)
+        val notch = 12f
+        shapeRenderer.setColor(0.95f, 0.80f, 0.30f, 0.95f)
+        // Top-Left
+        shapeRenderer.rectLine(cardX, cardY + cardH, cardX + notch, cardY + cardH, 2.5f)
+        shapeRenderer.rectLine(cardX, cardY + cardH, cardX, cardY + cardH - notch, 2.5f)
+        // Top-Right
+        shapeRenderer.rectLine(cardX + cardW, cardY + cardH, cardX + cardW - notch, cardY + cardH, 2.5f)
+        shapeRenderer.rectLine(cardX + cardW, cardY + cardH, cardX + cardW, cardY + cardH - notch, 2.5f)
+        // Bottom-Left
+        shapeRenderer.rectLine(cardX, cardY, cardX + notch, cardY, 2.5f)
+        shapeRenderer.rectLine(cardX, cardY, cardX, cardY + notch, 2.5f)
+        // Bottom-Right
+        shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW - notch, cardY, 2.5f)
+        shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW, cardY + notch, 2.5f)
+
+        // Button Pills Layout
         val startY = cardY + cardH - 75f
         val itemH = 32f
         val itemSpacing = 37f
         val itemW = cardW - 50f
         val btnX = cardX + 25f
 
-        val selBtnY = startY - (pauseSelectedIndex * itemSpacing)
-        shapeRenderer.setColor(0.15f, 0.35f, 0.65f, 0.75f)
-        shapeRenderer.rect(btnX, selBtnY, itemW, itemH)
+        // Render Button Containers
+        for (i in pauseMenuItems.indices) {
+            val btnY = startY - (i * itemSpacing)
+            if (i == pauseSelectedIndex) {
+                // Active Selected Button: Sapphire Glow + Gilded Side Brackets
+                shapeRenderer.setColor(0.15f, 0.36f, 0.65f, 0.90f)
+                shapeRenderer.rect(btnX, btnY, itemW, itemH)
+
+                // Gold Accent Line on top & bottom of selected pill
+                shapeRenderer.setColor(0.95f, 0.80f, 0.30f, 0.95f)
+                shapeRenderer.rectLine(btnX, btnY, btnX + 5f, btnY + itemH, 3f)
+                shapeRenderer.rectLine(btnX + itemW - 5f, btnY + itemH, btnX + itemW, btnY, 3f)
+            } else {
+                // Inactive Button: Subtle Dark Slate Capsule
+                shapeRenderer.setColor(0.04f, 0.06f, 0.10f, 0.65f)
+                shapeRenderer.rect(btnX, btnY, itemW, itemH)
+                shapeRenderer.setColor(0.15f, 0.22f, 0.32f, 0.45f)
+                shapeRenderer.rectLine(btnX, btnY, btnX + itemW, btnY, 1f)
+            }
+        }
+
+        // Footer Hint Capsule Pill
+        shapeRenderer.setColor(0.04f, 0.06f, 0.10f, 0.85f)
+        shapeRenderer.rect(cardX + 20f, cardY + 12f, cardW - 40f, 26f)
+        shapeRenderer.setColor(0.18f, 0.25f, 0.38f, 0.65f)
+        shapeRenderer.rectLine(cardX + 20f, cardY + 12f, cardX + cardW - 20f, cardY + 12f, 1f)
+        shapeRenderer.rectLine(cardX + 20f, cardY + 38f, cardX + cardW - 20f, cardY + 38f, 1f)
 
         shapeRenderer.end()
 
@@ -2816,8 +2867,9 @@ class PlayScreen(
         val headF = FontManager.headerFont
         val smallF = FontManager.smallFont
 
+        // Header Title
         headF.color = Color.GOLD
-        headF.draw(batch, "=== GAME PAUSED ===", cardX, cardY + cardH - 22f, cardW, Align.center, false)
+        headF.draw(batch, "JEDA PERMAINAN", cardX, cardY + cardH - 18f, cardW, Align.center, false)
 
         for (i in pauseMenuItems.indices) {
             val itemText = when (i) {
@@ -2830,16 +2882,16 @@ class PlayScreen(
             val textY = btnY + itemH / 2f + 6f
             if (i == pauseSelectedIndex) {
                 regF.color = Color.YELLOW
-                regF.draw(batch, "> $itemText <", btnX, textY, itemW, Align.center, false)
+                regF.draw(batch, "• $itemText •", btnX, textY, itemW, Align.center, false)
             } else {
-                regF.color = Color.WHITE
+                regF.setColor(0.82f, 0.87f, 0.94f, 1f)
                 regF.draw(batch, itemText, btnX, textY, itemW, Align.center, false)
             }
         }
 
         // Petunjuk kontrol di footer card
-        smallF.setColor(0.6f, 0.7f, 0.85f, 0.8f)
-        smallF.draw(batch, "[W/S / TAP] Pilih • [ENTER / SPACE] Konfirmasi", cardX, cardY + 32f, cardW, Align.center, false)
+        smallF.setColor(0.65f, 0.75f, 0.90f, 0.85f)
+        smallF.draw(batch, "[W/S / TAP] Pilih • [ENTER / SPACE] Konfirmasi", cardX, cardY + 29f, cardW, Align.center, false)
 
         batch.end()
     }

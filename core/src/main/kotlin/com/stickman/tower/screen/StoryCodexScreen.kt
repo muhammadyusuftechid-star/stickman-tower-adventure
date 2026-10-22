@@ -392,23 +392,49 @@ class StoryCodexScreen(
         shapeRenderer.setColor(0.18f, 0.24f, 0.35f, 0.75f)
         shapeRenderer.rectLine(400f, 100f, 400f, 620f, 2f)
 
-        // Highlight Bab Aktif
+        // Highlight & Daftar Bab (Chapter Sidebar Items)
         val chapterItemH = 54f
         val chapterStartY = 620f - chapterItemH
         for (i in chapters.indices) {
+            val ch = chapters[i]
             val itemY = chapterStartY - (i * chapterItemH)
             if (i == selectedChapterIndex) {
                 val pulse = sin(animTime * 5f) * 0.08f
-                shapeRenderer.setColor(0.12f, 0.18f, 0.28f, 0.95f)
+                shapeRenderer.setColor(0.10f, 0.15f, 0.24f, 0.95f)
                 shapeRenderer.rect(45f, itemY + 4f, 350f, chapterItemH - 8f)
-                shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.85f + pulse)
+                // Ornamen Bingkai Emas Kaligrafi di Tepi Kiri Bab Aktif
+                shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.90f + pulse)
                 shapeRenderer.rectLine(45f, itemY + 4f, 45f, itemY + chapterItemH - 4f, 4f)
-                shapeRenderer.rectLine(45f, itemY + 4f, 395f, itemY + 4f, 1.5f)
-                shapeRenderer.rectLine(45f, itemY + chapterItemH - 4f, 395f, itemY + chapterItemH - 4f, 1.5f)
+                shapeRenderer.rectLine(45f, itemY + 4f, 395f, itemY + 4f, 1.2f)
+                shapeRenderer.rectLine(45f, itemY + chapterItemH - 4f, 395f, itemY + chapterItemH - 4f, 1.2f)
             } else {
-                shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.5f)
+                shapeRenderer.setColor(0.06f, 0.09f, 0.15f, 0.60f)
                 shapeRenderer.rect(45f, itemY + 4f, 350f, chapterItemH - 8f)
             }
+
+            // Kapsul Tinta Tematik Kategori (Thematic Ink Capsule Pill - Anti AI Slop)
+            val isLantai = ch.tag.startsWith("LANTAI")
+            val pillColors = when {
+                ch.tag == "KOSMOLOGI" -> floatArrayOf(0.06f, 0.18f, 0.28f, 0.25f, 0.75f, 0.95f)
+                isLantai -> floatArrayOf(0.24f, 0.17f, 0.05f, 0.90f, 0.70f, 0.20f)
+                ch.tag == "EPILOG" -> floatArrayOf(0.18f, 0.08f, 0.26f, 0.75f, 0.45f, 0.95f)
+                ch.tag == "KARAKTER" -> floatArrayOf(0.06f, 0.20f, 0.14f, 0.30f, 0.80f, 0.55f)
+                ch.tag == "BESTIARY" -> floatArrayOf(0.25f, 0.06f, 0.08f, 0.90f, 0.30f, 0.35f)
+                ch.tag == "PRASASTI" -> floatArrayOf(0.22f, 0.14f, 0.08f, 0.85f, 0.60f, 0.35f)
+                else -> floatArrayOf(0.12f, 0.16f, 0.22f, 0.40f, 0.50f, 0.65f)
+            }
+            val pillW = if (isLantai) 90f else 84f
+            val pillH = 17f
+            val pillX = 54f
+            val pillY = itemY + 8f
+
+            shapeRenderer.setColor(pillColors[0], pillColors[1], pillColors[2], 0.92f)
+            shapeRenderer.rect(pillX, pillY, pillW, pillH)
+            shapeRenderer.setColor(pillColors[3], pillColors[4], pillColors[5], 0.85f)
+            shapeRenderer.rectLine(pillX, pillY, pillX + pillW, pillY, 1f)
+            shapeRenderer.rectLine(pillX, pillY + pillH, pillX + pillW, pillY + pillH, 1f)
+            shapeRenderer.rectLine(pillX, pillY, pillX, pillY + pillH, 1f)
+            shapeRenderer.rectLine(pillX + pillW, pillY, pillX + pillW, pillY + pillH, 1f)
         }
 
         // Panel Kanan: Wadah Baca Teks Kisah (Codex Reader Parchment)
@@ -420,7 +446,7 @@ class StoryCodexScreen(
         shapeRenderer.rectLine(420f, 100f, 420f, 620f, 2f)
         shapeRenderer.rectLine(1240f, 100f, 1240f, 620f, 2f)
 
-        // Ornamen Sudut Kotak Baca
+        // Ornamen Sudut Kotak Baca (Calligraphic Corner Notches)
         shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.9f)
         // Kiri Atas
         shapeRenderer.rectLine(420f, 620f, 445f, 620f, 4f)
@@ -435,29 +461,60 @@ class StoryCodexScreen(
         shapeRenderer.rectLine(1240f, 100f, 1215f, 100f, 4f)
         shapeRenderer.rectLine(1240f, 100f, 1240f, 125f, 4f)
 
+        // Bookmark Pill Nomor Halaman (Pojok Kanan Atas Kontainer)
+        shapeRenderer.setColor(0.09f, 0.14f, 0.22f, 0.95f)
+        shapeRenderer.rect(1090f, 580f, 130f, 26f)
+        shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.85f)
+        shapeRenderer.rectLine(1090f, 580f, 1220f, 580f, 1.2f)
+        shapeRenderer.rectLine(1090f, 606f, 1220f, 606f, 1.2f)
+        shapeRenderer.rectLine(1090f, 580f, 1090f, 606f, 1.2f)
+        shapeRenderer.rectLine(1220f, 580f, 1220f, 606f, 1.2f)
+
         // Garis Pemisah Subtitle di Halaman Baca
         shapeRenderer.setColor(0.20f, 0.28f, 0.40f, 0.65f)
         shapeRenderer.rectLine(445f, 545f, 1215f, 545f, 1.5f)
 
         // Tombol Navigasi Bawah: [❮ SEBELUMNYA] [SELANJUTNYA ❯] dan [KEMBALI]
-        // Tombol Page Prev (440f - 580f)
-        shapeRenderer.setColor(0.09f, 0.13f, 0.21f, 0.9f)
-        shapeRenderer.rect(445f, 40f, 160f, 44f)
-        shapeRenderer.setColor(0.25f, 0.35f, 0.50f, 0.8f)
-        shapeRenderer.rectLine(445f, 40f, 605f, 40f, 1.5f)
-        shapeRenderer.rectLine(445f, 84f, 605f, 84f, 1.5f)
+        val curChapterP = chapters[selectedChapterIndex]
+        val totalPagesP = curChapterP.pages.size
+        // Tombol Page Prev (445f - 605f)
+        if (currentPageIndex > 0) {
+            shapeRenderer.setColor(0.10f, 0.16f, 0.26f, 0.95f)
+            shapeRenderer.rect(445f, 40f, 160f, 44f)
+            shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.85f)
+            shapeRenderer.rectLine(445f, 40f, 605f, 40f, 1.5f)
+            shapeRenderer.rectLine(445f, 84f, 605f, 84f, 1.5f)
+            shapeRenderer.rectLine(445f, 40f, 445f, 84f, 1.5f)
+            shapeRenderer.rectLine(605f, 40f, 605f, 84f, 1.5f)
+        } else {
+            shapeRenderer.setColor(0.06f, 0.08f, 0.13f, 0.60f)
+            shapeRenderer.rect(445f, 40f, 160f, 44f)
+            shapeRenderer.setColor(0.20f, 0.25f, 0.35f, 0.40f)
+            shapeRenderer.rectLine(445f, 40f, 605f, 40f, 1f)
+            shapeRenderer.rectLine(445f, 84f, 605f, 84f, 1f)
+        }
 
-        // Tombol Page Next (630f - 790f)
-        shapeRenderer.setColor(0.09f, 0.13f, 0.21f, 0.9f)
-        shapeRenderer.rect(635f, 40f, 160f, 44f)
-        shapeRenderer.setColor(0.25f, 0.35f, 0.50f, 0.8f)
-        shapeRenderer.rectLine(635f, 40f, 795f, 40f, 1.5f)
-        shapeRenderer.rectLine(635f, 84f, 795f, 84f, 1.5f)
+        // Tombol Page Next (635f - 795f)
+        if (currentPageIndex < totalPagesP - 1) {
+            shapeRenderer.setColor(0.10f, 0.16f, 0.26f, 0.95f)
+            shapeRenderer.rect(635f, 40f, 160f, 44f)
+            shapeRenderer.setColor(0.95f, 0.78f, 0.25f, 0.85f)
+            shapeRenderer.rectLine(635f, 40f, 795f, 40f, 1.5f)
+            shapeRenderer.rectLine(635f, 84f, 795f, 84f, 1.5f)
+            shapeRenderer.rectLine(635f, 40f, 635f, 84f, 1.5f)
+            shapeRenderer.rectLine(795f, 40f, 795f, 84f, 1.5f)
+        } else {
+            shapeRenderer.setColor(0.06f, 0.08f, 0.13f, 0.60f)
+            shapeRenderer.rect(635f, 40f, 160f, 44f)
+            shapeRenderer.setColor(0.20f, 0.25f, 0.35f, 0.40f)
+            shapeRenderer.rectLine(635f, 40f, 795f, 40f, 1f)
+            shapeRenderer.rectLine(635f, 84f, 795f, 84f, 1f)
+        }
 
-        // Tombol Kembali Ke Menu (1000f - 1240f)
-        shapeRenderer.setColor(0.18f, 0.08f, 0.10f, 0.92f)
+        // Tombol Kembali Ke Menu (980f - 1240f) - Obsidian Crimson Slate
+        shapeRenderer.setColor(0.20f, 0.08f, 0.10f, 0.95f)
         shapeRenderer.rect(980f, 38f, 260f, 46f)
-        shapeRenderer.setColor(0.95f, 0.35f, 0.35f, 0.85f)
+        shapeRenderer.setColor(0.95f, 0.35f, 0.35f, 0.90f)
         shapeRenderer.rectLine(980f, 38f, 1240f, 38f, 2f)
         shapeRenderer.rectLine(980f, 84f, 1240f, 84f, 2f)
         shapeRenderer.rectLine(980f, 38f, 980f, 84f, 2f)
@@ -481,7 +538,7 @@ class StoryCodexScreen(
         smallF.setColor(1f, 0.85f, 0.35f, 0.9f)
         smallF.draw(batch, "Arsip Kisah Penuh & Rahasia Kanvas Dunia Siluet", 740f, 678f)
 
-        // Daftar Bab di Sidebar Kiri (List Item: 16pt Title, 13pt Tag, maxW 330f)
+        // Daftar Bab di Sidebar Kiri (List Item: 16pt Title, Thematic Capsule Pill, maxW 330f)
         val maxSidebarTextW = 330f
         for (i in chapters.indices) {
             val ch = chapters[i]
@@ -489,16 +546,29 @@ class StoryCodexScreen(
 
             if (i == selectedChapterIndex) {
                 regF.setColor(1f, 0.88f, 0.35f, 1f)
-                val activeTitle = "❖ ${ch.title}"
-                regF.draw(batch, activeTitle, 54f, itemY + 36f, maxSidebarTextW, Align.left, false)
-                smallF.setColor(0.35f, 0.85f, 1f, 0.95f)
-                smallF.draw(batch, "[${ch.tag}]", 54f, itemY + 16f)
+                val activeTitle = "◆ ${ch.title}"
+                regF.draw(batch, activeTitle, 54f, itemY + 37f, maxSidebarTextW, Align.left, false)
             } else {
                 regF.setColor(0.75f, 0.80f, 0.90f, 0.85f)
-                regF.draw(batch, ch.title, 54f, itemY + 36f, maxSidebarTextW, Align.left, false)
-                smallF.setColor(0.48f, 0.52f, 0.62f, 0.75f)
-                smallF.draw(batch, "[${ch.tag}]", 54f, itemY + 16f)
+                regF.draw(batch, ch.title, 54f, itemY + 37f, maxSidebarTextW, Align.left, false)
             }
+
+            // Render Teks Kapsul Pill Kategori
+            val isLantai = ch.tag.startsWith("LANTAI")
+            val pillTextColor = when {
+                ch.tag == "KOSMOLOGI" -> Color(0.40f, 0.88f, 1.0f, 1f)
+                isLantai -> Color(1.0f, 0.85f, 0.35f, 1f)
+                ch.tag == "EPILOG" -> Color(0.85f, 0.60f, 1.0f, 1f)
+                ch.tag == "KARAKTER" -> Color(0.45f, 0.95f, 0.70f, 1f)
+                ch.tag == "BESTIARY" -> Color(1.0f, 0.55f, 0.55f, 1f)
+                ch.tag == "PRASASTI" -> Color(0.95f, 0.75f, 0.50f, 1f)
+                else -> Color(0.70f, 0.80f, 0.90f, 1f)
+            }
+            val pillW = if (isLantai) 90f else 84f
+            val pillX = 54f
+            val pillY = itemY + 8f
+            smallF.color = pillTextColor
+            smallF.draw(batch, ch.tag, pillX, pillY + 13f, pillW, Align.center, false)
         }
 
         // Konten Bab yang Sedang Dipilih
@@ -507,26 +577,26 @@ class StoryCodexScreen(
         currentPageIndex = currentPageIndex.coerceIn(0, totalPages - 1)
         val curPage = curChapter.pages[currentPageIndex]
 
-        // Judul Bab & Subtitle Halaman
+        // Judul Bab (Head Token, bounded width 620f)
         headF.setColor(1f, 0.85f, 0.25f, 1f)
-        headF.draw(batch, curChapter.title, 450f, 595f)
+        headF.draw(batch, curChapter.title, 450f, 598f, 620f, Align.left, false)
 
-        regF.setColor(0.4f, 0.85f, 1f, 1f)
-        regF.draw(batch, "✦  ${curPage.subtitle}", 450f, 566f, 760f, Align.left, true)
+        // Nomor Halaman di Dalam Bookmark Pill
+        smallF.setColor(1f, 0.85f, 0.35f, 0.95f)
+        smallF.draw(batch, "Halaman ${currentPageIndex + 1} / $totalPages", 1090f, 598f, 130f, Align.center, false)
 
-        // Nomor Halaman (Pojok Kanan Atas Kontainer)
-        val pageNumStr = "Halaman ${currentPageIndex + 1} / $totalPages"
-        glyphLayout.setText(smallF, pageNumStr)
-        smallF.setColor(0.75f, 0.82f, 0.92f, 0.85f)
-        smallF.draw(batch, pageNumStr, 1220f - glyphLayout.width, 595f)
+        // Subtitle Halaman
+        regF.setColor(0.35f, 0.85f, 1f, 1f)
+        regF.draw(batch, "✦  ${curPage.subtitle}", 450f, 566f, 760f, Align.left, false)
 
-        // Paragraf Kisah (Wrapped Text)
+        // Paragraf Kisah (Wrapped Text dengan Parchment Bone White & Spasi Ergonomis)
         var cursorY = 520f
-        regF.setColor(0.92f, 0.94f, 0.98f, 0.95f)
+        val bodyColor = Color(0.92f, 0.94f, 0.98f, 0.95f)
+        regF.color = bodyColor
         for (paragraph in curPage.paragraphs) {
-            glyphLayout.setText(regF, paragraph, Color.WHITE, 760f, Align.left, true)
+            glyphLayout.setText(regF, paragraph, bodyColor, 760f, Align.left, true)
             regF.draw(batch, paragraph, 450f, cursorY, 760f, Align.left, true)
-            cursorY -= (glyphLayout.height + 22f)
+            cursorY -= (glyphLayout.height + 20f)
         }
 
         // Teks Tombol Navigasi Bawah
@@ -536,8 +606,7 @@ class StoryCodexScreen(
         } else {
             regF.setColor(0.4f, 0.45f, 0.55f, 0.5f)
         }
-        glyphLayout.setText(regF, "❮ SEBELUMNYA")
-        regF.draw(batch, "❮ SEBELUMNYA", 445f + (160f - glyphLayout.width) / 2f, 67f)
+        regF.draw(batch, "❮ SEBELUMNYA", 445f, 68f, 160f, Align.center, false)
 
         // Next Page
         if (currentPageIndex < totalPages - 1) {
@@ -545,13 +614,11 @@ class StoryCodexScreen(
         } else {
             regF.setColor(0.4f, 0.45f, 0.55f, 0.5f)
         }
-        glyphLayout.setText(regF, "SELANJUTNYA ❯")
-        regF.draw(batch, "SELANJUTNYA ❯", 635f + (160f - glyphLayout.width) / 2f, 67f)
+        regF.draw(batch, "SELANJUTNYA ❯", 635f, 68f, 160f, Align.center, false)
 
         // Kembali
-        headF.setColor(1f, 0.45f, 0.45f, 1f)
-        glyphLayout.setText(headF, "KEMBALI KE MENU")
-        headF.draw(batch, "KEMBALI KE MENU", 980f + (260f - glyphLayout.width) / 2f, 67f)
+        headF.setColor(1f, 0.50f, 0.50f, 1f)
+        headF.draw(batch, "KEMBALI KE MENU", 980f, 68f, 260f, Align.center, false)
 
         // Petunjuk Tombol Keyboard (Ukuran 13pt ringkas di dalam sidebar kiri, zero collision dengan tombol)
         smallF.setColor(0.55f, 0.62f, 0.72f, 0.85f)
