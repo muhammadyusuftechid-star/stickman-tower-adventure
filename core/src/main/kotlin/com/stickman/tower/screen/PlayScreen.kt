@@ -867,6 +867,18 @@ class PlayScreen(
                 }
             }
 
+            // Cek Tabrakan Titan Basalt Walls (Fase 27)
+            for (wall in currentFloor.basaltWalls) {
+                if (!wall.isBroken && player.bounds.overlaps(wall.bounds)) {
+                    if (player.bounds.x + player.bounds.width / 2f < wall.bounds.x + wall.bounds.width / 2f) {
+                        player.position.x = wall.bounds.x - player.width
+                    } else {
+                        player.position.x = wall.bounds.x + wall.bounds.width
+                    }
+                    player.velocity.x = 0f
+                }
+            }
+
             // Cek Pengambilan Runic Keys (Fase 25)
             for (key in currentFloor.runicKeys) {
                 if (!key.isCollected) {
@@ -1286,9 +1298,10 @@ class PlayScreen(
         currentFloor.checkpoint?.render(shapeRenderer)
         currentFloor.exitPortal.render(shapeRenderer)
 
-        // Render Runic Barriers, Keys, Cocoon, Titan Pillar & Co-op Allies (Fase 25 & 26)
+        // Render Runic Barriers, Keys, Cocoon, Titan Pillar, Basalt Walls & Co-op Allies (Fase 25, 26, & 27)
         for (barrier in currentFloor.runicBarriers) barrier.render(shapeRenderer)
         for (key in currentFloor.runicKeys) key.render(shapeRenderer)
+        for (wall in currentFloor.basaltWalls) wall.render(shapeRenderer)
         currentFloor.zephyrCocoon?.render(shapeRenderer)
         currentFloor.titanPillar?.render(shapeRenderer)
         zephyrCoopAlly?.render(shapeRenderer)
@@ -1604,6 +1617,28 @@ class PlayScreen(
                             SaveManager.saveAsync(saveData)
                         } else {
                             floatingTexts.add(FloatingText("KATUP RETAK! (${3 - pillar.hitsTaken}/3)", pillar.leverBounds.x + 0.2f, pillar.leverBounds.y + 2.5f, Color.CORAL, duration = 1.2f))
+                        }
+                    }
+                }
+            }
+
+            // Cek Hitbox Serangan Pemain terhadap Dinding Basalt Titan (Fase 27)
+            for (wall in currentFloor.basaltWalls) {
+                if (!wall.isBroken && !player.hitbox.hitEntities.contains(wall)) {
+                    if (player.hitbox.bounds.overlaps(wall.bounds)) {
+                        player.hitbox.hitEntities.add(wall)
+                        if (wall.takeHit()) {
+                            hitStopManager.trigger(0.08f)
+                            AudioManager.playHit()
+                            particleManager.spawnHitSparks(wall.x + wall.width / 2f, wall.y + wall.height / 2f, count = 15, color = Color.ORANGE)
+                            if (wall.isBroken) {
+                                cameraManager.shake(0.5f, 0.25f)
+                                AudioManager.playLevelUp()
+                                particleManager.spawnHitSparks(wall.x + wall.width / 2f, wall.y + wall.height / 2f, count = 35, color = Color.GOLD)
+                                floatingTexts.add(FloatingText("💥 DINDING BASALT HANCUR! 💥", wall.x - 0.5f, wall.y + wall.height + 0.5f, Color.GOLD, duration = 2.0f))
+                            } else {
+                                floatingTexts.add(FloatingText("DINDING RETAK! (${wall.maxHits - wall.hitsTaken}/3)", wall.x + 0.2f, wall.y + wall.height + 0.3f, Color.ORANGE, duration = 1.0f))
+                            }
                         }
                     }
                 }

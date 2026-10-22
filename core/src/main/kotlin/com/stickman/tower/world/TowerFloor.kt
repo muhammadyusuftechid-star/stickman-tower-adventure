@@ -33,7 +33,8 @@ data class TowerFloor(
     val runicBarriers: List<RunicBarrier> = emptyList(),
     val runicKeys: List<RunicKey> = emptyList(),
     var zephyrCocoon: ZephyrCocoon? = null,
-    var titanPillar: TitanPillar? = null
+    var titanPillar: TitanPillar? = null,
+    val basaltWalls: List<TitanBasaltWall> = emptyList()
 ) {
     val dynamicEnemies = mutableListOf<Enemy>()
     val allEnemies: List<Enemy> get() = if (dynamicEnemies.isEmpty()) enemies else enemies + dynamicEnemies

@@ -268,6 +268,98 @@ object DialogueRegistry {
     )
 
     /**
+     * SCENE 09: Kawah Basalt & Langkah Gorgon (Floor 21)
+     */
+    val SCENE_09_BASALT_CRATER = StoryDialogue(
+        triggerX = 6.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Paladin Benteng Besi",
+                text = "Dinding basalt di depan kita membeku dari lahar purba. Pedang biasa hanya akan memantul. Biarkan Greatsword-ku yang meremukkannya!",
+                speakerColor = COLOR_GORGON
+            ),
+            DialogueLine(
+                speaker = "Zephyr",
+                title = "Sang Pengintai Bayangan",
+                text = "Hantam tepat di retakan urat magma itu, kawan besar. Aku akan menusuk monster yang mencoba menyergapmu dari belakang.",
+                speakerColor = COLOR_ZEPHYR
+            )
+        )
+    )
+
+    /**
+     * SCENE 10: Singgasana Raja Golem Magma (Floor 25)
+     */
+    val SCENE_10_MAGMA_GOLEM = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Magma Golem King",
+                title = "Penjaga Kawah Purba",
+                text = "GRRRROOOAAAR...! KAWIS BASALT INI TIDAK MENERIMA PENYUSUP BERDARAH DAGING!",
+                speakerColor = COLOR_IGNIS
+            ),
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Paladin Benteng Besi",
+                text = "Kulit batunya tebal! Kaelen, Zephyr, pancing dia mengangkat tinjunya! Aku akan melancarkan Guard Break untuk menghancurkan intinya!",
+                speakerColor = COLOR_GORGON
+            )
+        )
+    )
+
+    /**
+     * SCENE 11: Ambang Retakan Kosmis (Floor 26)
+     */
+    val SCENE_11_ASTRAL_RIFT = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Aria",
+                title = "Peri Cahaya Menara",
+                text = "Lihat dinding menara di atas sana... retak dan memperlihatkan jurang antariksa kosmos! Gravitasi di sini mulai berfluktuasi liar!",
+                speakerColor = COLOR_ARIA
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Udara menipis, tapi api bara di pedang kita masih menyala. Lompatlah bersama hembusan angin bintang!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
+     * SCENE 12: The Nexus of Reflections (Floor 30)
+     */
+    val SCENE_12_NEXUS_OF_REFLECTIONS = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "The Shadow Doppelganger",
+                title = "Cermin Jiwa Gelap",
+                text = "Selamat datang di cermin keputusasaan kalian. Rasa bersalah Kaelen, ketakutan Zephyr, dan beban pundak Gorgon... semuanya bersatu menjadi algojo kalian!",
+                speakerColor = COLOR_CALLIGRAPHER
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Bayangan hanyalah ketiadaan cahaya. Bersama bara api dan tekad kami, kami akan menghancurkan cermin ilusi ini!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
      * SCENE 50: Singgasana Kanvas Primordial (Floor 50 - Puncak Menara)
      */
     val SCENE_50_CALLIGRAPHER = StoryDialogue(
@@ -305,6 +397,10 @@ object DialogueRegistry {
             13 -> SCENE_06_VULCANUS_SANCTUARY
             15 -> SCENE_07_IGNIS
             20 -> SCENE_08_GORGON_RESCUE
+            21 -> SCENE_09_BASALT_CRATER
+            25 -> SCENE_10_MAGMA_GOLEM
+            26 -> SCENE_11_ASTRAL_RIFT
+            30 -> SCENE_12_NEXUS_OF_REFLECTIONS
             50 -> SCENE_50_CALLIGRAPHER
             else -> null
         }
