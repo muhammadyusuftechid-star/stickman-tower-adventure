@@ -179,13 +179,57 @@ class AchievementScreen(
                 shapeRenderer.rectLine(colX, cardY + cardHeight, colX + colWidth, cardY + cardHeight, 1.5f)
             }
 
-            // Badge Kotak Ikon
+            // Badge Kotak Ikon Vektor Prosedural (Zero-Font Dependency)
+            val boxX = colX + 12f
+            val boxY = cardY + 11f
+            val boxSize = 50f
+            val cx = boxX + boxSize / 2f
+            val cy = boxY + boxSize / 2f
+
             if (isUnlocked) {
-                shapeRenderer.setColor(0.85f, 0.65f, 0.15f, 0.25f)
+                // Background & Border Emas
+                shapeRenderer.setColor(0.85f, 0.65f, 0.15f, 0.35f)
+                shapeRenderer.rect(boxX, boxY, boxSize, boxSize)
+                shapeRenderer.setColor(1f, 0.85f, 0.25f, 0.90f)
+                shapeRenderer.rectLine(boxX, boxY, boxX + boxSize, boxY, 1.5f)
+                shapeRenderer.rectLine(boxX, boxY + boxSize, boxX + boxSize, boxY + boxSize, 1.5f)
+                shapeRenderer.rectLine(boxX, boxY, boxX, boxY + boxSize, 1.5f)
+                shapeRenderer.rectLine(boxX + boxSize, boxY, boxX + boxSize, boxY + boxSize, 1.5f)
+
+                // Vektor Piala Emas Bersinar (Trophy Chalice)
+                shapeRenderer.setColor(1f, 0.88f, 0.25f, 1f)
+                // Kaki & Batang Piala
+                shapeRenderer.rect(cx - 10f, cy - 14f, 20f, 4f)
+                shapeRenderer.rect(cx - 3f, cy - 10f, 6f, 7f)
+                // Cawan Piala
+                shapeRenderer.triangle(cx - 13f, cy + 12f, cx + 13f, cy + 12f, cx, cy - 3f)
+                // Permata Bintang Inti
+                shapeRenderer.setColor(1f, 1f, 0.65f, 1f)
+                shapeRenderer.circle(cx, cy + 5f, 3.5f)
             } else {
-                shapeRenderer.setColor(0.12f, 0.16f, 0.22f, 0.6f)
+                // Background & Border Besi Gembok
+                shapeRenderer.setColor(0.10f, 0.14f, 0.20f, 0.75f)
+                shapeRenderer.rect(boxX, boxY, boxSize, boxSize)
+                shapeRenderer.setColor(0.30f, 0.38f, 0.50f, 0.70f)
+                shapeRenderer.rectLine(boxX, boxY, boxX + boxSize, boxY, 1.5f)
+                shapeRenderer.rectLine(boxX, boxY + boxSize, boxX + boxSize, boxY + boxSize, 1.5f)
+                shapeRenderer.rectLine(boxX, boxY, boxX, boxY + boxSize, 1.5f)
+                shapeRenderer.rectLine(boxX + boxSize, boxY, boxX + boxSize, boxY + boxSize, 1.5f)
+
+                // Vektor Gembok Baja (Padlock)
+                // Lengkungan Pengait (Shackle)
+                shapeRenderer.setColor(0.70f, 0.75f, 0.85f, 0.9f)
+                shapeRenderer.rectLine(cx - 7f, cy + 2f, cx - 7f, cy + 11f, 2.5f)
+                shapeRenderer.rectLine(cx - 7f, cy + 11f, cx + 7f, cy + 11f, 2.5f)
+                shapeRenderer.rectLine(cx + 7f, cy + 11f, cx + 7f, cy + 2f, 2.5f)
+                // Badan Gembok
+                shapeRenderer.setColor(0.42f, 0.48f, 0.60f, 0.95f)
+                shapeRenderer.rect(cx - 10f, cy - 12f, 20f, 14f)
+                // Lubang Kunci (Keyhole)
+                shapeRenderer.setColor(0.06f, 0.08f, 0.12f, 1f)
+                shapeRenderer.circle(cx, cy - 3f, 2.5f)
+                shapeRenderer.rect(cx - 1f, cy - 8f, 2f, 5f)
             }
-            shapeRenderer.rect(colX + 12f, cardY + 11f, 50f, 50f)
         }
 
         // Tombol Kembali Ke Menu
@@ -224,50 +268,41 @@ class AchievementScreen(
             val rowIdx = if (i < 6) i else i - 6
             val cardY = startY - (rowIdx * spacingY)
 
-            // Ikon Piala / Gembok
-            if (isUnlocked) {
-                headF.setColor(1f, 0.88f, 0.25f, 1f)
-                headF.draw(batch, "★", colX + 28f, cardY + 45f)
-            } else {
-                headF.setColor(0.45f, 0.50f, 0.60f, 0.7f)
-                headF.draw(batch, "🔒", colX + 26f, cardY + 45f)
-            }
-
             // Judul Prestasi
             if (isUnlocked) {
                 headF.setColor(1f, 0.90f, 0.35f, 1f)
-                headF.draw(batch, achv.title, colX + 75f, cardY + 54f)
             } else {
                 headF.setColor(0.60f, 0.65f, 0.75f, 0.85f)
-                headF.draw(batch, achv.title, colX + 75f, cardY + 54f)
             }
+            headF.draw(batch, achv.title, colX + 75f, cardY + 54f)
 
-            // Deskripsi Prestasi
+            // Deskripsi Prestasi (Auto-Wrap Anti-Overflow ke Kolom Sebelah)
             if (isUnlocked) {
                 regF.setColor(0.85f, 0.90f, 0.95f, 0.95f)
             } else {
                 regF.setColor(0.45f, 0.50f, 0.60f, 0.70f)
             }
-            regF.draw(batch, achv.description, colX + 75f, cardY + 28f)
+            val maxDescW = colWidth - 95f
+            regF.draw(batch, achv.description, colX + 75f, cardY + 34f, maxDescW, com.badlogic.gdx.utils.Align.left, true)
 
             // Label Reward
             if (isUnlocked) {
                 regF.setColor(0.35f, 0.95f, 0.55f, 1f)
                 val claimText = "✓ TERBUKA (+${achv.goldReward}G)"
                 glyphLayout.setText(regF, claimText)
-                regF.draw(batch, claimText, colX + colWidth - glyphLayout.width - 15f, cardY + 52f)
+                regF.draw(batch, claimText, colX + colWidth - glyphLayout.width - 15f, cardY + 54f)
             } else {
                 regF.setColor(0.85f, 0.65f, 0.3f, 0.8f)
                 val lockText = "HADIAH: +${achv.goldReward}G"
                 glyphLayout.setText(regF, lockText)
-                regF.draw(batch, lockText, colX + colWidth - glyphLayout.width - 15f, cardY + 52f)
+                regF.draw(batch, lockText, colX + colWidth - glyphLayout.width - 15f, cardY + 54f)
             }
         }
 
         // Tombol Kembali
         headF.setColor(1f, 0.45f, 0.45f, 1f)
-        glyphLayout.setText(headF, "🔙 KEMBALI KE MENU")
-        headF.draw(batch, "🔙 KEMBALI KE MENU", 980f + (250f - glyphLayout.width) / 2f, 62f)
+        glyphLayout.setText(headF, "KEMBALI KE MENU")
+        headF.draw(batch, "KEMBALI KE MENU", 980f + (250f - glyphLayout.width) / 2f, 62f)
 
         // Petunjuk Kontrol
         regF.setColor(0.55f, 0.60f, 0.70f, 0.8f)

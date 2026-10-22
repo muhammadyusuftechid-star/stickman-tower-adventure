@@ -51,7 +51,8 @@ class GauntletScreen(
 
     enum class ScreenTab(val title: String) {
         GAUNTLET("🏛️ Monolit Ujian"),
-        BOUNTY("☠ Papan Buronan")
+        BOUNTY("☠ Papan Buronan"),
+        BOSS_RUSH("⚔ Boss Rush")
     }
 
     private var activeTab = ScreenTab.GAUNTLET
@@ -59,8 +60,9 @@ class GauntletScreen(
     private var pulseTimer = 0f
 
     // Tab Buttons
-    private val btnTabGauntlet = Rectangle(100f, 600f, 260f, 48f)
-    private val btnTabBounty = Rectangle(375f, 600f, 260f, 48f)
+    private val btnTabGauntlet = Rectangle(80f, 600f, 240f, 48f)
+    private val btnTabBounty = Rectangle(335f, 600f, 240f, 48f)
+    private val btnTabBossRush = Rectangle(590f, 600f, 240f, 48f)
 
     // Action Buttons
     private val btnBack = Rectangle(40f, 35f, 180f, 50f)
@@ -105,6 +107,7 @@ class GauntletScreen(
         // Tab Navigation Buttons
         drawTabButton(btnTabGauntlet, activeTab == ScreenTab.GAUNTLET)
         drawTabButton(btnTabBounty, activeTab == ScreenTab.BOUNTY)
+        drawTabButton(btnTabBossRush, activeTab == ScreenTab.BOSS_RUSH)
 
         // Tombol Kembali
         shapeRenderer.setColor(0.18f, 0.22f, 0.32f, 0.90f)
@@ -114,6 +117,7 @@ class GauntletScreen(
         when (activeTab) {
             ScreenTab.GAUNTLET -> renderGauntletCardsShapes()
             ScreenTab.BOUNTY -> renderBountyCardsShapes()
+            ScreenTab.BOSS_RUSH -> renderGauntletCardsShapes()
         }
 
         // Render Action Button Shape
@@ -131,6 +135,7 @@ class GauntletScreen(
         // Tab Text
         drawTabText(btnTabGauntlet, "🏛️ Monolit Ujian", activeTab == ScreenTab.GAUNTLET)
         drawTabText(btnTabBounty, "☠ Papan Buronan", activeTab == ScreenTab.BOUNTY)
+        drawTabText(btnTabBossRush, "⚔ Boss Rush", activeTab == ScreenTab.BOSS_RUSH)
 
         // Tombol Kembali Text
         regularFont.color = Color.WHITE
@@ -151,6 +156,9 @@ class GauntletScreen(
                 if (selectedIndex in list.indices) {
                     renderBountyDetails(list[selectedIndex])
                 }
+            }
+            ScreenTab.BOSS_RUSH -> {
+                // Tampilan dialihkan ke BossRushScreen saat tab ditekan
             }
         }
 
@@ -415,6 +423,10 @@ class GauntletScreen(
                     }
                 }
             }
+            ScreenTab.BOSS_RUSH -> {
+                shapeRenderer.setColor(0.95f, 0.75f, 0.25f, 0.95f)
+                shapeRenderer.rect(btnAction.x, btnAction.y, btnAction.width, btnAction.height)
+            }
         }
     }
 
@@ -458,6 +470,10 @@ class GauntletScreen(
                     }
                 }
             }
+            ScreenTab.BOSS_RUSH -> {
+                regularFont.color = Color.WHITE
+                regularFont.draw(batch, "⚔ MASUKI ARENA BOSS RUSH", btnAction.x + 35f, btnAction.y + 35f)
+            }
         }
     }
 
@@ -485,6 +501,13 @@ class GauntletScreen(
                     selectedIndex = 0
                     AudioManager.playSlashLight()
                     HapticManager.vibrateLight()
+                }
+            } else if (btnTabBossRush.contains(touchVec.x, touchVec.y)) {
+                AudioManager.playSlashLight()
+                HapticManager.vibrateMedium()
+                if (game != null) {
+                    (game as? StickmanGame)?.preserveScreen(this)
+                    game.setScreen(BossRushScreen(game, this))
                 }
             } else if (btnBack.contains(touchVec.x, touchVec.y)) {
                 AudioManager.playSlashLight()
@@ -548,6 +571,12 @@ class GauntletScreen(
                             HapticManager.vibrateMedium()
                         }
                     }
+                }
+            }
+            ScreenTab.BOSS_RUSH -> {
+                if (game != null) {
+                    (game as? StickmanGame)?.preserveScreen(this)
+                    game.setScreen(BossRushScreen(game, this))
                 }
             }
         }

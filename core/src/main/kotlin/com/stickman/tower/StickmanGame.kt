@@ -56,6 +56,10 @@ class StickmanGame : Game() {
 
     override fun dispose() {
         super.dispose()
+        for (preserved in preservedScreens) {
+            runCatching { preserved.dispose() }
+        }
+        preservedScreens.clear()
         runCatching { screen?.dispose() }
         screen = null
         runCatching { AudioManager.dispose() }

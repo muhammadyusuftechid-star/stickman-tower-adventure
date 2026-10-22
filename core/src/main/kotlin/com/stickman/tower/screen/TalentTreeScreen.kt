@@ -144,7 +144,7 @@ class TalentTreeScreen(
                 val colX = if (cIndex == 0) 65f else 655f
 
                 // Tombol Select Sub-Class (Hitbox responsif)
-                val selectBtnY = startY + colH - 80f
+                val selectBtnY = startY + colH - 95f
                 if (tx in (colX - 10f)..(colX + colW + 10f) && ty in (selectBtnY - 12f)..(selectBtnY + 48f)) {
                     talentManager.selectSubClass(subClass, currentArchetype)
                     AudioManager.playParry()
@@ -232,14 +232,14 @@ class TalentTreeScreen(
             }
             shapeRenderer.rectLine(colX, startY + colH, colX + colW, startY + colH, if (isSelected) 4f else 2f)
 
-            // Button Select Sub-Class Background
-            val selectBtnY = startY + colH - 80f
+            // Button Select Sub-Class Background (Zero Overlap with Subtitle)
+            val selectBtnY = startY + colH - 95f
             if (isSelected) {
                 shapeRenderer.color = subClass.themeColor
             } else {
                 shapeRenderer.setColor(0.18f, 0.24f, 0.36f, 0.8f)
             }
-            shapeRenderer.rect(colX + 20f, selectBtnY, colW - 40f, 36f)
+            shapeRenderer.rect(colX + 20f, selectBtnY, colW - 40f, 38f)
 
             // Talent Nodes Cards
             val talents = TalentCatalog.getTalentsFor(subClass)
@@ -253,7 +253,7 @@ class TalentTreeScreen(
                 val canUnlock = isSelected && talentManager.canUnlockTalent(talent)
 
                 when {
-                    isUnlocked -> shapeRenderer.setColor(0.12f, 0.28f, 0.20f, 0.95f)
+                    isUnlocked -> if (isSelected) shapeRenderer.setColor(0.12f, 0.28f, 0.20f, 0.95f) else shapeRenderer.setColor(0.09f, 0.12f, 0.18f, 0.90f)
                     canUnlock -> shapeRenderer.setColor(0.16f, 0.22f, 0.36f, 0.90f)
                     else -> shapeRenderer.setColor(0.08f, 0.09f, 0.13f, 0.85f)
                 }
@@ -261,7 +261,7 @@ class TalentTreeScreen(
 
                 // Left Accent Strip
                 when {
-                    isUnlocked -> shapeRenderer.setColor(0.25f, 0.95f, 0.45f, 1f)
+                    isUnlocked -> if (isSelected) shapeRenderer.setColor(0.25f, 0.95f, 0.45f, 1f) else shapeRenderer.setColor(0.40f, 0.55f, 0.65f, 0.7f)
                     canUnlock -> shapeRenderer.color = Color.GOLD
                     else -> shapeRenderer.setColor(0.35f, 0.38f, 0.45f, 0.5f)
                 }
@@ -284,17 +284,17 @@ class TalentTreeScreen(
 
             // Sub-Class Title & Icon
             headF.color = if (isSelected) subClass.themeColor else Color.WHITE
-            headF.draw(batch, "${subClass.iconSymbol} ${subClass.displayName}", colX + 25f, startY + colH - 18f)
+            headF.draw(batch, "${subClass.iconSymbol} ${subClass.displayName}", colX + 25f, startY + colH - 16f)
 
             smallF.setColor(0.75f, 0.85f, 0.95f, 0.85f)
-            smallF.draw(batch, subClass.title, colX + 25f, startY + colH - 42f)
+            smallF.draw(batch, subClass.title, colX + 25f, startY + colH - 40f)
 
             // Select Button Text
-            val selectBtnY = startY + colH - 80f
+            val selectBtnY = startY + colH - 95f
             val btnText = if (isSelected) "✓ SPECIALIZATION ACTIVE" else "ACTIVATE ${subClass.displayName.uppercase()}"
             regF.color = if (isSelected) Color.BLACK else Color.WHITE
             glyphLayout.setText(regF, btnText)
-            regF.draw(batch, btnText, colX + (colW - glyphLayout.width) / 2f, selectBtnY + 24f)
+            regF.draw(batch, btnText, colX + (colW - glyphLayout.width) / 2f, selectBtnY + 25f)
 
             // Talent Nodes Texts
             val talents = TalentCatalog.getTalentsFor(subClass)
@@ -307,7 +307,7 @@ class TalentTreeScreen(
 
                 // Talent Header
                 regF.color = when {
-                    isUnlocked -> COLOR_UNLOCKED_HDR
+                    isUnlocked -> if (isSelected) COLOR_UNLOCKED_HDR else Color(0.65f, 0.75f, 0.85f, 0.85f)
                     canUnlock -> Color.YELLOW
                     else -> COLOR_LOCKED_HDR
                 }
@@ -316,21 +316,22 @@ class TalentTreeScreen(
 
                 // Cost & Status Badge
                 val statusText = when {
-                    isUnlocked -> "✓ UNLOCKED"
+                    isUnlocked -> if (isSelected) "✓ ACTIVE BONUS" else "✓ UNLOCKED (INACTIVE)"
                     canUnlock -> "UNLOCK (${talent.cost} PT)"
                     else -> "LOCKED (${talent.cost} PT)"
                 }
                 smallF.color = when {
-                    isUnlocked -> Color.GREEN
+                    isUnlocked -> if (isSelected) Color.GREEN else Color(0.60f, 0.70f, 0.80f, 0.80f)
                     canUnlock -> Color.GOLD
                     else -> Color.GRAY
                 }
                 glyphLayout.setText(smallF, statusText)
                 smallF.draw(batch, statusText, colX + colW - 30f - glyphLayout.width, nodeY + 70f)
 
-                // Description
+                // Description (Auto-Wrap Anti-Clipping)
                 smallF.setColor(0.85f, 0.88f, 0.92f, 0.90f)
-                smallF.draw(batch, talent.description, colX + 35f, nodeY + 45f)
+                val descMaxW = colW - 75f
+                smallF.draw(batch, talent.description, colX + 35f, nodeY + 45f, descMaxW, com.badlogic.gdx.utils.Align.left, true)
             }
         }
 

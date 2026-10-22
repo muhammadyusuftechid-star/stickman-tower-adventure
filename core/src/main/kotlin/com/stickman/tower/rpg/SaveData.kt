@@ -35,6 +35,9 @@ data class SaveData(
     var unlockedFamiliars: ArrayList<String> = arrayListOf("ARIA_WISP"),
     var equippedRunes: ArrayList<String> = arrayListOf("RUNE_SOLAR", "NONE"),
     var unlockedRunes: ArrayList<String> = arrayListOf("RUNE_SOLAR"),
+    var bossRushBestTimes: HashMap<String, Float> = hashMapOf(),
+    var unlockedTitles: ArrayList<String> = arrayListOf("TITEL_NOVICE"),
+    var activeTitle: String = "TITEL_NOVICE",
     var weaponAtkLevel: Int = 0,
     var weaponCritLevel: Int = 0,
     var weaponSpdLevel: Int = 0,
@@ -93,6 +96,13 @@ data class SaveData(
         unlockedFamiliars.sorted().forEach { mixString(it) }
         unlockedRunes.sorted().forEach { mixString(it) }
         equippedRunes.forEach { mixString(it) }
+
+        bossRushBestTimes.keys.sorted().forEach { key ->
+            mixString(key)
+            mix(((bossRushBestTimes[key] ?: 0f) * 100).toLong())
+        }
+        unlockedTitles.sorted().forEach { mixString(it) }
+        mixString(activeTitle)
 
         mixString(activeQuestId)
         completedQuests.sorted().forEach { mixString(it) }
@@ -179,6 +189,13 @@ data class SaveData(
         }
         while (equippedRunes.size < 2) {
             equippedRunes.add("NONE")
+        }
+
+        if (activeTitle.isBlank()) {
+            activeTitle = "TITEL_NOVICE"
+        }
+        if (unlockedTitles.isEmpty()) {
+            unlockedTitles.add("TITEL_NOVICE")
         }
         return this
     }

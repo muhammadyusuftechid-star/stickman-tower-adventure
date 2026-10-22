@@ -33,6 +33,9 @@ class DevCommandDispatcher {
     var onSwitchArchetype: ((CharacterArchetype) -> Unit)? = null
     var onSpawnEnemy: ((EnemyType) -> Unit)? = null
     var onToggleHitboxes: ((Boolean?) -> Unit)? = null
+    var onWarpBossRushStage: ((Int) -> Unit)? = null
+    var onSetBossRushTimer: ((Float) -> Unit)? = null
+    var onUnlockAllTitles: (() -> Unit)? = null
     var getCurrentFloor: (() -> TowerFloor?)? = null
 
     // Riwayat Log Konsol
@@ -96,6 +99,9 @@ class DevCommandDispatcher {
                 "reachability" -> handleReachability(args)
                 "simulate", "balance" -> handleSimulate(args)
                 "validate_assets", "assets" -> handleValidateAssets()
+                "bossrush", "gauntlet" -> handleBossRush(args)
+                "bossrush_time", "br_time" -> handleBossRushTime(args)
+                "unlock_titles", "titles" -> handleUnlockTitles()
                 else -> DevCommandResult(false, "Perintah '$cmd' tidak dikenali. Ketik 'help' untuk daftar perintah.")
             }
         } catch (t: Throwable) {
@@ -128,6 +134,9 @@ class DevCommandDispatcher {
             - reachability [lantai]  : Audit keterjangkauan jalur BFS platform
             - simulate [ronde]       : Jalankan simulasi balancing pertarungan
             - validate_assets        : Validasi file aset font, gambar & lore
+            - bossrush <1..5>        : Lompat langsung ke tahap Boss Rush
+            - bossrush_time <detik>  : Set timer Boss Rush untuk uji rank
+            - unlock_titles          : Buka seluruh gelar ksatria untuk QA
         """.trimIndent()
         return DevCommandResult(true, helpText)
     }
@@ -238,5 +247,31 @@ class DevCommandDispatcher {
     private fun handleValidateAssets(): DevCommandResult {
         val report = AssetPipelineValidator.validateAll()
         return DevCommandResult(report.isClean, report.summary())
+    }
+
+    private fun handleBossRush(args: List<String>): DevCommandResult {
+        val stage = args.firstOrNull()?.toIntOrNull()?.coerceIn(1, 5) ?: 1
+        if (onWarpBossRushStage != null) {
+            onWarpBossRushStage?.invoke(stage)
+            return DevCommandResult(true, "Warp ke Boss Rush Tahap $stage.")
+        }
+        return DevCommandResult(false, "Handler Boss Rush belum terhubung.")
+    }
+
+    private fun handleBossRushTime(args: List<String>): DevCommandResult {
+        val timeSec = args.firstOrNull()?.toFloatOrNull()?.coerceAtLeast(0f) ?: 120f
+        if (onSetBossRushTimer != null) {
+            onSetBossRushTimer?.invoke(timeSec)
+            return DevCommandResult(true, "Timer Boss Rush disetel ke ${timeSec}s.")
+        }
+        return DevCommandResult(false, "Handler Boss Rush Timer belum terhubung.")
+    }
+
+    private fun handleUnlockTitles(): DevCommandResult {
+        if (onUnlockAllTitles != null) {
+            onUnlockAllTitles?.invoke()
+            return DevCommandResult(true, "Seluruh gelar ksatria siluet telah dibuka untuk inspeksi visual.")
+        }
+        return DevCommandResult(false, "Handler unlock titles belum terhubung.")
     }
 }

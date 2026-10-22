@@ -63,6 +63,8 @@ import com.stickman.tower.rune.RuneManager
 import com.stickman.tower.rune.RuneType
 import com.stickman.tower.world.BloodAltar
 import com.stickman.tower.world.TemporalPact
+import com.stickman.tower.bossrush.BossRushManager
+import com.stickman.tower.bossrush.BossRushRank
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
 import com.stickman.tower.world.ProceduralBackgroundRenderer
@@ -70,7 +72,8 @@ import kotlin.math.sin
 
 enum class GameMode {
     STORY,
-    ENDLESS
+    ENDLESS,
+    BOSS_RUSH
 }
 
 /**
@@ -163,6 +166,11 @@ class PlayScreen(
     var isInteractingWithAltar: Boolean = false
     var altarSelectedIndex: Int = 0
     var activeTemporalPact: TemporalPact = TemporalPact.NONE
+
+    // Mode Boss Rush (Gauntlet of Sovereigns) (Fase 23)
+    var bossRushStage: Int = 1
+    var bossRushTimer: Float = 0f
+    var bossRushTransitionTimer: Float = 0f
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -303,6 +311,36 @@ class PlayScreen(
             )
         }
         devTools.dispatcher.getCurrentFloor = { currentFloor }
+        devTools.dispatcher.onWarpBossRushStage = { stage ->
+            gameMode = GameMode.BOSS_RUSH
+            bossRushStage = stage
+            bossRushTimer = 0f
+            bossRushTransitionTimer = 0f
+            val targetFloor = when (stage) {
+                1 -> 3
+                2 -> 5
+                3 -> 8
+                4 -> 9
+                else -> 10
+            }
+            loadFloor(targetFloor)
+            player.respawn(currentFloor.spawnX, currentFloor.spawnY)
+            gameStatus = GameStatus.PLAYING
+            floatingTexts.add(FloatingText("DEV WARP: GAUNTLET TAHAP $stage", player.position.x, player.position.y + 2.5f, Color.GOLD))
+        }
+        devTools.dispatcher.onSetBossRushTimer = { timeSec ->
+            bossRushTimer = timeSec
+            floatingTexts.add(FloatingText("DEV: BOSS RUSH TIMER = ${timeSec}s", player.position.x, player.position.y + 2.5f, Color.CYAN))
+        }
+        devTools.dispatcher.onUnlockAllTitles = {
+            for (title in com.stickman.tower.bossrush.BossRushManager.ALL_TITLES) {
+                if (!saveData.unlockedTitles.contains(title.id)) {
+                    saveData.unlockedTitles.add(title.id)
+                }
+            }
+            com.stickman.tower.rpg.SaveManager.saveAsync(saveData)
+            floatingTexts.add(FloatingText("DEV: ALL TITLES UNLOCKED", player.position.x, player.position.y + 2.5f, Color.GOLD))
+        }
 
         if (isFirstShow) {
             isFirstShow = false
@@ -315,9 +353,9 @@ class PlayScreen(
      */
     fun loadFloor(floorNumber: Int) {
         CombatDirector.reset()
-        currentFloorNumber = if (gameMode == GameMode.STORY) floorNumber.coerceIn(1, 10) else floorNumber.coerceAtLeast(11)
+        currentFloorNumber = if (gameMode == GameMode.ENDLESS) floorNumber.coerceAtLeast(11) else floorNumber.coerceIn(1, 10)
         activeMutator = if (gameMode == GameMode.ENDLESS) FloorMutator.getRandomMutator(currentFloorNumber) else FloorMutator.NONE
-        currentFloor = if (gameMode == GameMode.STORY) TowerLevelBuilder.buildFloor(currentFloorNumber) else TowerLevelBuilder.buildEndlessFloor(currentFloorNumber, activeMutator)
+        currentFloor = if (gameMode == GameMode.ENDLESS) TowerLevelBuilder.buildEndlessFloor(currentFloorNumber, activeMutator) else TowerLevelBuilder.buildFloor(currentFloorNumber)
 
         cameraManager.setBounds(
             left = currentFloor.mapBounds.x,
@@ -580,7 +618,6 @@ class PlayScreen(
             uiViewport.apply()
             shapeRenderer.projectionMatrix = uiCamera.combined
             batch.projectionMatrix = uiCamera.combined
-            renderHUD()
             renderBestiaryOverlay()
             return
         }
@@ -728,6 +765,13 @@ class PlayScreen(
             if (nextAchv != null) {
                 activeAchievementBanner = nextAchv
                 achievementBannerTimer = 3.8f
+                if (nextAchv.goldReward > 0) {
+                    player.stats.addGold(nextAchv.goldReward)
+                    player.stats.applyToSaveData(saveData)
+                    floatingTexts.add(
+                        FloatingText("+${nextAchv.goldReward} GOLD [PRESTASI]", player.position.x, player.position.y + 2.5f, Color.GOLD, duration = 3.0f)
+                    )
+                }
                 AudioManager.playChest()
                 HapticManager.vibrateMedium()
             }
@@ -953,6 +997,39 @@ class PlayScreen(
                     floatingTexts.add(
                         FloatingText("\"${boss.deathQuote}\"", boss.position.x + boss.width / 2f, boss.position.y + 2.2f, Color.LIGHT_GRAY, duration = 4.5f)
                     )
+
+                    // Integrasi Mode Boss Rush (Gauntlet of Sovereigns) (Fase 23)
+                    if (gameMode == GameMode.BOSS_RUSH) {
+                        if (bossRushStage < 5) {
+                            val healAmount = player.health.maxHp * 0.35f
+                            player.health.heal(healAmount)
+                            particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.health.maxHp * 0.05f, count = 20, color = Color.GREEN)
+                            floatingTexts.add(
+                                FloatingText("+35% ANIMA PULIH! 🩸", player.position.x + player.width / 2f, player.position.y + player.height + 0.8f, Color.GREEN, duration = 3.0f)
+                            )
+                            bossRushTransitionTimer = 2.5f
+                            floatingTexts.add(
+                                FloatingText("⚔ TAHAP $bossRushStage/5 TUNTAS! BOS BERIKUTNYA DALAM 2.5s...", boss.position.x, boss.position.y + 4.5f, Color.CYAN, duration = 2.8f)
+                            )
+                        } else {
+                            val (rank, isNewRecord, unlockedTitle) = BossRushManager.recordCompletion(archetype.name, bossRushTimer, saveData)
+                            if (rank.goldReward > 0) {
+                                player.stats.addGold(rank.goldReward)
+                            }
+                            player.stats.applyToSaveData(saveData)
+                            SaveManager.saveAsync(saveData)
+                            gameStatus = GameStatus.STAGE_CLEAR
+                            AudioManager.playLevelUp()
+                            floatingTexts.add(
+                                FloatingText("★ GAUNTLET DITAKLUKKAN! [${rank.badgeSymbol}] ★", boss.position.x, boss.position.y + 4.5f, rank.primaryColor, duration = 5.0f)
+                            )
+                            if (unlockedTitle != null) {
+                                floatingTexts.add(
+                                    FloatingText("✦ GELAR TERBUKA: \"${unlockedTitle.titleName}\"! ✦", player.position.x, player.position.y + 2.5f, Color.GOLD, duration = 4.5f)
+                                )
+                            }
+                        }
+                    }
                 }
             }
 
@@ -979,6 +1056,27 @@ class PlayScreen(
             // Endless Survival Time Tracking
             if (gameMode == GameMode.ENDLESS && !player.health.isDead) {
                 endlessSurvivalTime += updateDelta
+            }
+
+            // Boss Rush Timer & Stage Transition Tracking (Fase 23)
+            if (gameMode == GameMode.BOSS_RUSH && !player.health.isDead) {
+                bossRushTimer += updateDelta
+                if (bossRushTransitionTimer > 0f) {
+                    bossRushTransitionTimer = (bossRushTransitionTimer - updateDelta).coerceAtLeast(0f)
+                    if (bossRushTransitionTimer <= 0f && bossRushStage < 5) {
+                        bossRushStage++
+                        val nextFloor = when (bossRushStage) {
+                            2 -> 5
+                            3 -> 8
+                            4 -> 9
+                            else -> 10
+                        }
+                        loadFloor(nextFloor)
+                        floatingTexts.add(
+                            FloatingText("⚔ GAUNTLET: TAHAP $bossRushStage / 5!", player.position.x, player.position.y + 2.0f, Color.GOLD, duration = 2.5f)
+                        )
+                    }
+                }
             }
 
             // 3. Evaluasi Kondisi Menang & Kalah
@@ -1705,6 +1803,12 @@ class PlayScreen(
             currentFloor.allEnemies.all { it.health.isDead }
         }
 
+        if (gameMode == GameMode.BOSS_RUSH) {
+            // Pada Boss Rush, transisi panggung ditangani secara otomatis oleh bossRushTransitionTimer
+            // dan kemenangan akhir dicapai saat bos ke-5 tumbang.
+            return
+        }
+
         if (isFloorCleared && currentFloor.exitPortal.bounds.overlaps(player.bounds) && gameStatus == GameStatus.PLAYING) {
             gameStatus = GameStatus.STAGE_CLEAR
             floatingTexts.add(
@@ -1847,13 +1951,22 @@ class PlayScreen(
             }
 
             if (keyRespawn || touchRespawn) {
-                player.respawn(activeCheckpointPos.x, activeCheckpointPos.y)
-                currentFloor.boss?.let { b ->
-                    if (!b.health.isDead) {
-                        b.projectiles.clear()
+                if (gameMode == GameMode.BOSS_RUSH) {
+                    bossRushStage = 1
+                    bossRushTimer = 0f
+                    bossRushTransitionTimer = 0f
+                    loadFloor(3)
+                    player.respawn(currentFloor.spawnX, currentFloor.spawnY)
+                    gameStatus = GameStatus.PLAYING
+                } else {
+                    player.respawn(activeCheckpointPos.x, activeCheckpointPos.y)
+                    currentFloor.boss?.let { b ->
+                        if (!b.health.isDead) {
+                            b.projectiles.clear()
+                        }
                     }
+                    gameStatus = GameStatus.PLAYING
                 }
-                gameStatus = GameStatus.PLAYING
                 AudioManager.playSlashLight()
             }
         } else if (gameStatus == GameStatus.STAGE_CLEAR) {
@@ -1915,6 +2028,20 @@ class PlayScreen(
                         loadFloor(1)
                     }
                 }
+            } else if (gameMode == GameMode.BOSS_RUSH) {
+                if (proceedTriggered) {
+                    if (game != null) {
+                        (game as? StickmanGame)?.releasePreservedScreen(this)
+                        game.setScreen(BossRushScreen(game, MainMenuScreen(game)))
+                    }
+                } else if (retryTriggered) {
+                    bossRushStage = 1
+                    bossRushTimer = 0f
+                    bossRushTransitionTimer = 0f
+                    loadFloor(3)
+                    player.respawn(currentFloor.spawnX, currentFloor.spawnY)
+                    gameStatus = GameStatus.PLAYING
+                }
             } else {
                 // Endless Mode: Lanjut ke Lantai Berikutnya
                 if (proceedTriggered) {
@@ -1953,6 +2080,12 @@ class PlayScreen(
         // Panel Latar Player Status Card (Kiri Atas - Obsidian Glassmorphism)
         shapeRenderer.setColor(0.06f + 0.08f * dangerThrob, 0.09f * (1f - dangerThrob), 0.15f * (1f - dangerThrob), 0.94f)
         shapeRenderer.rect(12f, h - 90f, 290f, 78f)
+
+        // Panel Latar Sub-Stats Pod (Gold, ATK, Relics, Familiar)
+        shapeRenderer.setColor(0.04f, 0.06f, 0.10f, 0.88f)
+        shapeRenderer.rect(12f, h - 146f, 320f, 52f)
+        shapeRenderer.setColor(0.20f, 0.30f, 0.45f, 0.50f)
+        shapeRenderer.rectLine(12f, h - 94f, 332f, h - 94f, 1f)
 
         // Top Accent Line (Red danger pulse or Sleek Blue/Gold)
         if (isLowHp) {
@@ -2090,6 +2223,14 @@ class PlayScreen(
             shapeRenderer.setColor(0.12f, 0.08f, 0.18f, 0.85f)
             shapeRenderer.rect(w / 2f - 240f, h - 110f, 480f, 38f)
             shapeRenderer.setColor(0.85f, 0.45f, 0.95f, 0.9f)
+            shapeRenderer.rectLine(w / 2f - 240f, h - 72f, w / 2f + 240f, h - 72f, 2f)
+        }
+
+        // Gauntlet of Sovereigns Badge Background (Fase 23)
+        if (gameMode == GameMode.BOSS_RUSH) {
+            shapeRenderer.setColor(0.08f, 0.10f, 0.16f, 0.88f)
+            shapeRenderer.rect(w / 2f - 240f, h - 110f, 480f, 38f)
+            shapeRenderer.setColor(0.95f, 0.75f, 0.25f, 0.9f)
             shapeRenderer.rectLine(w / 2f - 240f, h - 72f, w / 2f + 240f, h - 72f, 2f)
         }
 
@@ -2244,15 +2385,15 @@ class PlayScreen(
             smallF.draw(batch, "✦ MORALE SURGE: ${activeMoraleBuff.displayName} (${activeMoraleBuff.effectDescription})", 15f, h - 140f)
         }
 
-        // Tower Whispers Ambient Monologue (Fase 18)
+        // Tower Whispers Ambient Monologue (Fase 18) - Center-wrapped to avoid Quest Tracker collision
         if (towerWhisperManager.isWhisperActive && towerWhisperManager.whisperAlpha > 0.01f) {
             val whisper = towerWhisperManager.currentWhisper ?: ""
             val alpha = towerWhisperManager.whisperAlpha
             regF.setColor(0.85f, 0.92f, 1.0f, alpha * 0.90f)
-            glyphLayout.setText(regF, whisper)
-            val wx = (w - glyphLayout.width) / 2f
-            val wy = 630f
-            regF.draw(batch, whisper, wx, wy)
+            val maxWhisperWidth = 500f
+            val wx = (w - maxWhisperWidth) / 2f
+            val wy = 620f
+            regF.draw(batch, whisper, wx, wy, maxWhisperWidth, com.badlogic.gdx.utils.Align.center, true)
         }
 
         // Floor Name Banner
@@ -2325,6 +2466,28 @@ class PlayScreen(
             smallF.draw(batch, activeMutator.description, w / 2f - 230f, h - 94f)
         }
 
+        // Gauntlet of Sovereigns Badge Text (Fase 23)
+        if (gameMode == GameMode.BOSS_RUSH) {
+            val stageName = when (bossRushStage) {
+                1 -> "Penjaga Gerbang Purba (F3)"
+                2 -> "Matron Amethyst (F5)"
+                3 -> "Bayangan Doppelgänger (F8)"
+                4 -> "Crimson Sovereign (F9)"
+                5 -> "Sang Kaligrafer Agung (F10)"
+                else -> "Boss Rush"
+            }
+            val gauntletText = "⚔ GAUNTLET: TAHAP $bossRushStage / 5   ⏱ ${String.format("%.1f", bossRushTimer)}s"
+            regF.color = Color.GOLD
+            glyphLayout.setText(regF, gauntletText)
+            regF.draw(batch, gauntletText, (w - glyphLayout.width) / 2f, h - 76f)
+
+            val activeTitleHero = if (saveData.activeTitle.isNotEmpty()) BossRushManager.getTitleById(saveData.activeTitle).titleName else ""
+            val titleText = if (activeTitleHero.isNotEmpty()) "\"$activeTitleHero\" | $stageName" else stageName
+            smallF.setColor(0.85f, 0.92f, 1f, 0.9f)
+            glyphLayout.setText(smallF, titleText)
+            smallF.draw(batch, titleText, (w - glyphLayout.width) / 2f, h - 94f)
+        }
+
         // Overlays Game Over / Victory
         if (gameStatus == GameStatus.GAME_OVER) {
             headF.setColor(1f, 0.25f, 0.25f, 1f)
@@ -2341,28 +2504,47 @@ class PlayScreen(
 
         if (gameStatus == GameStatus.STAGE_CLEAR) {
             val isStory = gameMode == GameMode.STORY
+            val isBossRush = gameMode == GameMode.BOSS_RUSH
             headF.color = Color.GOLD
-            val bannerTitle = if (isStory) {
-                if (currentFloorNumber < 10) "★ KEBANGKITAN KANVAS: ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! KANVAS SEMESTA TERBEBASKAN! ★"
-            } else {
-                "★ KEBANGKITAN KANVAS: ENDLESS FLOOR $currentFloorNumber CLEARED! ★"
+            val bannerTitle = when {
+                isBossRush -> {
+                    val rank = BossRushRank.fromTime(bossRushTimer)
+                    "★ GAUNTLET DITAKLUKKAN! [RANK: ${rank.badgeSymbol}] ★"
+                }
+                isStory -> {
+                    if (currentFloorNumber < 10) "★ KEBANGKITAN KANVAS: ${currentFloor.floorName.uppercase()} SELESAI! ★" else "★ TOWER CONQUERED! KANVAS SEMESTA TERBEBASKAN! ★"
+                }
+                else -> "★ KEBANGKITAN KANVAS: ENDLESS FLOOR $currentFloorNumber CLEARED! ★"
             }
             glyphLayout.setText(headF, bannerTitle)
             headF.draw(batch, bannerTitle, (w - glyphLayout.width) / 2f, h / 2f + 75f)
 
             regF.color = Color.WHITE
-            val subText = if (isStory) {
-                if (currentFloorNumber < 10) "Musuh telah dibersihkan! Bersiap untuk lantai berikutnya."
-                else "Sang Penulis Takdir tumbang! Pecahnya pena takdir membuka dimensi Endless Spire."
-            } else {
-                val talentPtText = if (currentFloorNumber % 2 == 0) " | +1 TALENT POINT!" else ""
-                "Kills: $endlessEnemiesKilled | Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText"
+            val subText = when {
+                isBossRush -> {
+                    val rank = BossRushRank.fromTime(bossRushTimer)
+                    val titleName = if (rank.titleRewardId != null) BossRushManager.getTitleById(rank.titleRewardId).titleName else "Pejuang Menara"
+                    val rankReward = if (rank.goldReward > 0) " | +${rank.goldReward} GOLD" else ""
+                    "Waktu: ${String.format("%.2f", bossRushTimer)}s | Gelar: \"$titleName\"$rankReward"
+                }
+                isStory -> {
+                    if (currentFloorNumber < 10) "Musuh telah dibersihkan! Bersiap untuk lantai berikutnya."
+                    else "Sang Penulis Takdir tumbang! Pecahnya pena takdir membuka dimensi Endless Spire."
+                }
+                else -> {
+                    val talentPtText = if (currentFloorNumber % 2 == 0) " | +1 TALENT POINT!" else ""
+                    "Kills: $endlessEnemiesKilled | Waktu: ${endlessSurvivalTime.toInt()}s$talentPtText"
+                }
             }
             glyphLayout.setText(regF, subText)
             regF.draw(batch, subText, (w - glyphLayout.width) / 2f, h / 2f + 25f)
 
             val nextFloorNumber = if (isStory && currentFloorNumber >= 10) 11 else currentFloorNumber + 1
-            val nextFloorLabel = if (isStory && currentFloorNumber >= 10) "ENDLESS SPIRE (F11)" else "LANTAI $nextFloorNumber"
+            val nextFloorLabel = when {
+                isBossRush -> "ARENA GAUNTLET"
+                isStory && currentFloorNumber >= 10 -> "ENDLESS SPIRE (F11)"
+                else -> "LANTAI $nextFloorNumber"
+            }
 
             headF.color = Color.WHITE
             headF.draw(batch, "LANJUT ($nextFloorLabel)", w / 2f - 240f, h / 2f - 40f)
@@ -2665,8 +2847,8 @@ class PlayScreen(
         shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        // Dim background
-        shapeRenderer.setColor(0.04f, 0.04f, 0.08f, 0.94f)
+        // Dim background (Tinggi untuk isolasi visual penuh dari gameplay)
+        shapeRenderer.setColor(0.04f, 0.05f, 0.08f, 0.98f)
         shapeRenderer.rect(0f, 0f, w, h)
 
         // Top Header Banner
@@ -2675,9 +2857,14 @@ class PlayScreen(
         shapeRenderer.setColor(0.85f, 0.70f, 0.25f, 1f)
         shapeRenderer.rect(50f, 633f, 1180f, 2f)
 
-        // Tombol Close [X] di Header
-        shapeRenderer.setColor(0.6f, 0.15f, 0.15f, 0.85f)
+        // Tombol Close [X] di Header (Aksen Emas Bertema)
+        shapeRenderer.setColor(0.48f, 0.12f, 0.16f, 0.92f)
         shapeRenderer.rect(1140f, 645f, 80f, 45f)
+        shapeRenderer.setColor(0.95f, 0.75f, 0.25f, 0.85f)
+        shapeRenderer.rectLine(1140f, 645f, 1220f, 645f, 1.5f)
+        shapeRenderer.rectLine(1140f, 690f, 1220f, 690f, 1.5f)
+        shapeRenderer.rectLine(1140f, 645f, 1140f, 690f, 1.5f)
+        shapeRenderer.rectLine(1220f, 645f, 1220f, 690f, 1.5f)
 
         // Left Panel (Daftar Entitas Monster)
         shapeRenderer.setColor(0.07f, 0.07f, 0.13f, 0.90f)
@@ -2715,6 +2902,26 @@ class PlayScreen(
         shapeRenderer.rect(430f, 495f, 780f, 110f)
         shapeRenderer.setColor(Color.valueOf(selected.colorHex))
         shapeRenderer.rect(430f, 495f, 8f, 110f)
+
+        // Preview Siluet Mini Entitas (Vektor Silhouette Preview)
+        val previewX = 1145f
+        val previewY = 550f
+        val entColor = Color.valueOf(selected.colorHex)
+        shapeRenderer.setColor(0.05f, 0.06f, 0.10f, 0.95f)
+        shapeRenderer.circle(previewX, previewY, 38f)
+        shapeRenderer.setColor(entColor.r, entColor.g, entColor.b, 0.85f)
+        shapeRenderer.circle(previewX, previewY, 38f)
+        shapeRenderer.setColor(0.05f, 0.06f, 0.10f, 0.95f)
+        shapeRenderer.circle(previewX, previewY, 35f)
+
+        // Ornamen siluet ksatria/monster di dalam lingkaran
+        shapeRenderer.setColor(entColor)
+        shapeRenderer.circle(previewX, previewY + 12f, 7f)
+        shapeRenderer.rectLine(previewX, previewY + 5f, previewX, previewY - 12f, 3f)
+        shapeRenderer.rectLine(previewX, previewY - 12f, previewX - 9f, previewY - 24f, 2.5f)
+        shapeRenderer.rectLine(previewX, previewY - 12f, previewX + 9f, previewY - 24f, 2.5f)
+        shapeRenderer.rectLine(previewX, previewY - 2f, previewX - 14f, previewY + 8f, 2f)
+        shapeRenderer.rectLine(previewX, previewY - 2f, previewX + 13f, previewY + 3f, 2f)
 
         // Card Lore Aurelius
         shapeRenderer.setColor(0.09f, 0.09f, 0.16f, 0.90f)

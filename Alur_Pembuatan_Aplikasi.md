@@ -804,6 +804,46 @@ flowchart TD
 
 ---
 
+### FASE 23: Mode Gauntlet Para Raja (Boss Rush Mode) & Balairung Sang Legenda (Hall of Legends)
+> **Tujuan Terbesar:** Menghadirkan tantangan murni keterampilan boss gauntlet 5 tahap tanpa henti berurutan (Lantai 3, 5, 8, 9, 10), kalkulator waktu & peringkat huruf (S, A, B, C, D), 5 Gelar Kehormatan eksklusif Ksatria Aethelgard, dan layar Hall of Legends interaktif.
+
+#### Modul 23.1: Model & Kalkulator Peringkat Boss Rush (BossRushRank & Best Times)
+- **Task 23.1.1: 5 Tier Peringkat & Syarat Batas Waktu**
+  - [x] Class enum [BossRushRank.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/bossrush/BossRushRank.kt) dengan 5 peringkat:
+    - *Rank S (Apex Sovereign):* Waktu < 150 detik (2:30), Hadiah 5,000 Gold, Warna Emas Bercahaya.
+    - *Rank A (Grand Inquisitor):* Waktu < 240 detik (4:00), Hadiah 2,500 Gold, Warna Cyan Kristal.
+    - *Rank B (Spire Sentinel):* Waktu < 360 detik (6:00), Hadiah 1,200 Gold, Warna Hijau Zamrud.
+    - *Rank C (Tower Veteran):* Waktu < 500 detik (8:20), Hadiah 500 Gold, Warna Oranye Terang.
+    - *Rank D (Shadow Novice):* Waktu >= 500 detik, Hadiah 150 Gold, Warna Abu-abu Baja.
+- **Task 23.1.2: 5 Gelar Kehormatan Ksatria Aethelgard (Knight Titles)**
+  - [x] Class [KnightTitle.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/bossrush/KnightTitle.kt) & sistem equip gelar aktif terpampang di HUD gameplay:
+    - `"Inisiat Siluet"` (Bawaan)
+    - `"Pembantai Bayang"` (Selesaikan Gauntlet pertama kali)
+    - `"Penguasa Kilat"` (Raih minimal Rank A)
+    - `"Tirani Tinta"` (Raih minimal Rank S)
+    - `"Legenda Abadi Aethelgard"` (Raih Rank S dengan ketiga karakter)
+
+#### Modul 23.2: Arsitektur Transisi Gauntlet & Loop Pertarungan (PlayScreen.kt)
+- **Task 23.2.1: Urutan Bos Beruntun & Pemulihan Sebagian**
+  - [x] Transisi otomatis antar bos (Lantai 3: Oakhaven -> Lantai 5: Matron -> Lantai 8: Doppelgänger -> Lantai 9: Sovereign -> Lantai 10: Calligrapher).
+  - [x] Pemulihan parsial diegetik: +35% Anima HP pemain saat tiap bos tumbang (`bossRushTransitionTimer = 2.5s`).
+  - [x] Timer stopwatch real-time akurat (format `MM:SS.ms`) dengan zero-heap formatting.
+  - [x] Penanganan respawn & retry anti dead-loop yang memulihkan darah dan state tempur ksatria secara tuntas.
+
+#### Modul 23.3: Layar Balairung Sang Legenda & Integrasi Menu (BossRushScreen & GauntletScreen)
+- **Task 23.3.1: Antarmuka Interaktif Hall of Legends**
+  - [x] Layar interaktif [BossRushScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/BossRushScreen.kt) menampilkan Rekor Terbaik per arketipe (Sword, Dagger, Heavy), lencana peringkat, siklus pemilihan gelar kehormatan, dan deskripsi bos.
+  - [x] Tab navigasi `"⚔ Boss Rush"` terintegrasi langsung di dalam [GauntletScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/GauntletScreen.kt) dan shortcut langsung di [MainMenuScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/MainMenuScreen.kt).
+  - [x] Zero-allocation static cached collections pada render loop UI 60 FPS.
+
+#### Modul 23.4: Persistensi Multi-Slot & Unit Testing Komprehensif
+- **Task 23.4.1: Defensive Copying Thread-Safe SaveManager**
+  - [x] Enkapsulasi `bossRushBestTimes`, `unlockedTitles`, dan `activeTitle` di [SaveData.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rpg/SaveData.kt) dengan verifikasi hash checksum.
+  - [x] Thread-safe defensive copying pada `SaveManager.saveAsync` untuk mengeliminasi race condition background save.
+  - [x] Suite unit test [BossRushTest.kt](file:///home/yusuf/projekan/game/game1/core/src/test/kotlin/com/stickman/tower/bossrush/BossRushTest.kt) (6 test cases) lulus 100% (total 147/147 unit test passing di seluruh proyek).
+
+---
+
 ## 4. Matriks Ketergantungan & Prioritas Eksekusi
 
 | Prioritas | Fase | Fitur Kunci | Output Terukur |
@@ -830,6 +870,7 @@ flowchart TD
 | **P10 (Final Master)**| Fase 20 | BGM Prosedural Dinamis, Vignette Kritis & AAB Production | Audio master per-Act, post-processing VFX & Bundle Rilis Store [SELESAI] |
 | **P11 (Companion)**| Fase 21 | Sistem Pendamping Roh Tinta (Aria, Vulcanus, Phantom) | Follow kinematics, Prismatic Spark, Molten Burn & Echo Slash [SELESAI] |
 | **P12 (Alchemy)** | Fase 22 | Sistem Soket Rune & Altar Pengorbanan Anima | 4 Tipe Rune Senjata, 3 Pakta Temporal Darah, Altar Prosedural [SELESAI] |
+| **P13 (Boss Rush)**| Fase 23 | Mode Gauntlet Para Raja & Balairung Sang Legenda | Gauntlet 5 Bos, Peringkat S-D, 5 Gelar Kehormatan & Hall of Legends [SELESAI] |
 
 
 ---

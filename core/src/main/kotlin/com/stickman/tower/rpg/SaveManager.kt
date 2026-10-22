@@ -197,12 +197,24 @@ object SaveManager {
      * Menyimpan progres secara asinkron di background thread agar tidak memblokir render frame (60 FPS smooth).
      */
     fun saveAsync(data: SaveData, slotId: Int = currentSlotId, onComplete: ((Boolean) -> Unit)? = null) {
-        // Snapshot clone sederhana di thread utama sebelum beralih ke background
+        // Snapshot clone defensif di thread utama sebelum beralih ke background
         val snapshot = data.copy(
             unlockedCharacters = ArrayList(data.unlockedCharacters),
             unlockedAchievements = ArrayList(data.unlockedAchievements),
             unlockedTalents = ArrayList(data.unlockedTalents),
-            unlockedLoreTablets = ArrayList(data.unlockedLoreTablets)
+            unlockedLoreTablets = ArrayList(data.unlockedLoreTablets),
+            completedQuests = ArrayList(data.completedQuests),
+            questProgressMap = HashMap(data.questProgressMap),
+            challengeMedals = HashMap(data.challengeMedals),
+            acceptedBounties = ArrayList(data.acceptedBounties),
+            completedBounties = ArrayList(data.completedBounties),
+            claimedBounties = ArrayList(data.claimedBounties),
+            bestiaryKills = HashMap(data.bestiaryKills),
+            unlockedFamiliars = ArrayList(data.unlockedFamiliars),
+            equippedRunes = ArrayList(data.equippedRunes),
+            unlockedRunes = ArrayList(data.unlockedRunes),
+            bossRushBestTimes = HashMap(data.bossRushBestTimes),
+            unlockedTitles = ArrayList(data.unlockedTitles)
         )
 
         asyncExecutor.submit {
@@ -329,6 +341,13 @@ object SaveManager {
             prefs.putString("acceptedBounties", data.acceptedBounties.joinToString(","))
             prefs.putString("completedBounties", data.completedBounties.joinToString(","))
             prefs.putString("claimedBounties", data.claimedBounties.joinToString(","))
+            prefs.putString("selectedFamiliar", data.selectedFamiliar)
+            prefs.putString("unlockedFamiliars", data.unlockedFamiliars.joinToString(","))
+            prefs.putString("equippedRunes", data.equippedRunes.joinToString(","))
+            prefs.putString("unlockedRunes", data.unlockedRunes.joinToString(","))
+            prefs.putString("bossRushBestTimes", data.bossRushBestTimes.entries.joinToString(";") { "${it.key}:${it.value}" })
+            prefs.putString("unlockedTitles", data.unlockedTitles.joinToString(","))
+            prefs.putString("activeTitle", data.activeTitle)
             prefs.putInteger("weaponAtkLevel", data.weaponAtkLevel)
             prefs.putInteger("weaponCritLevel", data.weaponCritLevel)
             prefs.putInteger("weaponSpdLevel", data.weaponSpdLevel)
@@ -378,6 +397,27 @@ object SaveManager {
                 val compBounties = ArrayList(prefs.getString("completedBounties", "").split(",").filter { it.isNotBlank() })
                 val claimBounties = ArrayList(prefs.getString("claimedBounties", "").split(",").filter { it.isNotBlank() })
 
+                val famList = ArrayList(prefs.getString("unlockedFamiliars", "ARIA_WISP").split(",").filter { it.isNotBlank() })
+                if (famList.isEmpty()) famList.add("ARIA_WISP")
+
+                val runeEqList = ArrayList(prefs.getString("equippedRunes", "RUNE_SOLAR,NONE").split(",").filter { it.isNotBlank() })
+                while (runeEqList.size < 2) runeEqList.add("NONE")
+
+                val runeUnList = ArrayList(prefs.getString("unlockedRunes", "RUNE_SOLAR").split(",").filter { it.isNotBlank() })
+                if (runeUnList.isEmpty()) runeUnList.add("RUNE_SOLAR")
+
+                val brTimes = HashMap<String, Float>()
+                val brStr = prefs.getString("bossRushBestTimes", "")
+                if (brStr.isNotBlank()) {
+                    brStr.split(";").filter { it.contains(":") }.forEach {
+                        val parts = it.split(":")
+                        if (parts.size == 2) parts[1].toFloatOrNull()?.let { t -> brTimes[parts[0]] = t }
+                    }
+                }
+
+                val titleList = ArrayList(prefs.getString("unlockedTitles", "TITEL_NOVICE").split(",").filter { it.isNotBlank() })
+                if (titleList.isEmpty()) titleList.add("TITEL_NOVICE")
+
                 return SaveData(
                     playerLevel = prefs.getInteger("playerLevel", 1),
                     currentExp = prefs.getInteger("currentExp", 0),
@@ -397,6 +437,13 @@ object SaveManager {
                     claimedBounties = claimBounties,
                     selectedArchetype = prefs.getString("selectedArchetype", "BALANCED"),
                     selectedSubClass = prefs.getString("selectedSubClass", "BERSERKER"),
+                    selectedFamiliar = prefs.getString("selectedFamiliar", "ARIA_WISP"),
+                    unlockedFamiliars = famList,
+                    equippedRunes = runeEqList,
+                    unlockedRunes = runeUnList,
+                    bossRushBestTimes = brTimes,
+                    unlockedTitles = titleList,
+                    activeTitle = prefs.getString("activeTitle", "TITEL_NOVICE"),
                     weaponAtkLevel = prefs.getInteger("weaponAtkLevel", 0),
                     weaponCritLevel = prefs.getInteger("weaponCritLevel", 0),
                     weaponSpdLevel = prefs.getInteger("weaponSpdLevel", 0),

@@ -53,12 +53,21 @@ object AchievementManager {
         }
 
         if (isBoss) {
-            when (floorNumber) {
-                3 -> if (unlock("TOWER_GUARDIAN_DOWN", saveData)) AchievementCatalog.findById("TOWER_GUARDIAN_DOWN")?.let { unlockedNow.add(it) }
-                5 -> if (unlock("MATRON_SLAYER", saveData)) AchievementCatalog.findById("MATRON_SLAYER")?.let { unlockedNow.add(it) }
-                8 -> if (unlock("SHADOW_REFLECTOR", saveData)) AchievementCatalog.findById("SHADOW_REFLECTOR")?.let { unlockedNow.add(it) }
-                9 -> if (unlock("CRIMSON_CLEANSER", saveData)) AchievementCatalog.findById("CRIMSON_CLEANSER")?.let { unlockedNow.add(it) }
-                10 -> if (unlock("DESTINY_REWRITTEN", saveData)) AchievementCatalog.findById("DESTINY_REWRITTEN")?.let { unlockedNow.add(it) }
+            val name = bossName?.lowercase() ?: ""
+            if (floorNumber == 3 || name.contains("oakhaven") || name.contains("guardian")) {
+                if (unlock("TOWER_GUARDIAN_DOWN", saveData)) AchievementCatalog.findById("TOWER_GUARDIAN_DOWN")?.let { unlockedNow.add(it) }
+            }
+            if (floorNumber == 5 || name.contains("matron") || name.contains("amethyst")) {
+                if (unlock("MATRON_SLAYER", saveData)) AchievementCatalog.findById("MATRON_SLAYER")?.let { unlockedNow.add(it) }
+            }
+            if (floorNumber == 8 || name.contains("doppelganger") || name.contains("doppelgänger") || name.contains("shadow")) {
+                if (unlock("SHADOW_REFLECTOR", saveData)) AchievementCatalog.findById("SHADOW_REFLECTOR")?.let { unlockedNow.add(it) }
+            }
+            if (floorNumber == 9 || name.contains("sovereign") || name.contains("crimson")) {
+                if (unlock("CRIMSON_CLEANSER", saveData)) AchievementCatalog.findById("CRIMSON_CLEANSER")?.let { unlockedNow.add(it) }
+            }
+            if (floorNumber == 10 || name.contains("calligrapher")) {
+                if (unlock("DESTINY_REWRITTEN", saveData)) AchievementCatalog.findById("DESTINY_REWRITTEN")?.let { unlockedNow.add(it) }
             }
         }
         return unlockedNow
@@ -135,6 +144,39 @@ object AchievementManager {
                 }
             }
         }
+
+        // Retroactive Auto-Validation berdasarkan progres tersimpan di SaveData
+        if (saveData.totalEnemiesDefeated > 0) {
+            unlockedAchievementIds.add("FIRST_BLOOD")
+        }
+        if (saveData.highestTowerFloor > 3 || (saveData.bestiaryKills["TOWER_GUARDIAN"] ?: 0) > 0) {
+            unlockedAchievementIds.add("TOWER_GUARDIAN_DOWN")
+        }
+        if (saveData.highestTowerFloor > 5 || (saveData.bestiaryKills["AMETHYST_MATRON"] ?: 0) > 0) {
+            unlockedAchievementIds.add("MATRON_SLAYER")
+        }
+        if (saveData.highestTowerFloor > 8 || (saveData.bestiaryKills["SHADOW_DOPPELGANGER"] ?: 0) > 0) {
+            unlockedAchievementIds.add("SHADOW_REFLECTOR")
+        }
+        if (saveData.highestTowerFloor > 9 || (saveData.bestiaryKills["CRIMSON_SOVEREIGN"] ?: 0) > 0) {
+            unlockedAchievementIds.add("CRIMSON_CLEANSER")
+        }
+        if (saveData.highestTowerFloor > 10 || saveData.highestEndlessFloor > 0 || (saveData.bestiaryKills["GRAND_CALLIGRAPHER"] ?: 0) > 0) {
+            unlockedAchievementIds.add("DESTINY_REWRITTEN")
+        }
+        if (saveData.highestEndlessFloor >= 15) {
+            unlockedAchievementIds.add("ENDLESS_SURVIVOR")
+        }
+        if (saveData.weaponAtkLevel >= 5) {
+            unlockedAchievementIds.add("FORGE_MASTER")
+        }
+        if (saveData.unlockedTalents.size >= 3) {
+            unlockedAchievementIds.add("TALENT_ADEPT")
+        }
+        if (saveData.unlockedLoreTablets.size >= 3) {
+            unlockedAchievementIds.add("CHRONICLER_OF_AETHELGARD")
+        }
+        syncToSave(saveData)
     }
 
     /**

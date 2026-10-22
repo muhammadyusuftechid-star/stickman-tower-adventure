@@ -78,7 +78,7 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         "SELECT CHARACTER",
         "STORY CODEX",
         "📜 QUEST LOG",
-        "⚔ GAUNTLETS & BOUNTY",
+        "⚔ GAUNTLET & BOSS RUSH",
         "👑 LEADERBOARDS",
         "🏆 ACHIEVEMENTS",
         "CONTROL SETTINGS",
@@ -107,10 +107,10 @@ class MainMenuScreen(private val game: StickmanGame) : Screen {
         currentSaveData = SaveManager.load()
         QuestManager.initFromSave(currentSaveData)
         inputCooldown = 0.25f
-        val colX = if (selectedIndex < 7) 140f else 670f
-        val rowIdx = if (selectedIndex < 7) selectedIndex else selectedIndex - 7
+        val colX = if (selectedIndex < 8) 140f else 670f
+        val rowIdx = if (selectedIndex < 8) selectedIndex else selectedIndex - 8
         selectorX = colX
-        selectorY = 536f - (rowIdx * 50f)
+        selectorY = 540f - (rowIdx * 46f)
         particles.clear()
         for (i in 0 until 45) {
             val p = MenuParticle()
