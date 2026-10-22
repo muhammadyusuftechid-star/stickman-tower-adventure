@@ -188,10 +188,10 @@ class CharacterSelectScreen(private val game: StickmanGame) : Screen {
 
         // 2. Render Tipografi & Teks (FontManager FreeType Anti-Aliased)
         batch.begin()
-        val titleF = if (FontManager.isInitialized) FontManager.titleFont else BitmapFont()
-        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
-        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
-        val smallF = if (FontManager.isInitialized) FontManager.smallFont else BitmapFont()
+        val titleF = FontManager.titleFont
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
+        val smallF = FontManager.smallFont
 
         // Judul Atas
         titleF.color = Color.WHITE

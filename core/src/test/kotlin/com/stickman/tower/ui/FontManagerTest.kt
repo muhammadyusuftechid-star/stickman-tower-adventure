@@ -14,11 +14,25 @@ class FontManagerTest {
         assertTrue(FontManager.EXTRA_CHARS.contains("⚔"))
         assertTrue(FontManager.EXTRA_CHARS.contains("◀"))
         assertTrue(FontManager.EXTRA_CHARS.contains("▶"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("☼"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("☽"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("⚡"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("☯"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("◇"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("◈"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("◆"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("▲"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("▼"))
+        assertTrue(FontManager.EXTRA_CHARS.contains("—"))
     }
 
     @Test
     fun testFontManagerLifecycleFallback() {
         // Pada headless test runner tanpa OpenGL backend, init() harus fallback dengan aman
+        FontManager.init()
+        assertTrue(FontManager.isInitialized)
+
+        // Idempotency check: inisialisasi ganda harus aman
         FontManager.init()
         assertTrue(FontManager.isInitialized)
 

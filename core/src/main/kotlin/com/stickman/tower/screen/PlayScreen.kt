@@ -3700,8 +3700,8 @@ class PlayScreen(
         val bx = (w - bw) / 2f
         val by = 645f
 
-        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
-        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
 
         headF.setColor(1f, 0.88f, 0.25f, 1f)
         headF.draw(batch, "★", bx + 19f, by + 36f)

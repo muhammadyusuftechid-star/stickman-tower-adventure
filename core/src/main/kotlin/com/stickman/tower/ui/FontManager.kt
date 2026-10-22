@@ -10,23 +10,49 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 /**
  * Manajer Tipografi Terpusat untuk Stickman Tower Adventure.
  * Menghasilkan font beresolusi tinggi, anti-aliased dengan linear filtering menggunakan FreeType,
- * serta memuat karakter set lengkap (termasuk bullet, simbol RPG, dan panah) untuk mencegah
+ * serta memuat karakter set lengkap (termasuk bullet, simbol RPG, rune, dan panah) untuk mencegah
  * rendering simbol kotak kosong (□).
+ *
+ * Menerapkan jaminan Zero-Allocation Fallback: Jika FreeType gagal atau dalam lingkungan headless,
+ * font akan dialihkan secara transparan ke instance static cached fallback tanpa mengalokasikan
+ * objek baru di setiap frame render loop.
  */
 object FontManager {
     var isInitialized = false
         private set
 
-    lateinit var titleFont: BitmapFont
-        private set
-    lateinit var headerFont: BitmapFont
-        private set
-    lateinit var regularFont: BitmapFont
-        private set
-    lateinit var smallFont: BitmapFont
-        private set
+    private var _titleFont: BitmapFont? = null
+    private var _headerFont: BitmapFont? = null
+    private var _regularFont: BitmapFont? = null
+    private var _smallFont: BitmapFont? = null
 
-    const val EXTRA_CHARS = "•★⚔◀▶~✓✕"
+    // Single static cached fallback instance to guarantee zero heap allocations in render loops
+    private var _cachedFallbackFont: BitmapFont? = null
+
+    private fun getSafeFallback(): BitmapFont {
+        if (_cachedFallbackFont == null) {
+            try {
+                _cachedFallbackFont = BitmapFont()
+            } catch (_: Throwable) {
+                // Dalam headless testing tanpa OpenGL context
+            }
+        }
+        return _cachedFallbackFont ?: try { BitmapFont() } catch (_: Throwable) { BitmapFont() }
+    }
+
+    val titleFont: BitmapFont
+        get() = _titleFont ?: getSafeFallback()
+
+    val headerFont: BitmapFont
+        get() = _headerFont ?: getSafeFallback()
+
+    val regularFont: BitmapFont
+        get() = _regularFont ?: getSafeFallback()
+
+    val smallFont: BitmapFont
+        get() = _smallFont ?: getSafeFallback()
+
+    const val EXTRA_CHARS = "•★⚔◀▶~✓✕☼☽⚡☯◇◈◆▲▼—'\""
 
     fun init() {
         if (isInitialized) return
@@ -46,7 +72,7 @@ object FontManager {
                     magFilter = Texture.TextureFilter.Linear
                     characters = FreeTypeFontGenerator.DEFAULT_CHARS + EXTRA_CHARS
                 }
-                titleFont = boldGen.generateFont(paramTitle)
+                _titleFont = boldGen.generateFont(paramTitle)
 
                 val paramHeader = FreeTypeFontParameter().apply {
                     size = 22
@@ -55,7 +81,7 @@ object FontManager {
                     magFilter = Texture.TextureFilter.Linear
                     characters = FreeTypeFontGenerator.DEFAULT_CHARS + EXTRA_CHARS
                 }
-                headerFont = boldGen.generateFont(paramHeader)
+                _headerFont = boldGen.generateFont(paramHeader)
 
                 val paramRegular = FreeTypeFontParameter().apply {
                     size = 16
@@ -64,7 +90,7 @@ object FontManager {
                     magFilter = Texture.TextureFilter.Linear
                     characters = FreeTypeFontGenerator.DEFAULT_CHARS + EXTRA_CHARS
                 }
-                regularFont = regularGen.generateFont(paramRegular)
+                _regularFont = regularGen.generateFont(paramRegular)
 
                 val paramSmall = FreeTypeFontParameter().apply {
                     size = 13
@@ -73,7 +99,7 @@ object FontManager {
                     magFilter = Texture.TextureFilter.Linear
                     characters = FreeTypeFontGenerator.DEFAULT_CHARS + EXTRA_CHARS
                 }
-                smallFont = regularGen.generateFont(paramSmall)
+                _smallFont = regularGen.generateFont(paramSmall)
 
                 boldGen.dispose()
                 regularGen.dispose()
@@ -91,10 +117,12 @@ object FontManager {
 
     private fun createFallbackFonts() {
         try {
-            titleFont = BitmapFont().apply { data.setScale(2.2f) }
-            headerFont = BitmapFont().apply { data.setScale(1.6f) }
-            regularFont = BitmapFont().apply { data.setScale(1.1f) }
-            smallFont = BitmapFont().apply { data.setScale(0.85f) }
+            val fallback = BitmapFont()
+            _cachedFallbackFont = fallback
+            _titleFont = BitmapFont().apply { data.setScale(2.2f) }
+            _headerFont = BitmapFont().apply { data.setScale(1.6f) }
+            _regularFont = BitmapFont().apply { data.setScale(1.1f) }
+            _smallFont = BitmapFont().apply { data.setScale(0.85f) }
         } catch (_: Throwable) {
             // Dalam headless test tanpa Gdx.graphics/gl
         }
@@ -104,11 +132,18 @@ object FontManager {
     fun dispose() {
         if (!isInitialized) return
         try {
-            if (::titleFont.isInitialized) titleFont.dispose()
-            if (::headerFont.isInitialized) headerFont.dispose()
-            if (::regularFont.isInitialized) regularFont.dispose()
-            if (::smallFont.isInitialized) smallFont.dispose()
+            _titleFont?.dispose()
+            _headerFont?.dispose()
+            _regularFont?.dispose()
+            _smallFont?.dispose()
+            _cachedFallbackFont?.dispose()
         } catch (_: Throwable) {}
+        _titleFont = null
+        _headerFont = null
+        _regularFont = null
+        _smallFont = null
+        _cachedFallbackFont = null
         isInitialized = false
     }
 }
+

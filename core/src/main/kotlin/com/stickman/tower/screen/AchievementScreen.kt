@@ -248,9 +248,9 @@ class AchievementScreen(
         // =========================================================================
         batch.begin()
 
-        val titleF = if (FontManager.isInitialized) FontManager.titleFont else BitmapFont()
-        val headF = if (FontManager.isInitialized) FontManager.headerFont else BitmapFont()
-        val regF = if (FontManager.isInitialized) FontManager.regularFont else BitmapFont()
+        val titleF = FontManager.titleFont
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
 
         // Judul Utama
         titleF.color = Color.WHITE

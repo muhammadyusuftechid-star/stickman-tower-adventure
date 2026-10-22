@@ -16,6 +16,7 @@ class StickmanGame : Game() {
 
     override fun create() {
         com.badlogic.gdx.Gdx.input?.setCatchKey(com.badlogic.gdx.Input.Keys.BACK, true)
+        FontManager.init()
         AudioManager.init()
         setScreen(MainMenuScreen(this))
     }
