@@ -381,7 +381,8 @@ object TowerLevelBuilder {
             actTitle = "ACT II: SECRETS OF THE INK",
             actSubtitle = "THE SUNKEN ARCHIVES",
             loreTablets = loreTablets,
-            storyDialogues = storyDialogues
+            storyDialogues = storyDialogues,
+            bloodAltar = BloodAltar(x = 18.5f, y = 1.0f)
         )
     }
 
@@ -574,6 +575,7 @@ object TowerLevelBuilder {
             actSubtitle = "THE FRACTURED PRECIPICE",
             loreTablets = loreTablets,
             storyDialogues = storyDialogues,
+            bloodAltar = BloodAltar(x = 13.5f, y = 6.0f),
             gravityScale = 0.65f // Gravitasi Rendah (-35%) untuk Akrobatik Udara
         )
     }
@@ -924,7 +926,8 @@ object TowerLevelBuilder {
             isBossFloor = false,
             actTitle = "EPILOGUE: THE ENDLESS PARADOX",
             actSubtitle = "FLOOR $floorNumber",
-            environmentalProps = getEnvironmentalPropsForFloor(floorNumber)
+            environmentalProps = getEnvironmentalPropsForFloor(floorNumber),
+            bloodAltar = if (floorNumber % 3 == 0) BloodAltar(x = 13.5f, y = 1.0f) else null
         )
     }
 }

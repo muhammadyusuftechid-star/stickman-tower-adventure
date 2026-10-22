@@ -41,11 +41,14 @@ class CharacterStats(
     val weaponSpdBonus: Float
         get() = weaponSpdLevel * 0.035f
 
+    var runeAtkBonus: Float = 0f
+    var runeCritBonus: Float = 0f
+
     val attackPower: Float
-        get() = (baseAttack * (1f + 0.08f * (level - 1))) + weaponAtkBonus
+        get() = (baseAttack * (1f + 0.08f * (level - 1))) + weaponAtkBonus + runeAtkBonus
 
     val critRate: Float
-        get() = (baseCritRate + weaponCritBonus).coerceIn(0f, 0.85f)
+        get() = (baseCritRate + weaponCritBonus + runeCritBonus).coerceIn(0f, 0.85f)
 
     val requiredExp: Int
         get() = max(50, floor(50.0 * (level.toDouble()).pow(1.4)).toInt())
@@ -148,5 +151,7 @@ class CharacterStats(
         this.weaponAtkLevel = data.weaponAtkLevel.coerceIn(0, MAX_WEAPON_LEVEL)
         this.weaponCritLevel = data.weaponCritLevel.coerceIn(0, MAX_WEAPON_LEVEL)
         this.weaponSpdLevel = data.weaponSpdLevel.coerceIn(0, MAX_WEAPON_LEVEL)
+        this.runeAtkBonus = com.stickman.tower.rune.RuneManager.calculateBonusAtk(data)
+        this.runeCritBonus = com.stickman.tower.rune.RuneManager.calculateCritRateBonus(data)
     }
 }

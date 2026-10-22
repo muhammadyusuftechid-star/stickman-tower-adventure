@@ -48,6 +48,17 @@ class Health(
         }
     }
 
+    /**
+     * Mengurangi HP untuk ritual pengorbanan altar tanpa memicu invulnerability frames,
+     * dan mempertahankan minimal 1 HP agar karakter tidak langsung tewas di tempat.
+     */
+    fun consumeHp(amount: Float): Float {
+        if (isDead) return 0f
+        val actual = amount.coerceAtMost(currentHp - 1f).coerceAtLeast(0f)
+        currentHp -= actual
+        return actual
+    }
+
     fun setMaxHp(newMax: Float, healToFull: Boolean = true) {
         maxHp = newMax
         if (healToFull) {

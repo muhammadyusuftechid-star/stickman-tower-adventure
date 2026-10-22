@@ -27,6 +27,7 @@ data class TowerFloor(
     val loreTablets: List<LoreTablet> = emptyList(),
     val storyDialogues: List<StoryDialogue> = emptyList(),
     val environmentalProps: List<EnvironmentalProp> = emptyList(),
+    val bloodAltar: BloodAltar? = null,
     val isSafeZone: Boolean = false,
     val gravityScale: Float = 1.0f
 ) {

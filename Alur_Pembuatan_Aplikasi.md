@@ -764,6 +764,46 @@ flowchart TD
 
 ---
 
+### FASE 22: Sistem Transmutasi Rune & Altar Pengorbanan Anima (Rune Alchemy & Blood Altar System)
+> **Tujuan Terbesar:** Menghadirkan kustomisasi build senjata mendalam via 2 soket Rune Kuno di Bengkel Vulcanus serta pilar Altar Pengorbanan Anima (*Blood Altar*) di lantai menara tertentu dengan mekanik resiko tinggi-hadiah tinggi (*high risk, high reward*) melalui pengorbanan 25% Anima pemain demi 3 Pakta Temporal eksklusif.
+
+#### Modul 22.1: Sistem Soket Rune Senjata (Weapon Rune Sockets)
+- **Task 22.1.1: Pemodelan Rune Kuno & Manajer Stat**
+  - [x] Definisikan enum [RuneType.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rune/RuneType.kt) dengan 4 tipe primordial:
+    - *Rune Surya Vulcanus (`RUNE_SOLAR`):* +8 Bonus ATK senjata.
+    - *Rune Rembulan Aria (`RUNE_LUNAR`):* +10% Damage Taken Reduction.
+    - *Rune Badai Kael (`RUNE_TEMPEST`):* +15% Cooldown Reduction skill & dodge.
+    - *Rune Palung Obsidian (`RUNE_ABYSS`):* +8% Critical Rate & +4% Vampiric Lifesteal.
+  - [x] Manajer soket [RuneManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rune/RuneManager.kt) untuk kalkulasi bonus kumulatif, pembatasan cap stat (reduksi damage maks 40%, CDR maks 45%), equip/unequip, dan unlock.
+- **Task 22.1.2: Antarmuka Interaktif Bengkel Tempa Vulcanus**
+  - [x] Integrasikan 2 kartu soket rune interaktif di bawah 3 tier upgrade senjata pada [BlacksmithScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/BlacksmithScreen.kt).
+  - [x] Siklus pergantian rune instan saat di-klik/tekan ENTER dengan umpan balik dentang palu tempa dan partikel bara api.
+- **Task 22.1.3: Drop Rune Kuno Hasil Kemenangan Bos**
+  - [x] Bos Tower Guardian menjatuhkan `RUNE_LUNAR`.
+  - [x] Bos Amethyst Matron menjatuhkan `RUNE_TEMPEST`.
+  - [x] Bos Grand Calligrapher menjatuhkan `RUNE_ABYSS`.
+
+#### Modul 22.2: Altar Pengorbanan Anima & Pakta Temporal (Blood Altar & Temporal Pacts)
+- **Task 22.2.1: Entitas Altar Prosedural & Penempatan Menara**
+  - [x] Class entitas [BloodAltar.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/world/BloodAltar.kt) berukuran 1.6m x 2.4m dengan rendering pilar obsidian, ukiran garis rune denyut mistis, mangkuk sesaji, dan perapian api Anima mengambang.
+  - [x] Pemasangan altar di Lantai 4 (Reruntuhan Akropolis), Lantai 7 (Koridor Kristal Aethel), serta kelipatan lantai 3 di Endless Spire melalui [TowerLevelBuilder.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/world/TowerLevelBuilder.kt).
+- **Task 22.2.2: 3 Pakta Temporal Eksklusif & Konsekuensi Pengorbanan**
+  - [x] *Pakta Pembantaian (`CARNAGE`):* +40% Critical Damage, namun pertahanan ksatria berkurang 15% (kerusakan yang diterima bertambah).
+  - [x] *Pakta Ketamakan (`GREED`):* +60% Pecahan Aethel Gold, namun kecepatan gerak dan animasi musuh bertambah 20%.
+  - [x] *Pakta Kecepatan Jiwa (`SWIFTNESS`):* +35% CDR skill & dodge, namun seluruh pemulihan HP (lifesteal, parry heal, peti) terblokir di lantai aktif.
+  - [x] Konsumsi instan 25% HP saat ritual pengikatan pakta menggunakan `player.health.consumeHp(sacrificeHp)` yang aman dari fatal instant-kill (minimal 1 HP tersisa).
+- **Task 22.2.3: Overlay Interaksi Diegetik & HUD Badge**
+  - [x] Modal popup Altar Pengorbanan semi-transparan dengan 3 kartu pakta interaktif, tombol batal, navigasi W/S/Panah, dan dukungan klik sentuh responsif.
+  - [x] Lencana pakta aktif `"🩸 PAKTA: ..."` terpampang di HUD [PlayScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/PlayScreen.kt).
+
+#### Modul 22.3: Persistensi SaveData & Validasi Integritas
+- **Task 22.3.1: Enkapsulasi SaveData & Cryptographic Checksum**
+  - [x] Penambahan list `equippedRunes` (kapasitas 2) dan `unlockedRunes` pada [SaveData.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rpg/SaveData.kt).
+  - [x] Integrasi FNV-1a hash mixing dan sanitasi batasan slot soket.
+  - [x] Suite unit test komprehensif [RuneAndAltarTest.kt](file:///home/yusuf/projekan/game/game1/core/src/test/kotlin/com/stickman/tower/rune/RuneAndAltarTest.kt) (9 test case) lulus 100% (total 141/141 unit tests di seluruh proyek).
+
+---
+
 ## 4. Matriks Ketergantungan & Prioritas Eksekusi
 
 | Prioritas | Fase | Fitur Kunci | Output Terukur |
@@ -789,6 +829,7 @@ flowchart TD
 | **P9 (Atmosfer)** | Fase 19 | Penceritaan Lingkungan 4 Babak & Bestiarium Lapangan| Prop reruntuhan visual, catatan lapangan musuh, & UI diegetik [SELESAI] |
 | **P10 (Final Master)**| Fase 20 | BGM Prosedural Dinamis, Vignette Kritis & AAB Production | Audio master per-Act, post-processing VFX & Bundle Rilis Store [SELESAI] |
 | **P11 (Companion)**| Fase 21 | Sistem Pendamping Roh Tinta (Aria, Vulcanus, Phantom) | Follow kinematics, Prismatic Spark, Molten Burn & Echo Slash [SELESAI] |
+| **P12 (Alchemy)** | Fase 22 | Sistem Soket Rune & Altar Pengorbanan Anima | 4 Tipe Rune Senjata, 3 Pakta Temporal Darah, Altar Prosedural [SELESAI] |
 
 
 ---

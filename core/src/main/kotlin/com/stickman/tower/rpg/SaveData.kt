@@ -33,6 +33,8 @@ data class SaveData(
     var selectedSubClass: String = "BERSERKER",
     var selectedFamiliar: String = "ARIA_WISP",
     var unlockedFamiliars: ArrayList<String> = arrayListOf("ARIA_WISP"),
+    var equippedRunes: ArrayList<String> = arrayListOf("RUNE_SOLAR", "NONE"),
+    var unlockedRunes: ArrayList<String> = arrayListOf("RUNE_SOLAR"),
     var weaponAtkLevel: Int = 0,
     var weaponCritLevel: Int = 0,
     var weaponSpdLevel: Int = 0,
@@ -89,6 +91,8 @@ data class SaveData(
         unlockedTalents.sorted().forEach { mixString(it) }
         unlockedLoreTablets.sorted().forEach { mixString(it) }
         unlockedFamiliars.sorted().forEach { mixString(it) }
+        unlockedRunes.sorted().forEach { mixString(it) }
+        equippedRunes.forEach { mixString(it) }
 
         mixString(activeQuestId)
         completedQuests.sorted().forEach { mixString(it) }
@@ -168,6 +172,13 @@ data class SaveData(
         }
         if (unlockedFamiliars.isEmpty()) {
             unlockedFamiliars.add("ARIA_WISP")
+        }
+
+        if (unlockedRunes.isEmpty()) {
+            unlockedRunes.add("RUNE_SOLAR")
+        }
+        while (equippedRunes.size < 2) {
+            equippedRunes.add("NONE")
         }
         return this
     }

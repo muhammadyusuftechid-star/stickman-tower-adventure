@@ -9,13 +9,13 @@
   <a href="https://libgdx.com/"><img src="https://img.shields.io/badge/libGDX-1.13.1-EA2027.svg?logo=libgdx&logoColor=white" alt="libGDX" /></a>
   <a href="#-arsitektur--prinsip-rekayasa-perangkat-lunak"><img src="https://img.shields.io/badge/Architecture-Clean%20%7C%20Zero--GC-brightgreen.svg" alt="Architecture" /></a>
   <a href="#-skema-kontrol-cross-platform"><img src="https://img.shields.io/badge/Platform-Android%20%7C%20Desktop%20(LWJGL3)-48bb78.svg" alt="Platform" /></a>
-  <a href="#-automated-testing--qa-pipeline"><img src="https://img.shields.io/badge/Tests-47%20Passed%20(Headless)-success.svg?logo=checkmarx&logoColor=white" alt="Tests" /></a>
+  <a href="#-automated-testing--qa-pipeline"><img src="https://img.shields.io/badge/Tests-141%20Passed%20(Headless)-success.svg?logo=checkmarx&logoColor=white" alt="Tests" /></a>
   <a href="https://github.com/muhammadyusuftechid-star/stickman-tower-adventure/releases"><img src="https://img.shields.io/badge/APK%20Size-10.6%20MB-blue.svg?logo=android&logoColor=white" alt="APK Size" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License" /></a>
 </p>
 
 > **Stickman Tower Adventure** adalah game **2D Action Roguelite RPG** performa tinggi yang dibangun dari nol menggunakan bahasa pemrograman **Kotlin** dan framework **libGDX** untuk platform **Android** dan **Desktop (PC)**.  
-> Dirancang dengan standar rekayasa perangkat lunak kelas industri: modularitas tinggi, **zero-allocation rendering** untuk garansi 60 FPS mulus di perangkat mobile, sistem fisika kinematika terkalibrasi presisi, abstraksi multi-input terpadu (*Keyboard, Gamepad, Touch*), serta 47 automated unit tests yang siap diintegrasikan pada CI/CD pipeline.
+> Dirancang dengan standar rekayasa perangkat lunak kelas industri: modularitas tinggi, **zero-allocation rendering** untuk garansi 60 FPS mulus di perangkat mobile, sistem fisika kinematika terkalibrasi presisi, abstraksi multi-input terpadu (*Keyboard, Gamepad, Touch*), serta 141 automated unit tests yang siap diintegrasikan pada CI/CD pipeline.
 
 ---
 
@@ -208,7 +208,7 @@ stickman-tower-adventure/
 
 ## 🧪 Automated Testing & QA Pipeline
 
-Logika inti game dilindungi oleh **47 automated unit tests** yang dapat dieksekusi secara **headless** tanpa memerlukan display server atau OpenGL context:
+Logika inti game dilindungi oleh **141 automated unit tests** yang dapat dieksekusi secara **headless** tanpa memerlukan display server atau OpenGL context:
 
 ```bash
 # Eksekusi unit test suite:

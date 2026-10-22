@@ -59,6 +59,10 @@ import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.bestiary.BestiaryManager
 import com.stickman.tower.companion.FamiliarType
 import com.stickman.tower.companion.InkFamiliar
+import com.stickman.tower.rune.RuneManager
+import com.stickman.tower.rune.RuneType
+import com.stickman.tower.world.BloodAltar
+import com.stickman.tower.world.TemporalPact
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
 import com.stickman.tower.world.ProceduralBackgroundRenderer
@@ -155,6 +159,11 @@ class PlayScreen(
     var parryFlashTimer: Float = 0f
     private var dangerPulseTimer: Float = 0f
 
+    // Sistem Altar Pengorbanan Darah & Pakta Temporal (Fase 22)
+    var isInteractingWithAltar: Boolean = false
+    var altarSelectedIndex: Int = 0
+    var activeTemporalPact: TemporalPact = TemporalPact.NONE
+
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
         private set
@@ -207,6 +216,7 @@ class PlayScreen(
     var activeStoryDialogue: StoryDialogue? = null
     var nearbyTabletPrompt: LoreTablet? = null
     var nearbyDialoguePrompt: StoryDialogue? = null
+    var nearbyAltarPrompt: Boolean = false
 
     // Engine Dialog Dinamis & Naskah Sinematik (Fase 18)
     var activeMoraleBuff: MoraleBuffType = MoraleBuffType.NONE
@@ -320,9 +330,11 @@ class PlayScreen(
         player.velocity.set(0f, 0f)
         player.maxAirJumps = relicManager.getMaxAirJumps()
         player.airJumpsRemaining = player.maxAirJumps
-        player.cooldownMultiplier = relicManager.getCooldownMultiplier() * talentManager.getCooldownMultiplier()
-        player.gravityScale = currentFloor.gravityScale * activeMutator.gravityMultiplier
-        player.damageReductionMultiplier = talentManager.getDamageReductionMultiplier()
+        player.stats.runeAtkBonus = RuneManager.calculateBonusAtk(saveData)
+        player.stats.runeCritBonus = RuneManager.calculateCritRateBonus(saveData)
+        activeTemporalPact = TemporalPact.NONE
+        isInteractingWithAltar = false
+        refreshPlayerModifiers()
         player.hasSuperArmor = talentManager.hasSuperArmor()
         player.hasUndyingWill = talentManager.hasUndyingWill()
         player.undyingWillUsed = false
@@ -407,12 +419,31 @@ class PlayScreen(
         saveNotificationTimer = 2.5f
     }
 
+    fun refreshPlayerModifiers() {
+        val runeCdr = RuneManager.calculateCooldownReduction(saveData)
+        val runeDmgRed = RuneManager.calculateDamageReduction(saveData)
+        val pactCdr = if (activeTemporalPact == TemporalPact.SWIFTNESS) 0.35f else 0f
+        val effectiveCdr = (runeCdr + pactCdr).coerceIn(0f, 0.75f)
+        player.cooldownMultiplier = relicManager.getCooldownMultiplier() * talentManager.getCooldownMultiplier() * (1f - effectiveCdr)
+        player.gravityScale = currentFloor.gravityScale * activeMutator.gravityMultiplier
+        val pactDmgMultiplier = if (activeTemporalPact == TemporalPact.CARNAGE) 1.15f else 1.0f
+        player.damageReductionMultiplier = talentManager.getDamageReductionMultiplier() * (1f - runeDmgRed) * pactDmgMultiplier
+    }
+
     private fun grantRewards(exp: Int, gold: Int, x: Float, y: Float) {
-        val finalGold = if (inkFamiliar.type == FamiliarType.ARIA_WISP) (gold * 1.20f).toInt() else gold
+        var goldMultiplier = 1.0f
+        if (inkFamiliar.type == FamiliarType.ARIA_WISP) goldMultiplier += 0.20f
+        if (activeTemporalPact == TemporalPact.GREED) goldMultiplier += 0.60f
+        val finalGold = (gold * goldMultiplier).toInt()
         player.stats.addGold(finalGold)
         floatingTexts.add(FloatingText("+$finalGold G", x + 0.35f, y, Color.YELLOW, duration = 1.2f))
-        if (finalGold > gold) {
-            floatingTexts.add(FloatingText("✨ LENTERA ARIA (+${finalGold - gold} G) ✨", x, y + 0.65f, Color.CYAN, duration = 1.3f))
+        if (inkFamiliar.type == FamiliarType.ARIA_WISP && goldMultiplier > 1.0f) {
+            val bonusGold = (gold * 0.20f).toInt()
+            floatingTexts.add(FloatingText("✨ LENTERA ARIA (+$bonusGold G) ✨", x, y + 0.65f, Color.CYAN, duration = 1.3f))
+        }
+        if (activeTemporalPact == TemporalPact.GREED) {
+            val greedBonus = (gold * 0.60f).toInt()
+            floatingTexts.add(FloatingText("🩸 PAKTA GREED (+$greedBonus G) 🩸", x, y + 0.95f, Color.GOLD, duration = 1.4f))
         }
 
         val levelsGained = player.stats.addExp(exp)
@@ -603,6 +634,17 @@ class PlayScreen(
             return
         }
 
+        if (isInteractingWithAltar) {
+            handleBloodAltarInput()
+            renderWorld(0f)
+            uiViewport.apply()
+            shapeRenderer.projectionMatrix = uiCamera.combined
+            batch.projectionMatrix = uiCamera.combined
+            renderHUD()
+            renderBloodAltarOverlay()
+            return
+        }
+
         // Pembaruan Sinematik Boss Intro (Fase 11)
         if (isBossIntroActive) {
             if (Gdx.input.isKeyJustPressed(Keys.SPACE) || Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.justTouched()) {
@@ -756,11 +798,15 @@ class PlayScreen(
                     if (isSwordHit || isBodyTouch) {
                         if (chest.open()) {
                             player.stats.addGold(chest.goldReward)
-                            player.health.heal(chest.healReward)
+                            if (activeTemporalPact == TemporalPact.SWIFTNESS) {
+                                floatingTexts.add(FloatingText("⛔ HEAL TERBLOKIR PAKTA", chest.x + 0.2f, chest.y + 1.7f, Color.CYAN, duration = 1.4f))
+                            } else {
+                                player.health.heal(chest.healReward)
+                                floatingTexts.add(FloatingText("+${chest.healReward.toInt()} HP", chest.x + 0.2f, chest.y + 1.7f, Color.GREEN, duration = 1.4f))
+                            }
                             AudioManager.playChest()
                             particleManager.spawnHitSparks(chest.x + chest.width / 2f, chest.y + chest.height / 2f, count = 22, color = Color.GOLD)
                             floatingTexts.add(FloatingText("+${chest.goldReward} G", chest.x + 0.2f, chest.y + 1.2f, Color.YELLOW, duration = 1.4f))
-                            floatingTexts.add(FloatingText("+${chest.healReward.toInt()} HP", chest.x + 0.2f, chest.y + 1.7f, Color.GREEN, duration = 1.4f))
                             if (currentFloorNumber == 2 && chest.x > 20f && relicManager.activeRelics.size < 2) {
                                 triggerRelicChoice()
                             }
@@ -800,6 +846,20 @@ class PlayScreen(
                 }
             }
 
+            // Pembaruan Interaksi Altar Pengorbanan Anima (Fase 22)
+            nearbyAltarPrompt = false
+            val altar = currentFloor.bloodAltar
+            if (altar != null && !altar.isActivated) {
+                if (altar.isPlayerNear(player.position.x, player.position.y, player.width, player.height)) {
+                    nearbyAltarPrompt = true
+                    if (Gdx.input.isKeyJustPressed(Keys.E) || (Gdx.input.isKeyJustPressed(Keys.ENTER) && !isPaused) || input.isAttackJustPressed()) {
+                        isInteractingWithAltar = true
+                        altarSelectedIndex = 0
+                        AudioManager.playChest()
+                    }
+                }
+            }
+
             // Pembaruan Dialog Naratif Karakter (NPC & Cutscenes)
             nearbyDialoguePrompt = null
             for (dialogue in currentFloor.storyDialogues) {
@@ -818,8 +878,9 @@ class PlayScreen(
 
             // Pembaruan Sistem AI Combat Director & Musuh Biasa
             CombatDirector.update(updateDelta)
+            val enemyDelta = if (activeTemporalPact == TemporalPact.GREED) updateDelta * 1.20f else updateDelta
             for (enemy in currentFloor.allEnemies) {
-                enemy.update(updateDelta, player, currentFloor.platforms)
+                enemy.update(enemyDelta, player, currentFloor.platforms)
                 if (enemy.health.isDead && !enemy.rewardClaimed) {
                     enemy.rewardClaimed = true
                     endlessEnemiesKilled++
@@ -844,7 +905,8 @@ class PlayScreen(
             val boss = currentFloor.boss
             if (boss != null) {
                 val wasPhase2 = boss.isPhase2
-                boss.update(updateDelta, player, currentFloor.platforms)
+                val bossDelta = if (activeTemporalPact == TemporalPact.GREED) updateDelta * 1.20f else updateDelta
+                boss.update(bossDelta, player, currentFloor.platforms)
                 if (!wasPhase2 && boss.isPhase2) {
                     cameraManager.shake(0.35f, 0.25f)
                     AudioManager.playBossRoar()
@@ -861,6 +923,21 @@ class PlayScreen(
                     grantRewards(boss.expReward, boss.goldReward, boss.position.x + boss.width / 2f, boss.position.y + 1.5f)
                     com.stickman.tower.achievement.AchievementManager.onEnemyKilled(true, currentFloorNumber, boss.name, saveData = saveData)
                     QuestManager.notifyEvent(ObjectiveType.DEFEAT_BOSS, boss.type.name)
+
+                    // Drop Rune Kuno Transmutasi Alkimia (Fase 22)
+                    val droppedRune = when (boss.type) {
+                        BossType.TOWER_GUARDIAN -> RuneType.RUNE_LUNAR
+                        BossType.AMETHYST_MATRON -> RuneType.RUNE_TEMPEST
+                        BossType.GRAND_CALLIGRAPHER -> RuneType.RUNE_ABYSS
+                        else -> null
+                    }
+                    if (droppedRune != null && RuneManager.unlockRune(droppedRune, saveData)) {
+                        floatingTexts.add(
+                            FloatingText("💎 RUNE PURBA TERBUKA: ${droppedRune.displayName}!", boss.position.x, boss.position.y + 4.2f, droppedRune.primaryColor, duration = 4.0f)
+                        )
+                        AudioManager.playLevelUp()
+                        SaveManager.saveAsync(saveData)
+                    }
 
                     // Pencatatan Eliminasi Bos Bestiarium Lapangan (Fase 19)
                     val bossBestiaryId = when (boss.type) {
@@ -1010,6 +1087,8 @@ class PlayScreen(
         for (spike in currentFloor.spikes) spike.render(shapeRenderer)
         for (chest in currentFloor.chests) chest.render(shapeRenderer)
         for (tablet in currentFloor.loreTablets) tablet.render(shapeRenderer)
+        currentFloor.bloodAltar?.update(delta, particleManager)
+        currentFloor.bloodAltar?.render(shapeRenderer)
         currentFloor.checkpoint?.render(shapeRenderer)
         currentFloor.exitPortal.render(shapeRenderer)
 
@@ -1100,7 +1179,10 @@ class PlayScreen(
 
                         val knockX = if (player.facingRight) player.hitbox.knockbackX else -player.hitbox.knockbackX
                         val knockY = player.hitbox.knockbackY
-                        val actualDmg = if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) player.hitbox.damage * 1.08f else player.hitbox.damage
+                        var actualDmg = if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) player.hitbox.damage * 1.08f else player.hitbox.damage
+                        if (player.hitbox.isCritical && activeTemporalPact == TemporalPact.CARNAGE) {
+                            actualDmg *= 1.40f
+                        }
 
                         if (enemy.takeHit(actualDmg, knockX, knockY)) {
                             val combo = player.comboManager.registerHit()
@@ -1110,15 +1192,19 @@ class PlayScreen(
                             relicManager.onComboHit(combo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                             com.stickman.tower.achievement.AchievementManager.onComboHit(combo, saveData)
 
-                            // Lifesteal Mutator & Talents (Fase 13)
-                            val lifesteal = activeMutator.lifestealPercent
+                            // Lifesteal Mutator, Talents & Runes (Fase 13 & 22)
+                            val lifesteal = activeMutator.lifestealPercent + RuneManager.calculateLifestealBonus(saveData)
                             if (lifesteal > 0f) {
-                                val heal = player.hitbox.damage * lifesteal
-                                if (heal >= 0.5f) {
-                                    player.health.heal(heal)
-                                    floatingTexts.add(
-                                        FloatingText("+${heal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.GREEN)
-                                    )
+                                if (activeTemporalPact == TemporalPact.SWIFTNESS) {
+                                    // Pemulihan Anima dicegah oleh Pakta Kecepatan Jiwa
+                                } else {
+                                    val heal = player.hitbox.damage * lifesteal
+                                    if (heal >= 0.5f) {
+                                        player.health.heal(heal)
+                                        floatingTexts.add(
+                                            FloatingText("+${heal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.GREEN)
+                                        )
+                                    }
                                 }
                             }
 
@@ -1181,7 +1267,10 @@ class PlayScreen(
 
                     val knockX = if (player.facingRight) player.hitbox.knockbackX else -player.hitbox.knockbackX
                     val knockY = player.hitbox.knockbackY
-                    val actualDmg = if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) player.hitbox.damage * 1.08f else player.hitbox.damage
+                    var actualDmg = if (currentFloorNumber == 7 && activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) player.hitbox.damage * 1.08f else player.hitbox.damage
+                    if (player.hitbox.isCritical && activeTemporalPact == TemporalPact.CARNAGE) {
+                        actualDmg *= 1.40f
+                    }
 
                     if (boss.takeHit(actualDmg, knockX, knockY)) {
                         val combo = player.comboManager.registerHit()
@@ -1192,15 +1281,19 @@ class PlayScreen(
                         relicManager.onComboHit(combo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                         com.stickman.tower.achievement.AchievementManager.onComboHit(combo, saveData)
 
-                        // Lifesteal Mutator & Talents (Fase 13)
-                        val lifesteal = activeMutator.lifestealPercent
+                        // Lifesteal Mutator, Talents & Runes (Fase 13 & 22)
+                        val lifesteal = activeMutator.lifestealPercent + RuneManager.calculateLifestealBonus(saveData)
                         if (lifesteal > 0f) {
-                            val heal = player.hitbox.damage * lifesteal
-                            if (heal >= 0.5f) {
-                                player.health.heal(heal)
-                                floatingTexts.add(
-                                    FloatingText("+${heal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.GREEN)
-                                )
+                            if (activeTemporalPact == TemporalPact.SWIFTNESS) {
+                                // Pemulihan Anima dicegah oleh Pakta Kecepatan Jiwa
+                            } else {
+                                val heal = player.hitbox.damage * lifesteal
+                                if (heal >= 0.5f) {
+                                    player.health.heal(heal)
+                                    floatingTexts.add(
+                                        FloatingText("+${heal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.3f, Color.GREEN)
+                                    )
+                                }
                             }
                         }
 
@@ -1328,11 +1421,17 @@ class PlayScreen(
                         val parryCombo = player.comboManager.registerHit()
                         relicManager.onComboHit(parryCombo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                         if (talentManager.hasParryHeal()) {
-                            val parryHeal = player.health.maxHp * 0.15f
-                            player.health.heal(parryHeal)
-                            floatingTexts.add(
-                                FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
-                            )
+                            if (activeTemporalPact == TemporalPact.SWIFTNESS) {
+                                floatingTexts.add(
+                                    FloatingText("⛔ HEAL TERBLOKIR PAKTA", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.CYAN)
+                                )
+                            } else {
+                                val parryHeal = player.health.maxHp * 0.15f
+                                player.health.heal(parryHeal)
+                                floatingTexts.add(
+                                    FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
+                                )
+                            }
                         }
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
@@ -1405,11 +1504,17 @@ class PlayScreen(
                     val parryCombo = player.comboManager.registerHit()
                     relicManager.onComboHit(parryCombo, player, currentFloor.allEnemies, currentFloor.boss, floatingTexts, particleManager)
                     if (talentManager.hasParryHeal()) {
-                        val parryHeal = player.health.maxHp * 0.15f
-                        player.health.heal(parryHeal)
-                        floatingTexts.add(
-                            FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
-                        )
+                        if (activeTemporalPact == TemporalPact.SWIFTNESS) {
+                            floatingTexts.add(
+                                FloatingText("⛔ HEAL TERBLOKIR PAKTA", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.CYAN)
+                            )
+                        } else {
+                            val parryHeal = player.health.maxHp * 0.15f
+                            player.health.heal(parryHeal)
+                            floatingTexts.add(
+                                FloatingText("+${parryHeal.toInt()} HP", player.position.x + player.width / 2f, player.position.y + player.height + 0.35f, Color.GREEN)
+                            )
+                        }
                     }
                     hitStopManager.trigger(0.08f)
                     AudioManager.playParry()
@@ -2059,6 +2164,19 @@ class PlayScreen(
             shapeRenderer.rectLine(px, py + ph, px + pw, py + ph, 2f)
         }
 
+        // Kotak Prompt Altar Pengorbanan Darah (Fase 22)
+        if (gameStatus == GameStatus.PLAYING && nearbyAltarPrompt && currentFloor.bloodAltar != null && !currentFloor.bloodAltar!!.isActivated) {
+            val pw = 420f
+            val ph = 38f
+            val px = (w - pw) / 2f
+            val py = if (nearbyTabletPrompt != null) 180f else 135f
+            shapeRenderer.setColor(0.12f, 0.05f, 0.08f, 0.92f)
+            shapeRenderer.rect(px, py, pw, ph)
+            shapeRenderer.setColor(0.95f, 0.15f, 0.20f, 0.90f)
+            shapeRenderer.rectLine(px, py + ph, px + pw, py + ph, 2f)
+            shapeRenderer.rectLine(px, py, px + pw, py, 1.5f)
+        }
+
         renderActBannerShapes()
         renderAchievementBannerShapes()
 
@@ -2280,6 +2398,34 @@ class PlayScreen(
                         AudioManager.playChest()
                     }
                 }
+            }
+
+            if (nearbyAltarPrompt && currentFloor.bloodAltar != null && !currentFloor.bloodAltar!!.isActivated) {
+                val promptText = "🩸 [E] / [TAP] KORBANKAN ANIMA PADA ALTAR 🩸"
+                glyphLayout.setText(regF, promptText)
+                val pw = 420f
+                val ph = 38f
+                val px = (w - pw) / 2f
+                val py = if (nearbyTabletPrompt != null) 180f else 135f
+
+                regF.color = Color(1.0f, 0.35f, 0.35f, 1f)
+                regF.draw(batch, promptText, px + (pw - glyphLayout.width) / 2f, py + 26f)
+
+                if (Gdx.input.justTouched()) {
+                    uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                    uiViewport.unproject(uiTouchVec)
+                    if (uiTouchVec.x in px..(px + pw) && uiTouchVec.y in py..(py + ph)) {
+                        isInteractingWithAltar = true
+                        altarSelectedIndex = 0
+                        AudioManager.playChest()
+                    }
+                }
+            }
+
+            // Tampilkan Lencana Pakta Temporal Aktif di HUD
+            if (activeTemporalPact != TemporalPact.NONE) {
+                smallF.setColor(activeTemporalPact.primaryColor)
+                smallF.draw(batch, "🩸 PAKTA: ${activeTemporalPact.displayName.uppercase()}", 130f, h - 85f)
             }
         }
 
@@ -3406,6 +3552,247 @@ class PlayScreen(
         }
 
         shapeRenderer.end()
+    }
+
+    private fun handleBloodAltarInput() {
+        // Navigasi Keyboard / Gamepad
+        if (Gdx.input.isKeyJustPressed(Keys.UP) || Gdx.input.isKeyJustPressed(Keys.W)) {
+            altarSelectedIndex = (altarSelectedIndex - 1 + 4) % 4
+            AudioManager.playParry()
+        }
+        if (Gdx.input.isKeyJustPressed(Keys.DOWN) || Gdx.input.isKeyJustPressed(Keys.S)) {
+            altarSelectedIndex = (altarSelectedIndex + 1) % 4
+            AudioManager.playParry()
+        }
+
+        // Batal dengan ESC / BACK
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.BACK)) {
+            isInteractingWithAltar = false
+            AudioManager.playSlashLight()
+            return
+        }
+
+        val confirm = Gdx.input.isKeyJustPressed(Keys.ENTER) || Gdx.input.isKeyJustPressed(Keys.SPACE) ||
+                Gdx.input.isKeyJustPressed(Keys.E) || input.isAttackJustPressed()
+
+        if (confirm) {
+            applyAltarSelection(altarSelectedIndex)
+            return
+        }
+
+        // Navigasi Touch / Mouse Click
+        if (Gdx.input.justTouched()) {
+            uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+            uiViewport.unproject(uiTouchVec)
+
+            val modalW = 880f
+            val modalH = 580f
+            val modalX = (1280f - modalW) / 2f
+            val modalY = (720f - modalH) / 2f
+            val cardW = 820f
+            val cardX = modalX + (modalW - cardW) / 2f
+            val startY = modalY + modalH - 170f
+            val cardH = 86f
+            val spacing = 14f
+
+            for (i in 0 until 3) {
+                val cardY = startY - i * (cardH + spacing)
+                if (uiTouchVec.x in cardX..(cardX + cardW) && uiTouchVec.y in cardY..(cardY + cardH)) {
+                    applyAltarSelection(i)
+                    return
+                }
+            }
+
+            // Tombol Batal
+            val cancelY = startY - 3 * (cardH + spacing) + 10f
+            val cancelH = 50f
+            if (uiTouchVec.x in cardX..(cardX + cardW) && uiTouchVec.y in cancelY..(cancelY + cancelH)) {
+                applyAltarSelection(3)
+                return
+            }
+        }
+    }
+
+    private fun applyAltarSelection(index: Int) {
+        if (index == 3) {
+            isInteractingWithAltar = false
+            AudioManager.playSlashLight()
+            return
+        }
+
+        val chosenPact = when (index) {
+            0 -> TemporalPact.CARNAGE
+            1 -> TemporalPact.GREED
+            2 -> TemporalPact.SWIFTNESS
+            else -> TemporalPact.NONE
+        }
+
+        if (chosenPact != TemporalPact.NONE) {
+            val sacrificeHp = (player.health.currentHp * 0.25f).coerceAtLeast(1f)
+            player.health.consumeHp(sacrificeHp)
+            activeTemporalPact = chosenPact
+            currentFloor.bloodAltar?.isActivated = true
+            currentFloor.bloodAltar?.activePact = chosenPact
+            refreshPlayerModifiers()
+            isInteractingWithAltar = false
+
+            AudioManager.playLevelUp()
+            HapticManager.vibrateHeavy()
+            input.gamepad.vibrate(250, 0.9f)
+            particleManager.spawnHitSparks(
+                player.position.x + player.width / 2f,
+                player.position.y + player.height / 2f,
+                count = 32,
+                color = chosenPact.primaryColor
+            )
+            floatingTexts.add(
+                FloatingText(
+                    "🩸 TERIKAT: ${chosenPact.displayName}! (-${sacrificeHp.toInt()} ANIMA)",
+                    player.position.x + player.width / 2f,
+                    player.position.y + player.height + 0.6f,
+                    chosenPact.primaryColor,
+                    duration = 3.5f,
+                    isCritical = true
+                )
+            )
+        }
+    }
+
+    private fun renderBloodAltarOverlay() {
+        val w = 1280f
+        val h = 720f
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // 1. Fullscreen Dark Crimson Vignette Overlay
+        shapeRenderer.setColor(0.04f, 0.02f, 0.04f, 0.88f)
+        shapeRenderer.rect(0f, 0f, w, h)
+
+        // 2. Central Modal Box
+        val modalW = 880f
+        val modalH = 580f
+        val modalX = (w - modalW) / 2f
+        val modalY = (h - modalH) / 2f
+
+        shapeRenderer.setColor(0.06f, 0.04f, 0.07f, 0.98f)
+        shapeRenderer.rect(modalX, modalY, modalW, modalH)
+
+        // Border Crimson Berdenyut Mistis
+        val pulse = (sin(hudAnimTime * 3.5f) + 1f) * 0.5f
+        shapeRenderer.setColor(0.90f, 0.15f, 0.20f, 0.80f + 0.20f * pulse)
+        shapeRenderer.rectLine(modalX, modalY + modalH, modalX + modalW, modalY + modalH, 3f)
+        shapeRenderer.rectLine(modalX, modalY, modalX + modalW, modalY, 2f)
+        shapeRenderer.rectLine(modalX, modalY, modalX, modalY + modalH, 2f)
+        shapeRenderer.rectLine(modalX + modalW, modalY, modalX + modalW, modalY + modalH, 2f)
+
+        // 3. Render 3 Pact Cards + 1 Cancel Button
+        val cardW = 820f
+        val cardX = modalX + (modalW - cardW) / 2f
+        val startY = modalY + modalH - 170f
+        val cardH = 86f
+        val spacing = 14f
+
+        val pacts = listOf(
+            TemporalPact.CARNAGE,
+            TemporalPact.GREED,
+            TemporalPact.SWIFTNESS
+        )
+
+        for (i in 0 until 3) {
+            val pact = pacts[i]
+            val cardY = startY - i * (cardH + spacing)
+            val isSelected = (altarSelectedIndex == i)
+
+            // Card Background
+            if (isSelected) {
+                shapeRenderer.setColor(0.18f, 0.08f, 0.12f, 0.98f)
+            } else {
+                shapeRenderer.setColor(0.10f, 0.06f, 0.10f, 0.90f)
+            }
+            shapeRenderer.rect(cardX, cardY, cardW, cardH)
+
+            // Card Border
+            val borderColor = if (isSelected) pact.primaryColor else Color(0.35f, 0.25f, 0.35f, 0.7f)
+            val borderThick = if (isSelected) 2.5f else 1.2f
+            shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, borderThick)
+            shapeRenderer.rectLine(cardX, cardY, cardX + cardW, cardY, borderThick)
+            shapeRenderer.rectLine(cardX, cardY, cardX, cardY + cardH, borderThick)
+            shapeRenderer.rectLine(cardX + cardW, cardY, cardX + cardW, cardY + cardH, borderThick)
+
+            // Left Glow Indicator Strip
+            if (isSelected) {
+                shapeRenderer.setColor(pact.primaryColor)
+                shapeRenderer.rect(cardX, cardY, 8f, cardH)
+            }
+        }
+
+        // Cancel Button (Index 3)
+        val cancelY = startY - 3 * (cardH + spacing) + 10f
+        val cancelH = 50f
+        val isCancelSelected = (altarSelectedIndex == 3)
+        shapeRenderer.setColor(if (isCancelSelected) Color(0.22f, 0.12f, 0.16f, 0.95f) else Color(0.12f, 0.08f, 0.12f, 0.85f))
+        shapeRenderer.rect(cardX, cancelY, cardW, cancelH)
+        shapeRenderer.setColor(if (isCancelSelected) Color.WHITE else Color.GRAY)
+        shapeRenderer.rectLine(cardX, cancelY + cancelH, cardX + cardW, cancelY + cancelH, if (isCancelSelected) 2f else 1f)
+        shapeRenderer.rectLine(cardX, cancelY, cardX + cardW, cancelY, if (isCancelSelected) 2f else 1f)
+        shapeRenderer.rectLine(cardX, cancelY, cardX, cancelY + cardH, if (isCancelSelected) 2f else 1f)
+        shapeRenderer.rectLine(cardX + cardW, cancelY, cardX + cardW, cancelY + cardH, if (isCancelSelected) 2f else 1f)
+
+        shapeRenderer.end()
+
+        // 4. Batch Text Pass
+        batch.projectionMatrix = uiCamera.combined
+        batch.begin()
+
+        val headF = FontManager.headerFont
+        val regF = FontManager.regularFont
+        val smallF = FontManager.smallFont
+
+        // Header Title
+        headF.setColor(1.0f, 0.25f, 0.30f, 1f)
+        val title = "✦ ALTAR PENGORBANAN ANIMA ✦"
+        glyphLayout.setText(headF, title)
+        headF.draw(batch, title, (w - glyphLayout.width) / 2f, modalY + modalH - 24f)
+
+        // Subtitle Lore & Cost
+        val sacrificeHp = (player.health.currentHp * 0.25f).coerceAtLeast(1f).toInt()
+        regF.setColor(0.9f, 0.85f, 0.85f, 0.9f)
+        val sub = "Persembahkan $sacrificeHp Anima (25% Jiwa) untuk mengikat satu Pakta Temporal di lantai ini."
+        glyphLayout.setText(regF, sub)
+        regF.draw(batch, sub, (w - glyphLayout.width) / 2f, modalY + modalH - 58f)
+
+        // Draw Pact Texts
+        for (i in 0 until 3) {
+            val pact = pacts[i]
+            val cardY = startY - i * (cardH + spacing)
+            val isSelected = (altarSelectedIndex == i)
+
+            // Title & Subtitle
+            headF.setColor(if (isSelected) pact.primaryColor else Color.LIGHT_GRAY)
+            headF.draw(batch, "${pact.displayName.uppercase()}  •  ${pact.subtitle}", cardX + 22f, cardY + cardH - 16f)
+
+            // Description
+            regF.setColor(0.92f, 0.92f, 0.95f, 1f)
+            regF.draw(batch, pact.description, cardX + 22f, cardY + cardH - 46f, cardW - 44f, Align.left, true)
+        }
+
+        // Cancel Button Text
+        headF.setColor(if (isCancelSelected) Color.WHITE else Color.GRAY)
+        val cancelText = "BATALKAN RITUAL (TETAPKAN JIWA MURNI)"
+        glyphLayout.setText(headF, cancelText)
+        headF.draw(batch, cancelText, (w - glyphLayout.width) / 2f, cancelY + 34f)
+
+        // Footer Controls Guide
+        smallF.setColor(0.75f, 0.70f, 0.75f, 0.8f)
+        val guide = "[↑/↓ / W/S] PILIH PAKTA   •   [ENTER / E / TAP] KORBANKAN ANIMA   •   [ESC] BATAL"
+        glyphLayout.setText(smallF, guide)
+        smallF.draw(batch, guide, (w - glyphLayout.width) / 2f, modalY + 28f)
+
+        batch.end()
     }
 
     override fun resize(width: Int, height: Int) {

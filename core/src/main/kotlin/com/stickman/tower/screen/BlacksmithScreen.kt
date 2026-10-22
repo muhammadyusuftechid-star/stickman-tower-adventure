@@ -22,13 +22,15 @@ import com.stickman.tower.audio.HapticManager
 import com.stickman.tower.rpg.CharacterStats
 import com.stickman.tower.rpg.SaveData
 import com.stickman.tower.rpg.SaveManager
+import com.stickman.tower.rune.RuneManager
+import com.stickman.tower.rune.RuneType
 import com.stickman.tower.ui.FontManager
 import kotlin.math.sin
 
 /**
- * Layar Toko Tempa Senjata Blacksmith (Fase 10):
+ * Layar Toko Tempa Senjata Blacksmith (Fase 10 & 22):
  * Mengizinkan pemain membelanjakan Gold yang diperoleh dari menara untuk meningkatkan
- * statistik senjata permanen (Sharpening Stone, Hollow Edge, Lightweight Hilt).
+ * statistik senjata permanen serta memasang / menukar Rune Kuno pada 2 soket senjata.
  */
 class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen? = null) : Screen {
 
@@ -43,7 +45,7 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
     private val stats: CharacterStats = CharacterStats().apply { loadFromSaveData(saveData) }
 
     private var selectedIndex = 0
-    private val totalItems = 4 // 0: ATK, 1: CRIT, 2: SPD, 3: RETURN
+    private val totalItems = 6 // 0: ATK, 1: CRIT, 2: SPD, 3: SOKET 1, 4: SOKET 2, 5: RETURN
     private var animTime = 0f
     private var noticeText = ""
     private var noticeTimer = 0f
@@ -223,12 +225,46 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
             shapeRenderer.rectLine(btnX, btnY + btnH, btnX + btnW, btnY + btnH, 1.5f)
         }
 
-        // Tombol Kembali (Return to Main Menu)
-        val returnY = 45f
+        // Kartu Soket Rune 1 & 2 (Fase 22)
+        val socketW = 505f
+        val socketH = 82f
+        val socketY = 115f
+
+        for (s in 0 until 2) {
+            val sockX = if (s == 0) 120f else 655f
+            val isSockSelected = selectedIndex == (3 + s)
+            val equippedRune = RuneType.fromString(saveData.equippedRunes.getOrNull(s))
+
+            if (isSockSelected) {
+                shapeRenderer.setColor(0.16f, 0.20f, 0.32f, 0.95f)
+            } else {
+                shapeRenderer.setColor(0.08f, 0.10f, 0.17f, 0.88f)
+            }
+            shapeRenderer.rect(sockX, socketY, socketW, socketH)
+
+            // Garis border dengan warna rune jika terpasang
+            val borderPulse = if (isSockSelected) (sin(animTime * 6f) + 1f) * 0.15f else 0f
+            if (isSockSelected) {
+                shapeRenderer.setColor(1f, 0.72f, 0.2f, 0.8f + borderPulse)
+            } else if (equippedRune != RuneType.NONE) {
+                shapeRenderer.setColor(equippedRune.primaryColor.r, equippedRune.primaryColor.g, equippedRune.primaryColor.b, 0.6f)
+            } else {
+                shapeRenderer.setColor(0.2f, 0.25f, 0.35f, 0.5f)
+            }
+            shapeRenderer.rectLine(sockX, socketY, sockX + socketW, socketY, if (isSockSelected) 2.5f else 1.5f)
+            shapeRenderer.rectLine(sockX, socketY + socketH, sockX + socketW, socketY + socketH, if (isSockSelected) 2.5f else 1.5f)
+
+            // Lingkaran ornamen soket
+            shapeRenderer.setColor(equippedRune.primaryColor)
+            shapeRenderer.circle(sockX + 45f, socketY + socketH / 2f, 22f, 16)
+        }
+
+        // Tombol Kembali (Return to Main Menu / PlayScreen)
+        val returnY = 28f
         val returnW = 340f
-        val returnH = 46f
+        val returnH = 44f
         val returnX = (1280f - returnW) / 2f
-        val isReturnSelected = selectedIndex == 3
+        val isReturnSelected = selectedIndex == 5
 
         if (isReturnSelected) {
             shapeRenderer.setColor(0.18f, 0.25f, 0.38f, 0.95f)
@@ -311,17 +347,37 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
             regF.draw(batch, btnText, btnX + (200f - glyphLayout.width) / 2f, btnY + 32f)
         }
 
+        // Teks Soket Rune 1 & 2 (Fase 22)
+        for (s in 0 until 2) {
+            val sockX = if (s == 0) 120f else 655f
+            val isSockSelected = selectedIndex == (3 + s)
+            val equippedRune = RuneType.fromString(saveData.equippedRunes.getOrNull(s))
+
+            // Simbol Rune
+            headF.color = equippedRune.primaryColor
+            headF.draw(batch, equippedRune.runeSymbol, sockX + 38f, socketY + 50f)
+
+            // Nama Soket & Rune
+            headF.color = if (isSockSelected) Color.YELLOW else Color.WHITE
+            headF.draw(batch, "SOKET ${s + 1}: ${equippedRune.displayName}", sockX + 80f, socketY + 64f)
+
+            // Subtitle & Status
+            regF.setColor(0.75f, 0.85f, 0.95f, 0.85f)
+            val actionHint = if (isSockSelected) "[ KLIK / ENTER: GANTI ]" else "[ KETUK GANTI ]"
+            regF.draw(batch, "${equippedRune.subtitle} • $actionHint", sockX + 80f, socketY + 32f)
+        }
+
         // Teks Tombol Kembali
         val returnText = if (isReturnSelected) "⚔  BACK TO MAIN MENU  ⚔" else "BACK TO MAIN MENU"
         headF.color = if (isReturnSelected) Color.YELLOW else Color.WHITE
         glyphLayout.setText(headF, returnText)
-        headF.draw(batch, returnText, (1280f - glyphLayout.width) / 2f, returnY + 32f)
+        headF.draw(batch, returnText, (1280f - glyphLayout.width) / 2f, returnY + 30f)
 
         // Notifikasi / Feedback Pembelian
         if (noticeText.isNotEmpty()) {
             regF.color = Color.GREEN
             glyphLayout.setText(regF, noticeText)
-            regF.draw(batch, noticeText, (1280f - glyphLayout.width) / 2f, 115f)
+            regF.draw(batch, noticeText, (1280f - glyphLayout.width) / 2f, 88f)
         }
 
         batch.end()
@@ -365,13 +421,26 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
                 }
             }
 
+            // Sentuhan Soket Rune 1 & 2 (Fase 22)
+            if (touchVec.y in 105f..205f) {
+                if (touchVec.x in 110f..635f) {
+                    selectedIndex = 3
+                    executeSelection()
+                    return
+                } else if (touchVec.x in 645f..1170f) {
+                    selectedIndex = 4
+                    executeSelection()
+                    return
+                }
+            }
+
             // Tombol Kembali
-            val returnY = 45f
+            val returnY = 28f
             val returnW = 340f
-            val returnH = 46f
+            val returnH = 44f
             val returnX = (1280f - returnW) / 2f
             if (touchVec.x in (returnX - 80f)..(returnX + returnW + 80f) && touchVec.y in (returnY - 15f)..(returnY + returnH + 25f)) {
-                selectedIndex = 3
+                selectedIndex = 5
                 executeSelection()
             }
         }
@@ -400,10 +469,33 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
                     onUpgradeFailed(stats.weaponSpdLevel)
                 }
             }
-            3 -> {
+            3 -> { // Ganti Rune Soket 1
+                cycleRuneSocket(0)
+            }
+            4 -> { // Ganti Rune Soket 2
+                cycleRuneSocket(1)
+            }
+            5 -> {
                 returnToMenu()
             }
         }
+    }
+
+    private fun cycleRuneSocket(slotIndex: Int) {
+        val available = listOf(RuneType.NONE) + RuneType.values().filter { it != RuneType.NONE && saveData.unlockedRunes.contains(it.id) }.distinct()
+        val currentRune = RuneType.fromString(saveData.equippedRunes.getOrNull(slotIndex))
+        val currentIdx = available.indexOf(currentRune)
+        val nextRune = available[(if (currentIdx >= 0) currentIdx + 1 else 0) % available.size]
+
+        RuneManager.equipRune(slotIndex, nextRune, saveData)
+        stats.loadFromSaveData(saveData)
+        SaveManager.save(saveData)
+
+        hammerImpactFlash = 0.8f
+        AudioManager.playChest()
+        HapticManager.vibrateMedium()
+        noticeText = "Soket ${slotIndex + 1}: ${nextRune.displayName} Terpasang! (${nextRune.subtitle})"
+        noticeTimer = 3.0f
     }
 
     private fun onUpgradeSuccess(message: String) {
