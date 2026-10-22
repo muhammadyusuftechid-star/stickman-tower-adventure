@@ -31,6 +31,8 @@ data class SaveData(
     var isAudioMuted: Boolean = false,
     var selectedArchetype: String = "BALANCED",
     var selectedSubClass: String = "BERSERKER",
+    var selectedFamiliar: String = "ARIA_WISP",
+    var unlockedFamiliars: ArrayList<String> = arrayListOf("ARIA_WISP"),
     var weaponAtkLevel: Int = 0,
     var weaponCritLevel: Int = 0,
     var weaponSpdLevel: Int = 0,
@@ -79,12 +81,14 @@ data class SaveData(
 
         mixString(selectedArchetype)
         mixString(selectedSubClass)
+        mixString(selectedFamiliar)
 
         // Hash koleksi secara deterministik terurut
         unlockedCharacters.sorted().forEach { mixString(it) }
         unlockedAchievements.sorted().forEach { mixString(it) }
         unlockedTalents.sorted().forEach { mixString(it) }
         unlockedLoreTablets.sorted().forEach { mixString(it) }
+        unlockedFamiliars.sorted().forEach { mixString(it) }
 
         mixString(activeQuestId)
         completedQuests.sorted().forEach { mixString(it) }
@@ -157,6 +161,13 @@ data class SaveData(
 
         if (unlockedCharacters.isEmpty()) {
             unlockedCharacters.add("STICKMAN_SWORD")
+        }
+
+        if (selectedFamiliar.isBlank()) {
+            selectedFamiliar = "ARIA_WISP"
+        }
+        if (unlockedFamiliars.isEmpty()) {
+            unlockedFamiliars.add("ARIA_WISP")
         }
         return this
     }

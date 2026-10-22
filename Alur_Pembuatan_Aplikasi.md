@@ -732,6 +732,38 @@ flowchart TD
 
 ---
 
+### FASE 21: Sistem Pendamping Roh Tinta (Ink Familiar Companion System)
+> **Tujuan Terbesar:** Menghadirkan sistem roh penolong berwujud siluet magis melayang di samping bahu ksatria dengan gerakan kinematik melayang (*bobbing follow kinematics*), proyektil magis otomatis, efek pasif (*gold magnet*), sinergi serang aktif (*Vulcanus burn proc* & *Phantom echo slash*), serta seleksi instan pada Pause Menu dan persistensi save data anti-tampering.
+
+#### Modul 21.1: Entitas & Kinematika Roh Pendamping
+- **Task 21.1.1: Klasifikasi Tipe Roh Penolong (FamiliarType)**
+  - [x] Implementasi [FamiliarType.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/companion/FamiliarType.kt) dengan 4 wujud kanonikal:
+    - `NONE`: Melangkah sendiri tanpa pendamping.
+    - `ARIA_WISP`: *Gema Lentera Aria* (Lentera Penuntun Jiwa) terbuka sejak Lantai 1 dengan partikel pendaran cyan/emas.
+    - `VULCAN_SPARK`: *Bara Suci Vulcanus* (Nyala Api Paron Meteorit) terbuka di Lantai 6 dengan percikan api jingga/kuning bara.
+    - `PHANTOM_SHADOW`: *Bayangan Hantu Astral* (Cermin Jiwa Penakluk) terbuka di Lantai 8 setelah menundukkan Doppelgänger dengan sayap bayangan ungu astral.
+  - [x] Parser tangguh `fromString(...)` dengan penanganan null-safe dan fallback default `ARIA_WISP`.
+- **Task 21.1.2: Gerakan Kinematik & Rendering Prosedural**
+  - [x] Implementasi [InkFamiliar.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/companion/InkFamiliar.kt) dengan interpolasi follow lerp halus (`speed = 7.0f * delta`) dan osilasi vertikal sinusoidal `sin(animTime * 3.5f) * 0.14f`.
+  - [x] Rendering prosedural zero-allocation berbasis `ShapeRenderer`: pendaran outer glow, core sphere, inner spark, mahkota lentera Aria, cincin bara Vulcanus, dan kepakan sayap mini Phantom Shadow.
+
+#### Modul 21.2: Mekanik Tempur Sinergis & Integrasi Gameplay
+- **Task 21.2.1: Sinergi Pasif & Serang per Tipe Roh**
+  - [x] *Aria's Wisp:* Menarik ekstra pecahan emas Aethel (+20% bonus magnetik gold pada `grantRewards`) dan menembakkan proyektil *Prismatic Spark* (16 DMG) setiap kelipatan 10 kombo.
+  - [x] *Vulcan's Spark:* Peluang 25% pembakaran bara penempa api (+14 DMG biasa, +20 DMG boss) saat serangan tebasan pedang mengenai lawan.
+  - [x] *Phantom Shadow:* Memicu tebasan bayangan astral *Echo Slash* (+24 AoE DMG) saat pemain mengeksekusi Dentang Penolakan Takdir (*Perfect Parry*).
+- **Task 21.2.2: HUD & Pause Menu Quick Selector**
+  - [x] Status roh pendamping aktif terpampang di HUD permainan dengan warna identitas roh (`renderHUDText`).
+  - [x] Rotator instan cepat di Pause Menu (`ROH PENDAMPING`) untuk beralih di antara roh yang telah terbuka tanpa meninggalkan sesi permainan.
+
+#### Modul 21.3: Persistensi SaveData & Validasi Integritas
+- **Task 21.3.1: Skema SaveData V2 & Checksum Cryptographic FNV-1a**
+  - [x] Penambahan field `selectedFamiliar` dan `unlockedFamiliars` di [SaveData.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rpg/SaveData.kt).
+  - [x] Pencampuran FNV-1a salted checksum 64-bit dan sanitasi batas nilai default.
+  - [x] Suite unit test komprehensif [InkFamiliarTest.kt](file:///home/yusuf/projekan/game/game1/core/src/test/kotlin/com/stickman/tower/companion/InkFamiliarTest.kt) dengan 7 test case lulus 100% (total 132/132 unit tests di seluruh proyek).
+
+---
+
 ## 4. Matriks Ketergantungan & Prioritas Eksekusi
 
 | Prioritas | Fase | Fitur Kunci | Output Terukur |
@@ -756,6 +788,7 @@ flowchart TD
 | **P9 (Sinematik)**| Fase 18 | Naskah Lakon Standar, Sintesis Voice Chirp & Whispers | Format naskah industri, vokal prosedural osilator & bisikan idle [SELESAI] |
 | **P9 (Atmosfer)** | Fase 19 | Penceritaan Lingkungan 4 Babak & Bestiarium Lapangan| Prop reruntuhan visual, catatan lapangan musuh, & UI diegetik [SELESAI] |
 | **P10 (Final Master)**| Fase 20 | BGM Prosedural Dinamis, Vignette Kritis & AAB Production | Audio master per-Act, post-processing VFX & Bundle Rilis Store [SELESAI] |
+| **P11 (Companion)**| Fase 21 | Sistem Pendamping Roh Tinta (Aria, Vulcanus, Phantom) | Follow kinematics, Prismatic Spark, Molten Burn & Echo Slash [SELESAI] |
 
 
 ---

@@ -57,6 +57,8 @@ import com.stickman.tower.world.MoraleBuffType
 import com.stickman.tower.narrative.TowerWhisperManager
 import com.stickman.tower.world.TowerFloor
 import com.stickman.tower.bestiary.BestiaryManager
+import com.stickman.tower.companion.FamiliarType
+import com.stickman.tower.companion.InkFamiliar
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
 import com.stickman.tower.world.ProceduralBackgroundRenderer
@@ -122,6 +124,9 @@ class PlayScreen(
     // Manajer Partikel VFX
     val particleManager = ParticleManager()
 
+    // Sistem Pendamping Roh Tinta (Fase 21)
+    val inkFamiliar = InkFamiliar(FamiliarType.fromString(saveData.selectedFamiliar))
+
     // Manajer Relik Pasif (Fase 10) & Talent Tree (Fase 13)
     val relicManager = RelicManager()
     val talentManager = TalentManager().apply { loadFromSave(saveData) }
@@ -138,7 +143,7 @@ class PlayScreen(
     // Sistem Pause Menu & Developer QA Tools
     var isPaused: Boolean = false
     private var pauseSelectedIndex: Int = 0
-    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "BESTIARIUM", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "DEVELOPER TOOLS", "MAIN MENU")
+    private val pauseMenuItems = listOf("RESUME", "RESTART FLOOR", "BLACKSMITH FORGE", "TALENT TREE", "BESTIARIUM", "ROH PENDAMPING", "CONTROL SETTINGS", "AUDIO: ON", "HAPTIC: ON", "DEVELOPER TOOLS", "MAIN MENU")
     val devTools = DevToolsOverlay()
 
     // Sistem Bestiarium Lapangan (Fase 19)
@@ -322,6 +327,7 @@ class PlayScreen(
         player.hasUndyingWill = talentManager.hasUndyingWill()
         player.undyingWillUsed = false
         activeCheckpointPos.set(currentFloor.spawnX, currentFloor.spawnY)
+        inkFamiliar.resetPosition(player.position.x, player.position.y)
 
         hasSavedStageClear = false
         gameStatus = GameStatus.PLAYING
@@ -402,8 +408,12 @@ class PlayScreen(
     }
 
     private fun grantRewards(exp: Int, gold: Int, x: Float, y: Float) {
-        player.stats.addGold(gold)
-        floatingTexts.add(FloatingText("+$gold G", x + 0.35f, y, Color.YELLOW, duration = 1.2f))
+        val finalGold = if (inkFamiliar.type == FamiliarType.ARIA_WISP) (gold * 1.20f).toInt() else gold
+        player.stats.addGold(finalGold)
+        floatingTexts.add(FloatingText("+$finalGold G", x + 0.35f, y, Color.YELLOW, duration = 1.2f))
+        if (finalGold > gold) {
+            floatingTexts.add(FloatingText("✨ LENTERA ARIA (+${finalGold - gold} G) ✨", x, y + 0.65f, Color.CYAN, duration = 1.3f))
+        }
 
         val levelsGained = player.stats.addExp(exp)
         floatingTexts.add(FloatingText("+$exp EXP", x - 0.35f, y + 0.45f, Color.CYAN, duration = 1.2f))
@@ -869,6 +879,9 @@ class PlayScreen(
                 }
             }
 
+            // Pembaruan Roh Pendamping Tinta (Fase 21)
+            inkFamiliar.update(updateDelta, player, currentFloor.allEnemies, currentFloor.boss, particleManager, floatingTexts)
+
             // 2. Deteksi Pertarungan Dua Arah (Pemain <-> Musuh / Boss)
             handleTwoWayCombat()
 
@@ -1010,6 +1023,7 @@ class PlayScreen(
         for (enemy in currentFloor.allEnemies) enemy.render(shapeRenderer)
         currentFloor.boss?.render(shapeRenderer)
         player.render(shapeRenderer)
+        inkFamiliar.render(shapeRenderer)
         player.renderProjectiles(shapeRenderer)
 
         // Render Efek Partikel VFX
@@ -1114,6 +1128,9 @@ class PlayScreen(
                                 particleManager.spawnHitSparks(enemy.position.x + enemy.width / 2f, enemy.position.y + enemy.height / 2f, count = 5, color = Color.GREEN)
                             }
 
+                            // Efek Proc Roh Pendamping Tinta (Fase 21)
+                            inkFamiliar.onAttackHitProc(enemy, particleManager, floatingTexts)
+
                             // Thorns Mutator dari Kontrak Buronan Elit (Fase 17)
                             val bountyAffixes = BountyManager.getActiveAffixesForFloor(currentFloorNumber)
                             if (bountyAffixes.contains(BountyAffix.THORNS)) {
@@ -1192,6 +1209,9 @@ class PlayScreen(
                             boss.applyPoison(3.5f, player.baseAttackPower * 0.35f)
                             particleManager.spawnHitSparks(boss.position.x + boss.width / 2f, boss.position.y + boss.height / 2f, count = 6, color = Color.GREEN)
                         }
+
+                        // Efek Proc Roh Pendamping Tinta (Fase 21)
+                        inkFamiliar.onAttackHitBossProc(boss, particleManager, floatingTexts)
 
                         // Thorns Mutator dari Kontrak Buronan Elit (Fase 17)
                         val bountyAffixes = BountyManager.getActiveAffixesForFloor(currentFloorNumber)
@@ -1323,6 +1343,7 @@ class PlayScreen(
                             ChallengeManager.recordAttempt("GAUNTLET_DEFLECTION", player.comboManager.comboCount)
                             ChallengeManager.syncToSaveData(saveData)
                         }
+                        inkFamiliar.onParryProc(player.position.x + player.width / 2f, player.position.y + player.height / 2f, currentFloor.allEnemies, currentFloor.boss, particleManager, floatingTexts)
                         HapticManager.vibrateHeavy()
                         input.gamepad.vibrate(200, 1.0f)
                         cameraManager.shake(0.5f, 0.25f)
@@ -1395,6 +1416,7 @@ class PlayScreen(
                     parryFlashTimer = 0.18f
                     com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                     QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
+                    inkFamiliar.onParryProc(player.position.x + player.width / 2f, player.position.y + player.height / 2f, currentFloor.allEnemies, currentFloor.boss, particleManager, floatingTexts)
                     HapticManager.vibrateHeavy()
                     input.gamepad.vibrate(250, 1.0f)
                     cameraManager.shake(0.8f, 0.35f)
@@ -1611,6 +1633,22 @@ class PlayScreen(
                         val ironWillScore = (player.health.currentHp * 15f).toInt()
                         ChallengeManager.recordAttempt("GAUNTLET_IRON_WILL", ironWillScore)
                         ChallengeManager.syncToSaveData(saveData)
+                    }
+
+                    // Pembukaan Roh Pendamping Tinta (Fase 21)
+                    if (currentFloorNumber >= 6 && !saveData.unlockedFamiliars.contains("VULCAN_SPARK")) {
+                        saveData.unlockedFamiliars.add("VULCAN_SPARK")
+                        SaveManager.save(saveData)
+                        floatingTexts.add(
+                            FloatingText("✦ PENDAMPING DIBUKA: BARA SUCI VULCANUS! ✦", currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 4.2f, Color.ORANGE, duration = 3.5f)
+                        )
+                    }
+                    if (currentFloorNumber >= 8 && !saveData.unlockedFamiliars.contains("PHANTOM_SHADOW")) {
+                        saveData.unlockedFamiliars.add("PHANTOM_SHADOW")
+                        SaveManager.save(saveData)
+                        floatingTexts.add(
+                            FloatingText("✦ PENDAMPING DIBUKA: BAYANGAN HANTU ASTRAL! ✦", currentFloor.exitPortal.x + 0.8f, currentFloor.exitPortal.y + 4.8f, Color.MAGENTA, duration = 3.5f)
+                        )
                     }
 
                     if (currentFloorNumber == 10) {
@@ -2075,6 +2113,12 @@ class PlayScreen(
             smallF.draw(batch, "RELICS: $relicStr", 15f, h - 122f)
         }
 
+        // Status Roh Pendamping Tinta (Fase 21)
+        if (inkFamiliar.type != FamiliarType.NONE) {
+            smallF.setColor(inkFamiliar.type.primaryColor)
+            smallF.draw(batch, "ROH: ✦ ${inkFamiliar.type.displayName} (${inkFamiliar.type.subtitle})", 15f, h - 138f)
+        }
+
         // Morale Surge Buff Indicator (Fase 18)
         if (currentFloorNumber == 7 && activeMoraleBuff != MoraleBuffType.NONE) {
             val buffColor = if (activeMoraleBuff == MoraleBuffType.KINETIC_SURGE) Color(1.0f, 0.65f, 0.25f, 1f) else Color(0.35f, 0.85f, 1.0f, 1f)
@@ -2319,27 +2363,39 @@ class PlayScreen(
                 isViewingBestiary = true
                 bestiarySelectedIndex = 0
             }
-            5 -> { // Control Settings (Fase 12)
+            5 -> { // Ganti Roh Pendamping Tinta (Fase 21)
+                val available = FamiliarType.values().filter { saveData.unlockedFamiliars.contains(it.id) || it == FamiliarType.NONE }
+                val currIdx = available.indexOf(inkFamiliar.type)
+                val nextType = available[(if (currIdx >= 0) currIdx + 1 else 0) % available.size]
+                inkFamiliar.type = nextType
+                saveData.selectedFamiliar = nextType.id
+                SaveManager.save(saveData)
+                AudioManager.playLevelUp()
+                floatingTexts.add(
+                    FloatingText("ROH: ${nextType.displayName}", player.position.x + player.width / 2f, player.position.y + player.height + 0.8f, nextType.primaryColor, duration = 2.0f)
+                )
+            }
+            6 -> { // Control Settings (Fase 12)
                 AudioManager.playSlashLight()
                 if (game != null) {
                     (game as? StickmanGame)?.preserveScreen(this)
                     game.setScreen(ControlSettingsScreen(game, this))
                 }
             }
-            6 -> { // Toggle Audio
+            7 -> { // Toggle Audio
                 AudioManager.toggleMute()
                 if (!AudioManager.isMuted) AudioManager.playChest()
             }
-            7 -> { // Toggle Haptic
+            8 -> { // Toggle Haptic
                 HapticManager.toggle()
                 AudioManager.playSlashLight()
             }
-            8 -> { // Developer Tools & Profiler (Tools Architecture)
+            9 -> { // Developer Tools & Profiler (Tools Architecture)
                 isPaused = false
                 devTools.isVisible = true
                 AudioManager.playSlashLight()
             }
-            9 -> { // Main Menu
+            10 -> { // Main Menu
                 isPaused = false
                 AudioManager.stopBgm()
                 AudioManager.playDodge()
@@ -2393,8 +2449,9 @@ class PlayScreen(
 
         for (i in pauseMenuItems.indices) {
             val itemText = when (i) {
-                6 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
-                7 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
+                5 -> "ROH: ${inkFamiliar.type.displayName.take(14)}"
+                7 -> if (AudioManager.isMuted) "AUDIO: MUTED" else "AUDIO: ON"
+                8 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> pauseMenuItems[i]
             }
             val curY = startY - (i * itemH) + 16f
