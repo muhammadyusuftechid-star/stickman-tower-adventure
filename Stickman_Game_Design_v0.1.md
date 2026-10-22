@@ -663,9 +663,22 @@ Gelar yang terbuka dapat dipasang pemain melalui layar [BossRushScreen.kt](file:
 
 ---
 
+## 🎨 24. Sistem Tipografi & Hirarki UI (Design System Typography Tokens)
+
+Untuk menjamin kenyamanan visual (*readability*), konsistensi antarmuka antarlayar, dan mencegah terjadinya teks meluap (*text overflow*) maupun tabrakan teks (*text collision*), seluruh elemen UI game diatur oleh **Design System Typography Tokens** berbasis FreeType yang terpusat di [FontManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/ui/FontManager.kt) pada resolusi acuan $1280 \times 720$:
+
+| Token Semantik | Instance Font | Ukuran | Bobot / Style | Peran Semantik Resmi (Design System Mandate) |
+| :--- | :--- | :---: | :---: | :--- |
+| **`TOKEN_DISPLAY`** | `titleFont` | **32 pt** | Bold / Heavy | H1: Judul Layar Utama (Screen Title), Big Achievement Banners, Game Over Title. |
+| **`TOKEN_HEADING`** | `headerFont` | **22 pt** | Bold | H2: Judul Panel/Seksi Besar, Nama Bos/Monster, Tombol Aksi Primer Utama (Confirm/Play/Gauntlet). |
+| **`TOKEN_BODY`** | `regularFont` | **16 pt** | Regular | Teks Konten Paragraf, Teks Deskripsi Lore/Bakat/Senjata, Label Tombol Standar, List Item Sidebar. |
+| **`TOKEN_CAPTION`** | `smallFont` | **13 pt** | Regular | Metadata, Tag Kategori (`[KOSMOLOGI]`, `[LANTAI 1-3]`), Tooltip Cooldown, Panduan Keyboard Footer, Nomor Halaman. |
+
+### 24.1 Aturan Bounded Width & Zero Collision
+1. **Sidebar & List Items:** Seluruh teks yang berada di dalam kontainer berkolom (seperti daftar bab [StoryCodexScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/StoryCodexScreen.kt) atau daftar buronan [GauntletScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/GauntletScreen.kt)) wajib menggunakan `TOKEN_BODY` (16 pt) dengan batas lebar terukur (`targetWidth`) dan pemotongan teks rapi untuk mencegah teks menembus batas panel tetangga.
+2. **Tag Metadata:** Tag sub-item wajib diposisikan dengan margin vertikal minimal $18\text{px}$ dari teks utama dan menggunakan `TOKEN_CAPTION` (13 pt).
+3. **Footer Action Zones:** Teks panduan keyboard / gamepad wajib dikelompokkan terpisah di sisi kiri (margin aman $> 150\text{px}$) agar tidak menabrak barisan tombol aksi di sisi kanan.
+
+---
+
 *Dokumen Game Design Document (GDD) v1.0 ini merupakan spesifikasi desain resmi dan kanon final untuk pengembangan dan produksi game **Stickman Tower Adventure**.*
-
-
-
-
-
