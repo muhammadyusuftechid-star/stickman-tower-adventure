@@ -71,7 +71,7 @@ class QuestManagerTest {
         assertEquals(QuestStatus.COMPLETED, QuestManager.getQuestStatus("MQ_1"))
         assertEquals(initialGold + 120, stats.gold)
         assertEquals(2, stats.level, "Player should level up to 2 with 150 EXP")
-        assertEquals(100, stats.currentExp, "Remaining EXP after 50 consumed for level up")
+        assertEquals(50, stats.currentExp, "Remaining EXP after 100 consumed for level up")
 
         // 5. Rantai otomatis memajukan ke MQ_2
         val nextMain = QuestManager.getActiveMainQuest()

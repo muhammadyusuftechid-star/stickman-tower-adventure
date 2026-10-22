@@ -22,7 +22,7 @@ class CharacterStats(
     var weaponSpdLevel: Int = 0
 ) {
     companion object {
-        const val MAX_WEAPON_LEVEL = 5
+        const val MAX_WEAPON_LEVEL = 10
 
         fun getUpgradeCost(currentLevel: Int): Int {
             return 120 * (currentLevel + 1)
@@ -51,7 +51,7 @@ class CharacterStats(
         get() = (baseCritRate + weaponCritBonus + runeCritBonus).coerceIn(0f, 0.85f)
 
     val requiredExp: Int
-        get() = max(50, floor(50.0 * (level.toDouble()).pow(1.4)).toInt())
+        get() = max(50, floor(100.0 * (level.toDouble()).pow(1.35)).toInt())
 
     /**
      * Adds EXP and returns the number of levels gained (0 if no level up occurred).

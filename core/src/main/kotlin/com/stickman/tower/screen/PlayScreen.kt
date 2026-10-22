@@ -504,6 +504,17 @@ class PlayScreen(
 
         if (levelsGained > 0) {
             player.onLevelUp(levelsGained)
+            if (saveData.unspentTalentPoints >= 0) {
+                val oldPts = (player.stats.level - levelsGained) / 2
+                val newPts = player.stats.level / 2
+                val ptsToAdd = newPts - oldPts
+                if (ptsToAdd > 0) {
+                    saveData.unspentTalentPoints += ptsToAdd
+                    floatingTexts.add(
+                        FloatingText("✦ +$ptsToAdd TALENT POINT ✦", player.position.x, player.position.y + 3.2f, Color.GOLD, duration = 2.4f)
+                    )
+                }
+            }
             AudioManager.playLevelUp()
             particleManager.spawnHitSparks(player.position.x + player.width / 2f, player.position.y + player.height, count = 25, color = Color.CYAN)
             floatingTexts.add(

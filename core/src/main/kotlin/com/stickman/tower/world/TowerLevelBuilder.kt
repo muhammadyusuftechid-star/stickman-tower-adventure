@@ -2276,17 +2276,17 @@ object TowerLevelBuilder {
         platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 28f, color = cosmicFloor))
         platforms.add(Platform(x = 149f, y = 1.2f, width = 1.2f, height = 28f, color = cosmicFloor))
 
-        // Platform Angkasa Melayang
-        platforms.add(Platform(x = 8.0f, y = 4.2f, width = 8.5f, height = 0.5f, color = astralBridge))
-        platforms.add(Platform(x = 22.0f, y = 7.0f, width = 7.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 34.0f, y = 4.8f, width = 9.0f, height = 0.5f, color = nebulaStone))
-        platforms.add(Platform(x = 48.0f, y = 7.5f, width = 7.5f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 62.0f, y = 5.0f, width = 9.5f, height = 0.5f, color = astralBridge))
-        platforms.add(Platform(x = 76.0f, y = 7.8f, width = 7.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 90.0f, y = 4.8f, width = 9.0f, height = 0.5f, color = nebulaStone))
-        platforms.add(Platform(x = 104.0f, y = 7.2f, width = 8.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 118.0f, y = 4.5f, width = 9.0f, height = 0.5f, color = astralBridge))
-        platforms.add(Platform(x = 132.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        // Platform Angkasa Melayang (Celah terkontrol <= 2.0m ramah semua karakter termasuk Gorgon)
+        platforms.add(Platform(x = 6.0f, y = 3.2f, width = 12.0f, height = 0.5f, color = astralBridge))
+        platforms.add(Platform(x = 20.0f, y = 5.5f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 34.0f, y = 4.2f, width = 12.0f, height = 0.5f, color = nebulaStone))
+        platforms.add(Platform(x = 48.0f, y = 6.0f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 62.0f, y = 4.8f, width = 13.0f, height = 0.5f, color = astralBridge))
+        platforms.add(Platform(x = 77.0f, y = 6.2f, width = 11.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 90.0f, y = 4.5f, width = 12.0f, height = 0.5f, color = nebulaStone))
+        platforms.add(Platform(x = 104.0f, y = 6.0f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 118.0f, y = 4.2f, width = 12.0f, height = 0.5f, color = astralBridge))
+        platforms.add(Platform(x = 132.0f, y = 5.8f, width = 10.0f, height = 0.4f, isOneWay = true))
 
         val spikes = listOf(
             SpikeHazard(x = 26.0f, y = 1.2f, width = 5.0f, height = 0.6f),
@@ -2295,9 +2295,9 @@ object TowerLevelBuilder {
         )
 
         val chests = listOf(
-            TreasureChest(x = 36.0f, y = 5.4f),
-            TreasureChest(x = 92.0f, y = 5.4f),
-            TreasureChest(x = 120.0f, y = 5.1f)
+            TreasureChest(x = 36.0f, y = 4.8f),
+            TreasureChest(x = 92.0f, y = 5.1f),
+            TreasureChest(x = 120.0f, y = 4.8f)
         )
 
         val enemies = listOf(
@@ -2330,7 +2330,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 64.0f, y = 5.6f),
+            checkpoint = Checkpoint(x = 64.0f, y = 5.4f),
             exitPortal = StageExit(x = 140.0f, y = 1.2f),
             actTitle = "SAGA III: BASALT CRATER & ASTRAL RIFT",
             actSubtitle = "THE STARWIND CHASM",
@@ -2350,17 +2350,17 @@ object TowerLevelBuilder {
         platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 28f, color = meteorFloor))
         platforms.add(Platform(x = 154f, y = 1.2f, width = 1.2f, height = 28f, color = meteorFloor))
 
-        // Bongkahan Meteorit Melayang Bebas di Angkasa
-        platforms.add(Platform(x = 8.0f, y = 4.2f, width = 8.5f, height = 0.5f, color = meteorChunk))
-        platforms.add(Platform(x = 22.0f, y = 7.2f, width = 7.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 34.0f, y = 4.8f, width = 9.0f, height = 0.5f, color = voidRock))
-        platforms.add(Platform(x = 48.0f, y = 7.8f, width = 7.5f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 62.0f, y = 5.2f, width = 9.5f, height = 0.5f, color = meteorChunk))
-        platforms.add(Platform(x = 78.0f, y = 8.0f, width = 7.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 92.0f, y = 4.8f, width = 9.5f, height = 0.5f, color = voidRock))
-        platforms.add(Platform(x = 108.0f, y = 7.5f, width = 8.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 122.0f, y = 4.5f, width = 9.0f, height = 0.5f, color = meteorChunk))
-        platforms.add(Platform(x = 136.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        // Bongkahan Meteorit Melayang Bebas di Angkasa (Celah terkontrol <= 2.0m ramah Gorgon)
+        platforms.add(Platform(x = 6.0f, y = 3.2f, width = 12.0f, height = 0.5f, color = meteorChunk))
+        platforms.add(Platform(x = 20.0f, y = 5.5f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 34.0f, y = 4.2f, width = 12.0f, height = 0.5f, color = voidRock))
+        platforms.add(Platform(x = 48.0f, y = 6.0f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 62.0f, y = 4.8f, width = 13.0f, height = 0.5f, color = meteorChunk))
+        platforms.add(Platform(x = 77.0f, y = 6.2f, width = 11.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 90.0f, y = 4.5f, width = 12.0f, height = 0.5f, color = voidRock))
+        platforms.add(Platform(x = 104.0f, y = 6.0f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 118.0f, y = 4.2f, width = 12.0f, height = 0.5f, color = meteorChunk))
+        platforms.add(Platform(x = 132.0f, y = 5.8f, width = 10.0f, height = 0.4f, isOneWay = true))
 
         val spikes = listOf(
             SpikeHazard(x = 26.0f, y = 1.2f, width = 5.0f, height = 0.6f),
@@ -2369,9 +2369,9 @@ object TowerLevelBuilder {
         )
 
         val chests = listOf(
-            TreasureChest(x = 36.0f, y = 5.4f),
-            TreasureChest(x = 94.0f, y = 5.4f),
-            TreasureChest(x = 124.0f, y = 5.1f)
+            TreasureChest(x = 36.0f, y = 4.8f),
+            TreasureChest(x = 94.0f, y = 5.1f),
+            TreasureChest(x = 124.0f, y = 4.8f)
         )
 
         val enemies = listOf(
@@ -2404,7 +2404,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 66.0f, y = 5.8f),
+            checkpoint = Checkpoint(x = 64.0f, y = 5.4f),
             exitPortal = StageExit(x = 145.0f, y = 1.2f),
             actTitle = "SAGA III: BASALT CRATER & ASTRAL RIFT",
             actSubtitle = "THE METEORITE SPIRE",
@@ -2424,17 +2424,17 @@ object TowerLevelBuilder {
         platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 30f, color = vortexFloor))
         platforms.add(Platform(x = 154f, y = 1.2f, width = 1.2f, height = 30f, color = vortexFloor))
 
-        // Platform Tingkat Melayang Tinggi
-        platforms.add(Platform(x = 8.0f, y = 4.5f, width = 8.5f, height = 0.5f, color = gravitySlab))
-        platforms.add(Platform(x = 22.0f, y = 8.0f, width = 7.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 34.0f, y = 5.2f, width = 9.0f, height = 0.5f, color = cosmicCrystal))
-        platforms.add(Platform(x = 48.0f, y = 8.5f, width = 7.5f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 62.0f, y = 5.5f, width = 9.5f, height = 0.5f, color = gravitySlab))
-        platforms.add(Platform(x = 78.0f, y = 9.0f, width = 7.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 92.0f, y = 5.2f, width = 9.5f, height = 0.5f, color = cosmicCrystal))
-        platforms.add(Platform(x = 108.0f, y = 8.2f, width = 8.0f, height = 0.4f, isOneWay = true))
-        platforms.add(Platform(x = 122.0f, y = 4.8f, width = 9.0f, height = 0.5f, color = gravitySlab))
-        platforms.add(Platform(x = 136.0f, y = 7.5f, width = 7.0f, height = 0.4f, isOneWay = true))
+        // Platform Tingkat Melayang Tinggi (Celah terkontrol <= 2.0m ramah Gorgon)
+        platforms.add(Platform(x = 6.0f, y = 3.2f, width = 12.0f, height = 0.5f, color = gravitySlab))
+        platforms.add(Platform(x = 20.0f, y = 5.5f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 34.0f, y = 4.2f, width = 12.0f, height = 0.5f, color = cosmicCrystal))
+        platforms.add(Platform(x = 48.0f, y = 6.0f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 62.0f, y = 4.8f, width = 13.0f, height = 0.5f, color = gravitySlab))
+        platforms.add(Platform(x = 77.0f, y = 6.2f, width = 11.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 90.0f, y = 4.5f, width = 12.0f, height = 0.5f, color = cosmicCrystal))
+        platforms.add(Platform(x = 104.0f, y = 6.0f, width = 12.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 118.0f, y = 4.2f, width = 12.0f, height = 0.5f, color = gravitySlab))
+        platforms.add(Platform(x = 132.0f, y = 5.8f, width = 10.0f, height = 0.4f, isOneWay = true))
 
         val spikes = listOf(
             SpikeHazard(x = 26.0f, y = 1.2f, width = 5.0f, height = 0.6f),
@@ -2443,9 +2443,9 @@ object TowerLevelBuilder {
         )
 
         val chests = listOf(
-            TreasureChest(x = 36.0f, y = 5.8f),
-            TreasureChest(x = 94.0f, y = 5.8f),
-            TreasureChest(x = 124.0f, y = 5.4f)
+            TreasureChest(x = 36.0f, y = 4.8f),
+            TreasureChest(x = 94.0f, y = 5.1f),
+            TreasureChest(x = 124.0f, y = 4.8f)
         )
 
         val enemies = listOf(
@@ -2478,7 +2478,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 66.0f, y = 6.1f),
+            checkpoint = Checkpoint(x = 64.0f, y = 5.4f),
             exitPortal = StageExit(x = 145.0f, y = 1.2f),
             actTitle = "SAGA III: BASALT CRATER & ASTRAL RIFT",
             actSubtitle = "GRAVITY INVERSION VORTEX",
@@ -2561,20 +2561,20 @@ object TowerLevelBuilder {
         val starLight = Color(0.20f, 0.45f, 0.75f, 0.9f)
         val obsidianFloating = Color(0.12f, 0.12f, 0.18f, 1f)
 
-        // Dimensi di Balik Kanvas (Bentang Luas 150m, Anomali Gravitasi Rendah 0.55G)
-        platforms.add(Platform(x = -10f, y = 0f, width = 45f, height = 1.2f, color = starLight))
-        platforms.add(Platform(x = 42f, y = 2.8f, width = 18f, height = 0.5f, isOneWay = true, color = obsidianFloating))
-        platforms.add(Platform(x = 68f, y = 5.2f, width = 22f, height = 0.5f, isOneWay = true, color = starLight))
-        platforms.add(Platform(x = 98f, y = 3.4f, width = 20f, height = 0.5f, isOneWay = true, color = obsidianFloating))
-        platforms.add(Platform(x = 125f, y = 0f, width = 35f, height = 1.2f, color = starLight))
+        // Dimensi di Balik Kanvas (Bentang Luas 150m, Anomali Gravitasi Rendah 0.55G, Celah Terkontrol <= 2.5m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 48f, height = 1.2f, color = starLight))
+        platforms.add(Platform(x = 40.5f, y = 2.4f, width = 22f, height = 0.5f, isOneWay = true, color = obsidianFloating))
+        platforms.add(Platform(x = 65.0f, y = 4.6f, width = 24f, height = 0.5f, isOneWay = true, color = starLight))
+        platforms.add(Platform(x = 91.5f, y = 2.8f, width = 24f, height = 0.5f, isOneWay = true, color = obsidianFloating))
+        platforms.add(Platform(x = 118.0f, y = 0f, width = 42f, height = 1.2f, color = starLight))
 
         val spikes = listOf(
-            SpikeHazard(x = 48.0f, y = 0f, width = 18.0f, height = 0.8f),
-            SpikeHazard(x = 92.0f, y = 0f, width = 30.0f, height = 0.8f)
+            SpikeHazard(x = 42.0f, y = 0f, width = 18.0f, height = 0.8f),
+            SpikeHazard(x = 94.0f, y = 0f, width = 22.0f, height = 0.8f)
         )
 
         val chests = listOf(
-            TreasureChest(x = 80.0f, y = 5.7f),
+            TreasureChest(x = 80.0f, y = 5.2f),
             TreasureChest(x = 138.0f, y = 1.2f)
         )
 
@@ -2609,7 +2609,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 75.0f, y = 5.7f),
+            checkpoint = Checkpoint(x = 75.0f, y = 5.2f),
             exitPortal = StageExit(x = 142.0f, y = 1.2f),
             actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
             actSubtitle = "DIMENSION BEYOND THE CANVAS",
@@ -2625,21 +2625,21 @@ object TowerLevelBuilder {
         val darkAstral = Color(0.14f, 0.14f, 0.22f, 1f)
         val floatingIsle = Color(0.22f, 0.28f, 0.42f, 1f)
 
-        // Kepulauan Batu Melayang (Bentang Luas 160m, Gravitasi Rendah 0.50G)
-        platforms.add(Platform(x = -10f, y = 0f, width = 35f, height = 1.2f, color = darkAstral))
-        platforms.add(Platform(x = 32f, y = 3.2f, width = 14f, height = 0.6f, isOneWay = true, color = floatingIsle))
-        platforms.add(Platform(x = 52f, y = 6.4f, width = 16f, height = 0.6f, isOneWay = true, color = floatingIsle))
-        platforms.add(Platform(x = 75f, y = 4.2f, width = 18f, height = 0.6f, isOneWay = true, color = floatingIsle))
-        platforms.add(Platform(x = 100f, y = 7.0f, width = 16f, height = 0.6f, isOneWay = true, color = floatingIsle))
-        platforms.add(Platform(x = 124f, y = 3.6f, width = 15f, height = 0.6f, isOneWay = true, color = floatingIsle))
-        platforms.add(Platform(x = 142f, y = 0f, width = 28f, height = 1.2f, color = darkAstral))
+        // Kepulauan Batu Melayang (Bentang Luas 160m, Gravitasi Rendah 0.50G, Celah Terkontrol <= 2.5m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 38f, height = 1.2f, color = darkAstral))
+        platforms.add(Platform(x = 30.5f, y = 2.8f, width = 20f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 53.0f, y = 5.2f, width = 22f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 77.5f, y = 3.6f, width = 22f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 102.0f, y = 5.8f, width = 20f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 124.5f, y = 3.2f, width = 18f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 145.0f, y = 0f, width = 25f, height = 1.2f, color = darkAstral))
 
         val spikes = listOf(
             SpikeHazard(x = 30.0f, y = 0f, width = 110.0f, height = 0.8f) // Jurang hampa luas di bawah
         )
 
         val chests = listOf(
-            TreasureChest(x = 82.0f, y = 4.8f),
+            TreasureChest(x = 82.0f, y = 4.3f),
             TreasureChest(x = 152.0f, y = 1.2f)
         )
 
@@ -2672,7 +2672,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 80.0f, y = 4.8f),
+            checkpoint = Checkpoint(x = 80.0f, y = 4.3f),
             exitPortal = StageExit(x = 155.0f, y = 1.2f),
             actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
             actSubtitle = "FLOATING OBSIDIAN ARCHIPELAGO",
@@ -2686,21 +2686,21 @@ object TowerLevelBuilder {
         val warpStone = Color(0.18f, 0.16f, 0.28f, 1f)
         val beamPlatform = Color(0.35f, 0.50f, 0.85f, 0.85f)
 
-        // Labirin Singularitas (Bentang Luas 165m, Gravitasi Rendah 0.50G, Altar Prisma di Tengah)
-        platforms.add(Platform(x = -10f, y = 0f, width = 36f, height = 1.2f, color = warpStone))
-        platforms.add(Platform(x = 32f, y = 3.6f, width = 16f, height = 0.5f, isOneWay = true, color = beamPlatform))
-        platforms.add(Platform(x = 54f, y = 6.2f, width = 18f, height = 0.5f, isOneWay = true, color = warpStone))
-        platforms.add(Platform(x = 76f, y = 9.0f, width = 20f, height = 0.5f, isOneWay = true, color = beamPlatform))
-        platforms.add(Platform(x = 104f, y = 6.0f, width = 18f, height = 0.5f, isOneWay = true, color = warpStone))
-        platforms.add(Platform(x = 128f, y = 3.2f, width = 16f, height = 0.5f, isOneWay = true, color = beamPlatform))
-        platforms.add(Platform(x = 145f, y = 0f, width = 30f, height = 1.2f, color = warpStone))
+        // Labirin Singularitas (Bentang Luas 165m, Gravitasi Rendah 0.50G, Altar Prisma di Tengah, Celah <= 2.5m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 38f, height = 1.2f, color = warpStone))
+        platforms.add(Platform(x = 30.5f, y = 3.0f, width = 22f, height = 0.5f, isOneWay = true, color = beamPlatform))
+        platforms.add(Platform(x = 55.0f, y = 5.4f, width = 22f, height = 0.5f, isOneWay = true, color = warpStone))
+        platforms.add(Platform(x = 79.5f, y = 7.6f, width = 24f, height = 0.5f, isOneWay = true, color = beamPlatform))
+        platforms.add(Platform(x = 106.0f, y = 5.2f, width = 20f, height = 0.5f, isOneWay = true, color = warpStone))
+        platforms.add(Platform(x = 128.5f, y = 2.8f, width = 18f, height = 0.5f, isOneWay = true, color = beamPlatform))
+        platforms.add(Platform(x = 149.0f, y = 0f, width = 26f, height = 1.2f, color = warpStone))
 
         val spikes = listOf(
             SpikeHazard(x = 34.0f, y = 0f, width = 108.0f, height = 0.8f)
         )
 
         val chests = listOf(
-            TreasureChest(x = 86.0f, y = 9.5f),
+            TreasureChest(x = 86.0f, y = 8.2f),
             TreasureChest(x = 158.0f, y = 1.2f)
         )
 
@@ -2723,7 +2723,7 @@ object TowerLevelBuilder {
             )
         )
 
-        val prismAltar = PrismAltar(x = 60.0f, y = 6.7f)
+        val prismAltar = PrismAltar(x = 60.0f, y = 6.0f)
 
         return TowerFloor(
             floorNumber = 33,
@@ -2735,7 +2735,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 82.0f, y = 9.5f),
+            checkpoint = Checkpoint(x = 84.0f, y = 8.2f),
             exitPortal = StageExit(x = 160.0f, y = 1.2f),
             actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
             actSubtitle = "LABYRINTH OF SINGULARITY",
@@ -2750,21 +2750,21 @@ object TowerLevelBuilder {
         val voidFloor = Color(0.12f, 0.12f, 0.18f, 1f)
         val windPlate = Color(0.24f, 0.32f, 0.48f, 1f)
 
-        // Gema Suara Orang Mati (Bentang Luas 160m, Gravitasi Rendah 0.55G)
+        // Gema Suara Orang Mati (Bentang Luas 160m, Gravitasi Rendah 0.55G, Celah Terkontrol <= 2.5m)
         platforms.add(Platform(x = -10f, y = 0f, width = 38f, height = 1.2f, color = voidFloor))
-        platforms.add(Platform(x = 34f, y = 2.8f, width = 16f, height = 0.5f, isOneWay = true, color = windPlate))
-        platforms.add(Platform(x = 56f, y = 5.4f, width = 18f, height = 0.5f, isOneWay = true, color = voidFloor))
-        platforms.add(Platform(x = 80f, y = 3.6f, width = 18f, height = 0.5f, isOneWay = true, color = windPlate))
-        platforms.add(Platform(x = 104f, y = 6.2f, width = 18f, height = 0.5f, isOneWay = true, color = voidFloor))
-        platforms.add(Platform(x = 126f, y = 3.0f, width = 15f, height = 0.5f, isOneWay = true, color = windPlate))
-        platforms.add(Platform(x = 144f, y = 0f, width = 26f, height = 1.2f, color = voidFloor))
+        platforms.add(Platform(x = 30.5f, y = 2.6f, width = 22f, height = 0.5f, isOneWay = true, color = windPlate))
+        platforms.add(Platform(x = 55.0f, y = 4.8f, width = 24f, height = 0.5f, isOneWay = true, color = voidFloor))
+        platforms.add(Platform(x = 81.5f, y = 3.4f, width = 22f, height = 0.5f, isOneWay = true, color = windPlate))
+        platforms.add(Platform(x = 106.0f, y = 5.6f, width = 20f, height = 0.5f, isOneWay = true, color = voidFloor))
+        platforms.add(Platform(x = 128.5f, y = 2.8f, width = 18f, height = 0.5f, isOneWay = true, color = windPlate))
+        platforms.add(Platform(x = 149.0f, y = 0f, width = 21f, height = 1.2f, color = voidFloor))
 
         val spikes = listOf(
             SpikeHazard(x = 32.0f, y = 0f, width = 110.0f, height = 0.8f)
         )
 
         val chests = listOf(
-            TreasureChest(x = 65.0f, y = 5.9f),
+            TreasureChest(x = 65.0f, y = 5.4f),
             TreasureChest(x = 155.0f, y = 1.2f)
         )
 
@@ -2797,7 +2797,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 88.0f, y = 4.1f),
+            checkpoint = Checkpoint(x = 88.0f, y = 4.0f),
             exitPortal = StageExit(x = 156.0f, y = 1.2f),
             actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
             actSubtitle = "ECHOES OF THE FALLEN VOID",
@@ -2876,12 +2876,12 @@ object TowerLevelBuilder {
         val gothicStone = Color(0.12f, 0.08f, 0.10f, 1f)
         val crimsonArch = Color(0.28f, 0.10f, 0.14f, 1f)
 
-        // Ambang Katedral Gotik (Bentang Luas 150m, Gerhana Bulan Merah, Gravitasi Normal 1.0G)
-        platforms.add(Platform(x = -10f, y = 0f, width = 50f, height = 1.2f, color = gothicStone))
-        platforms.add(Platform(x = 45f, y = 3.2f, width = 16f, height = 0.5f, isOneWay = true, color = crimsonArch))
-        platforms.add(Platform(x = 66f, y = 5.8f, width = 20f, height = 0.5f, isOneWay = true, color = gothicStone))
-        platforms.add(Platform(x = 92f, y = 3.4f, width = 18f, height = 0.5f, isOneWay = true, color = crimsonArch))
-        platforms.add(Platform(x = 115f, y = 0f, width = 45f, height = 1.2f, color = gothicStone))
+        // Ambang Katedral Gotik (Bentang Luas 150m, Gerhana Bulan Merah, Celah Terkontrol <= 2.0m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 52f, height = 1.2f, color = gothicStone))
+        platforms.add(Platform(x = 44f, y = 2.8f, width = 20f, height = 0.5f, isOneWay = true, color = crimsonArch))
+        platforms.add(Platform(x = 66f, y = 5.0f, width = 22f, height = 0.5f, isOneWay = true, color = gothicStone))
+        platforms.add(Platform(x = 90f, y = 3.2f, width = 22f, height = 0.5f, isOneWay = true, color = crimsonArch))
+        platforms.add(Platform(x = 114f, y = 0f, width = 46f, height = 1.2f, color = gothicStone))
 
         val spikes = listOf(
             SpikeHazard(x = 52.0f, y = 0f, width = 12.0f, height = 0.8f),
@@ -2889,7 +2889,7 @@ object TowerLevelBuilder {
         )
 
         val chests = listOf(
-            TreasureChest(x = 76.0f, y = 6.3f),
+            TreasureChest(x = 76.0f, y = 5.5f),
             TreasureChest(x = 135.0f, y = 1.2f)
         )
 
@@ -2924,7 +2924,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 75.0f, y = 6.3f),
+            checkpoint = Checkpoint(x = 75.0f, y = 5.5f),
             exitPortal = StageExit(x = 145.0f, y = 1.2f),
             actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
             actSubtitle = "GOTHIC CATHEDRAL THRESHOLD",
@@ -2939,13 +2939,13 @@ object TowerLevelBuilder {
         val velvetCarpet = Color(0.42f, 0.08f, 0.12f, 1f)
         val gothicPillar = Color(0.14f, 0.08f, 0.10f, 1f)
 
-        // Koridor Beludru Merah (Bentang Luas 160m)
+        // Koridor Beludru Merah (Bentang Luas 160m, Celah Terkontrol <= 2.0m)
         platforms.add(Platform(x = -10f, y = 0f, width = 180f, height = 1.2f, color = velvetCarpet))
-        platforms.add(Platform(x = 25f, y = 3.4f, width = 16f, height = 0.5f, isOneWay = true, color = gothicPillar))
-        platforms.add(Platform(x = 50f, y = 6.0f, width = 18f, height = 0.5f, isOneWay = true, color = gothicPillar))
-        platforms.add(Platform(x = 76f, y = 4.2f, width = 20f, height = 0.5f, isOneWay = true, color = gothicPillar))
-        platforms.add(Platform(x = 104f, y = 6.4f, width = 18f, height = 0.5f, isOneWay = true, color = gothicPillar))
-        platforms.add(Platform(x = 130f, y = 3.6f, width = 16f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 24f, y = 3.0f, width = 20f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 46f, y = 5.2f, width = 24f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 72f, y = 3.8f, width = 24f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 98f, y = 5.4f, width = 24f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 124f, y = 3.2f, width = 22f, height = 0.5f, isOneWay = true, color = gothicPillar))
 
         val spikes = listOf(
             SpikeHazard(x = 42.0f, y = 1.2f, width = 7.0f, height = 0.6f),
@@ -2953,7 +2953,7 @@ object TowerLevelBuilder {
         )
 
         val chests = listOf(
-            TreasureChest(x = 60.0f, y = 6.5f),
+            TreasureChest(x = 58.0f, y = 5.7f),
             TreasureChest(x = 148.0f, y = 1.2f)
         )
 
@@ -2985,7 +2985,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 86.0f, y = 4.7f),
+            checkpoint = Checkpoint(x = 84.0f, y = 4.3f),
             exitPortal = StageExit(x = 155.0f, y = 1.2f),
             actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
             actSubtitle = "CRIMSON VELVET CORRIDOR",
@@ -2998,12 +2998,12 @@ object TowerLevelBuilder {
         val sacrificialStone = Color(0.18f, 0.08f, 0.10f, 1f)
         val marbleBalcony = Color(0.28f, 0.16f, 0.18f, 1f)
 
-        // Altar Pengorbanan Anima (Bentang Luas 165m, Fitur BloodAltar Interaktif)
-        platforms.add(Platform(x = -10f, y = 0f, width = 60f, height = 1.2f, color = sacrificialStone))
-        platforms.add(Platform(x = 55f, y = 3.6f, width = 18f, height = 0.5f, isOneWay = true, color = marbleBalcony))
-        platforms.add(Platform(x = 78f, y = 0f, width = 45f, height = 1.2f, color = sacrificialStone))
-        platforms.add(Platform(x = 126f, y = 3.8f, width = 16f, height = 0.5f, isOneWay = true, color = marbleBalcony))
-        platforms.add(Platform(x = 145f, y = 0f, width = 30f, height = 1.2f, color = sacrificialStone))
+        // Altar Pengorbanan Anima (Bentang Luas 165m, Celah Terkontrol <= 2.0m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 62f, height = 1.2f, color = sacrificialStone))
+        platforms.add(Platform(x = 54f, y = 3.2f, width = 22f, height = 0.5f, isOneWay = true, color = marbleBalcony))
+        platforms.add(Platform(x = 78f, y = 0f, width = 46f, height = 1.2f, color = sacrificialStone))
+        platforms.add(Platform(x = 126f, y = 3.2f, width = 18f, height = 0.5f, isOneWay = true, color = marbleBalcony))
+        platforms.add(Platform(x = 146f, y = 0f, width = 29f, height = 1.2f, color = sacrificialStone))
 
         val spikes = listOf(
             SpikeHazard(x = 50.0f, y = 0f, width = 28.0f, height = 0.8f),
@@ -3011,7 +3011,7 @@ object TowerLevelBuilder {
         )
 
         val chests = listOf(
-            TreasureChest(x = 64.0f, y = 4.1f),
+            TreasureChest(x = 64.0f, y = 3.7f),
             TreasureChest(x = 158.0f, y = 1.2f)
         )
 
@@ -3061,13 +3061,13 @@ object TowerLevelBuilder {
         val catacombStone = Color(0.10f, 0.08f, 0.12f, 1f)
         val tombLedge = Color(0.24f, 0.14f, 0.18f, 1f)
 
-        // Katakomba Darah Abadi (Bentang Luas 160m)
-        platforms.add(Platform(x = -10f, y = 0f, width = 45f, height = 1.2f, color = catacombStone))
-        platforms.add(Platform(x = 40f, y = 3.2f, width = 16f, height = 0.5f, isOneWay = true, color = tombLedge))
-        platforms.add(Platform(x = 62f, y = 5.8f, width = 20f, height = 0.5f, isOneWay = true, color = catacombStone))
-        platforms.add(Platform(x = 88f, y = 3.4f, width = 18f, height = 0.5f, isOneWay = true, color = tombLedge))
-        platforms.add(Platform(x = 112f, y = 6.0f, width = 18f, height = 0.5f, isOneWay = true, color = catacombStone))
-        platforms.add(Platform(x = 135f, y = 0f, width = 35f, height = 1.2f, color = catacombStone))
+        // Katakomba Darah Abadi (Bentang Luas 160m, Celah Terkontrol <= 2.0m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 48f, height = 1.2f, color = catacombStone))
+        platforms.add(Platform(x = 40f, y = 2.8f, width = 20f, height = 0.5f, isOneWay = true, color = tombLedge))
+        platforms.add(Platform(x = 62f, y = 5.0f, width = 24f, height = 0.5f, isOneWay = true, color = catacombStone))
+        platforms.add(Platform(x = 88f, y = 3.2f, width = 22f, height = 0.5f, isOneWay = true, color = tombLedge))
+        platforms.add(Platform(x = 112f, y = 5.2f, width = 22f, height = 0.5f, isOneWay = true, color = catacombStone))
+        platforms.add(Platform(x = 136f, y = 0f, width = 34f, height = 1.2f, color = catacombStone))
 
         val spikes = listOf(
             SpikeHazard(x = 42.0f, y = 0f, width = 18.0f, height = 0.8f),
@@ -3075,7 +3075,7 @@ object TowerLevelBuilder {
         )
 
         val chests = listOf(
-            TreasureChest(x = 72.0f, y = 6.3f),
+            TreasureChest(x = 72.0f, y = 5.5f),
             TreasureChest(x = 152.0f, y = 1.2f)
         )
 
@@ -3108,7 +3108,7 @@ object TowerLevelBuilder {
             spikes = spikes,
             chests = chests,
             enemies = enemies,
-            checkpoint = Checkpoint(x = 72.0f, y = 6.3f),
+            checkpoint = Checkpoint(x = 72.0f, y = 5.5f),
             exitPortal = StageExit(x = 155.0f, y = 1.2f),
             actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
             actSubtitle = "CATACOMBS OF THE UNDYING",

@@ -189,10 +189,11 @@ class BlacksmithScreen(private val game: StickmanGame, val returnScreen: Screen?
             }
             val pipStartX = cardX + 380f
             val pipY = cardY + 28f
-            val pipW = 45f
+            val pipW = 32f
             val pipH = 16f
+            val pipSpacing = 8f
             for (p in 0 until CharacterStats.MAX_WEAPON_LEVEL) {
-                val px = pipStartX + (p * (pipW + 10f))
+                val px = pipStartX + (p * (pipW + pipSpacing))
                 if (p < currentLevel) {
                     shapeRenderer.setColor(1f, 0.75f, 0.2f, 1f)
                 } else {
