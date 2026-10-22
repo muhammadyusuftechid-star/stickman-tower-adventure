@@ -26,6 +26,9 @@ data class SaveData(
     var completedBounties: ArrayList<String> = arrayListOf(),
     var claimedBounties: ArrayList<String> = arrayListOf(),
     var bestiaryKills: HashMap<String, Int> = hashMapOf(),
+    var bgmVolume: Float = 0.65f,
+    var sfxVolume: Float = 0.85f,
+    var isAudioMuted: Boolean = false,
     var selectedArchetype: String = "BALANCED",
     var selectedSubClass: String = "BERSERKER",
     var weaponAtkLevel: Int = 0,
@@ -102,6 +105,10 @@ data class SaveData(
             mix(bestiaryKills[key]?.toLong() ?: 0L)
         }
 
+        mix((bgmVolume * 100).toLong())
+        mix((sfxVolume * 100).toLong())
+        mix(if (isAudioMuted) 1L else 0L)
+
         return hash and 0x7FFFFFFFFFFFFFFFL // Bilangan bulat positif 63-bit
     }
 
@@ -138,6 +145,8 @@ data class SaveData(
         weaponCritLevel = weaponCritLevel.coerceIn(0, 10)
         weaponSpdLevel = weaponSpdLevel.coerceIn(0, 10)
         unspentTalentPoints = unspentTalentPoints.coerceAtLeast(-1)
+        bgmVolume = bgmVolume.coerceIn(0f, 1f)
+        sfxVolume = sfxVolume.coerceIn(0f, 1f)
         playTimeSeconds = playTimeSeconds.coerceAtLeast(0L)
         saveSlotId = saveSlotId.coerceIn(1, 10)
         saveVersion = saveVersion.coerceAtLeast(1)

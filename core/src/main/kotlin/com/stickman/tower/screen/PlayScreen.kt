@@ -145,6 +145,11 @@ class PlayScreen(
     var isViewingBestiary: Boolean = false
     var bestiarySelectedIndex: Int = 0
 
+    // Post-Processing VFX & Audio Master (Fase 20)
+    var floorTransitionAlpha: Float = 1.0f
+    var parryFlashTimer: Float = 0f
+    private var dangerPulseTimer: Float = 0f
+
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
         private set
@@ -376,6 +381,8 @@ class PlayScreen(
         floatingTexts.add(
             FloatingText("=== ${currentFloor.floorName} ===", player.position.x, player.position.y + 2.5f, Color.GOLD, duration = 2.8f)
         )
+        AudioManager.playFloorBgm(currentFloorNumber, currentFloor.isBossFloor)
+        floorTransitionAlpha = 1.0f
     }
 
     private fun triggerSave(reason: String, highestFloor: Int = currentFloorNumber) {
@@ -469,9 +476,11 @@ class PlayScreen(
                     isPaused = true
                     pauseSelectedIndex = 0
                     AudioManager.playDodge()
+                    AudioManager.pauseBgm()
                     inputCooldown = 0.20f
                 } else if (isPaused) {
                     isPaused = false
+                    AudioManager.resumeBgm()
                     AudioManager.playSlashLight()
                     inputCooldown = 0.20f
                 } else if (gameStatus == GameStatus.GAME_OVER || gameStatus == GameStatus.STAGE_CLEAR) {
@@ -491,7 +500,13 @@ class PlayScreen(
                 if (uiTouchVec.x in (1280f - 180f)..1280f && uiTouchVec.y in (720f - 75f)..720f) {
                     isPaused = !isPaused
                     pauseSelectedIndex = 0
-                    if (isPaused) AudioManager.playDodge() else AudioManager.playSlashLight()
+                    if (isPaused) {
+                        AudioManager.playDodge()
+                        AudioManager.pauseBgm()
+                    } else {
+                        AudioManager.playSlashLight()
+                        AudioManager.resumeBgm()
+                    }
                     inputCooldown = 0.20f
                 } else if (gameStatus == GameStatus.PLAYING && !isPaused && gameMode == GameMode.STORY && questCompass.contains(uiTouchVec.x, uiTouchVec.y)) {
                     AudioManager.playSlashLight()
@@ -926,6 +941,9 @@ class PlayScreen(
         }
         batch.end()
 
+        // 8.5 Post-Processing VFX (Critical Anima Vignette, Parry Flare & Ink Screen Dissolve - Fase 20)
+        renderPostProcessingVFX(safeDelta)
+
         // 9. Developer Tools & Profiler Overlay (Senior Tools Architecture)
         devTools.render(shapeRenderer, batch, uiCamera, player, currentFloor, particleManager.activeParticleCount)
     }
@@ -1298,6 +1316,7 @@ class PlayScreen(
                         }
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
+                        parryFlashTimer = 0.18f
                         com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                         QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
                         if (currentFloorNumber == 2) {
@@ -1373,6 +1392,7 @@ class PlayScreen(
                     }
                     hitStopManager.trigger(0.08f)
                     AudioManager.playParry()
+                    parryFlashTimer = 0.18f
                     com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                     QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
                     HapticManager.vibrateHeavy()
@@ -1533,6 +1553,7 @@ class PlayScreen(
     private fun evaluateGameConditions() {
         if (player.health.isDead && gameStatus == GameStatus.PLAYING) {
             gameStatus = GameStatus.GAME_OVER
+            AudioManager.stopBgm()
             floatingTexts.add(
                 FloatingText("DEFEATED!", player.position.x, player.position.y + 2.2f, Color.RED, duration = 2.0f)
             )
@@ -2271,6 +2292,7 @@ class PlayScreen(
         when (pauseSelectedIndex) {
             0 -> { // Resume
                 isPaused = false
+                AudioManager.resumeBgm()
                 AudioManager.playSlashLight()
             }
             1 -> { // Restart Floor
@@ -2319,6 +2341,7 @@ class PlayScreen(
             }
             9 -> { // Main Menu
                 isPaused = false
+                AudioManager.stopBgm()
                 AudioManager.playDodge()
                 if (game != null) {
                     (game as? StickmanGame)?.releasePreservedScreen(this)
@@ -3274,17 +3297,82 @@ class PlayScreen(
         regF.draw(batch, textDesc, bx + 60f, by + 22f)
     }
 
+    private fun renderPostProcessingVFX(delta: Float) {
+        val w = 1280f
+        val h = 720f
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+
+        shapeRenderer.projectionMatrix = uiCamera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+
+        // A. Critical Anima Vignette (Detak Darah Saat HP Kritis <= 25%)
+        if (!player.health.isDead && player.health.currentHp <= player.health.maxHp * 0.25f && gameStatus == GameStatus.PLAYING) {
+            dangerPulseTimer += delta
+            val hpRatio = (player.health.currentHp / (player.health.maxHp * 0.25f)).coerceIn(0f, 1f)
+            val urgency = 1f - hpRatio
+            val pulse = 0.5f + 0.5f * kotlin.math.sin(dangerPulseTimer * (5f + urgency * 5f))
+            val vigAlpha = (0.16f + urgency * 0.26f) * pulse
+
+            shapeRenderer.setColor(0.75f, 0.05f, 0.05f, vigAlpha)
+            val edgeThickness = 55f
+            shapeRenderer.rect(0f, 0f, w, edgeThickness) // Bottom
+            shapeRenderer.rect(0f, h - edgeThickness, w, edgeThickness) // Top
+            shapeRenderer.rect(0f, edgeThickness, edgeThickness, h - edgeThickness * 2f) // Left
+            shapeRenderer.rect(w - edgeThickness, edgeThickness, edgeThickness, h - edgeThickness * 2f) // Right
+
+            // Inner softer gradient strip
+            shapeRenderer.setColor(0.55f, 0.02f, 0.02f, vigAlpha * 0.45f)
+            shapeRenderer.rect(edgeThickness, edgeThickness, w - edgeThickness * 2f, 25f)
+            shapeRenderer.rect(edgeThickness, h - edgeThickness - 25f, w - edgeThickness * 2f, 25f)
+        }
+
+        // B. Perfect Parry Horizontal Flare (Dentang Penolakan Takdir)
+        if (parryFlashTimer > 0f) {
+            parryFlashTimer = (parryFlashTimer - delta).coerceAtLeast(0f)
+            val flareRatio = (parryFlashTimer / 0.18f).coerceIn(0f, 1f)
+            val flareHeight = 6f + 24f * flareRatio
+            val flareY = h / 2f - flareHeight / 2f
+
+            shapeRenderer.setColor(1f, 0.95f, 0.65f, flareRatio * 0.85f)
+            shapeRenderer.rect(0f, flareY, w, flareHeight)
+            shapeRenderer.setColor(1f, 1f, 1f, flareRatio * 0.95f)
+            shapeRenderer.rect(0f, h / 2f - 2f, w, 4f)
+        }
+
+        // C. Ink Screen Dissolve Transition (Transisi Pindah Lantai & Respawn)
+        if (floorTransitionAlpha > 0f) {
+            floorTransitionAlpha = (floorTransitionAlpha - delta * 2.2f).coerceAtLeast(0f)
+            shapeRenderer.setColor(0.04f, 0.04f, 0.06f, floorTransitionAlpha)
+            shapeRenderer.rect(0f, 0f, w, h)
+        }
+
+        shapeRenderer.end()
+    }
+
     override fun resize(width: Int, height: Int) {
         cameraManager.resize(width, height)
         uiViewport.update(width, height, true)
         virtualController.resize(1280, 720)
     }
 
-    override fun pause() {}
-    override fun resume() {}
-    override fun hide() {}
+    override fun pause() {
+        AudioManager.pauseBgm()
+    }
+
+    override fun resume() {
+        if (!isPaused && gameStatus == GameStatus.PLAYING) {
+            AudioManager.resumeBgm()
+        }
+    }
+
+    override fun hide() {
+        AudioManager.pauseBgm()
+    }
 
     override fun dispose() {
+        AudioManager.stopBgm()
         particleManager.clear()
         shapeRenderer.dispose()
         batch.dispose()

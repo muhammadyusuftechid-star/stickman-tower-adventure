@@ -589,8 +589,8 @@ flowchart TD
 
 #### Modul 15.2: Release Packaging (.aab) & Store Assets
 - **Task 15.2.1: Android App Bundle (.aab)**
-  - [ ] Konfigurasi signing key `keystore.jks` dan ProGuard / R8 minification rule.
-  - [ ] Build file produksi `./gradlew android:bundleRelease`.
+  - [x] Konfigurasi signing key `release.keystore` dan ProGuard / R8 minification rule (`android/proguard-rules.pro`).
+  - [x] Build file produksi `./gradlew android:bundleRelease` (AAB 5.2 MB) & `./gradlew android:assembleRelease` (APK 4.8 MB).
 
 ---
 
@@ -703,6 +703,35 @@ flowchart TD
 
 ---
 
+### FASE 20: Polishing Audiovisual Akhir, Master Musik Tema Dinamis & Release Packaging (.aab/APK Rilis)
+> **Tujuan Terbesar:** Mewujudkan soundtrack musik latar dinamis prosedural ambient per-babak tanpa beban aset file rekaman besar, efek pasca-pemrosesan vignette saat Anima kritis, dan validasi build rilis produksi Google Play Store (.aab dan .apk).
+
+#### Modul 20.1: Engine Musik Ambien Prosedural Dinamis
+- **Task 20.1.1: Trek Ambien Looping Mulus per Babak Cerita**
+  - [x] Sintesis drone polifonik per babak di [ProceduralMusicEngine.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/audio/ProceduralMusicEngine.kt):
+    - *Act I (L1-3):* D-minor ambient drone 73.4 Hz + sub-bass nafas menara.
+    - *Act II (L4-6):* F-sharp resonance ambient pad 92.5 Hz + desis uap alchemical.
+    - *Act III (L7-9):* A-minor ethereal chime pad 110 Hz + shimmer astral kristal.
+    - *Act IV (L10):* E-minor cathedral resonance 82.4 Hz penentu takdir.
+    - *Endless Spire:* Multi-harmonic polyphonic drone 98 Hz paradoks menara.
+    - *Boss Battle:* Pulsa tensi 65.4 Hz dengan detak drum takdir 120 BPM.
+  - [x] Manajemen volume BGM independen di [SaveData.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/rpg/SaveData.kt) & [AudioManager.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/audio/AudioManager.kt).
+
+#### Modul 20.2: Post-Processing VFX & Animasi Sinematik
+- **Task 20.2.1: Critical Anima Danger Pulse (Vignette HP Kritis)**
+  - [x] Deteksi Integritas Anima $\le 25\%$ dengan efek denyut merah berfrekuensi detak jantung di tepi layar [PlayScreen.kt](file:///home/yusuf/projekan/game/game1/core/src/main/kotlin/com/stickman/tower/screen/PlayScreen.kt).
+- **Task 20.2.2: Perfect Parry Horizontal Flare & Ink Screen Dissolve**
+  - [x] Kilatan garis horizontal keemasan saat Dentang Penolakan Takdir (Parry).
+  - [x] Transisi pudar hitam pekat (fade-in & fade-out) saat berpindah lantai atau respawn di checkpoint.
+
+#### Modul 20.3: Validasi Produksi Google Play Store
+- **Task 20.3.1: ProGuard/R8 Keep Rules & Signed Production Build**
+  - [x] Aturan proteksi data RPG, Quests, SaveData, dan Enums di [proguard-rules.pro](file:///home/yusuf/projekan/game/game1/android/proguard-rules.pro).
+  - [x] Pembuatan signing key resmi `release.keystore` dan integrasi di [build.gradle](file:///home/yusuf/projekan/game/game1/android/build.gradle).
+  - [x] Verifikasi build rilis mandiri: APK signed 4.8 MB & AAB bundle 5.2 MB siap terbit.
+
+---
+
 ## 4. Matriks Ketergantungan & Prioritas Eksekusi
 
 | Prioritas | Fase | Fitur Kunci | Output Terukur |
@@ -721,11 +750,12 @@ flowchart TD
 | **P5 (Lanjutan B)** | Fase 12 | Dukungan Gamepad & Touch Layout Editor | Fleksibilitas kontrol controller & ergonomi sentuh [SELESAI] |
 | **P6 (Endgame)** | Fase 13 | Endless Spire Mode & Talent Tree | Replayability tanpa batas & kedalaman RPG mendalam [SELESAI] |
 | **P6 (Naratif)** | Fase 14 | Kampanye Cerita 10 Lantai, 5 Boss & Codex Odyssey | Alur cerita epik 4 Act, dialog NPC Aria/Vulcanus, & tablet prasasti [SELESAI] |
-| **P7 (Publikasi)**| Fase 15 | Google Play Services & Release Bundle (.aab) | Kesiapan peluncuran komersial di Google Play Store |
+| **P7 (Publikasi)**| Fase 15 | Google Play Services & Release Bundle (.aab) | Kesiapan peluncuran komersial di Google Play Store [SELESAI] |
 | **P8 (Quest System)**| Fase 16 | Quest Engine FSM, 7 Main Quests & 3 Heritage Sagas| Aliran objektif terarah, HUD compass, dan hadiah relik unik [SELESAI] |
 | **P8 (Tantangan)**| Fase 17 | Scribe's Gauntlets (Parry/Speedrun) & Papan Buronan | Mode tantangan handicap, medali emas, dan kontrak buronan harian [SELESAI] |
 | **P9 (Sinematik)**| Fase 18 | Naskah Lakon Standar, Sintesis Voice Chirp & Whispers | Format naskah industri, vokal prosedural osilator & bisikan idle [SELESAI] |
 | **P9 (Atmosfer)** | Fase 19 | Penceritaan Lingkungan 4 Babak & Bestiarium Lapangan| Prop reruntuhan visual, catatan lapangan musuh, & UI diegetik [SELESAI] |
+| **P10 (Final Master)**| Fase 20 | BGM Prosedural Dinamis, Vignette Kritis & AAB Production | Audio master per-Act, post-processing VFX & Bundle Rilis Store [SELESAI] |
 
 
 ---

@@ -37,11 +37,13 @@ object AudioManager {
 
     private const val PREF_AUDIO = "stickman_audio_settings"
     private const val KEY_VOLUME = "sfx_volume"
+    private const val KEY_BGM_VOLUME = "bgm_volume"
     private const val KEY_MUTED = "is_muted"
 
     var isMuted: Boolean = false
         set(value) {
             field = value
+            ProceduralMusicEngine.isMuted = value
             persistSettings()
         }
     var sfxVolume: Float = 0.85f
@@ -50,11 +52,19 @@ object AudioManager {
             persistSettings()
         }
 
+    var bgmVolume: Float
+        get() = ProceduralMusicEngine.bgmVolume
+        set(value) {
+            ProceduralMusicEngine.bgmVolume = value.coerceIn(0f, 1f)
+            persistSettings()
+        }
+
     private fun persistSettings() {
         try {
             val prefs = Gdx.app?.getPreferences(PREF_AUDIO)
             if (prefs != null) {
                 prefs.putFloat(KEY_VOLUME, sfxVolume)
+                prefs.putFloat(KEY_BGM_VOLUME, bgmVolume)
                 prefs.putBoolean(KEY_MUTED, isMuted)
                 prefs.flush()
             }
@@ -69,8 +79,10 @@ object AudioManager {
             val prefs = Gdx.app?.getPreferences(PREF_AUDIO)
             if (prefs != null) {
                 if (prefs.contains(KEY_VOLUME)) sfxVolume = prefs.getFloat(KEY_VOLUME, 0.85f).coerceIn(0f, 1f)
+                if (prefs.contains(KEY_BGM_VOLUME)) bgmVolume = prefs.getFloat(KEY_BGM_VOLUME, 0.65f).coerceIn(0f, 1f)
                 if (prefs.contains(KEY_MUTED)) isMuted = prefs.getBoolean(KEY_MUTED, false)
             }
+            ProceduralMusicEngine.init()
         } catch (_: Exception) {}
 
         try {
@@ -460,6 +472,22 @@ object AudioManager {
         }
     }
 
+    fun playFloorBgm(floorNumber: Int, isBossFloor: Boolean = false) {
+        ProceduralMusicEngine.playFloorBgm(floorNumber, isBossFloor)
+    }
+
+    fun pauseBgm() {
+        ProceduralMusicEngine.pause()
+    }
+
+    fun resumeBgm() {
+        ProceduralMusicEngine.resume()
+    }
+
+    fun stopBgm() {
+        ProceduralMusicEngine.stop()
+    }
+
     fun toggleMute(): Boolean {
         isMuted = !isMuted
         return isMuted
@@ -502,6 +530,7 @@ object AudioManager {
         soundChirpOakhaven = null
         soundChirpMatron = null
 
+        ProceduralMusicEngine.dispose()
         isInitialized = false
     }
 }

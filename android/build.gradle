@@ -42,8 +42,17 @@ android {
     targetCompatibility "17"
     coreLibraryDesugaringEnabled = true
   }
+  signingConfigs {
+    release {
+      storeFile file("release.keystore")
+      storePassword "stickmantower123"
+      keyAlias "stickmantower"
+      keyPassword "stickmantower123"
+    }
+  }
   buildTypes {
     release {
+      signingConfig signingConfigs.release
       minifyEnabled true
       proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), 'proguard-rules.pro'
     }

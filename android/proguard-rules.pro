@@ -1,33 +1,15 @@
-# To enable ProGuard in your project, edit project.properties
-# to define the proguard.config property as described in that file.
-#
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in ${sdk.dir}/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the ProGuard
-# include property in project.properties.
-#
-# For more details, see
-#   https://developer.android.com/guide/developing/tools/proguard.html
-
-# Add any project specific keep options here:
-
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ProGuard & R8 Optimization and Obfuscation Rules
+# Stickman Tower Adventure - Release Hardening
 
 -verbose
 
 -dontwarn android.support.**
 -dontwarn com.badlogic.gdx.backends.android.AndroidFragmentApplication
 
-# Needed by the gdx-controllers official extension.
--keep class com.badlogic.gdx.controllers.android.AndroidControllers
+# Needed by LibGDX Controllers
+-keep class com.badlogic.gdx.controllers.android.AndroidControllers { *; }
 
-# Needed by the Box2D official extension.
+# Needed by Box2D / Physics if present
 -keepclassmembers class com.badlogic.gdx.physics.box2d.World {
    boolean contactFilter(long, long);
    boolean getUseDefaultContactFilter();
@@ -39,14 +21,40 @@
    float   reportRayFixture(long, float, float, float, float, float);
 }
 
-# You will need the next three lines if you use scene2d for UI or gameplay.
-# If you don't use scene2d at all, you can remove or comment out the next line:
+# Keep LibGDX Core, Scene2D, Graphics & Backends
+-keep public class com.badlogic.gdx.backends.android.** { *; }
 -keep public class com.badlogic.gdx.scenes.scene2d.** { *; }
-# You will need the next two lines if you use BitmapFont or any scene2d.ui text:
 -keep public class com.badlogic.gdx.graphics.g2d.BitmapFont { *; }
-# You will probably need this line in most cases:
 -keep public class com.badlogic.gdx.graphics.Color { *; }
+-keep interface com.badlogic.gdx.** { *; }
 
-# These two lines are used with mapping files; see https://developer.android.com/build/shrink-code#retracing
--keepattributes LineNumberTable,SourceFile
+# CRITICAL: Keep Game Models, RPG Stats, Quests & SaveData Serializers
+# Mencegah obfuscation merusak JSON reflection pada SaveData dan SaveManager
+-keep class com.stickman.tower.rpg.** { *; }
+-keep class com.stickman.tower.bestiary.** { *; }
+-keep class com.stickman.tower.quest.** { *; }
+-keep class com.stickman.tower.achievement.** { *; }
+-keep class com.stickman.tower.leaderboard.** { *; }
+-keep class com.stickman.tower.bounty.** { *; }
+-keep class com.stickman.tower.challenge.** { *; }
+-keep class com.stickman.tower.relic.** { *; }
+-keep class com.stickman.tower.talent.** { *; }
+-keep class com.stickman.tower.world.** { *; }
+-keep class com.stickman.tower.character.** { *; }
+-keep class com.stickman.tower.enemy.** { *; }
+-keep class com.stickman.tower.combat.** { *; }
+-keep class com.stickman.tower.audio.** { *; }
+-keep class com.stickman.tower.input.** { *; }
+-keep class com.stickman.tower.ui.** { *; }
+-keep class com.stickman.tower.vfx.** { *; }
+-keep class com.stickman.tower.tools.** { *; }
+
+# Keep Enums for serialization and string lookup
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# Retain attributes for Stacktraces & Retracing
+-keepattributes *Annotation*,EnclosingMethod,Signature,InnerClasses,LineNumberTable,SourceFile
 -renamesourcefileattribute SourceFile
