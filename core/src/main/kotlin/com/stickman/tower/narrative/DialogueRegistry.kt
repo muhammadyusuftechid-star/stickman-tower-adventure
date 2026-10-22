@@ -22,6 +22,8 @@ object DialogueRegistry {
     val COLOR_IGNIS = Color(0.95f, 0.35f, 0.15f, 1f)           // Merah Lahar Pijar (Forge-Master Ignis)
     val COLOR_GORGON = Color(0.85f, 0.70f, 0.25f, 1f)          // Emas Titan Kuno (Gorgon The Ironbreaker)
     val COLOR_CALLIGRAPHER = Color(0.95f, 0.82f, 0.35f, 1f)   // Emas Primordial Gelap (Grand Calligrapher)
+    val COLOR_CHIMERA = Color(0.70f, 0.40f, 0.90f, 1f)        // Ungu Nebula Kosmis (The Void Chimera)
+    val COLOR_MALAKOR = Color(0.90f, 0.15f, 0.20f, 1f)        // Merah Darah Gelap (Malakor The Crimson Sovereign)
 
     /**
      * SCENE 01: Prolog Gerbang Bawah (Floor 1)
@@ -360,6 +362,104 @@ object DialogueRegistry {
     )
 
     /**
+     * SCENE 13: Jembatan Cahaya Antarbintang (Floor 31)
+     */
+    val SCENE_13_ASTRAL_ISLES = StoryDialogue(
+        triggerX = 6.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Zephyr",
+                title = "Penjelajah Bayangan",
+                text = "Dinding menara lenyap... kita melangkah di atas jembatan cahaya bintang! Altar Prisma di depan kita... energinya memanggil resonansi jiwa kita!",
+                speakerColor = COLOR_ZEPHYR
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Kalian berdua siap? Sentuh Altar Prisma kapan pun kita membutuhkan kecepatan belati Zephyr atau ketangguhan perisai Gorgon!",
+                speakerColor = COLOR_KAELEN
+            ),
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Palu Bastion",
+                text = "Otot bajaku selalu siap di garis depan jika ada monster angkasa yang perlu diremukkan!",
+                speakerColor = COLOR_GORGON
+            )
+        )
+    )
+
+    /**
+     * SCENE 14: Sarang Chimera Kehampaan (Floor 35)
+     */
+    val SCENE_14_VOID_CHIMERA = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "The Void Chimera",
+                title = "Penjaga Gerbang Nebula",
+                text = "*Desisan tentakel kosmis menggelegar*... Tiga jiwa fana berani menyeberangi kehampaan bintang... kalian akan larut dalam kegelapan abadi!",
+                speakerColor = COLOR_CHIMERA
+            ),
+            DialogueLine(
+                speaker = "Zephyr",
+                title = "Penjelajah Bayangan",
+                text = "Tiga kepala, tiga titik lemah! Kaelen, alihkan serangannya, Gorgon hancurkan pelindungnya, aku akan menusuk intinya dari bayangan!",
+                speakerColor = COLOR_ZEPHYR
+            )
+        )
+    )
+
+    /**
+     * SCENE 15: Katedral Gerhana Darah (Floor 36)
+     */
+    val SCENE_15_BLOOD_CATHEDRAL = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Aria",
+                title = "Peri Cahaya Menara",
+                text = "Cahaya cyan kosmis telah berganti merah pekat... gerhana bulan darah telah tiba! Di depan sana berdiri Katedral Malakor!",
+                speakerColor = COLOR_ARIA
+            ),
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Palu Bastion",
+                text = "Bau darah dan kemunafikan bangsawan menguar dari pilar gotik ini. Berhati-hatilah, mereka meregenerasi luka di bawah sinar bulan merah!",
+                speakerColor = COLOR_GORGON
+            )
+        )
+    )
+
+    /**
+     * SCENE 16: Singgasana Pangeran Darah (Floor 40)
+     */
+    val SCENE_16_MALAKOR_SHOWDOWN = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Malakor The Crimson Sovereign",
+                title = "Pangeran Darah Abadi",
+                text = "Selamat datang di Katedral Keabadian, serangga-serangga menara. Darah kalian adalah persembahan sempurna bagi fajar malam abadi!",
+                speakerColor = COLOR_MALAKOR
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Keabadianmu dibangun di atas tumbal rakyat tak berdosa, Malakor! Bilah pedang kami akan mengakhiri pesta darahmu sekarang juga!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
      * SCENE 50: Singgasana Kanvas Primordial (Floor 50 - Puncak Menara)
      */
     val SCENE_50_CALLIGRAPHER = StoryDialogue(
@@ -401,6 +501,10 @@ object DialogueRegistry {
             25 -> SCENE_10_MAGMA_GOLEM
             26 -> SCENE_11_ASTRAL_RIFT
             30 -> SCENE_12_NEXUS_OF_REFLECTIONS
+            31 -> SCENE_13_ASTRAL_ISLES
+            35 -> SCENE_14_VOID_CHIMERA
+            36 -> SCENE_15_BLOOD_CATHEDRAL
+            40 -> SCENE_16_MALAKOR_SHOWDOWN
             50 -> SCENE_50_CALLIGRAPHER
             else -> null
         }

@@ -51,6 +51,16 @@ object TowerLevelBuilder {
             28 -> buildFloor28()
             29 -> buildFloor29()
             30 -> buildFloor30()
+            31 -> buildFloor31()
+            32 -> buildFloor32()
+            33 -> buildFloor33()
+            34 -> buildFloor34()
+            35 -> buildFloor35()
+            36 -> buildFloor36()
+            37 -> buildFloor37()
+            38 -> buildFloor38()
+            39 -> buildFloor39()
+            40 -> buildFloor40()
             else -> buildEndlessFloor(floorNumber, mutator ?: FloorMutator.getRandomMutator(floorNumber))
         }
         return floor.copy(environmentalProps = getEnvironmentalPropsForFloor(floorNumber))
@@ -2513,11 +2523,639 @@ object TowerLevelBuilder {
     }
 
     // =========================================================================
-    // POST-GAME: PARADOKS ENDLESS SPIRE (LANTAI 31 KE ATAS)
+    // SAGA IV: RETAKAN ASTRAL & KUIL GERHANA DARAH MALAKOR (LANTAI 31 - 40)
+    // =========================================================================
+
+    private fun buildFloor31(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val starLight = Color(0.20f, 0.45f, 0.75f, 0.9f)
+        val obsidianFloating = Color(0.12f, 0.12f, 0.18f, 1f)
+
+        // Dimensi di Balik Kanvas (Bentang Luas 150m, Anomali Gravitasi Rendah 0.55G)
+        platforms.add(Platform(x = -10f, y = 0f, width = 45f, height = 1.2f, color = starLight))
+        platforms.add(Platform(x = 42f, y = 2.8f, width = 18f, height = 0.5f, isOneWay = true, color = obsidianFloating))
+        platforms.add(Platform(x = 68f, y = 5.2f, width = 22f, height = 0.5f, isOneWay = true, color = starLight))
+        platforms.add(Platform(x = 98f, y = 3.4f, width = 20f, height = 0.5f, isOneWay = true, color = obsidianFloating))
+        platforms.add(Platform(x = 125f, y = 0f, width = 35f, height = 1.2f, color = starLight))
+
+        val spikes = listOf(
+            SpikeHazard(x = 48.0f, y = 0f, width = 18.0f, height = 0.8f),
+            SpikeHazard(x = 92.0f, y = 0f, width = 30.0f, height = 0.8f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 80.0f, y = 5.7f),
+            TreasureChest(x = 138.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 30.0f, spawnY = 1.2f, type = EnemyType.RANGED),
+            Enemy(spawnX = 52.0f, spawnY = 3.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 78.0f, spawnY = 5.7f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 108.0f, spawnY = 3.9f, type = EnemyType.FLYING),
+            Enemy(spawnX = 132.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 14.0f,
+                y = 1.2f,
+                tabletId = "TABLET_31",
+                title = "Tablet XXXI: Dimensi di Balik Kanvas",
+                text = "Dinding menara lenyap total di sini. Kita melangkah di atas jembatan cahaya yang melayang di ruang hampa antar-galaksi. Realitas sedang diuji."
+            )
+        )
+
+        val prismAltar = PrismAltar(x = 22.0f, y = 1.2f)
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(31))
+
+        return TowerFloor(
+            floorNumber = 31,
+            floorName = "Lantai 31: Dimension Beyond the Canvas",
+            mapBounds = Rectangle(-10f, -1f, 160f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 75.0f, y = 5.7f),
+            exitPortal = StageExit(x = 142.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "DIMENSION BEYOND THE CANVAS",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            gravityScale = 0.55f,
+            prismAltar = prismAltar
+        )
+    }
+
+    private fun buildFloor32(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val darkAstral = Color(0.14f, 0.14f, 0.22f, 1f)
+        val floatingIsle = Color(0.22f, 0.28f, 0.42f, 1f)
+
+        // Kepulauan Batu Melayang (Bentang Luas 160m, Gravitasi Rendah 0.50G)
+        platforms.add(Platform(x = -10f, y = 0f, width = 35f, height = 1.2f, color = darkAstral))
+        platforms.add(Platform(x = 32f, y = 3.2f, width = 14f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 52f, y = 6.4f, width = 16f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 75f, y = 4.2f, width = 18f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 100f, y = 7.0f, width = 16f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 124f, y = 3.6f, width = 15f, height = 0.6f, isOneWay = true, color = floatingIsle))
+        platforms.add(Platform(x = 142f, y = 0f, width = 28f, height = 1.2f, color = darkAstral))
+
+        val spikes = listOf(
+            SpikeHazard(x = 30.0f, y = 0f, width = 110.0f, height = 0.8f) // Jurang hampa luas di bawah
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 82.0f, y = 4.8f),
+            TreasureChest(x = 152.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 22.0f, spawnY = 1.2f, type = EnemyType.FLYING),
+            Enemy(spawnX = 40.0f, spawnY = 3.8f, type = EnemyType.RANGED),
+            Enemy(spawnX = 60.0f, spawnY = 7.0f, type = EnemyType.FLYING),
+            Enemy(spawnX = 84.0f, spawnY = 4.8f, type = EnemyType.FLYING),
+            Enemy(spawnX = 108.0f, spawnY = 7.6f, type = EnemyType.RANGED),
+            Enemy(spawnX = 130.0f, spawnY = 4.2f, type = EnemyType.SHIELDED)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 24.0f,
+                y = 1.2f,
+                tabletId = "TABLET_32",
+                title = "Tablet XXXII: Kepulauan Batu Melayang",
+                text = "Pulau-pulau batu obsidian melayang bebas di angkasa. Zephyr melompat dengan lincah membuka portal warna, sementara Gorgon dan Kaelen bersiap menyambut serbuan monster terbang."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 32,
+            floorName = "Lantai 32: Floating Obsidian Archipelago",
+            mapBounds = Rectangle(-10f, -1f, 170f, 30f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 80.0f, y = 4.8f),
+            exitPortal = StageExit(x = 155.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "FLOATING OBSIDIAN ARCHIPELAGO",
+            loreTablets = loreTablets,
+            gravityScale = 0.50f
+        )
+    }
+
+    private fun buildFloor33(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val warpStone = Color(0.18f, 0.16f, 0.28f, 1f)
+        val beamPlatform = Color(0.35f, 0.50f, 0.85f, 0.85f)
+
+        // Labirin Singularitas (Bentang Luas 165m, Gravitasi Rendah 0.50G, Altar Prisma di Tengah)
+        platforms.add(Platform(x = -10f, y = 0f, width = 36f, height = 1.2f, color = warpStone))
+        platforms.add(Platform(x = 32f, y = 3.6f, width = 16f, height = 0.5f, isOneWay = true, color = beamPlatform))
+        platforms.add(Platform(x = 54f, y = 6.2f, width = 18f, height = 0.5f, isOneWay = true, color = warpStone))
+        platforms.add(Platform(x = 76f, y = 9.0f, width = 20f, height = 0.5f, isOneWay = true, color = beamPlatform))
+        platforms.add(Platform(x = 104f, y = 6.0f, width = 18f, height = 0.5f, isOneWay = true, color = warpStone))
+        platforms.add(Platform(x = 128f, y = 3.2f, width = 16f, height = 0.5f, isOneWay = true, color = beamPlatform))
+        platforms.add(Platform(x = 145f, y = 0f, width = 30f, height = 1.2f, color = warpStone))
+
+        val spikes = listOf(
+            SpikeHazard(x = 34.0f, y = 0f, width = 108.0f, height = 0.8f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 86.0f, y = 9.5f),
+            TreasureChest(x = 158.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 24.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 42.0f, spawnY = 4.1f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 62.0f, spawnY = 6.7f, type = EnemyType.FLYING),
+            Enemy(spawnX = 90.0f, spawnY = 9.5f, type = EnemyType.RANGED),
+            Enemy(spawnX = 114.0f, spawnY = 6.5f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 136.0f, spawnY = 3.7f, type = EnemyType.FLYING)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 20.0f,
+                y = 1.2f,
+                tabletId = "TABLET_33",
+                title = "Tablet XXXIII: Labirin Singularitas",
+                text = "Ruang melengkung pada sudut 90 derajat. Waktu melambat saat proyektil musuh mendekat. Manfaatkan Perfect Parry untuk memantulkan hukum waktu dewa."
+            )
+        )
+
+        val prismAltar = PrismAltar(x = 60.0f, y = 6.7f)
+
+        return TowerFloor(
+            floorNumber = 33,
+            floorName = "Lantai 33: Labyrinth of Singularity",
+            mapBounds = Rectangle(-10f, -1f, 175f, 30f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 82.0f, y = 9.5f),
+            exitPortal = StageExit(x = 160.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "LABYRINTH OF SINGULARITY",
+            loreTablets = loreTablets,
+            gravityScale = 0.50f,
+            prismAltar = prismAltar
+        )
+    }
+
+    private fun buildFloor34(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val voidFloor = Color(0.12f, 0.12f, 0.18f, 1f)
+        val windPlate = Color(0.24f, 0.32f, 0.48f, 1f)
+
+        // Gema Suara Orang Mati (Bentang Luas 160m, Gravitasi Rendah 0.55G)
+        platforms.add(Platform(x = -10f, y = 0f, width = 38f, height = 1.2f, color = voidFloor))
+        platforms.add(Platform(x = 34f, y = 2.8f, width = 16f, height = 0.5f, isOneWay = true, color = windPlate))
+        platforms.add(Platform(x = 56f, y = 5.4f, width = 18f, height = 0.5f, isOneWay = true, color = voidFloor))
+        platforms.add(Platform(x = 80f, y = 3.6f, width = 18f, height = 0.5f, isOneWay = true, color = windPlate))
+        platforms.add(Platform(x = 104f, y = 6.2f, width = 18f, height = 0.5f, isOneWay = true, color = voidFloor))
+        platforms.add(Platform(x = 126f, y = 3.0f, width = 15f, height = 0.5f, isOneWay = true, color = windPlate))
+        platforms.add(Platform(x = 144f, y = 0f, width = 26f, height = 1.2f, color = voidFloor))
+
+        val spikes = listOf(
+            SpikeHazard(x = 32.0f, y = 0f, width = 110.0f, height = 0.8f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 65.0f, y = 5.9f),
+            TreasureChest(x = 155.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 26.0f, spawnY = 1.2f, type = EnemyType.RANGED),
+            Enemy(spawnX = 44.0f, spawnY = 3.3f, type = EnemyType.FLYING),
+            Enemy(spawnX = 66.0f, spawnY = 5.9f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 90.0f, spawnY = 4.1f, type = EnemyType.FLYING),
+            Enemy(spawnX = 112.0f, spawnY = 6.7f, type = EnemyType.MELEE),
+            Enemy(spawnX = 134.0f, spawnY = 3.5f, type = EnemyType.RANGED)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 24.0f,
+                y = 1.2f,
+                tabletId = "TABLET_34",
+                title = "Tablet XXXIV: Gema Suara Orang Mati",
+                text = "Angin kosmis membawa bisikan jutaan jiwa yang telah larut di bumi bawah: 'Teruslah mendaki... jangan biarkan kematian kami sia-sia...'"
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 34,
+            floorName = "Lantai 34: Echoes of the Fallen Void",
+            mapBounds = Rectangle(-10f, -1f, 170f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 88.0f, y = 4.1f),
+            exitPortal = StageExit(x = 156.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "ECHOES OF THE FALLEN VOID",
+            loreTablets = loreTablets,
+            gravityScale = 0.55f
+        )
+    }
+
+    private fun buildFloor35(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val nestStone = Color(0.16f, 0.12f, 0.22f, 1f)
+        val crystalPerch = Color(0.32f, 0.22f, 0.44f, 1f)
+
+        // The Void Chimera's Nest — Arena Bos Sarang Kehampaan (Bentang Luas 115m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 135f, height = 1.2f, color = nestStone))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.5f, height = 24f, color = nestStone))
+        platforms.add(Platform(x = 123.5f, y = 1.2f, width = 1.5f, height = 24f, color = nestStone))
+
+        // Platform suspensi udara untuk manuver taktis menghadapi kepala Chimera
+        platforms.add(Platform(x = 18f, y = 4.2f, width = 8f, height = 0.4f, isOneWay = true, color = crystalPerch))
+        platforms.add(Platform(x = 36f, y = 6.8f, width = 10f, height = 0.4f, isOneWay = true, color = crystalPerch))
+        platforms.add(Platform(x = 58f, y = 8.5f, width = 12f, height = 0.4f, isOneWay = true, color = crystalPerch))
+        platforms.add(Platform(x = 82f, y = 6.8f, width = 10f, height = 0.4f, isOneWay = true, color = crystalPerch))
+        platforms.add(Platform(x = 100f, y = 4.2f, width = 8f, height = 0.4f, isOneWay = true, color = crystalPerch))
+
+        val chests = listOf(
+            TreasureChest(x = 8.0f, y = 1.2f),
+            TreasureChest(x = 110.0f, y = 1.2f)
+        )
+
+        val boss = BossEnemy(
+            spawnX = 64.0f,
+            spawnY = 2.0f,
+            type = BossType.AMETHYST_MATRON,
+            customMaxHp = 1800f,
+            customName = "THE VOID CHIMERA"
+        )
+        boss.hitbox.damage = 38f
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 12.0f,
+                y = 1.2f,
+                tabletId = "TABLET_35",
+                title = "Tablet XXXV: Chimera Kehampaan",
+                text = "Monster raksasa bertentakel bintang menjaga gerbang menuju kuil gerhana. Hancurkan ketiga kepalanya dengan keahlian khas masing-masing pahlawan."
+            )
+        )
+
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(35))
+
+        return TowerFloor(
+            floorNumber = 35,
+            floorName = "Lantai 35: The Void Chimera's Nest",
+            mapBounds = Rectangle(-10f, -1f, 125f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 4.0f, y = 1.2f),
+            exitPortal = StageExit(x = 105.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "THE VOID CHIMERA'S NEST",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            gravityScale = 0.65f
+        )
+    }
+
+    private fun buildFloor36(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val gothicStone = Color(0.12f, 0.08f, 0.10f, 1f)
+        val crimsonArch = Color(0.28f, 0.10f, 0.14f, 1f)
+
+        // Ambang Katedral Gotik (Bentang Luas 150m, Gerhana Bulan Merah, Gravitasi Normal 1.0G)
+        platforms.add(Platform(x = -10f, y = 0f, width = 50f, height = 1.2f, color = gothicStone))
+        platforms.add(Platform(x = 45f, y = 3.2f, width = 16f, height = 0.5f, isOneWay = true, color = crimsonArch))
+        platforms.add(Platform(x = 66f, y = 5.8f, width = 20f, height = 0.5f, isOneWay = true, color = gothicStone))
+        platforms.add(Platform(x = 92f, y = 3.4f, width = 18f, height = 0.5f, isOneWay = true, color = crimsonArch))
+        platforms.add(Platform(x = 115f, y = 0f, width = 45f, height = 1.2f, color = gothicStone))
+
+        val spikes = listOf(
+            SpikeHazard(x = 52.0f, y = 0f, width = 12.0f, height = 0.8f),
+            SpikeHazard(x = 88.0f, y = 0f, width = 24.0f, height = 0.8f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 76.0f, y = 6.3f),
+            TreasureChest(x = 135.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 32.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 54.0f, spawnY = 3.7f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 76.0f, spawnY = 6.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 100.0f, spawnY = 3.9f, type = EnemyType.FLYING),
+            Enemy(spawnX = 125.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 18.0f,
+                y = 1.2f,
+                tabletId = "TABLET_36",
+                title = "Tablet XXXVI: Ambang Katedral Gotik",
+                text = "Dinding batu mulai retak digantikan pemandangan gotik hitam pekat di bawah gerhana bulan merah darah. Cahaya cyan kosmis perlahan memerah."
+            )
+        )
+
+        val prismAltar = PrismAltar(x = 24.0f, y = 1.2f)
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(36))
+
+        return TowerFloor(
+            floorNumber = 36,
+            floorName = "Lantai 36: Gothic Cathedral Threshold",
+            mapBounds = Rectangle(-10f, -1f, 160f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 75.0f, y = 6.3f),
+            exitPortal = StageExit(x = 145.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "GOTHIC CATHEDRAL THRESHOLD",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            prismAltar = prismAltar
+        )
+    }
+
+    private fun buildFloor37(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val velvetCarpet = Color(0.42f, 0.08f, 0.12f, 1f)
+        val gothicPillar = Color(0.14f, 0.08f, 0.10f, 1f)
+
+        // Koridor Beludru Merah (Bentang Luas 160m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 180f, height = 1.2f, color = velvetCarpet))
+        platforms.add(Platform(x = 25f, y = 3.4f, width = 16f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 50f, y = 6.0f, width = 18f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 76f, y = 4.2f, width = 20f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 104f, y = 6.4f, width = 18f, height = 0.5f, isOneWay = true, color = gothicPillar))
+        platforms.add(Platform(x = 130f, y = 3.6f, width = 16f, height = 0.5f, isOneWay = true, color = gothicPillar))
+
+        val spikes = listOf(
+            SpikeHazard(x = 42.0f, y = 1.2f, width = 7.0f, height = 0.6f),
+            SpikeHazard(x = 98.0f, y = 1.2f, width = 5.0f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 60.0f, y = 6.5f),
+            TreasureChest(x = 148.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 32.0f, spawnY = 3.9f, type = EnemyType.MELEE),
+            Enemy(spawnX = 58.0f, spawnY = 6.5f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 85.0f, spawnY = 4.7f, type = EnemyType.RANGED),
+            Enemy(spawnX = 112.0f, spawnY = 6.9f, type = EnemyType.FLYING),
+            Enemy(spawnX = 138.0f, spawnY = 4.1f, type = EnemyType.SHIELDED)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 20.0f,
+                y = 1.2f,
+                tabletId = "TABLET_37",
+                title = "Tablet XXXVII: Koridor Beludru Merah",
+                text = "Tirai beludru katedral basah oleh tetesan darah. Musuh di lantai ini meregenerasi luka mereka di bawah sinar bulan merah. Pancing mereka ke bayangan pilar!"
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 37,
+            floorName = "Lantai 37: Crimson Velvet Corridor",
+            mapBounds = Rectangle(-10f, -1f, 170f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 86.0f, y = 4.7f),
+            exitPortal = StageExit(x = 155.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "CRIMSON VELVET CORRIDOR",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor38(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val sacrificialStone = Color(0.18f, 0.08f, 0.10f, 1f)
+        val marbleBalcony = Color(0.28f, 0.16f, 0.18f, 1f)
+
+        // Altar Pengorbanan Anima (Bentang Luas 165m, Fitur BloodAltar Interaktif)
+        platforms.add(Platform(x = -10f, y = 0f, width = 60f, height = 1.2f, color = sacrificialStone))
+        platforms.add(Platform(x = 55f, y = 3.6f, width = 18f, height = 0.5f, isOneWay = true, color = marbleBalcony))
+        platforms.add(Platform(x = 78f, y = 0f, width = 45f, height = 1.2f, color = sacrificialStone))
+        platforms.add(Platform(x = 126f, y = 3.8f, width = 16f, height = 0.5f, isOneWay = true, color = marbleBalcony))
+        platforms.add(Platform(x = 145f, y = 0f, width = 30f, height = 1.2f, color = sacrificialStone))
+
+        val spikes = listOf(
+            SpikeHazard(x = 50.0f, y = 0f, width = 28.0f, height = 0.8f),
+            SpikeHazard(x = 123.0f, y = 0f, width = 22.0f, height = 0.8f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 64.0f, y = 4.1f),
+            TreasureChest(x = 158.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 35.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 62.0f, spawnY = 4.1f, type = EnemyType.RANGED),
+            Enemy(spawnX = 92.0f, spawnY = 1.2f, type = EnemyType.FLYING),
+            Enemy(spawnX = 112.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 134.0f, spawnY = 4.3f, type = EnemyType.SHIELDED)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 22.0f,
+                y = 1.2f,
+                tabletId = "TABLET_38",
+                title = "Tablet XXXVIII: Altar Pengorbanan Anima",
+                text = "Di atas altar ini para bangsawan menjual rakyat jelata demi keabadian daging. Darah mereka kini menuntut balas pada siapa pun yang lewat."
+            )
+        )
+
+        val bloodAltar = BloodAltar(x = 95.0f, y = 1.2f)
+        val prismAltar = PrismAltar(x = 30.0f, y = 1.2f)
+
+        return TowerFloor(
+            floorNumber = 38,
+            floorName = "Lantai 38: Altar of Anima Sacrifice",
+            mapBounds = Rectangle(-10f, -1f, 175f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 88.0f, y = 1.2f),
+            exitPortal = StageExit(x = 162.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "ALTAR OF ANIMA SACRIFICE",
+            loreTablets = loreTablets,
+            bloodAltar = bloodAltar,
+            prismAltar = prismAltar
+        )
+    }
+
+    private fun buildFloor39(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val catacombStone = Color(0.10f, 0.08f, 0.12f, 1f)
+        val tombLedge = Color(0.24f, 0.14f, 0.18f, 1f)
+
+        // Katakomba Darah Abadi (Bentang Luas 160m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 45f, height = 1.2f, color = catacombStone))
+        platforms.add(Platform(x = 40f, y = 3.2f, width = 16f, height = 0.5f, isOneWay = true, color = tombLedge))
+        platforms.add(Platform(x = 62f, y = 5.8f, width = 20f, height = 0.5f, isOneWay = true, color = catacombStone))
+        platforms.add(Platform(x = 88f, y = 3.4f, width = 18f, height = 0.5f, isOneWay = true, color = tombLedge))
+        platforms.add(Platform(x = 112f, y = 6.0f, width = 18f, height = 0.5f, isOneWay = true, color = catacombStone))
+        platforms.add(Platform(x = 135f, y = 0f, width = 35f, height = 1.2f, color = catacombStone))
+
+        val spikes = listOf(
+            SpikeHazard(x = 42.0f, y = 0f, width = 18.0f, height = 0.8f),
+            SpikeHazard(x = 84.0f, y = 0f, width = 26.0f, height = 0.8f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 72.0f, y = 6.3f),
+            TreasureChest(x = 152.0f, y = 1.2f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 28.0f, spawnY = 1.2f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 48.0f, spawnY = 3.7f, type = EnemyType.MELEE),
+            Enemy(spawnX = 70.0f, spawnY = 6.3f, type = EnemyType.RANGED),
+            Enemy(spawnX = 96.0f, spawnY = 3.9f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 120.0f, spawnY = 6.5f, type = EnemyType.FLYING),
+            Enemy(spawnX = 145.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 20.0f,
+                y = 1.2f,
+                tabletId = "TABLET_39",
+                title = "Tablet XXXIX: Katakomba Darah Abadi",
+                text = "Peti-peti marmer berlumur darah terbuka. Pasukan algojo bertaring bangkit. Gorgon menahan ayunan kapak eksekusi, Zephyr menusuk jantung mereka dari bayang-bayang."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 39,
+            floorName = "Lantai 39: Catacombs of the Undying",
+            mapBounds = Rectangle(-10f, -1f, 170f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 72.0f, y = 6.3f),
+            exitPortal = StageExit(x = 155.0f, y = 1.2f),
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "CATACOMBS OF THE UNDYING",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor40(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val throneMarble = Color(0.10f, 0.05f, 0.08f, 1f)
+        val stainedGlassBeam = Color(0.48f, 0.10f, 0.16f, 0.9f)
+
+        // Throne of the Crimson Sovereign — Arena Bos Malakor (Bentang Luas 110m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 130f, height = 1.2f, color = throneMarble))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.5f, height = 24f, color = throneMarble))
+        platforms.add(Platform(x = 118.5f, y = 1.2f, width = 1.5f, height = 24f, color = throneMarble))
+
+        // Platform balkon gotik megah tempat Malakor melompat dan menghujamkan pedang
+        platforms.add(Platform(x = 16f, y = 3.8f, width = 9f, height = 0.4f, isOneWay = true, color = stainedGlassBeam))
+        platforms.add(Platform(x = 34f, y = 6.4f, width = 12f, height = 0.4f, isOneWay = true, color = stainedGlassBeam))
+        platforms.add(Platform(x = 55f, y = 8.5f, width = 14f, height = 0.4f, isOneWay = true, color = stainedGlassBeam))
+        platforms.add(Platform(x = 78f, y = 6.4f, width = 12f, height = 0.4f, isOneWay = true, color = stainedGlassBeam))
+        platforms.add(Platform(x = 98f, y = 3.8f, width = 9f, height = 0.4f, isOneWay = true, color = stainedGlassBeam))
+
+        val chests = listOf(
+            TreasureChest(x = 6.0f, y = 1.2f),
+            TreasureChest(x = 108.0f, y = 1.2f)
+        )
+
+        val boss = BossEnemy(
+            spawnX = 62.0f,
+            spawnY = 2.0f,
+            type = BossType.CRIMSON_SOVEREIGN,
+            customMaxHp = 2200f,
+            customName = "MALAKOR THE CRIMSON SOVEREIGN"
+        )
+        boss.hitbox.damage = 42f
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 12.0f,
+                y = 1.2f,
+                tabletId = "TABLET_40",
+                title = "Tablet XL: Runtuhnya Takhta Pangeran Darah",
+                text = "Malakor tersungkur di depan takhtanya seraya memuntahkan tinta merah: 'Kalian kira kalian menang? Di atas lantai 40... para dewa tidak lagi bermain dengan darah... mereka bermain dengan hukum penciptaan!'"
+            )
+        )
+
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(40))
+
+        return TowerFloor(
+            floorNumber = 40,
+            floorName = "Lantai 40: Throne of the Crimson Sovereign",
+            mapBounds = Rectangle(-10f, -1f, 120f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 4.0f, y = 1.2f),
+            exitPortal = StageExit(x = 100.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "SAGA IV: ASTRAL RIFT & CRIMSON ECLIPSE",
+            actSubtitle = "THRONE OF THE CRIMSON SOVEREIGN",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
+        )
+    }
+
+    // =========================================================================
+    // POST-GAME: PARADOKS ENDLESS SPIRE (LANTAI 41 KE ATAS)
     // =========================================================================
 
     fun buildEndlessFloor(floorNumber: Int, mutator: FloorMutator): TowerFloor {
-        val endlessRank = (floorNumber - 30).coerceAtLeast(1)
+        val endlessRank = (floorNumber - 40).coerceAtLeast(1)
         val hpScale = 1.0f + endlessRank * 0.15f
         val dmgScale = (1.0f + endlessRank * 0.12f) * mutator.enemyDamageMultiplier
         val isBossFloor = (floorNumber % 5 == 0)

@@ -237,6 +237,7 @@ class PlayScreen(
     var nearbyTabletPrompt: LoreTablet? = null
     var nearbyDialoguePrompt: StoryDialogue? = null
     var nearbyAltarPrompt: Boolean = false
+    var nearbyPrismPrompt: Boolean = false
 
     // Engine Dialog Dinamis & Naskah Sinematik (Fase 18)
     var activeMoraleBuff: MoraleBuffType = MoraleBuffType.NONE
@@ -1014,6 +1015,41 @@ class PlayScreen(
                 }
             }
 
+            // Pembaruan Interaksi Altar Prisma Triad Tag-Team (Fase 28)
+            nearbyPrismPrompt = false
+            val prismAltar = currentFloor.prismAltar
+            if (prismAltar != null) {
+                prismAltar.update(updateDelta)
+                if (player.bounds.overlaps(prismAltar.interactionBounds)) {
+                    nearbyPrismPrompt = true
+                    val isTriggerPressed = Gdx.input.isKeyJustPressed(Keys.T) || (Gdx.input.isKeyJustPressed(Keys.E) && !nearbyAltarPrompt) || (player.hitbox.isActive && player.hitbox.bounds.overlaps(prismAltar.bounds))
+                    if (isTriggerPressed && prismAltar.interactionCooldown <= 0f) {
+                        prismAltar.interactionCooldown = 0.8f
+                        val nextArchetype = prismAltar.getNextAvailableArchetype(player.archetype, saveData.unlockedCharacters)
+                        if (nextArchetype != player.archetype) {
+                            player.switchArchetype(nextArchetype)
+                            saveData.selectedArchetype = nextArchetype.name
+                            SaveManager.saveAsync(saveData)
+                            AudioManager.playLevelUp()
+                            particleManager.spawnHitSparks(prismAltar.x + prismAltar.width / 2f, prismAltar.y + prismAltar.height / 2f, count = 25, color = Color.GOLD)
+                            cameraManager.shake(0.3f, 0.2f)
+                            val heroTitle = when (nextArchetype) {
+                                CharacterArchetype.BALANCED -> "KAELEN (PEWARIS BARA EMAS)"
+                                CharacterArchetype.AGILE -> "ZEPHYR (THE PHANTOM STRIDER)"
+                                CharacterArchetype.HEAVY -> "GORGON (THE IRONBREAKER)"
+                            }
+                            floatingTexts.add(
+                                FloatingText("✦ TRIAD SWAP: $heroTitle ✦", prismAltar.x - 1.5f, prismAltar.y + prismAltar.height + 0.8f, Color.GOLD, duration = 3.0f)
+                            )
+                        } else {
+                            floatingTexts.add(
+                                FloatingText("✦ Ksatria Lain Masih Terkunci! Selesaikan Menara! ✦", prismAltar.x - 1.5f, prismAltar.y + prismAltar.height + 0.8f, Color.WHITE, duration = 2.0f)
+                            )
+                        }
+                    }
+                }
+            }
+
             // Pembaruan Dialog Naratif Karakter (NPC & Cutscenes)
             nearbyDialoguePrompt = null
             for (dialogue in currentFloor.storyDialogues) {
@@ -1304,6 +1340,7 @@ class PlayScreen(
         for (wall in currentFloor.basaltWalls) wall.render(shapeRenderer)
         currentFloor.zephyrCocoon?.render(shapeRenderer)
         currentFloor.titanPillar?.render(shapeRenderer)
+        currentFloor.prismAltar?.render(shapeRenderer)
         zephyrCoopAlly?.render(shapeRenderer)
         gorgonCoopAlly?.render(shapeRenderer)
 
@@ -2560,6 +2597,19 @@ class PlayScreen(
             shapeRenderer.rectLine(px, py, px + pw, py, 1.5f)
         }
 
+        // Kotak Prompt Altar Prisma Triad Tag-Team (Fase 28)
+        if (gameStatus == GameStatus.PLAYING && nearbyPrismPrompt && currentFloor.prismAltar != null) {
+            val pw = 440f
+            val ph = 38f
+            val px = (w - pw) / 2f
+            val py = if (nearbyAltarPrompt || nearbyTabletPrompt != null) 180f else 135f
+            shapeRenderer.setColor(0.10f, 0.12f, 0.18f, 0.92f)
+            shapeRenderer.rect(px, py, pw, ph)
+            shapeRenderer.setColor(0.35f, 0.75f, 1.0f, 0.90f)
+            shapeRenderer.rectLine(px, py + ph, px + pw, py + ph, 2f)
+            shapeRenderer.rectLine(px, py, px + pw, py, 1.5f)
+        }
+
         renderActBannerShapes()
         renderAchievementBannerShapes()
 
@@ -2865,6 +2915,47 @@ class PlayScreen(
                         isInteractingWithAltar = true
                         altarSelectedIndex = 0
                         AudioManager.playChest()
+                    }
+                }
+            }
+
+            // Prompt Teks Altar Prisma Triad Tag-Team (Fase 28)
+            if (nearbyPrismPrompt && currentFloor.prismAltar != null) {
+                val promptText = "✦ [T] / [E] / [TAP] GANTI HERO (TRIAD TAG-TEAM) ✦"
+                glyphLayout.setText(regF, promptText)
+                val pw = 440f
+                val ph = 38f
+                val px = (w - pw) / 2f
+                val py = if (nearbyAltarPrompt || nearbyTabletPrompt != null) 180f else 135f
+
+                regF.color = Color(0.40f, 0.85f, 1.0f, 1f)
+                regF.draw(batch, promptText, px + (pw - glyphLayout.width) / 2f, py + 26f)
+
+                if (Gdx.input.justTouched()) {
+                    uiTouchVec.set(Gdx.input.x.toFloat(), Gdx.input.y.toFloat(), 0f)
+                    uiViewport.unproject(uiTouchVec)
+                    if (uiTouchVec.x in px..(px + pw) && uiTouchVec.y in py..(py + ph)) {
+                        val pAltar = currentFloor.prismAltar!!
+                        if (pAltar.interactionCooldown <= 0f) {
+                            pAltar.interactionCooldown = 0.8f
+                            val nextArchetype = pAltar.getNextAvailableArchetype(player.archetype, saveData.unlockedCharacters)
+                            if (nextArchetype != player.archetype) {
+                                player.switchArchetype(nextArchetype)
+                                saveData.selectedArchetype = nextArchetype.name
+                                SaveManager.saveAsync(saveData)
+                                AudioManager.playLevelUp()
+                                particleManager.spawnHitSparks(pAltar.x + pAltar.width / 2f, pAltar.y + pAltar.height / 2f, count = 25, color = Color.GOLD)
+                                cameraManager.shake(0.3f, 0.2f)
+                                val heroTitle = when (nextArchetype) {
+                                    CharacterArchetype.BALANCED -> "KAELEN (PEWARIS BARA EMAS)"
+                                    CharacterArchetype.AGILE -> "ZEPHYR (THE PHANTOM STRIDER)"
+                                    CharacterArchetype.HEAVY -> "GORGON (THE IRONBREAKER)"
+                                }
+                                floatingTexts.add(
+                                    FloatingText("✦ TRIAD SWAP: $heroTitle ✦", pAltar.x - 1.5f, pAltar.y + pAltar.height + 0.8f, Color.GOLD, duration = 3.0f)
+                                )
+                            }
+                        }
                     }
                 }
             }
