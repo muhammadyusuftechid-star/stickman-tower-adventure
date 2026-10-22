@@ -4,11 +4,14 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Preferences
 import com.badlogic.gdx.utils.Json
 import com.badlogic.gdx.utils.JsonWriter
+import com.stickman.tower.network.CloudSyncClient
+import com.stickman.tower.network.NetworkSyncOutbox
 
 /**
- * Pengelola Papan Peringkat Rekor Menara (Leaderboard Manager).
+ * Pengelola Papan Peringkat Rekor Menara (Leaderboard Manager 10/10):
  * Menyimpan rekor lokal untuk Endless Ascent dan Campaign Speedrun,
- * mendukung serialisasi JSON, penyortiran otomatis, dan batasan Top 10.
+ * mendukung serialisasi JSON, penyortiran otomatis, batasan Top 10,
+ * serta integrasi Offline Outbox Sync Queue untuk sinkronisasi ke cloud.
  */
 object LeaderboardManager {
 
@@ -16,6 +19,9 @@ object LeaderboardManager {
     private const val KEY_ENDLESS = "records_endless"
     private const val KEY_SPEEDRUN = "records_speedrun"
     private const val MAX_RECORDS = 10
+
+    // Antrean sinkronisasi jaringan offline
+    val outbox = NetworkSyncOutbox()
 
     private val json = Json().apply {
         setOutputType(JsonWriter.OutputType.json)
@@ -83,6 +89,9 @@ object LeaderboardManager {
      * Menambahkan rekor Endless Ascent baru dan mengurutkan secara otomatis (Top 10).
      */
     fun addEndlessRecord(entry: LeaderboardEntry): Boolean {
+        // Enqueue ke Outbox untuk sinkronisasi cloud offline-first
+        outbox.enqueue(entry)
+
         endlessRecords.add(entry)
         endlessRecords.sortWith(compareByDescending<LeaderboardEntry> { it.score }
             .thenByDescending { it.floorReached }
@@ -99,6 +108,9 @@ object LeaderboardManager {
      * Menambahkan rekor Speedrun kampanye baru dan mengurutkan secara otomatis (Waktu tercepat).
      */
     fun addSpeedrunRecord(entry: LeaderboardEntry): Boolean {
+        // Enqueue ke Outbox untuk sinkronisasi cloud offline-first
+        outbox.enqueue(entry)
+
         speedrunRecords.add(entry)
         speedrunRecords.sortWith(compareBy<LeaderboardEntry> { it.clearTimeSeconds }
             .thenByDescending { it.score })
@@ -108,6 +120,13 @@ object LeaderboardManager {
         val isTopTen = speedrunRecords.contains(entry)
         saveRecords()
         return isTopTen
+    }
+
+    /**
+     * Menyinkronkan seluruh antrean rekor offline ke server cloud backend.
+     */
+    fun syncWithCloud(client: CloudSyncClient): Int {
+        return outbox.flush(client)
     }
 
     fun getEndlessRecords(): List<LeaderboardEntry> = endlessRecords.toList()
