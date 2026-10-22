@@ -499,12 +499,10 @@ class PlayScreen(
     }
 
     override fun render(delta: Float) {
-        // 1. Polling input controller di awal frame
-        input.update(uiViewport)
-
         // Hotkey DevTools Console & Profiler (F1/F3/~) dan Bounding Boxes (TAB)
         if (Gdx.input.isKeyJustPressed(Keys.F1) || Gdx.input.isKeyJustPressed(Keys.F3) || Gdx.input.isKeyJustPressed(Keys.GRAVE)) {
             devTools.toggle()
+            if (devTools.isVisible) AudioManager.playSlashLight()
         }
         if (Gdx.input.isKeyJustPressed(Keys.TAB)) {
             showDebugBounds = !showDebugBounds
@@ -517,12 +515,9 @@ class PlayScreen(
             player.ultimate.addEnergy(player.ultimate.maxEnergy)
         }
 
-        // Konsumsi sentuhan panel Developer Tools jika sedang terbuka
-        if (devTools.isVisible && Gdx.input.justTouched()) {
-            val handled = devTools.handleTouchDown(Gdx.input.x, Gdx.input.y, uiViewport, currentFloor, player)
-            if (handled) {
-                inputCooldown = 0.15f
-            }
+        // 1. Polling input controller di awal frame (hanya saat gameplay aktif, cegah kebocoran sentuhan ke modal)
+        if (!devTools.isVisible && !isPaused && !isViewingBestiary) {
+            input.update(uiViewport)
         }
 
         val baseDelta = delta.coerceAtMost(1f / 30f)
@@ -610,6 +605,17 @@ class PlayScreen(
                 game?.setScreen(GauntletScreen(game, player.stats, this))
                 return
             }
+        }
+
+        if (devTools.isVisible) {
+            handleDevToolsInput()
+            renderWorld(0f)
+            uiViewport.apply()
+            shapeRenderer.projectionMatrix = uiCamera.combined
+            batch.projectionMatrix = uiCamera.combined
+            renderHUD()
+            devTools.render(shapeRenderer, batch, uiCamera, player, currentFloor, particleManager.activeParticleCount)
+            return
         }
 
         if (isViewingBestiary) {
@@ -1132,8 +1138,6 @@ class PlayScreen(
         // 8.5 Post-Processing VFX (Critical Anima Vignette, Parry Flare & Ink Screen Dissolve - Fase 20)
         renderPostProcessingVFX(safeDelta)
 
-        // 9. Developer Tools & Profiler Overlay (Senior Tools Architecture)
-        devTools.render(shapeRenderer, batch, uiCamera, player, currentFloor, particleManager.activeParticleCount)
     }
 
     private fun renderWorld(delta: Float) {
@@ -2622,11 +2626,34 @@ class PlayScreen(
         renderActBannerText()
     }
 
+    private fun handleDevToolsInput() {
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) ||
+            Gdx.input.isKeyJustPressed(Keys.F1) ||
+            Gdx.input.isKeyJustPressed(Keys.F3) ||
+            Gdx.input.isKeyJustPressed(Keys.GRAVE) ||
+            Gdx.input.isKeyJustPressed(Keys.BACK) ||
+            input.gamepad.isPauseJustPressed()
+        ) {
+            devTools.isVisible = false
+            AudioManager.playSlashLight()
+            inputCooldown = 0.20f
+            return
+        }
+
+        if (Gdx.input.justTouched()) {
+            val handled = devTools.handleTouchDown(Gdx.input.x, Gdx.input.y, uiViewport, currentFloor, player)
+            if (handled) {
+                inputCooldown = 0.15f
+            }
+        }
+    }
+
     private fun handlePauseInput() {
         if (inputCooldown > 0f) return
 
         if (Gdx.input.isKeyJustPressed(Keys.BACK) || Gdx.input.isKeyJustPressed(Keys.ESCAPE) || input.isPauseJustPressed()) {
             isPaused = false
+            AudioManager.resumeBgm()
             AudioManager.playSlashLight()
             inputCooldown = 0.20f
             return
@@ -2651,14 +2678,19 @@ class PlayScreen(
             val touchY = uiTouchVec.y
             val w = 1280f
             val h = 720f
-            val menuW = 320f
-            val startY = h / 2f + 155f
-            val itemH = 38f
-            val menuX = w / 2f - menuW / 2f
+            val cardW = 390f
+            val cardH = 540f
+            val cardX = (w - cardW) / 2f
+            val cardY = (h - cardH) / 2f
+            val startY = cardY + cardH - 75f
+            val itemH = 32f
+            val itemSpacing = 37f
+            val itemW = cardW - 50f
+            val btnX = cardX + 25f
 
             for (i in pauseMenuItems.indices) {
-                val itemY = startY - (i * itemH)
-                if (touchX in (menuX - 35f)..(menuX + menuW + 35f) && touchY in (itemY - 14f)..(itemY + itemH - 4f)) {
+                val btnY = startY - (i * itemSpacing)
+                if (touchX in (btnX - 10f)..(btnX + itemW + 10f) && touchY in (btnY - 3f)..(btnY + itemH + 3f)) {
                     pauseSelectedIndex = i
                     executePauseSelection()
                     break
@@ -2758,19 +2790,23 @@ class PlayScreen(
         // Pause Menu Card (Dark Obsidian with Gold Accent)
         val cardW = 390f
         val cardH = 540f
-        val cardX = w / 2f - cardW / 2f
-        val cardY = h / 2f - cardH / 2f
+        val cardX = (w - cardW) / 2f
+        val cardY = (h - cardH) / 2f
         shapeRenderer.setColor(0.08f, 0.11f, 0.18f, 0.95f)
         shapeRenderer.rect(cardX, cardY, cardW, cardH)
         shapeRenderer.setColor(0.9f, 0.75f, 0.25f, 0.9f)
         shapeRenderer.rectLine(cardX, cardY + cardH, cardX + cardW, cardY + cardH, 3f)
 
         // Selected button highlight
-        val startY = h / 2f + 180f
-        val itemH = 37f
-        val btnY = startY - (pauseSelectedIndex * itemH)
+        val startY = cardY + cardH - 75f
+        val itemH = 32f
+        val itemSpacing = 37f
+        val itemW = cardW - 50f
+        val btnX = cardX + 25f
+
+        val selBtnY = startY - (pauseSelectedIndex * itemSpacing)
         shapeRenderer.setColor(0.15f, 0.35f, 0.65f, 0.75f)
-        shapeRenderer.rect(cardX + 25f, btnY - 8f, cardW - 50f, 32f)
+        shapeRenderer.rect(btnX, selBtnY, itemW, itemH)
 
         shapeRenderer.end()
 
@@ -2778,9 +2814,10 @@ class PlayScreen(
         batch.begin()
         val regF = FontManager.regularFont
         val headF = FontManager.headerFont
+        val smallF = FontManager.smallFont
 
         headF.color = Color.GOLD
-        headF.draw(batch, "=== GAME PAUSED ===", w / 2f - 110f, cardY + cardH - 22f)
+        headF.draw(batch, "=== GAME PAUSED ===", cardX, cardY + cardH - 22f, cardW, Align.center, false)
 
         for (i in pauseMenuItems.indices) {
             val itemText = when (i) {
@@ -2789,15 +2826,21 @@ class PlayScreen(
                 8 -> if (HapticManager.isEnabled) "HAPTIC: ON" else "HAPTIC: OFF"
                 else -> pauseMenuItems[i]
             }
-            val curY = startY - (i * itemH) + 16f
+            val btnY = startY - (i * itemSpacing)
+            val textY = btnY + itemH / 2f + 6f
             if (i == pauseSelectedIndex) {
                 regF.color = Color.YELLOW
-                regF.draw(batch, "> $itemText <", w / 2f - 85f, curY)
+                regF.draw(batch, "> $itemText <", btnX, textY, itemW, Align.center, false)
             } else {
                 regF.color = Color.WHITE
-                regF.draw(batch, itemText, w / 2f - 70f, curY)
+                regF.draw(batch, itemText, btnX, textY, itemW, Align.center, false)
             }
         }
+
+        // Petunjuk kontrol di footer card
+        smallF.setColor(0.6f, 0.7f, 0.85f, 0.8f)
+        smallF.draw(batch, "[W/S / TAP] Pilih • [ENTER / SPACE] Konfirmasi", cardX, cardY + 32f, cardW, Align.center, false)
+
         batch.end()
     }
 

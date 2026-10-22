@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.stickman.tower.audio.AudioManager
 import com.stickman.tower.character.CharacterArchetype
 import com.stickman.tower.character.Player
 import com.stickman.tower.enemy.EnemyType
@@ -153,6 +154,14 @@ class DevToolsOverlay {
     }
 
     /**
+     * Helper extension untuk mengecek apakah titik (px, py) berada di dalam rectangle
+     * dengan toleransi margin sentuh tambahan untuk kenyamanan tombol mobile/mouse.
+     */
+    private fun Rectangle.containsPoint(px: Float, py: Float, margin: Float = 6f): Boolean {
+        return px in (x - margin)..(x + width + margin) && py in (y - margin)..(y + height + margin)
+    }
+
+    /**
      * Memproses input klik / sentuhan pada panel Developer Tools.
      */
     fun handleTouchDown(screenX: Int, screenY: Int, viewport: Viewport, currentFloor: TowerFloor, player: Player? = null): Boolean {
@@ -163,28 +172,30 @@ class DevToolsOverlay {
         val tx = touchPoint.x
         val ty = touchPoint.y
 
-        if (btnClose.contains(tx, ty)) {
+        // Tombol Tutup [ X ] di kanan atas modal
+        if (btnClose.containsPoint(tx, ty, 8f)) {
             isVisible = false
+            AudioManager.playSlashLight()
             return true
         }
 
         // Navigasi Tab
-        if (tabBtnCheats.contains(tx, ty)) { currentTab = DevTab.CHEATS; return true }
-        if (tabBtnWarp.contains(tx, ty)) { currentTab = DevTab.WARP_SPAWN; return true }
-        if (tabBtnAudit.contains(tx, ty)) { currentTab = DevTab.PROFILER_AUDIT; return true }
-        if (tabBtnCli.contains(tx, ty)) { currentTab = DevTab.CLI_CONSOLE; return true }
+        if (tabBtnCheats.containsPoint(tx, ty, 4f)) { currentTab = DevTab.CHEATS; AudioManager.playJump(); return true }
+        if (tabBtnWarp.containsPoint(tx, ty, 4f)) { currentTab = DevTab.WARP_SPAWN; AudioManager.playJump(); return true }
+        if (tabBtnAudit.containsPoint(tx, ty, 4f)) { currentTab = DevTab.PROFILER_AUDIT; AudioManager.playJump(); return true }
+        if (tabBtnCli.containsPoint(tx, ty, 4f)) { currentTab = DevTab.CLI_CONSOLE; AudioManager.playJump(); return true }
 
         when (currentTab) {
             DevTab.CHEATS -> {
-                if (btnGodMode.contains(tx, ty)) { isGodMode = !isGodMode; return true }
-                if (btnInfEnergy.contains(tx, ty)) { isInfiniteEnergy = !isInfiniteEnergy; return true }
-                if (btnHitboxes.contains(tx, ty)) { showHitboxes = !showHitboxes; return true }
-                if (btnHeal.contains(tx, ty)) { onHealFull?.invoke(); return true }
-                if (btnGrantGold.contains(tx, ty)) { onGrantGold?.invoke(1000); return true }
-                if (btnGrantLevel.contains(tx, ty)) { onGrantLevel?.invoke(); return true }
-                if (btnKillEnemies.contains(tx, ty)) { onKillAllEnemies?.invoke(); return true }
+                if (btnGodMode.containsPoint(tx, ty, 4f)) { isGodMode = !isGodMode; AudioManager.playSlashLight(); return true }
+                if (btnInfEnergy.containsPoint(tx, ty, 4f)) { isInfiniteEnergy = !isInfiniteEnergy; AudioManager.playSlashLight(); return true }
+                if (btnHitboxes.containsPoint(tx, ty, 4f)) { showHitboxes = !showHitboxes; AudioManager.playSlashLight(); return true }
+                if (btnHeal.containsPoint(tx, ty, 4f)) { onHealFull?.invoke(); AudioManager.playLevelUp(); return true }
+                if (btnGrantGold.containsPoint(tx, ty, 4f)) { onGrantGold?.invoke(1000); AudioManager.playChest(); return true }
+                if (btnGrantLevel.containsPoint(tx, ty, 4f)) { onGrantLevel?.invoke(); AudioManager.playLevelUp(); return true }
+                if (btnKillEnemies.containsPoint(tx, ty, 4f)) { onKillAllEnemies?.invoke(); AudioManager.playSlashHeavy(); return true }
 
-                if (btnCycleHero.contains(tx, ty) && player != null) {
+                if (btnCycleHero.containsPoint(tx, ty, 4f) && player != null) {
                     val current = player.archetype
                     val next = when (current) {
                         CharacterArchetype.BALANCED -> CharacterArchetype.AGILE
@@ -193,71 +204,79 @@ class DevToolsOverlay {
                     }
                     player.switchArchetype(next)
                     onSwitchArchetype?.invoke(next)
+                    AudioManager.playDodge()
                     return true
                 }
 
                 // Timescale controls
-                if (btnSpeed01.contains(tx, ty)) { timeScale = 0.1f; isPaused = false; return true }
-                if (btnSpeed05.contains(tx, ty)) { timeScale = 0.5f; isPaused = false; return true }
-                if (btnSpeed10.contains(tx, ty)) { timeScale = 1.0f; isPaused = false; return true }
-                if (btnSpeed20.contains(tx, ty)) { timeScale = 2.0f; isPaused = false; return true }
-                if (btnPauseToggle.contains(tx, ty)) { isPaused = !isPaused; return true }
-                if (btnStepFrame.contains(tx, ty)) { isPaused = true; step(); return true }
+                if (btnSpeed01.containsPoint(tx, ty, 4f)) { timeScale = 0.1f; isPaused = false; AudioManager.playSlashLight(); return true }
+                if (btnSpeed05.containsPoint(tx, ty, 4f)) { timeScale = 0.5f; isPaused = false; AudioManager.playSlashLight(); return true }
+                if (btnSpeed10.containsPoint(tx, ty, 4f)) { timeScale = 1.0f; isPaused = false; AudioManager.playSlashLight(); return true }
+                if (btnSpeed20.containsPoint(tx, ty, 4f)) { timeScale = 2.0f; isPaused = false; AudioManager.playSlashLight(); return true }
+                if (btnPauseToggle.containsPoint(tx, ty, 4f)) { isPaused = !isPaused; AudioManager.playSlashLight(); return true }
+                if (btnStepFrame.containsPoint(tx, ty, 4f)) { isPaused = true; step(); AudioManager.playSlashLight(); return true }
             }
             DevTab.WARP_SPAWN -> {
-                if (btnWarpF1.contains(tx, ty)) { onWarpFloor?.invoke(1); return true }
-                if (btnWarpF2.contains(tx, ty)) { onWarpFloor?.invoke(2); return true }
-                if (btnWarpF3.contains(tx, ty)) { onWarpFloor?.invoke(3); return true }
-                if (btnWarpF5.contains(tx, ty)) { onWarpFloor?.invoke(5); return true }
-                if (btnWarpF10.contains(tx, ty)) { onWarpFloor?.invoke(10); return true }
-                if (btnWarpEndless5.contains(tx, ty)) { onWarpFloor?.invoke(5); return true }
-                if (btnWarpEndless10.contains(tx, ty)) { onWarpFloor?.invoke(10); return true }
-                if (btnWarpEndless20.contains(tx, ty)) { onWarpFloor?.invoke(20); return true }
-                if (btnWarpEndless50.contains(tx, ty)) { onWarpFloor?.invoke(50); return true }
+                if (btnWarpF1.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(1); AudioManager.playSlashLight(); return true }
+                if (btnWarpF2.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(2); AudioManager.playSlashLight(); return true }
+                if (btnWarpF3.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(3); AudioManager.playSlashLight(); return true }
+                if (btnWarpF5.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(5); AudioManager.playSlashLight(); return true }
+                if (btnWarpF10.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(10); AudioManager.playSlashLight(); return true }
+                if (btnWarpEndless5.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(5); AudioManager.playSlashLight(); return true }
+                if (btnWarpEndless10.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(10); AudioManager.playSlashLight(); return true }
+                if (btnWarpEndless20.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(20); AudioManager.playSlashLight(); return true }
+                if (btnWarpEndless50.containsPoint(tx, ty, 4f)) { onWarpFloor?.invoke(50); AudioManager.playSlashLight(); return true }
 
-                if (btnSpawnMelee.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.MELEE); return true }
-                if (btnSpawnRanged.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.RANGED); return true }
-                if (btnSpawnFlying.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.FLYING); return true }
-                if (btnSpawnShield.contains(tx, ty)) { onSpawnEnemy?.invoke(EnemyType.SHIELDED); return true }
+                if (btnSpawnMelee.containsPoint(tx, ty, 4f)) { onSpawnEnemy?.invoke(EnemyType.MELEE); AudioManager.playDodge(); return true }
+                if (btnSpawnRanged.containsPoint(tx, ty, 4f)) { onSpawnEnemy?.invoke(EnemyType.RANGED); AudioManager.playDodge(); return true }
+                if (btnSpawnFlying.containsPoint(tx, ty, 4f)) { onSpawnEnemy?.invoke(EnemyType.FLYING); AudioManager.playDodge(); return true }
+                if (btnSpawnShield.containsPoint(tx, ty, 4f)) { onSpawnEnemy?.invoke(EnemyType.SHIELDED); AudioManager.playDodge(); return true }
             }
             DevTab.PROFILER_AUDIT -> {
-                if (btnRunSanity.contains(tx, ty)) {
+                if (btnRunSanity.containsPoint(tx, ty, 4f)) {
                     val report = LevelSanityValidator.validateFloor(currentFloor)
                     lastAuditSummary = report.summary()
+                    AudioManager.playSlashLight()
                     return true
                 }
-                if (btnRunReachability.contains(tx, ty)) {
+                if (btnRunReachability.containsPoint(tx, ty, 4f)) {
                     val report = LevelReachabilityGraph.analyzeFloor(currentFloor)
                     lastAuditSummary = report.summary()
+                    AudioManager.playSlashLight()
                     return true
                 }
-                if (btnRunBalance.contains(tx, ty)) {
+                if (btnRunBalance.containsPoint(tx, ty, 4f)) {
                     val report = CombatBalanceSimulator.runFullAudit(roundsPerArchetype = 30)
                     lastAuditSummary = "SIMULATION DONE: OverallBalanced=${report.overallBalanced}, WinRate=${"%.1f".format(report.globalWinRate * 100)}%"
+                    AudioManager.playSlashLight()
                     return true
                 }
-                if (btnRunAssets.contains(tx, ty)) {
+                if (btnRunAssets.containsPoint(tx, ty, 4f)) {
                     val report = AssetPipelineValidator.validateAll()
                     lastAuditSummary = report.summary()
+                    AudioManager.playSlashLight()
                     return true
                 }
             }
             DevTab.CLI_CONSOLE -> {
-                if (btnCliHelp.contains(tx, ty)) { dispatcher.dispatch("help"); return true }
-                if (btnCliGod.contains(tx, ty)) { dispatcher.dispatch("god"); return true }
-                if (btnCliHeal.contains(tx, ty)) { dispatcher.dispatch("heal"); return true }
-                if (btnCliGold.contains(tx, ty)) { dispatcher.dispatch("gold 5000"); return true }
-                if (btnCliSim.contains(tx, ty)) { dispatcher.dispatch("simulate 20"); return true }
-                if (btnCliReach.contains(tx, ty)) { dispatcher.dispatch("reachability"); return true }
+                if (btnCliHelp.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("help"); AudioManager.playSlashLight(); return true }
+                if (btnCliGod.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("god"); AudioManager.playSlashLight(); return true }
+                if (btnCliHeal.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("heal"); AudioManager.playLevelUp(); return true }
+                if (btnCliGold.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("gold 5000"); AudioManager.playChest(); return true }
+                if (btnCliSim.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("simulate 20"); AudioManager.playSlashLight(); return true }
+                if (btnCliReach.containsPoint(tx, ty, 4f)) { dispatcher.dispatch("reachability"); AudioManager.playSlashLight(); return true }
             }
         }
 
-        // Konsumsi sentuhan jika berada di dalam area panel modal
+        // Sentuhan di dalam area panel modal -> konsumsi input (cegah kebocoran input ke game di bawahnya)
         if (tx in 220f..1060f && ty in 90f..630f) {
             return true
         }
 
-        return false
+        // Sentuhan di luar panel modal (backdrop gelap) -> tutup overlay dengan aman
+        isVisible = false
+        AudioManager.playSlashLight()
+        return true
     }
 
     /**
