@@ -104,29 +104,29 @@ object BestiaryManager {
         name = "Jenderal Oakhaven",
         subtitle = "Panglima Benteng Kayu Bawah",
         classification = "Tower Guardian / Ksatria Pelindung Ordo",
-        habitat = "Lantai 3 (Apex Boss Arena)",
+        habitat = "Lantai 5 (Benteng Bawah / The Lower Bastion)",
         physicalDescription = "Ksatria raksasa bersenjatakan Greatsword emas yang mampu membelah platform batu dengan sekali tebasan.",
         loreNotesAurelius = "Oakhaven bersumpah pada ordo monokrom bukan karena kebencian, melainkan menjaga agar ksatria yang lemah tidak melangkah ke jurang kematian di lantai atas.",
         tacticNotesValerius = "Ketika pedangnya berkilat emas, jangan berguling menjauh; lakukan Dentang Penolakan Takdir (Parry) tepat waktu untuk melipatgandakan peluang stagger!",
         weaknesses = listOf("Perfect Parry Bilah Emas", "Dodge Roll Cross-up"),
         silhouetteColor = Color(0.25f, 0.20f, 0.10f, 1f),
         accentColor = Color(0.95f, 0.82f, 0.30f, 1f),
-        unlockFloor = 3
+        unlockFloor = 5
     )
 
     val BOSS_MATRON = BestiaryEntry(
         id = "BOSS_MATRON",
         name = "The Amethyst Matron",
-        subtitle = "Sang Ratu Busur Bayang",
+        subtitle = "Lady Vespera • Sang Ratu Busur Bayang",
         classification = "Alchemical Sovereign / Ratu Sarang Miasma",
-        habitat = "Lantai 5 (Crucible of Mutations)",
+        habitat = "Lantai 10 (Sarang Amethyst / The Violet Sanctum)",
         physicalDescription = "Ratu bayangan berkepompong kristal ungu yang menembakkan salvo panah beracun ke segala penjuru kawah.",
         loreNotesAurelius = "Korupsi Miasma melarutkan tekad para pejuang masa lalu, mengubah sarang alkimia menjadi makam para pendaki yang kehilangan arah.",
         tacticNotesValerius = "Panah ungu menyebar secara diagonal. Manfaatkan platform vertikal untuk menghindar dan serang saat ia memulihkan busurnya.",
         weaknesses = listOf("Vertical Platform Flanking", "Punish Recovery Window"),
         silhouetteColor = Color(0.28f, 0.12f, 0.32f, 1f),
         accentColor = Color(0.90f, 0.40f, 1.0f, 1f),
-        unlockFloor = 5
+        unlockFloor = 10
     )
 
     val BOSS_CALLIGRAPHER = BestiaryEntry(
@@ -134,14 +134,14 @@ object BestiaryManager {
         name = "The Grand Calligrapher",
         subtitle = "Arsitek Tinta Primordial",
         classification = "Primordial Sovereign / Penulis Takdir",
-        habitat = "Lantai 10 (The Primordial Canvas)",
+        habitat = "Lantai 50 (Puncak Kanvas Kosmis / Primordial Zenith)",
         physicalDescription = "Entitas kosmis agung dengan pena emas primordial yang sanggup menggambar pilar tinta pemusnah kenyataan.",
         loreNotesAurelius = "Baginya, warna adalah kekacauan dan keserakahan manusia. Hanya monokrom hitam-putih yang mutlak abadi.",
         tacticNotesValerius = "Patahkan pilar tinta hitam yang ia panggil. Saat penanya terangkat untuk memanggil hujan meteorit tinta, serang tanpa henti!",
         weaknesses = listOf("Ink Pillar Destruction", "All-Out Attack on Channeling"),
         silhouetteColor = Color(0.32f, 0.28f, 0.14f, 1f),
         accentColor = Color(1.0f, 0.90f, 0.45f, 1f),
-        unlockFloor = 10
+        unlockFloor = 50
     )
 
     val ENTRIES: List<BestiaryEntry> = listOf(
