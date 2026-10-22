@@ -165,10 +165,25 @@ class PlayScreen(
     var isViewingBestiary: Boolean = false
     var bestiarySelectedIndex: Int = 0
 
-    // Post-Processing VFX & Audio Master (Fase 20)
+    // Post-Processing VFX & Audio Master (Fase 20 & Engine 10/10)
     var floorTransitionAlpha: Float = 1.0f
     var parryFlashTimer: Float = 0f
     private var dangerPulseTimer: Float = 0f
+    private var screenFlashTimer: Float = 0f
+    private var screenFlashDuration: Float = 0f
+    private var screenFlashR: Float = 1f
+    private var screenFlashG: Float = 1f
+    private var screenFlashB: Float = 1f
+    private var screenFlashMaxAlpha: Float = 0.45f
+
+    fun triggerScreenFlash(r: Float, g: Float, b: Float, duration: Float = 0.22f, maxAlpha: Float = 0.45f) {
+        screenFlashR = r
+        screenFlashG = g
+        screenFlashB = b
+        screenFlashDuration = duration
+        screenFlashTimer = duration
+        screenFlashMaxAlpha = maxAlpha
+    }
 
     // Sistem Altar Pengorbanan Darah & Pakta Temporal (Fase 22)
     var isInteractingWithAltar: Boolean = false
@@ -1410,13 +1425,19 @@ class PlayScreen(
         // Render Efek Partikel VFX dengan Frustum Bounding Box Culling [-2m, +26m]
         particleManager.render(shapeRenderer, minCullX, maxCullX)
 
-        // Render Radial Shockwave Super Finish Boss (Fase 11)
+        // Render Radial Shockwave Super Finish Boss (Fase 11 & Engine 10/10 Chromatic Ripple)
         if (isBossShockwaveActive && shockwaveRadius > 0f) {
             val shockAlpha = (1f - shockwaveRadius / 22f).coerceIn(0f, 1f)
-            shapeRenderer.setColor(1f, 1f, 1f, shockAlpha * 0.9f)
-            shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, shockwaveRadius, 36)
-            shapeRenderer.setColor(0.9f, 0.7f, 0.2f, shockAlpha * 0.5f)
-            shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, (shockwaveRadius - 0.35f).coerceAtLeast(0f), 36)
+            // Cincin Luar (Cyan Chromatic Wave)
+            shapeRenderer.setColor(0.2f, 0.9f, 1.0f, shockAlpha * 0.65f)
+            shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, shockwaveRadius + 0.35f, 40)
+            // Cincin Tengah (Golden Pure Wave)
+            shapeRenderer.setColor(1.0f, 0.85f, 0.2f, shockAlpha * 0.95f)
+            shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, shockwaveRadius, 44)
+            // Cincin Dalam (Red Chromatic Wave)
+            shapeRenderer.setColor(1.0f, 0.25f, 0.25f, shockAlpha * 0.70f)
+            val innerR = (shockwaveRadius - 0.35f).coerceAtLeast(0f)
+            shapeRenderer.circle(shockwaveCenterX, shockwaveCenterY, innerR, 40)
         }
         shapeRenderer.end()
 
@@ -1620,7 +1641,7 @@ class PlayScreen(
                             }
                         }
 
-                        // Super Finish Slow-Motion & Radial Shockwave jika Boss Mati (Fase 11)
+                        // Super Finish Slow-Motion & Radial Shockwave jika Boss Mati (Fase 11 & Engine 10/10)
                         if (boss.health.isDead && !bossSlowMoTriggered) {
                             bossSlowMoTriggered = true
                             bossSlowMoTimer = 0.55f
@@ -1630,6 +1651,7 @@ class PlayScreen(
                             shockwaveCenterY = boss.position.y + boss.height / 2f
                             cameraManager.shake(1.2f, 0.7f)
                             HapticManager.vibrateHeavy()
+                            triggerScreenFlash(1.0f, 0.88f, 0.35f, duration = 0.45f, maxAlpha = 0.55f)
                         }
 
                         val energyGain = when {
@@ -1814,6 +1836,7 @@ class PlayScreen(
                         hitStopManager.trigger(0.08f)
                         AudioManager.playParry()
                         parryFlashTimer = 0.18f
+                        triggerScreenFlash(1.0f, 1.0f, 1.0f, duration = 0.14f, maxAlpha = 0.35f)
                         com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                         QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
                         if (currentFloorNumber == 2) {
@@ -1897,6 +1920,7 @@ class PlayScreen(
                     hitStopManager.trigger(0.08f)
                     AudioManager.playParry()
                     parryFlashTimer = 0.18f
+                    triggerScreenFlash(1.0f, 1.0f, 1.0f, duration = 0.14f, maxAlpha = 0.35f)
                     com.stickman.tower.achievement.AchievementManager.onPerfectParry(saveData)
                     QuestManager.notifyEvent(ObjectiveType.PERFECT_PARRY, "PARRY")
                     inkFamiliar.onParryProc(player.position.x + player.width / 2f, player.position.y + player.height / 2f, currentFloor.allEnemies, currentFloor.boss, particleManager, floatingTexts)
@@ -4214,7 +4238,22 @@ class PlayScreen(
         shapeRenderer.projectionMatrix = uiCamera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        // A. Critical Anima Vignette (Detak Darah Saat HP Kritis <= 25%)
+        // 1. Living Canvas Edge Vignette (Bingkai Tinta Naskah Sinematik di 4 Sisi Layar - Engine 10/10)
+        val edgeW = 48f
+        shapeRenderer.setColor(0.02f, 0.02f, 0.05f, 0.35f)
+        shapeRenderer.rect(0f, 0f, w, edgeW) // Bawah
+        shapeRenderer.rect(0f, h - edgeW, w, edgeW) // Atas
+        shapeRenderer.rect(0f, 0f, edgeW, h) // Kiri
+        shapeRenderer.rect(w - edgeW, 0f, edgeW, h) // Kanan
+
+        // Lapisan gradien halus bagian dalam
+        shapeRenderer.setColor(0.01f, 0.01f, 0.03f, 0.18f)
+        shapeRenderer.rect(edgeW, edgeW, w - edgeW * 2f, 22f)
+        shapeRenderer.rect(edgeW, h - edgeW - 22f, w - edgeW * 2f, 22f)
+        shapeRenderer.rect(edgeW, edgeW, 22f, h - edgeW * 2f)
+        shapeRenderer.rect(w - edgeW - 22f, edgeW, 22f, h - edgeW * 2f)
+
+        // 2. Critical Anima Vignette (Detak Darah Saat HP Kritis <= 25%)
         if (!player.health.isDead && player.health.currentHp <= player.health.maxHp * 0.25f && gameStatus == GameStatus.PLAYING) {
             dangerPulseTimer += delta
             val hpRatio = (player.health.currentHp / (player.health.maxHp * 0.25f)).coerceIn(0f, 1f)
@@ -4235,7 +4274,7 @@ class PlayScreen(
             shapeRenderer.rect(edgeThickness, h - edgeThickness - 25f, w - edgeThickness * 2f, 25f)
         }
 
-        // B. Perfect Parry Horizontal Flare (Dentang Penolakan Takdir)
+        // 3. Perfect Parry Horizontal Flare (Dentang Penolakan Takdir)
         if (parryFlashTimer > 0f) {
             parryFlashTimer = (parryFlashTimer - delta).coerceAtLeast(0f)
             val flareRatio = (parryFlashTimer / 0.18f).coerceIn(0f, 1f)
@@ -4248,7 +4287,16 @@ class PlayScreen(
             shapeRenderer.rect(0f, h / 2f - 2f, w, 4f)
         }
 
-        // C. Ink Screen Dissolve Transition (Transisi Pindah Lantai & Respawn)
+        // 4. Screen Impact Flash (Whiteout / Gold Super Burst - Engine 10/10)
+        if (screenFlashTimer > 0f && screenFlashDuration > 0f) {
+            screenFlashTimer = (screenFlashTimer - delta).coerceAtLeast(0f)
+            val progress = (screenFlashTimer / screenFlashDuration).coerceIn(0f, 1f)
+            val currentAlpha = progress * screenFlashMaxAlpha
+            shapeRenderer.setColor(screenFlashR, screenFlashG, screenFlashB, currentAlpha)
+            shapeRenderer.rect(0f, 0f, w, h)
+        }
+
+        // 5. Ink Screen Dissolve Transition (Transisi Pindah Lantai & Respawn)
         if (floorTransitionAlpha > 0f) {
             floorTransitionAlpha = (floorTransitionAlpha - delta * 2.2f).coerceAtLeast(0f)
             shapeRenderer.setColor(0.04f, 0.04f, 0.06f, floorTransitionAlpha)
