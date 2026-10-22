@@ -3346,7 +3346,11 @@ class PlayScreen(
 
     private fun handleBestiaryInput() {
         val entries = BestiaryManager.ENTRIES
-        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Keys.B) || Gdx.input.isKeyJustPressed(Keys.BACKSPACE)) {
+        if (Gdx.input.isKeyJustPressed(Keys.ESCAPE) ||
+            Gdx.input.isKeyJustPressed(Keys.B) ||
+            Gdx.input.isKeyJustPressed(Keys.BACKSPACE) ||
+            Gdx.input.isKeyJustPressed(Keys.BACK)
+        ) {
             isViewingBestiary = false
             AudioManager.playSlashLight()
             return
