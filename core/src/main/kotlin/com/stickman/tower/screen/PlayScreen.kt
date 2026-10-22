@@ -1373,10 +1373,14 @@ class PlayScreen(
             currentFloor.mapBounds.width
         )
 
-        // Frustum Bounding Box Horizontal Culling [-2.0m, +26.0m] (Task 32.1.1)
+        // Zero Pop-In Frustum Bounding Box Culling dengan Buffer Lebar Adaptif
+        // Kamera Viewport Width = 16m (half = 8m).
+        // Buffer aman: 24m di luar tepi kiri layar, 32m di luar tepi kanan layar (total span 72m).
+        // Menjamin tidak ada platform yang hilang saat mundur/lompat, dan musuh/halangan/proyektil sudah ter-render sempurna sebelum masuk layar.
+        val halfViewportW = cameraManager.viewport.worldWidth / 2f
         val camX = cameraManager.camera.position.x
-        val minCullX = camX - 2.0f
-        val maxCullX = camX + 26.0f
+        val minCullX = camX - halfViewportW - 24.0f
+        val maxCullX = camX + halfViewportW + 32.0f
 
         for (platform in currentFloor.platforms) {
             if (platform.bounds.x + platform.bounds.width >= minCullX && platform.bounds.x <= maxCullX) {
@@ -1442,7 +1446,9 @@ class PlayScreen(
         }
 
         for (enemy in currentFloor.allEnemies) {
-            if (enemy.position.x + enemy.width >= minCullX && enemy.position.x <= maxCullX) {
+            // Render musuh jika berada dalam buffer luas atau memiliki proyektil panah aktif yang sedang meluncur
+            val hasActiveProjectiles = enemy.projectiles.isNotEmpty()
+            if (hasActiveProjectiles || (enemy.position.x + enemy.width >= minCullX && enemy.position.x <= maxCullX)) {
                 enemy.render(shapeRenderer)
             }
         }
@@ -1451,7 +1457,7 @@ class PlayScreen(
         inkFamiliar.render(shapeRenderer)
         player.renderProjectiles(shapeRenderer)
 
-        // Render Efek Partikel VFX dengan Frustum Bounding Box Culling [-2m, +26m]
+        // Render Efek Partikel VFX dengan Buffer Luas Anti Pop-In
         particleManager.render(shapeRenderer, minCullX, maxCullX)
 
         // Render Radial Shockwave Super Finish Boss (Fase 11 & Engine 10/10 Chromatic Ripple)
