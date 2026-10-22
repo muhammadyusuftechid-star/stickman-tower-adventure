@@ -67,6 +67,10 @@ import com.stickman.tower.world.BloodAltar
 import com.stickman.tower.world.TemporalPact
 import com.stickman.tower.bossrush.BossRushManager
 import com.stickman.tower.bossrush.BossRushRank
+import com.stickman.tower.character.ZephyrCoopAlly
+import com.stickman.tower.world.RunicBarrier
+import com.stickman.tower.world.RunicKey
+import com.stickman.tower.world.ZephyrCocoon
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
 import com.stickman.tower.world.ProceduralBackgroundRenderer
@@ -173,6 +177,9 @@ class PlayScreen(
     var bossRushStage: Int = 1
     var bossRushTimer: Float = 0f
     var bossRushTransitionTimer: Float = 0f
+
+    // Tag-Team Co-op Ally System (Fase 25)
+    var zephyrCoopAlly: ZephyrCoopAlly? = null
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -412,6 +419,7 @@ class PlayScreen(
         nearbyTabletPrompt = null
         nearbyDialoguePrompt = null
         towerWhisperManager.reset()
+        zephyrCoopAlly = null
 
         if (currentFloorNumber == 1) {
             activeMoraleBuff = MoraleBuffType.NONE
@@ -842,6 +850,62 @@ class PlayScreen(
                 }
             }
 
+            // Cek Tabrakan Runic Barriers (Fase 25)
+            for (barrier in currentFloor.runicBarriers) {
+                if (!barrier.isUnlocked && player.bounds.overlaps(barrier.bounds)) {
+                    if (player.bounds.x + player.bounds.width / 2f < barrier.bounds.x + barrier.bounds.width / 2f) {
+                        player.position.x = barrier.bounds.x - player.width
+                    } else {
+                        player.position.x = barrier.bounds.x + barrier.bounds.width
+                    }
+                    player.velocity.x = 0f
+                    particleManager.spawnHitSparks(barrier.x + barrier.width / 2f, player.position.y + player.height / 2f, count = 2, color = Color.RED)
+                }
+            }
+
+            // Cek Pengambilan Runic Keys (Fase 25)
+            for (key in currentFloor.runicKeys) {
+                if (!key.isCollected) {
+                    key.update(updateDelta)
+                    val isBodyTouch = player.bounds.overlaps(key.bounds)
+                    val isSwordHit = player.hitbox.isActive && player.hitbox.bounds.overlaps(key.bounds)
+                    if (isBodyTouch || isSwordHit) {
+                        key.isCollected = true
+                        for (barrier in currentFloor.runicBarriers) {
+                            if (barrier.barrierId == key.targetBarrierId) {
+                                barrier.unlock()
+                            }
+                        }
+                        AudioManager.playLevelUp()
+                        particleManager.spawnHitSparks(key.x + 0.4f, key.y + 0.4f, count = 25, color = Color.GOLD)
+                        floatingTexts.add(
+                            FloatingText("✦ KUNCI RUNIK DITEMUKAN! SEGEL TERBUKA! ✦", key.x - 1.5f, key.y + 2.0f, Color.GOLD, duration = 3.0f)
+                        )
+                    }
+                }
+            }
+
+            // Pembaruan Kepompong Zephyr (Fase 25)
+            currentFloor.zephyrCocoon?.update(updateDelta)
+
+            // Pembaruan Zephyr Co-op Tag-Team Ally (Fase 25)
+            val activeAlly = zephyrCoopAlly
+            if (activeAlly != null && activeAlly.isActive) {
+                if (activeAlly.onBossHit == null) {
+                    activeAlly.onBossHit = { dmg, _ ->
+                        val activeBoss = currentFloor.boss
+                        if (activeBoss != null) {
+                            particleManager.spawnHitSparks(activeBoss.position.x + activeBoss.width / 2f, activeBoss.position.y + activeBoss.height / 2f, count = 10, color = Color.CYAN)
+                            floatingTexts.add(
+                                FloatingText("ZEPHYR -${dmg.toInt()}", activeBoss.position.x + activeBoss.width / 2f, activeBoss.position.y + activeBoss.height + 0.3f, Color.CYAN)
+                            )
+                            AudioManager.playHit()
+                        }
+                    }
+                }
+                activeAlly.update(updateDelta, currentFloor.boss, player.position)
+            }
+
             // Cek Interaksi Peti Harta (Chests)
             for (chest in currentFloor.chests) {
                 if (!chest.isOpened) {
@@ -1196,6 +1260,12 @@ class PlayScreen(
         currentFloor.checkpoint?.render(shapeRenderer)
         currentFloor.exitPortal.render(shapeRenderer)
 
+        // Render Runic Barriers, Keys, Cocoon, & Zephyr Ally (Fase 25)
+        for (barrier in currentFloor.runicBarriers) barrier.render(shapeRenderer)
+        for (key in currentFloor.runicKeys) key.render(shapeRenderer)
+        currentFloor.zephyrCocoon?.render(shapeRenderer)
+        zephyrCoopAlly?.render(shapeRenderer)
+
         // Render Tokoh Cerita (NPC)
         if (currentFloor.floorNumber == 6) {
             renderVulcanusNPC(shapeRenderer)
@@ -1453,6 +1523,31 @@ class PlayScreen(
                                 isCritical = player.hitbox.isCritical
                             )
                         )
+                    }
+                }
+            }
+
+            // Cek Hitbox Serangan Pemain terhadap Kepompong Zephyr (Fase 25)
+            val cocoon = currentFloor.zephyrCocoon
+            if (cocoon != null && !cocoon.isBroken && !player.hitbox.hitEntities.contains(cocoon)) {
+                if (player.hitbox.bounds.overlaps(cocoon.bounds)) {
+                    player.hitbox.hitEntities.add(cocoon)
+                    if (cocoon.takeHit()) {
+                        hitStopManager.trigger(0.08f)
+                        AudioManager.playHit()
+                        particleManager.spawnHitSparks(cocoon.x + cocoon.width / 2f, cocoon.y + cocoon.height / 2f, count = 18, color = Color.PURPLE)
+                        if (cocoon.isBroken) {
+                            AudioManager.playLevelUp()
+                            particleManager.spawnHitSparks(cocoon.x + cocoon.width / 2f, cocoon.y + cocoon.height / 2f, count = 35, color = Color.CYAN)
+                            floatingTexts.add(FloatingText("⚔ KEPOMPONG HANCUR! ZEPHYR BEBAS! ⚔", cocoon.x - 1.5f, cocoon.y + 3.2f, Color.CYAN, duration = 3.5f))
+                            zephyrCoopAlly = ZephyrCoopAlly(spawnX = cocoon.x, spawnY = cocoon.y)
+                            if (!saveData.unlockedCharacters.contains("ZEPHYR")) {
+                                saveData.unlockedCharacters.add("ZEPHYR")
+                                SaveManager.saveAsync(saveData)
+                            }
+                        } else {
+                            floatingTexts.add(FloatingText("KEPOMPONG RETAK! (${3 - cocoon.hitsTaken}/3)", cocoon.x + 0.2f, cocoon.y + 2.5f, Color.PURPLE, duration = 1.2f))
+                        }
                     }
                 }
             }

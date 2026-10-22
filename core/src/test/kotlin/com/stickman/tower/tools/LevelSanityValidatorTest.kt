@@ -25,8 +25,8 @@ class LevelSanityValidatorTest {
             assertTrue(report.summary().contains("[PASSED]"), "Summary harus berstatus PASSED")
         }
 
-        // Lantai bos: 3, 5, 8, 9, 10
-        val bossFloors = setOf(3, 5, 8, 9, 10)
+        // Lantai bos Saga I: 5 (Oakhaven), 10 (Lady Vespera)
+        val bossFloors = setOf(5, 10)
         for (report in reports) {
             if (report.floorNumber in bossFloors) {
                 assertTrue(report.hasBoss, "Lantai ${report.floorNumber} harus memiliki boss")

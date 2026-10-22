@@ -115,17 +115,17 @@ class DialogueEngineTest {
     @Test
     fun testDialogueRegistryScenesIntegrity() {
         val scene1 = DialogueRegistry.getSceneForFloor(1)
-        val scene3 = DialogueRegistry.getSceneForFloor(3)
         val scene5 = DialogueRegistry.getSceneForFloor(5)
         val scene6 = DialogueRegistry.getSceneForFloor(6)
         val scene10 = DialogueRegistry.getSceneForFloor(10)
+        val scene50 = DialogueRegistry.getSceneForFloor(50)
         val sceneOther = DialogueRegistry.getSceneForFloor(2)
 
         assertNotNull(scene1)
-        assertNotNull(scene3)
         assertNotNull(scene5)
         assertNotNull(scene6)
         assertNotNull(scene10)
+        assertNotNull(scene50)
         assertNull(sceneOther)
 
         // Scene 1: Prolog Aria & Kaelen
@@ -138,8 +138,10 @@ class DialogueEngineTest {
         assertEquals(MoraleBuffType.KINETIC_SURGE, vulcanusQuestion.branchOptions[0].moraleBuff)
         assertEquals(MoraleBuffType.SPIRITUAL_WARD, vulcanusQuestion.branchOptions[1].moraleBuff)
 
-        // Scene 5: Grand Calligrapher
-        assertEquals("The Grand Calligrapher", scene10.lines[0].speaker)
+        // Scene 5: Lady Vespera di Lantai 10
+        assertEquals("Lady Vespera", scene10.lines[0].speaker)
+        // Scene 50: The Grand Calligrapher di Lantai 50
+        assertEquals("The Grand Calligrapher", scene50.lines[0].speaker)
     }
 
     @Test

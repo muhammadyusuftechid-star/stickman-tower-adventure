@@ -42,88 +42,72 @@ class StoryCampaignTest {
         assertEquals("ACT I: THE INITIATION", floor3.actTitle)
         assertEquals("LOWER BASTION", floor1.actSubtitle)
         assertEquals("SPIRE OF HAZARDS", floor2.actSubtitle)
-        assertEquals("APEX BOSS ARENA", floor3.actSubtitle)
+        assertEquals("THE SEALED ARMORY", floor3.actSubtitle)
 
-        // Act II: Lantai 4 s/d 6
+        // Lantai 4: Act II
         val floor4 = TowerLevelBuilder.buildFloor(4)
+        assertEquals("ACT II: SECRETS OF THE INK", floor4.actTitle)
+        assertEquals("THE SUNKEN ARCHIVES", floor4.actSubtitle)
+
+        // Saga I (Lantai 5 s/d 10)
         val floor5 = TowerLevelBuilder.buildFloor(5)
         val floor6 = TowerLevelBuilder.buildFloor(6)
-        assertEquals("ACT II: SECRETS OF THE INK", floor4.actTitle)
-        assertEquals("ACT II: SECRETS OF THE INK", floor5.actTitle)
-        assertEquals("ACT II: SECRETS OF THE INK", floor6.actTitle)
-        assertEquals("THE SUNKEN ARCHIVES", floor4.actSubtitle)
-        assertEquals("CRUCIBLE OF MUTATIONS", floor5.actSubtitle)
-        assertEquals("THE IRON FOUNDRY", floor6.actSubtitle)
-
-        // Act III: Lantai 7 s/d 9
         val floor7 = TowerLevelBuilder.buildFloor(7)
         val floor8 = TowerLevelBuilder.buildFloor(8)
         val floor9 = TowerLevelBuilder.buildFloor(9)
-        assertEquals("ACT III: THE ASTRAL CLIMB", floor7.actTitle)
-        assertEquals("ACT III: THE ASTRAL CLIMB", floor8.actTitle)
-        assertEquals("ACT III: THE ASTRAL CLIMB", floor9.actTitle)
+        val floor10 = TowerLevelBuilder.buildFloor(10)
+
+        assertEquals("SAGA I: THE ASHEN DEPTHS", floor5.actTitle)
+        assertEquals("SAGA I: THE ASHEN DEPTHS", floor6.actTitle)
+        assertEquals("SAGA I: THE ASHEN DEPTHS", floor7.actTitle)
+        assertEquals("SAGA I: THE ASHEN DEPTHS", floor8.actTitle)
+        assertEquals("SAGA I: THE ASHEN DEPTHS", floor9.actTitle)
+        assertEquals("SAGA I: THE ASHEN DEPTHS", floor10.actTitle)
+
+        assertEquals("THE OBSIDIAN COLOSSEUM", floor5.actSubtitle)
+        assertEquals("THE IRON FOUNDRY", floor6.actSubtitle)
         assertEquals("THE FRACTURED PRECIPICE", floor7.actSubtitle)
         assertEquals("THE HALL OF ECHOES", floor8.actSubtitle)
-        assertEquals("THE BLOOD MOON SANCTUM", floor9.actSubtitle)
-
-        // Act IV: Lantai 10
-        val floor10 = TowerLevelBuilder.buildFloor(10)
-        assertEquals("ACT IV: THE PRIMORDIAL CANVAS", floor10.actTitle)
-        assertEquals("SUMMIT OF REALITY", floor10.actSubtitle)
+        assertEquals("THE WEAVERS' PASSAGE", floor9.actSubtitle)
+        assertEquals("THE VIOLET SANCTUM", floor10.actSubtitle)
     }
 
     @Test
     fun testFiveLegendaryBossesInitializationAndAttributes() {
-        // 1. Boss Lantai 3: The Tower Guardian (General Oakhaven)
-        val floor3 = TowerLevelBuilder.buildFloor(3)
-        assertTrue(floor3.isBossFloor)
-        val boss3 = floor3.boss
-        assertNotNull(boss3)
-        assertEquals(BossType.TOWER_GUARDIAN, boss3.type)
-        assertEquals("TOWER GUARDIAN", boss3.name)
-        assertEquals("General Oakhaven", boss3.subtitle)
-        assertEquals(350f, boss3.health.maxHp)
-
-        // 2. Boss Lantai 5: The Amethyst Matron (Sang Ratu Busur Bayang)
+        // Boss Lantai 5: The Tower Guardian (General Oakhaven)
         val floor5 = TowerLevelBuilder.buildFloor(5)
         assertTrue(floor5.isBossFloor)
         val boss5 = floor5.boss
         assertNotNull(boss5)
-        assertEquals(BossType.AMETHYST_MATRON, boss5.type)
-        assertEquals("THE AMETHYST MATRON", boss5.name)
-        assertEquals("Queen of the Shadow Bow", boss5.subtitle)
-        assertEquals(480f, boss5.health.maxHp)
+        assertEquals(BossType.TOWER_GUARDIAN, boss5.type)
+        assertEquals("TOWER GUARDIAN", boss5.name)
+        assertEquals("General Oakhaven", boss5.subtitle)
+        assertEquals(350f, boss5.health.maxHp)
 
-        // 3. Boss Lantai 8: The Shadow Doppelgänger (Cermin Jiwa Gelap)
-        val floor8 = TowerLevelBuilder.buildFloor(8)
-        assertTrue(floor8.isBossFloor)
-        val boss8 = floor8.boss
-        assertNotNull(boss8)
-        assertEquals(BossType.SHADOW_DOPPELGANGER, boss8.type)
-        assertEquals("SHADOW DOPPELGANGER", boss8.name)
-        assertEquals("Dark Reflection", boss8.subtitle)
-        assertEquals(620f, boss8.health.maxHp)
-
-        // 4. Boss Lantai 9: The Crimson Sovereign (Pangeran Belati Darah)
-        val floor9 = TowerLevelBuilder.buildFloor(9)
-        assertTrue(floor9.isBossFloor)
-        val boss9 = floor9.boss
-        assertNotNull(boss9)
-        assertEquals(BossType.CRIMSON_SOVEREIGN, boss9.type)
-        assertEquals("CRIMSON SOVEREIGN", boss9.name)
-        assertEquals("Prince of Blood Daggers", boss9.subtitle)
-        assertEquals(780f, boss9.health.maxHp)
-
-        // 5. Boss Lantai 10: The Grand Calligrapher (Sang Penulis Takdir)
+        // Boss Lantai 10: The Amethyst Matron (Lady Vespera)
         val floor10 = TowerLevelBuilder.buildFloor(10)
         assertTrue(floor10.isBossFloor)
         val boss10 = floor10.boss
         assertNotNull(boss10)
-        assertEquals(BossType.GRAND_CALLIGRAPHER, boss10.type)
-        assertEquals("THE GRAND CALLIGRAPHER", boss10.name)
-        assertEquals("Architect of Fate", boss10.subtitle)
-        assertEquals(1100f, boss10.health.maxHp)
-        assertTrue(boss10.health.maxHp > boss9.health.maxHp, "Final Boss harus memiliki HP tertinggi!")
+        assertEquals(BossType.AMETHYST_MATRON, boss10.type)
+        assertEquals("THE AMETHYST MATRON", boss10.name)
+        assertEquals("Queen of the Shadow Bow", boss10.subtitle)
+        assertEquals(480f, boss10.health.maxHp)
+        assertNotNull(floor10.zephyrCocoon, "Lantai 10 harus memiliki kepompong Zephyr!")
+
+        // Boss Archetypes untuk Endless Spire & Saga Mendatang
+        val bossDoppel = BossEnemy(type = BossType.SHADOW_DOPPELGANGER)
+        assertEquals("SHADOW DOPPELGANGER", bossDoppel.name)
+        assertEquals(620f, bossDoppel.health.maxHp)
+
+        val bossCrimson = BossEnemy(type = BossType.CRIMSON_SOVEREIGN)
+        assertEquals("CRIMSON SOVEREIGN", bossCrimson.name)
+        assertEquals(780f, bossCrimson.health.maxHp)
+
+        val bossCalligrapher = BossEnemy(type = BossType.GRAND_CALLIGRAPHER)
+        assertEquals("THE GRAND CALLIGRAPHER", bossCalligrapher.name)
+        assertEquals(1100f, bossCalligrapher.health.maxHp)
+        assertTrue(bossCalligrapher.health.maxHp > bossCrimson.health.maxHp)
     }
 
     @Test
@@ -146,34 +130,35 @@ class StoryCampaignTest {
         assertTrue(f2.text.contains("Kutukan gravitasi"))
 
         val f3 = TowerLevelBuilder.buildFloor(3).loreTablets.first()
-        assertTrue(f3.text.contains("Oakhaven"))
+        assertTrue(f3.text.contains("Segel Runik Bawah"))
 
         val f4 = TowerLevelBuilder.buildFloor(4).loreTablets.first()
         assertTrue(f4.text.contains("panah amethyst"))
 
         val f5 = TowerLevelBuilder.buildFloor(5).loreTablets.first()
-        assertTrue(f5.text.contains("Miasma"))
+        assertTrue(f5.text.contains("Oakhaven"))
 
         val f6 = TowerLevelBuilder.buildFloor(6).loreTablets.first()
         assertTrue(f6.text.contains("Besi meteorit"))
 
         val f7 = TowerLevelBuilder.buildFloor(7).loreTablets.first()
-        assertTrue(f7.text.contains("jurang kosmis"))
+        assertTrue(f7.text.contains("Tinta Primordial"))
 
         val f8 = TowerLevelBuilder.buildFloor(8).loreTablets.first()
-        assertTrue(f8.text.contains("parry"))
+        assertTrue(f8.text.contains("Segel Runik Gema"))
 
         val f9 = TowerLevelBuilder.buildFloor(9).loreTablets.first()
-        assertTrue(f9.text.contains("tinta darah"))
+        assertTrue(f9.text.contains("Lady Vespera"))
 
         val f10 = TowerLevelBuilder.buildFloor(10).loreTablets.first()
-        assertTrue(f10.text.contains("Sang Penulis Takdir"))
+        assertTrue(f10.text.contains("Zephyr"))
     }
 
     @Test
-    fun testStoryDialoguesAcrossAllStoryFloors() {
-        // Pastikan setiap lantai 1 s/d 10 memiliki dialog naratif pengantar cerita
-        for (fNum in 1..10) {
+    fun testStoryDialoguesAcrossKeyStoryFloors() {
+        // Lantai-lantai bernarasi tinggi: Lantai 1, 4, 5, 6, 7, 9, 10
+        val keyFloors = listOf(1, 4, 5, 6, 7, 9, 10)
+        for (fNum in keyFloors) {
             val floor = TowerLevelBuilder.buildFloor(fNum)
             assertTrue(floor.storyDialogues.isNotEmpty(), "Lantai $fNum harus memiliki storyDialogues naratif!")
             val firstDialogue = floor.storyDialogues.first()
@@ -186,23 +171,14 @@ class StoryCampaignTest {
         val floor1 = TowerLevelBuilder.buildFloor(1)
         assertEquals("Aria", floor1.storyDialogues.first().lines.first().speaker)
 
-        val floor3 = TowerLevelBuilder.buildFloor(3)
-        assertEquals("Jenderal Oakhaven", floor3.storyDialogues.first().lines.first().speaker)
-
         val floor5 = TowerLevelBuilder.buildFloor(5)
-        assertEquals("The Amethyst Matron", floor5.storyDialogues.first().lines.first().speaker)
+        assertEquals("Jenderal Oakhaven", floor5.storyDialogues.first().lines.first().speaker)
 
         val floor6 = TowerLevelBuilder.buildFloor(6)
         assertEquals("Vulcanus", floor6.storyDialogues.first().lines.first().speaker)
 
-        val floor8 = TowerLevelBuilder.buildFloor(8)
-        assertEquals("The Shadow Doppelgänger", floor8.storyDialogues.first().lines.first().speaker)
-
-        val floor9 = TowerLevelBuilder.buildFloor(9)
-        assertEquals("The Crimson Sovereign", floor9.storyDialogues.first().lines.first().speaker)
-
         val floor10 = TowerLevelBuilder.buildFloor(10)
-        assertEquals("The Grand Calligrapher", floor10.storyDialogues.first().lines.first().speaker)
+        assertEquals("Lady Vespera", floor10.storyDialogues.first().lines.first().speaker)
     }
 
     @Test

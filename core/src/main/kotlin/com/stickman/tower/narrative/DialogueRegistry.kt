@@ -18,6 +18,7 @@ object DialogueRegistry {
     val COLOR_OAKHAVEN = Color(0.55f, 0.85f, 0.45f, 1f)       // Hijau Hutan Lumut (Jenderal Kehormatan)
     val COLOR_MATRON = Color(0.85f, 0.45f, 0.95f, 1f)         // Ungu Kristal Miasma (The Amethyst Matron)
     val COLOR_VULCANUS = Color(1.0f, 0.65f, 0.25f, 1f)        // Oranye Bara Meteorit (Sang Penempa Jiwa)
+    val COLOR_ZEPHYR = Color(0.2f, 0.95f, 0.85f, 1f)          // Cyan Bayangan (Zephyr The Phantom Strider)
     val COLOR_CALLIGRAPHER = Color(0.95f, 0.82f, 0.35f, 1f)   // Emas Primordial Gelap (Grand Calligrapher)
 
     /**
@@ -155,9 +156,38 @@ object DialogueRegistry {
     )
 
     /**
-     * SCENE 05: Singgasana Kanvas Primordial (Floor 10)
+     * SCENE 05: Sarang Lady Vespera & Penyelamatan Zephyr (Floor 10)
      */
-    val SCENE_05_CALLIGRAPHER = StoryDialogue(
+    val SCENE_05_VESPERA_AND_ZEPHYR = StoryDialogue(
+        triggerX = 12.0f,
+        triggerY = 1.3f,
+        triggerRadius = 4.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Lady Vespera",
+                title = "Sang Ratu Busur Bayang",
+                text = "Hahaha... mangsa baru merayap ke Sarang Ungu. Lihatlah teman pencurimu ini, Kaelen! Ia terbungkus rapi dalam sutra kristalku!",
+                speakerColor = COLOR_MATRON
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Lepaskan dia, Vespera! Menara ini bukan makam untuk prajurit yang setia pada tanah airnya!",
+                speakerColor = COLOR_KAELEN
+            ),
+            DialogueLine(
+                speaker = "Lady Vespera",
+                title = "Sang Ratu Busur Bayang",
+                text = "Jika kau ingin membebaskannya, tebas kepompong itu di hadapanku! Tapi sebelum pedangmu mencapainya, panah racunku kan menembus jantungmu!",
+                speakerColor = COLOR_MATRON
+            )
+        )
+    )
+
+    /**
+     * SCENE 50: Singgasana Kanvas Primordial (Floor 50 - Puncak Menara)
+     */
+    val SCENE_50_CALLIGRAPHER = StoryDialogue(
         triggerX = 4.0f,
         triggerY = 1.3f,
         triggerRadius = 3.5f,
@@ -186,10 +216,10 @@ object DialogueRegistry {
     fun getSceneForFloor(floor: Int): StoryDialogue? {
         val scene = when (floor) {
             1 -> SCENE_01_PROLOGUE
-            3 -> SCENE_02_OAKHAVEN
-            5 -> SCENE_03_MATRON
+            5 -> SCENE_02_OAKHAVEN
             6 -> SCENE_04_VULCANUS
-            10 -> SCENE_05_CALLIGRAPHER
+            10 -> SCENE_05_VESPERA_AND_ZEPHYR
+            50 -> SCENE_50_CALLIGRAPHER
             else -> null
         }
         scene?.reset()
