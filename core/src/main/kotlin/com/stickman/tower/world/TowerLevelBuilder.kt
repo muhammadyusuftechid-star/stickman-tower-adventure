@@ -31,6 +31,16 @@ object TowerLevelBuilder {
             8 -> buildFloor8()
             9 -> buildFloor9()
             10 -> buildFloor10()
+            11 -> buildFloor11()
+            12 -> buildFloor12()
+            13 -> buildFloor13()
+            14 -> buildFloor14()
+            15 -> buildFloor15()
+            16 -> buildFloor16()
+            17 -> buildFloor17()
+            18 -> buildFloor18()
+            19 -> buildFloor19()
+            20 -> buildFloor20()
             else -> buildEndlessFloor(floorNumber, mutator ?: FloorMutator.getRandomMutator(floorNumber))
         }
         return floor.copy(environmentalProps = getEnvironmentalPropsForFloor(floorNumber))
@@ -87,6 +97,56 @@ object TowerLevelBuilder {
                 EnvironmentalProp(x = 12.0f, y = 1.0f, width = 1.2f, height = 5.0f, type = PropType.PURE_CANVAS_PILLAR),
                 EnvironmentalProp(x = 34.0f, y = 4.2f, width = 1.5f, height = 2.2f, type = PropType.FROZEN_GOLDEN_BRUSH),
                 EnvironmentalProp(x = 65.0f, y = 1.0f, width = 1.2f, height = 5.0f, type = PropType.PURE_CANVAS_PILLAR)
+            )
+            11 -> listOf(
+                EnvironmentalProp(x = 18.0f, y = 4.5f, width = 1.4f, height = 2.2f, type = PropType.SHATTERED_BOOKSHELF),
+                EnvironmentalProp(x = 55.0f, y = 1.0f, width = 1.2f, height = 2.0f, type = PropType.LEAKING_ALCHEMY_VAT),
+                EnvironmentalProp(x = 92.0f, y = 6.0f, width = 0.6f, height = 2.5f, type = PropType.BROKEN_CHAIN)
+            )
+            12 -> listOf(
+                EnvironmentalProp(x = 24.0f, y = 5.5f, width = 0.6f, height = 2.8f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 68.0f, y = 1.0f, width = 1.8f, height = 1.6f, type = PropType.TITAN_ANVIL),
+                EnvironmentalProp(x = 108.0f, y = 7.0f, width = 1.4f, height = 2.2f, type = PropType.SHATTERED_BOOKSHELF)
+            )
+            13 -> listOf(
+                EnvironmentalProp(x = 18.0f, y = 1.2f, width = 2.4f, height = 2.0f, type = PropType.TITAN_ANVIL),
+                EnvironmentalProp(x = 35.0f, y = 3.8f, width = 1.6f, height = 2.2f, type = PropType.SHATTERED_BOOKSHELF),
+                EnvironmentalProp(x = 75.0f, y = 1.0f, width = 1.2f, height = 4.5f, type = PropType.PURE_CANVAS_PILLAR)
+            )
+            14 -> listOf(
+                EnvironmentalProp(x = 22.0f, y = 1.0f, width = 1.4f, height = 2.2f, type = PropType.LEAKING_ALCHEMY_VAT),
+                EnvironmentalProp(x = 62.0f, y = 5.5f, width = 0.6f, height = 2.5f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 110.0f, y = 1.0f, width = 1.4f, height = 2.2f, type = PropType.LEAKING_ALCHEMY_VAT)
+            )
+            15 -> listOf(
+                EnvironmentalProp(x = 15.0f, y = 1.0f, width = 1.8f, height = 1.6f, type = PropType.TITAN_ANVIL),
+                EnvironmentalProp(x = 45.0f, y = 1.0f, width = 1.4f, height = 2.4f, type = PropType.BEHEADED_STATUE),
+                EnvironmentalProp(x = 78.0f, y = 1.0f, width = 1.4f, height = 2.2f, type = PropType.LEAKING_ALCHEMY_VAT)
+            )
+            16 -> listOf(
+                EnvironmentalProp(x = 25.0f, y = 6.0f, width = 0.6f, height = 2.6f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 72.0f, y = 1.0f, width = 1.4f, height = 2.2f, type = PropType.LEAKING_ALCHEMY_VAT),
+                EnvironmentalProp(x = 115.0f, y = 5.5f, width = 0.6f, height = 2.6f, type = PropType.BROKEN_CHAIN)
+            )
+            17 -> listOf(
+                EnvironmentalProp(x = 16.0f, y = 3.5f, width = 1.6f, height = 2.2f, type = PropType.SHATTERED_BOOKSHELF),
+                EnvironmentalProp(x = 64.0f, y = 1.0f, width = 1.4f, height = 2.4f, type = PropType.BEHEADED_STATUE),
+                EnvironmentalProp(x = 120.0f, y = 4.0f, width = 1.6f, height = 2.2f, type = PropType.SHATTERED_BOOKSHELF)
+            )
+            18 -> listOf(
+                EnvironmentalProp(x = 28.0f, y = 7.0f, width = 0.6f, height = 3.0f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 75.0f, y = 1.0f, width = 1.4f, height = 2.2f, type = PropType.LEAKING_ALCHEMY_VAT),
+                EnvironmentalProp(x = 122.0f, y = 7.0f, width = 0.6f, height = 3.0f, type = PropType.BROKEN_CHAIN)
+            )
+            19 -> listOf(
+                EnvironmentalProp(x = 22.0f, y = 1.0f, width = 1.4f, height = 2.4f, type = PropType.BEHEADED_STATUE),
+                EnvironmentalProp(x = 70.0f, y = 6.5f, width = 0.6f, height = 2.8f, type = PropType.BROKEN_CHAIN),
+                EnvironmentalProp(x = 125.0f, y = 1.0f, width = 1.4f, height = 2.4f, type = PropType.BEHEADED_STATUE)
+            )
+            20 -> listOf(
+                EnvironmentalProp(x = 14.0f, y = 1.0f, width = 2.2f, height = 1.8f, type = PropType.TITAN_ANVIL),
+                EnvironmentalProp(x = 52.0f, y = 1.0f, width = 1.4f, height = 5.0f, type = PropType.PURE_CANVAS_PILLAR),
+                EnvironmentalProp(x = 88.0f, y = 5.5f, width = 0.6f, height = 3.0f, type = PropType.BROKEN_CHAIN)
             )
             else -> listOf(
                 EnvironmentalProp(x = 6.0f, y = 4.0f, width = 1.8f, height = 2.5f, type = PropType.VOID_WALL_CRACK)
@@ -948,11 +1008,718 @@ object TowerLevelBuilder {
     }
 
     // =========================================================================
-    // POST-GAME: PARADOKS ENDLESS SPIRE (LANTAI 11 KE ATAS)
+    // SAGA II: THE SUNKEN ARCHIVES & CLOCKWORK FOUNDRY (LANTAI 11 S/D 20)
+    // =========================================================================
+
+    private fun buildFloor11(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val gearSteel = Color(0.25f, 0.22f, 0.20f, 1f)
+        val brassPlate = Color(0.42f, 0.35f, 0.22f, 1f)
+        val ventGrate = Color(0.18f, 0.16f, 0.15f, 1f)
+
+        // Lantai Dasar Berongga Ventilasi (Bentang Luas 135m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 145f, height = 1.2f, color = gearSteel))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 22f, color = gearSteel))
+        platforms.add(Platform(x = 134f, y = 1.2f, width = 1.2f, height = 22f, color = gearSteel))
+
+        // Platform Ventilasi Roda Gigi Sempit (Dirancang untuk Kelincahan Zephyr)
+        platforms.add(Platform(x = 8.0f, y = 3.5f, width = 7.0f, height = 0.5f, color = brassPlate))
+        platforms.add(Platform(x = 18.0f, y = 5.8f, width = 6.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 28.0f, y = 3.8f, width = 8.5f, height = 0.5f, color = brassPlate))
+        platforms.add(Platform(x = 42.0f, y = 6.2f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 54.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = ventGrate))
+        platforms.add(Platform(x = 68.0f, y = 6.5f, width = 6.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 79.0f, y = 4.0f, width = 8.0f, height = 0.5f, color = brassPlate))
+        platforms.add(Platform(x = 92.0f, y = 6.0f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 104.0f, y = 3.8f, width = 9.0f, height = 0.5f, color = ventGrate))
+        platforms.add(Platform(x = 118.0f, y = 5.2f, width = 6.0f, height = 0.4f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 22.0f, y = 1.2f, width = 3.5f, height = 0.6f),
+            SpikeHazard(x = 64.0f, y = 1.2f, width = 4.0f, height = 0.6f),
+            SpikeHazard(x = 98.0f, y = 1.2f, width = 3.5f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 20.0f, y = 6.3f),
+            TreasureChest(x = 57.0f, y = 4.8f),
+            TreasureChest(x = 107.0f, y = 4.4f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 14.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 32.0f, spawnY = 4.4f, type = EnemyType.RANGED),
+            Enemy(spawnX = 48.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 60.0f, spawnY = 4.8f, type = EnemyType.RANGED),
+            Enemy(spawnX = 74.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 85.0f, spawnY = 4.6f, type = EnemyType.RANGED),
+            Enemy(spawnX = 112.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 18.0f,
+                y = 1.2f,
+                tabletId = "TABLET_11",
+                title = "Tablet XI: Jejak Sang Penyusup Malam",
+                text = "Catatan Zephyr: Aku berhasil menembus ventilasi lantai 11. Di bawah sini, roda-roda gigi raksasa berputar tanpa pelumas. Ksatria berzirah berat takkan pernah muat lewat sini. Aku harus mematikan katup uap utama sebelum Kaelen menyusul."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 11,
+            floorName = "Lantai 11: The Clockwork Conduits",
+            mapBounds = Rectangle(-10f, -1f, 145f, 24f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 56.0f, y = 4.8f),
+            exitPortal = StageExit(x = 125.0f, y = 1.2f),
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE CLOCKWORK CONDUITS",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor12(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val gearDark = Color(0.22f, 0.19f, 0.18f, 1f)
+        val bronzeBevel = Color(0.48f, 0.38f, 0.24f, 1f)
+        val ironMesh = Color(0.30f, 0.28f, 0.26f, 1f)
+
+        // Bentang Luas 140m
+        platforms.add(Platform(x = -10f, y = 0f, width = 150f, height = 1.2f, color = gearDark))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 24f, color = gearDark))
+        platforms.add(Platform(x = 139f, y = 1.2f, width = 1.2f, height = 24f, color = gearDark))
+
+        // Platform Roda Gigi Jam Kosmis
+        platforms.add(Platform(x = 6.0f, y = 3.6f, width = 7.5f, height = 0.5f, color = bronzeBevel))
+        platforms.add(Platform(x = 17.0f, y = 6.0f, width = 6.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 27.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = ironMesh))
+        platforms.add(Platform(x = 40.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 52.0f, y = 4.5f, width = 8.5f, height = 0.5f, color = bronzeBevel))
+        platforms.add(Platform(x = 65.0f, y = 7.0f, width = 6.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 76.0f, y = 4.2f, width = 9.5f, height = 0.5f, color = ironMesh))
+        platforms.add(Platform(x = 90.0f, y = 6.5f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 102.0f, y = 4.0f, width = 9.0f, height = 0.5f, color = bronzeBevel))
+        platforms.add(Platform(x = 116.0f, y = 6.2f, width = 7.5f, height = 0.4f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 20.0f, y = 1.2f, width = 4.0f, height = 0.6f),
+            SpikeHazard(x = 60.0f, y = 1.2f, width = 4.5f, height = 0.6f),
+            SpikeHazard(x = 96.0f, y = 1.2f, width = 4.0f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 29.0f, y = 4.8f),
+            TreasureChest(x = 78.0f, y = 4.8f),
+            TreasureChest(x = 105.0f, y = 4.6f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 12.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 30.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 44.0f, spawnY = 7.4f, type = EnemyType.RANGED),
+            Enemy(spawnX = 58.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 80.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 94.0f, spawnY = 7.1f, type = EnemyType.RANGED),
+            Enemy(spawnX = 110.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 22.0f,
+                y = 1.2f,
+                tabletId = "TABLET_12",
+                title = "Tablet XII: Detak Jantung Mekanikal",
+                text = "Roda-roda gigi ini berputar mengikuti jam kosmis semesta. Setiap detik yang berdentang di lantai 12 adalah satu abad waktu fana yang terhapus di dunia bawah. Waktu di sini tidak mengalir, melainkan digiling."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 12,
+            floorName = "Lantai 12: The Mechanical Heart",
+            mapBounds = Rectangle(-10f, -1f, 150f, 26f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 54.0f, y = 5.1f),
+            exitPortal = StageExit(x = 130.0f, y = 1.2f),
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE MECHANICAL HEART",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor13(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val sanctuaryFloor = Color(0.24f, 0.18f, 0.15f, 1f)
+        val hearthStone = Color(0.38f, 0.28f, 0.20f, 1f)
+        val anvilBench = Color(0.50f, 0.38f, 0.25f, 1f)
+
+        // Suaka Tempa Vulcanus — Safe Hub II (Bentang Luas 130m, Bebas Musuh)
+        platforms.add(Platform(x = -10f, y = 0f, width = 140f, height = 1.2f, color = sanctuaryFloor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 20f, color = sanctuaryFloor))
+        platforms.add(Platform(x = 129f, y = 1.2f, width = 1.2f, height = 20f, color = sanctuaryFloor))
+
+        // Platform Tingkat Peristirahatan & Area Kerja Penempa
+        platforms.add(Platform(x = 12.0f, y = 3.5f, width = 12.0f, height = 0.6f, color = hearthStone))
+        platforms.add(Platform(x = 30.0f, y = 5.0f, width = 10.0f, height = 0.5f, isOneWay = true))
+        platforms.add(Platform(x = 46.0f, y = 3.5f, width = 14.0f, height = 0.6f, color = anvilBench))
+        platforms.add(Platform(x = 66.0f, y = 5.2f, width = 9.5f, height = 0.5f, isOneWay = true))
+        platforms.add(Platform(x = 82.0f, y = 3.8f, width = 12.0f, height = 0.6f, color = hearthStone))
+        platforms.add(Platform(x = 100.0f, y = 5.0f, width = 9.0f, height = 0.5f, isOneWay = true))
+
+        val chests = listOf(
+            TreasureChest(x = 16.0f, y = 4.2f),
+            TreasureChest(x = 52.0f, y = 4.2f),
+            TreasureChest(x = 88.0f, y = 4.5f)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 25.0f,
+                y = 1.2f,
+                tabletId = "TABLET_13",
+                title = "Tablet XIII: Buku Harian Vulcanus",
+                text = "Hari ke-10,420. Dua siluet muda tiba di suakaku: seorang pendekar berpedang dan seorang gadis bertopeng belati. Aku menolak membiarkan mereka mati sia-sia. Tungkuku akan menempa bilah mereka dengan serpihan meteorit bintang."
+            )
+        )
+
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(13))
+
+        return TowerFloor(
+            floorNumber = 13,
+            floorName = "Lantai 13: Vulcanus Sanctuary",
+            mapBounds = Rectangle(-10f, -1f, 140f, 20f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            checkpoint = Checkpoint(x = 20.0f, y = 1.2f),
+            exitPortal = StageExit(x = 118.0f, y = 1.2f),
+            isBossFloor = false,
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "VULCANUS SANCTUARY",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            isSafeZone = true
+        )
+    }
+
+    private fun buildFloor14(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val lavaFloor = Color(0.20f, 0.14f, 0.12f, 1f)
+        val ironBridge = Color(0.40f, 0.32f, 0.28f, 1f)
+        val redHotSteel = Color(0.55f, 0.30f, 0.20f, 1f)
+
+        // Jembatan Baja Pijar Melintasi Kawah (Bentang Luas 145m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 155f, height = 1.2f, color = lavaFloor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 24f, color = lavaFloor))
+        platforms.add(Platform(x = 144f, y = 1.2f, width = 1.2f, height = 24f, color = lavaFloor))
+
+        // Jembatan Gantung Baja di Atas Lahar
+        platforms.add(Platform(x = 8.0f, y = 3.8f, width = 8.0f, height = 0.45f, color = ironBridge))
+        platforms.add(Platform(x = 20.0f, y = 6.0f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 32.0f, y = 4.2f, width = 9.0f, height = 0.45f, color = redHotSteel))
+        platforms.add(Platform(x = 46.0f, y = 6.5f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 58.0f, y = 4.0f, width = 9.5f, height = 0.45f, color = ironBridge))
+        platforms.add(Platform(x = 72.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 84.0f, y = 4.2f, width = 9.0f, height = 0.45f, color = redHotSteel))
+        platforms.add(Platform(x = 98.0f, y = 6.2f, width = 8.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 112.0f, y = 4.0f, width = 9.0f, height = 0.45f, color = ironBridge))
+        platforms.add(Platform(x = 126.0f, y = 5.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 22.0f, y = 1.2f, width = 5.0f, height = 0.6f),
+            SpikeHazard(x = 64.0f, y = 1.2f, width = 5.5f, height = 0.6f),
+            SpikeHazard(x = 104.0f, y = 1.2f, width = 5.0f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 34.0f, y = 4.8f),
+            TreasureChest(x = 86.0f, y = 4.8f),
+            TreasureChest(x = 114.0f, y = 4.6f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 14.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 24.0f, spawnY = 6.6f, type = EnemyType.RANGED),
+            Enemy(spawnX = 36.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 52.0f, spawnY = 1.2f, type = EnemyType.FLYING),
+            Enemy(spawnX = 62.0f, spawnY = 4.6f, type = EnemyType.MELEE),
+            Enemy(spawnX = 88.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 102.0f, spawnY = 6.8f, type = EnemyType.RANGED),
+            Enemy(spawnX = 120.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 16.0f,
+                y = 1.2f,
+                tabletId = "TABLET_14",
+                title = "Tablet XIV: Resep Bintang Vulcanus",
+                text = "Campurkan serpihan batu bintang dengan koin emas yang kau jarah dari monster. Emas itu bukan uang dewa; itu adalah butiran cahaya mentari yang dipadatkan oleh darah pengorbanan para martir."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 14,
+            floorName = "Lantai 14: The Molten Crucible",
+            mapBounds = Rectangle(-10f, -1f, 155f, 26f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 60.0f, y = 4.6f),
+            exitPortal = StageExit(x = 135.0f, y = 1.2f),
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE MOLTEN CRUCIBLE",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor15(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val forgeFloor = Color(0.24f, 0.14f, 0.12f, 1f)
+        val ironPillar = Color(0.42f, 0.28f, 0.22f, 1f)
+        val moltenGrate = Color(0.58f, 0.32f, 0.18f, 1f)
+
+        // Singgasana Ignis — Arena Bos Forge-Master Ignis (Bentang Luas 100m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 110f, height = 1.2f, color = forgeFloor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 24f, color = forgeFloor))
+        platforms.add(Platform(x = 99f, y = 1.2f, width = 1.2f, height = 24f, color = forgeFloor))
+
+        // Platform Berundak Bertarung Menghindari Earthshaker Slam & Molten Core
+        platforms.add(Platform(x = 6.0f, y = 3.6f, width = 6.5f, height = 0.5f, color = ironPillar))
+        platforms.add(Platform(x = 16.0f, y = 5.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 28.0f, y = 4.2f, width = 8.5f, height = 0.5f, color = moltenGrate))
+        platforms.add(Platform(x = 42.0f, y = 6.5f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 56.0f, y = 4.5f, width = 9.0f, height = 0.5f, color = ironPillar))
+        platforms.add(Platform(x = 70.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 82.0f, y = 4.0f, width = 7.5f, height = 0.5f, color = moltenGrate))
+
+        val chests = listOf(
+            TreasureChest(x = 2.0f, y = 1.2f),
+            TreasureChest(x = 92.0f, y = 1.2f)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 4.0f,
+                y = 1.2f,
+                tabletId = "TABLET_15",
+                title = "Tablet XV: Api Terakhir Sebelum Kebekuan",
+                text = "Ignis adalah murid terbaikku sebelum ia meminum terak baja cair demi keabadian. Ia menjadi raksasa tanpa rasa sakit, tapi juga tanpa jiwa. Bebaskan dia dengan belas kasihan pedangmu."
+            )
+        )
+
+        val boss = BossEnemy(
+            spawnX = 55.0f,
+            spawnY = 1.5f,
+            type = BossType.CRIMSON_SOVEREIGN,
+            customMaxHp = 900f,
+            customName = "FORGE-MASTER IGNIS"
+        )
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(15))
+
+        return TowerFloor(
+            floorNumber = 15,
+            floorName = "Lantai 15: The Forge Sovereign",
+            mapBounds = Rectangle(-10f, -1f, 110f, 24f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 2.0f, y = 1.2f),
+            exitPortal = StageExit(x = 90.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE FORGE SOVEREIGN",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues
+        )
+    }
+
+    private fun buildFloor16(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val pipeSteel = Color(0.22f, 0.20f, 0.22f, 1f)
+        val brassConduit = Color(0.45f, 0.36f, 0.26f, 1f)
+        val steamVent = Color(0.32f, 0.28f, 0.28f, 1f)
+
+        // Saluran Pipa Bertekanan Tinggi (Bentang Luas 145m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 155f, height = 1.2f, color = pipeSteel))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 24f, color = pipeSteel))
+        platforms.add(Platform(x = 144f, y = 1.2f, width = 1.2f, height = 24f, color = pipeSteel))
+
+        // Pipa-Pipa Berundak dan Platform Gantung
+        platforms.add(Platform(x = 8.0f, y = 3.6f, width = 8.5f, height = 0.5f, color = brassConduit))
+        platforms.add(Platform(x = 20.0f, y = 6.0f, width = 6.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 31.0f, y = 4.0f, width = 9.0f, height = 0.5f, color = steamVent))
+        platforms.add(Platform(x = 45.0f, y = 6.5f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 58.0f, y = 4.2f, width = 9.5f, height = 0.5f, color = brassConduit))
+        platforms.add(Platform(x = 72.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 84.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = steamVent))
+        platforms.add(Platform(x = 98.0f, y = 6.2f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 110.0f, y = 4.0f, width = 9.0f, height = 0.5f, color = brassConduit))
+        platforms.add(Platform(x = 124.0f, y = 5.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 22.0f, y = 1.2f, width = 4.5f, height = 0.6f),
+            SpikeHazard(x = 64.0f, y = 1.2f, width = 4.8f, height = 0.6f),
+            SpikeHazard(x = 102.0f, y = 1.2f, width = 4.5f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 33.0f, y = 4.6f),
+            TreasureChest(x = 86.0f, y = 4.8f),
+            TreasureChest(x = 112.0f, y = 4.6f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 14.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 24.0f, spawnY = 6.6f, type = EnemyType.RANGED),
+            Enemy(spawnX = 38.0f, spawnY = 4.6f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 54.0f, spawnY = 1.2f, type = EnemyType.FLYING),
+            Enemy(spawnX = 66.0f, spawnY = 4.8f, type = EnemyType.MELEE),
+            Enemy(spawnX = 90.0f, spawnY = 4.8f, type = EnemyType.RANGED),
+            Enemy(spawnX = 104.0f, spawnY = 6.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 118.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 24.0f,
+                y = 1.2f,
+                tabletId = "TABLET_16",
+                title = "Tablet XVI: Uap Bertekanan Tinggi",
+                text = "Tekanan uap di lantai 16 mampu menghancurkan zirah besi. Hanya mereka yang mampu meluncur dengan refleks kilat yang dapat melompati pipa-pipa panas ini."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 16,
+            floorName = "Lantai 16: The Steam Conduits",
+            mapBounds = Rectangle(-10f, -1f, 155f, 26f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 60.0f, y = 4.8f),
+            exitPortal = StageExit(x = 135.0f, y = 1.2f),
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE STEAM CONDUITS",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor17(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val bunkerStone = Color(0.20f, 0.18f, 0.16f, 1f)
+        val ironSupport = Color(0.38f, 0.32f, 0.28f, 1f)
+        val rubbleMat = Color(0.30f, 0.26f, 0.22f, 1f)
+
+        // Bunker Pengungsi Kawah Tempa (Bentang Luas 150m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 160f, height = 1.2f, color = bunkerStone))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 24f, color = bunkerStone))
+        platforms.add(Platform(x = 149f, y = 1.2f, width = 1.2f, height = 24f, color = bunkerStone))
+
+        // Platform Reruntuhan Pelindung Bunker
+        platforms.add(Platform(x = 8.0f, y = 3.8f, width = 8.0f, height = 0.5f, color = ironSupport))
+        platforms.add(Platform(x = 20.0f, y = 6.0f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 32.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = rubbleMat))
+        platforms.add(Platform(x = 46.0f, y = 6.5f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 60.0f, y = 4.2f, width = 9.5f, height = 0.5f, color = ironSupport))
+        platforms.add(Platform(x = 74.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 86.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = rubbleMat))
+        platforms.add(Platform(x = 100.0f, y = 6.2f, width = 8.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 114.0f, y = 4.0f, width = 9.0f, height = 0.5f, color = ironSupport))
+        platforms.add(Platform(x = 128.0f, y = 5.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 24.0f, y = 1.2f, width = 4.5f, height = 0.6f),
+            SpikeHazard(x = 68.0f, y = 1.2f, width = 5.0f, height = 0.6f),
+            SpikeHazard(x = 108.0f, y = 1.2f, width = 4.5f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 34.0f, y = 4.8f),
+            TreasureChest(x = 88.0f, y = 4.8f),
+            TreasureChest(x = 116.0f, y = 4.6f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 14.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 26.0f, spawnY = 6.6f, type = EnemyType.RANGED),
+            Enemy(spawnX = 38.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 56.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 76.0f, spawnY = 7.4f, type = EnemyType.RANGED),
+            Enemy(spawnX = 92.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 122.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 15.0f,
+                y = 1.2f,
+                tabletId = "TABLET_17",
+                title = "Tablet XVII: Jeritan di Bawah Kawah",
+                text = "Di bawah lantai kawah ini, ribuan warga bersembunyi di dalam bunker. Di atas kepala mereka, pilar titan menopang jutaan ton batu. Seorang raksasa sedang menahannya seorang diri... bertahanlah, Gorgon!"
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 17,
+            floorName = "Lantai 17: The Ash Refuge",
+            mapBounds = Rectangle(-10f, -1f, 160f, 26f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 62.0f, y = 4.8f),
+            exitPortal = StageExit(x = 140.0f, y = 1.2f),
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE ASH REFUGE",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor18(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val chainFloor = Color(0.22f, 0.16f, 0.14f, 1f)
+        val moltenSteel = Color(0.50f, 0.28f, 0.20f, 1f)
+        val ironChainLink = Color(0.36f, 0.32f, 0.30f, 1f)
+
+        // Koridor Rantai Lahar (Bentang Luas 150m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 160f, height = 1.2f, color = chainFloor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 26f, color = chainFloor))
+        platforms.add(Platform(x = 149f, y = 1.2f, width = 1.2f, height = 26f, color = chainFloor))
+
+        // Platform Penopang Katup Rantai Lahar
+        platforms.add(Platform(x = 8.0f, y = 3.8f, width = 8.0f, height = 0.5f, color = ironChainLink))
+        platforms.add(Platform(x = 22.0f, y = 6.2f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 34.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = moltenSteel))
+        platforms.add(Platform(x = 48.0f, y = 6.6f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 62.0f, y = 4.2f, width = 9.5f, height = 0.5f, color = ironChainLink))
+        platforms.add(Platform(x = 76.0f, y = 7.0f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 90.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = moltenSteel))
+        platforms.add(Platform(x = 104.0f, y = 6.5f, width = 8.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 118.0f, y = 4.0f, width = 9.0f, height = 0.5f, color = ironChainLink))
+        platforms.add(Platform(x = 132.0f, y = 6.0f, width = 7.0f, height = 0.4f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 26.0f, y = 1.2f, width = 5.0f, height = 0.6f),
+            SpikeHazard(x = 70.0f, y = 1.2f, width = 5.5f, height = 0.6f),
+            SpikeHazard(x = 112.0f, y = 1.2f, width = 5.0f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 36.0f, y = 4.8f),
+            TreasureChest(x = 92.0f, y = 4.8f),
+            TreasureChest(x = 120.0f, y = 4.6f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 14.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 26.0f, spawnY = 6.8f, type = EnemyType.RANGED),
+            Enemy(spawnX = 40.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 58.0f, spawnY = 1.2f, type = EnemyType.FLYING),
+            Enemy(spawnX = 78.0f, spawnY = 7.6f, type = EnemyType.RANGED),
+            Enemy(spawnX = 94.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 124.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 30.0f,
+                y = 1.2f,
+                tabletId = "TABLET_18",
+                title = "Tablet XVIII: Rantai Baja yang Merah Membara",
+                text = "Rantai-rantai ini mengikat katup lahar. Jika tidak ada yang memotongnya dari tiga sudut secara bersamaan, pilar lantai 20 akan roboh menimpa para pengungsi."
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 18,
+            floorName = "Lantai 18: The Molten Chains",
+            mapBounds = Rectangle(-10f, -1f, 160f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 64.0f, y = 4.8f),
+            exitPortal = StageExit(x = 140.0f, y = 1.2f),
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE MOLTEN CHAINS",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor19(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val bastionDark = Color(0.18f, 0.16f, 0.15f, 1f)
+        val titanRampart = Color(0.35f, 0.30f, 0.25f, 1f)
+        val brokenSlab = Color(0.28f, 0.24f, 0.20f, 1f)
+
+        // Ambang Paladin Terakhir (Bentang Luas 155m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 165f, height = 1.2f, color = bastionDark))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 26f, color = bastionDark))
+        platforms.add(Platform(x = 154f, y = 1.2f, width = 1.2f, height = 26f, color = bastionDark))
+
+        // Platform Runtuh Menuju Ambang Kawah Titan
+        platforms.add(Platform(x = 8.0f, y = 3.8f, width = 8.5f, height = 0.5f, color = titanRampart))
+        platforms.add(Platform(x = 22.0f, y = 6.2f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 34.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = brokenSlab))
+        platforms.add(Platform(x = 48.0f, y = 6.6f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 62.0f, y = 4.4f, width = 9.5f, height = 0.5f, color = titanRampart))
+        platforms.add(Platform(x = 78.0f, y = 7.0f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 92.0f, y = 4.4f, width = 9.5f, height = 0.5f, color = brokenSlab))
+        platforms.add(Platform(x = 108.0f, y = 6.8f, width = 8.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 122.0f, y = 4.2f, width = 9.0f, height = 0.5f, color = titanRampart))
+        platforms.add(Platform(x = 136.0f, y = 6.0f, width = 7.0f, height = 0.4f, isOneWay = true))
+
+        val spikes = listOf(
+            SpikeHazard(x = 26.0f, y = 1.2f, width = 5.0f, height = 0.6f),
+            SpikeHazard(x = 72.0f, y = 1.2f, width = 5.5f, height = 0.6f),
+            SpikeHazard(x = 116.0f, y = 1.2f, width = 5.0f, height = 0.6f)
+        )
+
+        val chests = listOf(
+            TreasureChest(x = 36.0f, y = 4.8f),
+            TreasureChest(x = 94.0f, y = 5.0f),
+            TreasureChest(x = 124.0f, y = 4.8f)
+        )
+
+        val enemies = listOf(
+            Enemy(spawnX = 14.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 28.0f, spawnY = 6.8f, type = EnemyType.RANGED),
+            Enemy(spawnX = 42.0f, spawnY = 4.8f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 64.0f, spawnY = 1.2f, type = EnemyType.MELEE),
+            Enemy(spawnX = 82.0f, spawnY = 7.6f, type = EnemyType.RANGED),
+            Enemy(spawnX = 98.0f, spawnY = 5.0f, type = EnemyType.SHIELDED),
+            Enemy(spawnX = 128.0f, spawnY = 1.2f, type = EnemyType.MELEE)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 28.0f,
+                y = 1.2f,
+                tabletId = "TABLET_19",
+                title = "Tablet XIX: Keteguhan Paladin Terakhir",
+                text = "Pundakku remuk, namun jika aku melangkah mundur satu jengkal saja, dunia di bawah kakiku akan musnah. Datanglah, siapa pun yang masih memiliki pedang... bantulah aku mengunci pilar ini!"
+            )
+        )
+
+        return TowerFloor(
+            floorNumber = 19,
+            floorName = "Lantai 19: The Titan Ramparts",
+            mapBounds = Rectangle(-10f, -1f, 165f, 28f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = spikes,
+            chests = chests,
+            enemies = enemies,
+            checkpoint = Checkpoint(x = 66.0f, y = 5.0f),
+            exitPortal = StageExit(x = 145.0f, y = 1.2f),
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE TITAN RAMPARTS",
+            loreTablets = loreTablets
+        )
+    }
+
+    private fun buildFloor20(): TowerFloor {
+        val platforms = mutableListOf<Platform>()
+        val slagFloor = Color(0.24f, 0.16f, 0.14f, 1f)
+        val calderaWall = Color(0.16f, 0.12f, 0.10f, 1f)
+        val titanMat = Color(0.40f, 0.30f, 0.22f, 1f)
+
+        // Ambang Tungku Titan — Arena Bos Slag Colossus & Penyelamatan Pilar Gorgon (Bentang Luas 110m)
+        platforms.add(Platform(x = -10f, y = 0f, width = 120f, height = 1.2f, color = slagFloor))
+        platforms.add(Platform(x = -10f, y = 1.2f, width = 1.2f, height = 24f, color = calderaWall))
+        platforms.add(Platform(x = 109f, y = 1.2f, width = 1.2f, height = 24f, color = calderaWall))
+
+        // Platform Berundak Arena untuk Tumpuan Menghindari Hantaman Slag Colossus
+        platforms.add(Platform(x = 6.0f, y = 3.6f, width = 6.5f, height = 0.5f, color = titanMat))
+        platforms.add(Platform(x = 18.0f, y = 5.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 30.0f, y = 4.5f, width = 8.5f, height = 0.5f, color = titanMat)) // Platform Tumpuan di atas Pilar Titan Gorgon
+        platforms.add(Platform(x = 46.0f, y = 6.5f, width = 7.5f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 62.0f, y = 4.2f, width = 8.5f, height = 0.5f, color = titanMat))
+        platforms.add(Platform(x = 76.0f, y = 6.8f, width = 7.0f, height = 0.4f, isOneWay = true))
+        platforms.add(Platform(x = 90.0f, y = 4.0f, width = 7.5f, height = 0.5f, color = titanMat))
+
+        val chests = listOf(
+            TreasureChest(x = 2.0f, y = 1.2f),
+            TreasureChest(x = 100.0f, y = 1.2f)
+        )
+
+        val loreTablets = listOf(
+            LoreTablet(
+                x = 5.0f,
+                y = 1.2f,
+                tabletId = "TABLET_20",
+                title = "Tablet XX: Patahnya Rantai Beban",
+                text = "Kaelen mengalihkan monster, Zephyr memotong tuas, dan Gorgon membelah raksasa terak. Tiga pahlawan kini berdiri bersama. Gerbang kawah tempa telah terbuka, menuju bentangan basalt dan langit retak!"
+            )
+        )
+
+        val boss = BossEnemy(
+            spawnX = 62.0f,
+            spawnY = 1.5f,
+            type = BossType.SHADOW_DOPPELGANGER,
+            customMaxHp = 1200f,
+            customName = "THE SLAG COLOSSUS"
+        )
+        val titanPillar = TitanPillar(x = 35.0f, y = 1.2f, width = 3.8f, height = 9.5f)
+        val storyDialogues = listOfNotNull(DialogueRegistry.getSceneForFloor(20))
+
+        return TowerFloor(
+            floorNumber = 20,
+            floorName = "Lantai 20: The Titan Caldera",
+            mapBounds = Rectangle(-10f, -1f, 120f, 26f),
+            spawnX = 0f,
+            spawnY = 1.5f,
+            platforms = platforms,
+            spikes = emptyList(),
+            chests = chests,
+            enemies = emptyList(),
+            boss = boss,
+            checkpoint = Checkpoint(x = 2.0f, y = 1.2f),
+            exitPortal = StageExit(x = 98.0f, y = 1.2f),
+            isBossFloor = true,
+            actTitle = "SAGA II: CLOCKWORK FOUNDRY",
+            actSubtitle = "THE TITAN CALDERA",
+            loreTablets = loreTablets,
+            storyDialogues = storyDialogues,
+            titanPillar = titanPillar
+        )
+    }
+
+    // =========================================================================
+    // POST-GAME: PARADOKS ENDLESS SPIRE (LANTAI 21 KE ATAS)
     // =========================================================================
 
     fun buildEndlessFloor(floorNumber: Int, mutator: FloorMutator): TowerFloor {
-        val endlessRank = (floorNumber - 10).coerceAtLeast(1)
+        val endlessRank = (floorNumber - 20).coerceAtLeast(1)
         val hpScale = 1.0f + endlessRank * 0.15f
         val dmgScale = (1.0f + endlessRank * 0.12f) * mutator.enemyDamageMultiplier
         val isBossFloor = (floorNumber % 5 == 0)

@@ -19,6 +19,8 @@ object DialogueRegistry {
     val COLOR_MATRON = Color(0.85f, 0.45f, 0.95f, 1f)         // Ungu Kristal Miasma (The Amethyst Matron)
     val COLOR_VULCANUS = Color(1.0f, 0.65f, 0.25f, 1f)        // Oranye Bara Meteorit (Sang Penempa Jiwa)
     val COLOR_ZEPHYR = Color(0.2f, 0.95f, 0.85f, 1f)          // Cyan Bayangan (Zephyr The Phantom Strider)
+    val COLOR_IGNIS = Color(0.95f, 0.35f, 0.15f, 1f)           // Merah Lahar Pijar (Forge-Master Ignis)
+    val COLOR_GORGON = Color(0.85f, 0.70f, 0.25f, 1f)          // Emas Titan Kuno (Gorgon The Ironbreaker)
     val COLOR_CALLIGRAPHER = Color(0.95f, 0.82f, 0.35f, 1f)   // Emas Primordial Gelap (Grand Calligrapher)
 
     /**
@@ -185,6 +187,87 @@ object DialogueRegistry {
     )
 
     /**
+     * SCENE 06: Suaka Tempa Vulcanus - The Second Forge Refuge (Floor 13)
+     */
+     val SCENE_06_VULCANUS_SANCTUARY = StoryDialogue(
+         triggerX = 18.0f,
+         triggerY = 1.3f,
+         triggerRadius = 3.2f,
+         lines = listOf(
+             DialogueLine(
+                 speaker = "Vulcanus",
+                 title = "Sang Penempa Jiwa",
+                 text = "Selamat datang di perapian keduaku, Kaelen, Zephyr! Aku melihat belati kembar Zephyr kembali menari di sisimu.",
+                 speakerColor = COLOR_VULCANUS
+             ),
+             DialogueLine(
+                 speaker = "Zephyr",
+                 title = "Sang Pengintai Bayangan",
+                 text = "Ventilasi mesin di bawah sini hampir membakar paru-paruku, kakek tua. Tapi kami berhasil lewat.",
+                 speakerColor = COLOR_ZEPHYR
+             ),
+             DialogueLine(
+                 speaker = "Vulcanus",
+                 title = "Sang Penempa Jiwa",
+                 text = "Istirahatlah di suaka ini. Namun berhati-hatilah... di Lantai 15 murid terbaikku, Ignis, telah meminum terak baja cair dan kehilangan akalnya. Dan di Lantai 20, Gorgon sedang meregang nyawa menahan pilar kawah!",
+                 speakerColor = COLOR_VULCANUS
+             )
+         )
+     )
+
+    /**
+     * SCENE 07: Singgasana Ignis (Floor 15)
+     */
+    val SCENE_07_IGNIS = StoryDialogue(
+        triggerX = 4.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Forge-Master Ignis",
+                title = "Murid Terpilih Vulcanus",
+                text = "Baja ini... menolak dingin! Tubuh lelehanku adalah wadah keabadian menara! Kalian takkan pernah melewati kawah tempa ini!",
+                speakerColor = COLOR_IGNIS
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Kau bukan dewa, Ignis! Keabadianmu hanyalah penjara terak yang membakar jiwamu sendiri! Biarkan pedang ini membebaskanmu!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
+     * SCENE 08: Ambang Tungku Titan & Penyelamatan Gorgon (Floor 20)
+     */
+    val SCENE_08_GORGON_RESCUE = StoryDialogue(
+        triggerX = 5.0f,
+        triggerY = 1.3f,
+        triggerRadius = 3.5f,
+        lines = listOf(
+            DialogueLine(
+                speaker = "Gorgon",
+                title = "Paladin Benteng Besi",
+                text = "GRRRHHH...! Pundakku... takkan mundur satu jengkal pun! Di bawah sini... ribuan pengungsi tak berdosa berlindung!",
+                speakerColor = COLOR_GORGON
+            ),
+            DialogueLine(
+                speaker = "Zephyr",
+                title = "Sang Pengintai Bayangan",
+                text = "Kaelen, alihkan monster raksasa Slag Colossus itu! Tuas katup lahar di samping pilar harus kita tebas sebelum pilar ini patah!",
+                speakerColor = COLOR_ZEPHYR
+            ),
+            DialogueLine(
+                speaker = "Kaelen",
+                title = "Pewaris Bara Emas",
+                text = "Bertahanlah, Gorgon! Kami datang untuk memotong rantai bebanmu!",
+                speakerColor = COLOR_KAELEN
+            )
+        )
+    )
+
+    /**
      * SCENE 50: Singgasana Kanvas Primordial (Floor 50 - Puncak Menara)
      */
     val SCENE_50_CALLIGRAPHER = StoryDialogue(
@@ -219,6 +302,9 @@ object DialogueRegistry {
             5 -> SCENE_02_OAKHAVEN
             6 -> SCENE_04_VULCANUS
             10 -> SCENE_05_VESPERA_AND_ZEPHYR
+            13 -> SCENE_06_VULCANUS_SANCTUARY
+            15 -> SCENE_07_IGNIS
+            20 -> SCENE_08_GORGON_RESCUE
             50 -> SCENE_50_CALLIGRAPHER
             else -> null
         }

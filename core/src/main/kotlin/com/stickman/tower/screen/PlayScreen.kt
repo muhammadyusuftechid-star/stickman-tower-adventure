@@ -68,9 +68,11 @@ import com.stickman.tower.world.TemporalPact
 import com.stickman.tower.bossrush.BossRushManager
 import com.stickman.tower.bossrush.BossRushRank
 import com.stickman.tower.character.ZephyrCoopAlly
+import com.stickman.tower.character.GorgonCoopAlly
 import com.stickman.tower.world.RunicBarrier
 import com.stickman.tower.world.RunicKey
 import com.stickman.tower.world.ZephyrCocoon
+import com.stickman.tower.world.TitanPillar
 import kotlin.math.abs
 import com.stickman.tower.world.TowerLevelBuilder
 import com.stickman.tower.world.ProceduralBackgroundRenderer
@@ -178,8 +180,9 @@ class PlayScreen(
     var bossRushTimer: Float = 0f
     var bossRushTransitionTimer: Float = 0f
 
-    // Tag-Team Co-op Ally System (Fase 25)
+    // Tag-Team Co-op Ally System (Fase 25 & 26)
     var zephyrCoopAlly: ZephyrCoopAlly? = null
+    var gorgonCoopAlly: GorgonCoopAlly? = null
 
     // Data Lantai Menara Aktif
     var currentFloorNumber: Int = 1
@@ -420,6 +423,7 @@ class PlayScreen(
         nearbyDialoguePrompt = null
         towerWhisperManager.reset()
         zephyrCoopAlly = null
+        gorgonCoopAlly = null
 
         if (currentFloorNumber == 1) {
             activeMoraleBuff = MoraleBuffType.NONE
@@ -885,8 +889,9 @@ class PlayScreen(
                 }
             }
 
-            // Pembaruan Kepompong Zephyr (Fase 25)
+            // Pembaruan Kepompong Zephyr (Fase 25) & Pilar Titan Gorgon (Fase 26)
             currentFloor.zephyrCocoon?.update(updateDelta)
+            currentFloor.titanPillar?.update(updateDelta)
 
             // Pembaruan Zephyr Co-op Tag-Team Ally (Fase 25)
             val activeAlly = zephyrCoopAlly
@@ -904,6 +909,27 @@ class PlayScreen(
                     }
                 }
                 activeAlly.update(updateDelta, currentFloor.boss, player.position)
+            }
+
+            // Pembaruan Gorgon Co-op Tag-Team Ally (Fase 26)
+            val activeGorgon = gorgonCoopAlly
+            if (activeGorgon != null && activeGorgon.isActive) {
+                if (activeGorgon.onBossHit == null) {
+                    activeGorgon.onBossHit = { dmg, isSlam ->
+                        val activeBoss = currentFloor.boss
+                        if (activeBoss != null) {
+                            particleManager.spawnHitSparks(activeBoss.position.x + activeBoss.width / 2f, activeBoss.position.y + activeBoss.height / 2f, count = if (isSlam) 24 else 12, color = Color.GOLD)
+                            floatingTexts.add(
+                                FloatingText(if (isSlam) "💥 GORGON SLAM -${dmg.toInt()} 💥" else "GORGON -${dmg.toInt()}", activeBoss.position.x + activeBoss.width / 2f, activeBoss.position.y + activeBoss.height + 0.3f, Color.GOLD)
+                            )
+                            AudioManager.playHit()
+                            if (isSlam) {
+                                cameraManager.shake(0.45f, 0.3f)
+                            }
+                        }
+                    }
+                }
+                activeGorgon.update(updateDelta, currentFloor.boss, player.position)
             }
 
             // Cek Interaksi Peti Harta (Chests)
@@ -1260,14 +1286,16 @@ class PlayScreen(
         currentFloor.checkpoint?.render(shapeRenderer)
         currentFloor.exitPortal.render(shapeRenderer)
 
-        // Render Runic Barriers, Keys, Cocoon, & Zephyr Ally (Fase 25)
+        // Render Runic Barriers, Keys, Cocoon, Titan Pillar & Co-op Allies (Fase 25 & 26)
         for (barrier in currentFloor.runicBarriers) barrier.render(shapeRenderer)
         for (key in currentFloor.runicKeys) key.render(shapeRenderer)
         currentFloor.zephyrCocoon?.render(shapeRenderer)
+        currentFloor.titanPillar?.render(shapeRenderer)
         zephyrCoopAlly?.render(shapeRenderer)
+        gorgonCoopAlly?.render(shapeRenderer)
 
         // Render Tokoh Cerita (NPC)
-        if (currentFloor.floorNumber == 6) {
+        if (currentFloor.floorNumber == 6 || currentFloor.floorNumber == 13) {
             renderVulcanusNPC(shapeRenderer)
         } else if (currentFloor.floorNumber == 1) {
             renderAriaNPC(shapeRenderer)
@@ -1547,6 +1575,35 @@ class PlayScreen(
                             }
                         } else {
                             floatingTexts.add(FloatingText("KEPOMPONG RETAK! (${3 - cocoon.hitsTaken}/3)", cocoon.x + 0.2f, cocoon.y + 2.5f, Color.PURPLE, duration = 1.2f))
+                        }
+                    }
+                }
+            }
+
+            // Cek Hitbox Serangan Pemain terhadap Tuas Hidrolik Pilar Titan Gorgon (Fase 26)
+            val pillar = currentFloor.titanPillar
+            if (pillar != null && !pillar.isLeverCut && !player.hitbox.hitEntities.contains(pillar)) {
+                if (player.hitbox.bounds.overlaps(pillar.leverBounds)) {
+                    player.hitbox.hitEntities.add(pillar)
+                    if (pillar.takeHit()) {
+                        hitStopManager.trigger(0.08f)
+                        AudioManager.playHit()
+                        particleManager.spawnHitSparks(pillar.leverBounds.x + pillar.leverBounds.width / 2f, pillar.leverBounds.y + pillar.leverBounds.height / 2f, count = 18, color = Color.CORAL)
+                        if (pillar.isLeverCut) {
+                            AudioManager.playLevelUp()
+                            particleManager.spawnHitSparks(pillar.leverBounds.x + pillar.leverBounds.width / 2f, pillar.leverBounds.y + pillar.leverBounds.height / 2f, count = 40, color = Color.GOLD)
+                            floatingTexts.add(FloatingText("🛡 RANTAI LAHAR PUTUS! GORGON BEBAS! 🛡", pillar.x - 1.5f, pillar.y + 3.5f, Color.GOLD, duration = 3.5f))
+                            gorgonCoopAlly = GorgonCoopAlly(spawnX = pillar.x + pillar.width + 0.5f, spawnY = pillar.y)
+                            CharacterUnlockManager.unlockGorgon(saveData)
+                            if (!saveData.unlockedCharacters.contains("STICKMAN_HEAVY")) {
+                                saveData.unlockedCharacters.add("STICKMAN_HEAVY")
+                            }
+                            if (!saveData.unlockedCharacters.contains("GORGON")) {
+                                saveData.unlockedCharacters.add("GORGON")
+                            }
+                            SaveManager.saveAsync(saveData)
+                        } else {
+                            floatingTexts.add(FloatingText("KATUP RETAK! (${3 - pillar.hitsTaken}/3)", pillar.leverBounds.x + 0.2f, pillar.leverBounds.y + 2.5f, Color.CORAL, duration = 1.2f))
                         }
                     }
                 }
